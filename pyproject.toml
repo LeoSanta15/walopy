@@ -26,7 +26,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
 ]
-dependencies = ["numpy>=1.22", "pandas>=1.4", "matplotlib>=3.5"]
+dependencies = ["numpy>=1.22", "pandas>=1.4", "matplotlib>=3.5", "plotly>=5.0"]
 
 [project.optional-dependencies]
 dev  = ["pytest>=7", "pytest-cov>=4", "ruff>=0.6", "mypy>=1.10"]

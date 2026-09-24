@@ -1,10 +1,11 @@
-"""All plotting functions for walopy.  Import matplotlib lazily."""
+"""All plotting functions for walopy.  Matplotlib and Plotly are imported lazily."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
+    import plotly.graph_objects as go
     from .queuing import QueueResult
     from .operations import OEEResult
     from .bottleneck import BottleneckResult
@@ -181,43 +182,88 @@ def plot_kpi_tree(
     root: "KPINode",
     *,
     title: str | None = None,
-    figsize: tuple | None = None,
-) -> "plt.Figure":
-    """Horizontal tree layout for a KPI node hierarchy."""
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
+    kind: str = "treemap",
+) -> "go.Figure":
+    """Interactive KPI tree using Plotly.
 
-    rows: list[tuple[int, str, float, str]] = []
+    Parameters
+    ----------
+    root : KPINode
+        Root of the KPI hierarchy.
+    title : str, optional
+        Figure title.  Defaults to "KPI Tree — <root.name>".
+    kind : {'treemap', 'sunburst'}
+        Chart type.  'treemap' (default) uses area to encode value;
+        'sunburst' uses a radial layout.
 
-    def _collect(node: "KPINode", depth: int) -> None:
-        rows.append((depth, node.name, node.value, node.unit))
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Call ``.show()`` to display or ``.write_html()`` to save.
+    """
+    import plotly.graph_objects as go
+
+    ids: list[str]        = []
+    labels: list[str]     = []
+    parents: list[str]    = []
+    values: list[float]   = []
+    hover: list[str]      = []
+
+    def _collect(node: "KPINode", parent_id: str = "") -> None:
+        node_id = f"{parent_id}/{node.name}" if parent_id else node.name
+        ids.append(node_id)
+        labels.append(node.name)
+        parents.append(parent_id)
+        # Use absolute value for area sizing; zero would collapse the tile
+        values.append(max(abs(node.value), 1e-9))
+        unit_str    = f" {node.unit}" if node.unit else ""
+        formula_str = f"<br><i>{node.formula}</i>" if node.formula else ""
+        hover.append(f"<b>{node.name}</b><br>{node.value:.6g}{unit_str}{formula_str}")
         for child in node.children:
-            _collect(child, depth + 1)
+            _collect(child, node_id)
 
-    _collect(root, 0)
+    _collect(root)
 
-    n   = len(rows)
-    fig, ax = plt.subplots(figsize=figsize or (10, max(4, n * 0.55)))
-    ax.set_xlim(0, 1)
-    ax.set_ylim(-0.5, n - 0.5)
-    ax.axis("off")
+    chart_title = title or f"KPI Tree — {root.name}"
 
-    palette = [BLUE, GREEN, TEAL, ORANGE, PURPLE, RED, GRAY]
-
-    for i, (depth, name, value, unit) in enumerate(rows):
-        y     = n - 1 - i
-        x     = depth * 0.06
-        color = palette[depth % len(palette)]
-        unit_str = f" [{unit}]" if unit else ""
-        ax.text(
-            x + 0.02, y,
-            f"● {name}: {value:.4g}{unit_str}",
-            va="center", ha="left",
-            fontsize=10 - depth,
-            color=color,
-            fontweight="bold" if depth == 0 else "normal",
+    if kind == "sunburst":
+        trace = go.Sunburst(
+            ids=ids,
+            labels=labels,
+            parents=parents,
+            values=values,
+            customdata=hover,
+            hovertemplate="%{customdata}<extra></extra>",
+            branchvalues="total",
+            textinfo="label+value",
+            insidetextorientation="radial",
+            marker=dict(colorscale="Blues"),
+        )
+        layout = go.Layout(
+            title=dict(text=chart_title, font=dict(size=16)),
+            margin=dict(t=60, l=10, r=10, b=10),
+        )
+    else:
+        trace = go.Treemap(
+            ids=ids,
+            labels=labels,
+            parents=parents,
+            values=values,
+            customdata=hover,
+            hovertemplate="%{customdata}<extra></extra>",
+            branchvalues="total",
+            texttemplate="<b>%{label}</b><br>%{value:.4g}",
+            textfont=dict(size=13),
+            marker=dict(
+                colorscale="Blues",
+                showscale=False,
+                line=dict(width=2, color="white"),
+            ),
+            pathbar=dict(visible=True),
+        )
+        layout = go.Layout(
+            title=dict(text=chart_title, font=dict(size=16)),
+            margin=dict(t=60, l=10, r=10, b=10),
         )
 
-    fig.suptitle(title or f"KPI Tree — {root.name}", fontweight="bold")
-    fig.tight_layout()
-    return fig
+    return go.Figure(data=[trace], layout=layout)

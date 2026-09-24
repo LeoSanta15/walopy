@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Callable, Sequence
+from typing import TYPE_CHECKING, Callable, Sequence
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 
 @dataclass
@@ -87,7 +90,8 @@ class KPINode:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> "go.Figure":
+        """Render an interactive Plotly treemap (or sunburst with ``kind='sunburst'``)."""
         from .plotting import plot_kpi_tree
         return plot_kpi_tree(self, **kwargs)
 
