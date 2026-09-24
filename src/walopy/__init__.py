@@ -45,6 +45,7 @@ from .solver import (
     solve_servers,
     optimize_servers,
     sensitivity,
+    batch_model,
 )
 
 # Advanced models
@@ -96,6 +97,7 @@ __all__ = [
     "solve_servers",
     "optimize_servers",
     "sensitivity",
+    "batch_model",
     # advanced
     "SimulationResult",
     "LineBalanceResult",
