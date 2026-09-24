@@ -36,6 +36,32 @@ from .kpi import (
     roi_kpi_tree,
 )
 
+# Solvers
+from .solver import (
+    SolverResult,
+    OptimizeResult,
+    solve_lam,
+    solve_mu,
+    solve_servers,
+    optimize_servers,
+    sensitivity,
+)
+
+# Advanced models
+from .advanced import (
+    SimulationResult,
+    LineBalanceResult,
+    BreakEvenResult,
+    erlang_b,
+    mm1k,
+    monte_carlo_gg1,
+    takt_time,
+    line_balance,
+    break_even,
+    queue_length_pmf,
+    sojourn_cdf,
+)
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -62,4 +88,24 @@ __all__ = [
     "oee_kpi_tree",
     "throughput_kpi_tree",
     "roi_kpi_tree",
+    # solver
+    "SolverResult",
+    "OptimizeResult",
+    "solve_lam",
+    "solve_mu",
+    "solve_servers",
+    "optimize_servers",
+    "sensitivity",
+    # advanced
+    "SimulationResult",
+    "LineBalanceResult",
+    "BreakEvenResult",
+    "erlang_b",
+    "mm1k",
+    "monte_carlo_gg1",
+    "takt_time",
+    "line_balance",
+    "break_even",
+    "queue_length_pmf",
+    "sojourn_cdf",
 ]
