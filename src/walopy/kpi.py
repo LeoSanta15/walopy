@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Callable, Sequence
 if TYPE_CHECKING:
     import plotly.graph_objects as go
 
+from ._utils import as_fraction, as_positive, as_nonneg, as_finite_scalar
+
 
 @dataclass
 class KPINode:
@@ -121,6 +123,9 @@ def oee_kpi_tree(
     KPINode
         Root node with OEE and its three sub-KPIs.
     """
+    availability = as_fraction(availability, "availability")
+    performance  = as_fraction(performance, "performance")
+    quality      = as_fraction(quality, "quality")
     oee_val = availability * performance * quality
     return KPINode(
         name="OEE",
@@ -159,7 +164,10 @@ def throughput_kpi_tree(
     -------
     KPINode
     """
-    utilization = actual_throughput / capacity if capacity > 0 else 0.0
+    actual_throughput = as_positive(actual_throughput, "actual_throughput")
+    capacity          = as_positive(capacity, "capacity")
+    defect_rate       = as_fraction(defect_rate, "defect_rate")
+    utilization = actual_throughput / capacity
     good_rate   = 1.0 - defect_rate
     return KPINode(
         name="Effective Throughput",
@@ -217,6 +225,11 @@ def roi_kpi_tree(
     KPINode
         Root node with ROI and its full decomposition.
     """
+    revenue                = as_finite_scalar(revenue, "revenue")
+    fixed_cost             = as_nonneg(fixed_cost, "fixed_cost")
+    variable_cost_per_unit = as_nonneg(variable_cost_per_unit, "variable_cost_per_unit")
+    units_sold             = as_nonneg(units_sold, "units_sold")
+    investment             = as_finite_scalar(investment, "investment")
     variable_cost = variable_cost_per_unit * units_sold
     total_cost    = fixed_cost + variable_cost
     net_profit    = revenue - total_cost

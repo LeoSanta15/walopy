@@ -472,3 +472,141 @@ def sensitivity(
             rows.append({param: v})
 
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
+# batch_model — apply a model to every row of a DataFrame
+# ---------------------------------------------------------------------------
+
+def batch_model(
+    model_fn: Callable[..., Any],
+    df: "pd.DataFrame",
+    **fixed_kwargs: Any,
+) -> pd.DataFrame:
+    """Apply a walopy model to every row of a DataFrame.
+
+    Each row's column values are passed as keyword arguments to *model_fn*.
+    Values in *fixed_kwargs* serve as defaults; row values always override them.
+    NaN cells in the input row are dropped before the call, so a sparse
+    DataFrame can represent multiple model configurations in one table.
+
+    Parameters
+    ----------
+    model_fn : callable
+        Any walopy model function (e.g. ``mm1``, ``mmc``, ``kingman``,
+        ``oee``, ``break_even``).
+    df : pd.DataFrame
+        One row per scenario.  Column names must match parameter names of
+        *model_fn*.
+    **fixed_kwargs
+        Additional parameters shared across all rows (e.g. ``mu=5.0``).
+        A column in *df* with the same name takes precedence.
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per input row with all original columns plus the model's
+        scalar output fields appended.  The input DataFrame's index is
+        preserved.  If any row raises an exception an ``_error`` column is
+        added; it contains the error message for failed rows and ``None``
+        for successful ones.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from walopy import mm1
+    >>> from walopy.solver import batch_model
+    >>> scenarios = pd.DataFrame({"lam": [1.0, 2.0, 3.0, 4.0], "mu": [5.0, 5.0, 5.0, 5.0]})
+    >>> batch_model(mm1, scenarios)
+    """
+    rows: list[dict] = []
+    has_errors = False
+
+    # Pre-compute integer columns so iterrows() float-upcast can be reversed
+    int_cols = {col for col in df.columns if pd.api.types.is_integer_dtype(df[col].dtype)}
+
+    for _, row_series in df.iterrows():
+        # Merge: fixed_kwargs as base, row values (non-NaN) take precedence
+        kwargs: dict[str, Any] = dict(fixed_kwargs)
+        for k, v in row_series.items():
+            if isinstance(v, float) and np.isnan(v):
+                continue
+            # iterrows() upcasts int64 columns to float64; reverse that cast
+            kwargs[k] = int(v) if k in int_cols else v
+
+        try:
+            result = model_fn(**kwargs)
+            row: dict[str, Any] = row_series.to_dict()
+            # Restore integer columns that iterrows() upcast to float
+            for k in int_cols:
+                if k in row and not (isinstance(row[k], float) and np.isnan(row[k])):
+                    row[k] = int(row[k])
+            if hasattr(result, "__dict__"):
+                row.update({
+                    k: val for k, val in vars(result).items()
+                    if isinstance(val, (int, float, np.floating))
+                    and not k.startswith("_")
+                })
+            elif isinstance(result, (int, float, np.floating)):
+                row["value"] = float(result)
+        except Exception as exc:
+            row = row_series.to_dict()
+            row["_error"] = str(exc)
+            has_errors = True
+
+        rows.append(row)
+
+    result_df = pd.DataFrame(rows, index=df.index)
+    if not has_errors and "_error" in result_df.columns:
+        result_df = result_df.drop(columns=["_error"])
+    return result_df
+
+
+# ---------------------------------------------------------------------------
+# compare — side-by-side comparison of multiple results
+# ---------------------------------------------------------------------------
+
+def compare(
+    *results: Any,
+    labels: Sequence[str] | None = None,
+) -> pd.DataFrame:
+    """Compare multiple walopy model results side by side.
+
+    Parameters
+    ----------
+    *results
+        Any walopy result objects (``QueueResult``, ``SimulationResult``,
+        ``EOQResult``, etc.) or plain dicts.
+    labels : sequence of str, optional
+        Row labels.  Defaults to ``'scenario_1'``, ``'scenario_2'``, …
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per result with a ``label`` column prepended.
+
+    Examples
+    --------
+    >>> from walopy import mm1, mmc, compare
+    >>> compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
+    """
+    rows = []
+    for i, r in enumerate(results):
+        label = labels[i] if (labels and i < len(labels)) else f"scenario_{i + 1}"
+        if hasattr(r, "to_frame"):
+            row = r.to_frame().iloc[0].to_dict()
+        elif isinstance(r, dict):
+            row = dict(r)
+        elif hasattr(r, "__dict__"):
+            row = {
+                k: v for k, v in vars(r).items()
+                if isinstance(v, (int, float, str, np.floating))
+                and not k.startswith("_")
+            }
+        else:
+            row = {"value": r}
+        row["label"] = label
+        # Move label to front
+        rows.append({"label": label, **{k: v for k, v in row.items() if k != "label"}})
+
+    return pd.DataFrame(rows)

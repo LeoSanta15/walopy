@@ -151,3 +151,27 @@ def test_sojourn_cdf_bounds():
     df = sojourn_cdf(lam=3.0, mu=5.0)
     assert df["F(t)"].iloc[0] == pytest.approx(0.0, abs=1e-9)
     assert df["F(t)"].iloc[-1] > 0.98  # approaches 1
+
+
+# --- Robustness ---
+
+def test_erlang_b_numpy_int():
+    import numpy as np
+    b = erlang_b(lam=2.0, mu=1.0, c=np.int64(3))
+    assert 0.0 < b < 1.0
+
+
+def test_mm1k_numpy_int():
+    import numpy as np
+    r = mm1k(lam=5.0, mu=3.0, K=np.int64(10))
+    assert 0 < r.L < 10
+
+
+def test_monte_carlo_zero_customers_raises():
+    with pytest.raises((ValueError, TypeError)):
+        monte_carlo_gg1(lam=3.0, mu=5.0, ca2=1.0, cs2=1.0, n_customers=0)
+
+
+def test_line_balance_empty_raises():
+    with pytest.raises(ValueError, match="station_names"):
+        line_balance([], [], takt=10.0)

@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from ._utils import as_positive, as_nonneg, as_fraction
+from ._utils import as_positive, as_nonneg, as_fraction, as_int_positive
 
 
 @dataclass
@@ -194,8 +194,7 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    if not isinstance(c, int) or c < 1:
-        raise ValueError(f"'c' must be a positive integer, got {c!r}.")
+    c   = as_int_positive(c, "c")
     rho = lam / (c * mu)
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < c·μ.")

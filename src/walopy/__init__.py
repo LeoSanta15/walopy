@@ -45,6 +45,8 @@ from .solver import (
     solve_servers,
     optimize_servers,
     sensitivity,
+    batch_model,
+    compare,
 )
 
 # Advanced models
@@ -52,8 +54,11 @@ from .advanced import (
     SimulationResult,
     LineBalanceResult,
     BreakEvenResult,
+    PriorityQueueResult,
     erlang_b,
     mm1k,
+    mmck,
+    mm1_priority,
     monte_carlo_gg1,
     takt_time,
     line_balance,
@@ -62,7 +67,30 @@ from .advanced import (
     sojourn_cdf,
 )
 
-__version__ = "0.1.0"
+# Fitting
+from .fitting import (
+    FitResult,
+    fit_from_data,
+)
+
+# Inventory
+from .inventory import (
+    EOQResult,
+    ReorderResult,
+    NewsvendorResult,
+    eoq,
+    reorder_point,
+    newsvendor,
+)
+
+# Network
+from .network import (
+    StationMetrics,
+    JacksonResult,
+    jackson_network,
+)
+
+__version__ = "0.2.0"
 
 __all__ = [
     # queuing
@@ -96,16 +124,35 @@ __all__ = [
     "solve_servers",
     "optimize_servers",
     "sensitivity",
+    "batch_model",
+    "compare",
     # advanced
     "SimulationResult",
     "LineBalanceResult",
     "BreakEvenResult",
+    "PriorityQueueResult",
     "erlang_b",
     "mm1k",
+    "mmck",
+    "mm1_priority",
     "monte_carlo_gg1",
     "takt_time",
     "line_balance",
     "break_even",
     "queue_length_pmf",
     "sojourn_cdf",
+    # fitting
+    "FitResult",
+    "fit_from_data",
+    # inventory
+    "EOQResult",
+    "ReorderResult",
+    "NewsvendorResult",
+    "eoq",
+    "reorder_point",
+    "newsvendor",
+    # network
+    "StationMetrics",
+    "JacksonResult",
+    "jackson_network",
 ]

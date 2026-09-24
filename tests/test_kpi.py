@@ -69,3 +69,25 @@ def test_roi_kpi_tree_structure():
     assert tree.find("Fixed Cost") is not None
     assert tree.find("Variable Cost") is not None
     assert tree.find("Investment") is not None
+
+
+def test_oee_kpi_tree_nan_raises():
+    import math
+    with pytest.raises((ValueError, TypeError)):
+        oee_kpi_tree(float("nan"), 0.8, 0.95)
+
+
+def test_oee_kpi_tree_out_of_range_raises():
+    with pytest.raises(ValueError):
+        oee_kpi_tree(1.5, 0.8, 0.95)  # availability > 1
+
+
+def test_roi_kpi_tree_nan_raises():
+    import math
+    with pytest.raises((ValueError, TypeError)):
+        roi_kpi_tree(float("nan"), 10_000, 8, 2_000, 20_000)
+
+
+def test_throughput_kpi_tree_nan_raises():
+    with pytest.raises((ValueError, TypeError)):
+        throughput_kpi_tree(float("nan"), 100, 0.05)
