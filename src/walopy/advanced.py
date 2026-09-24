@@ -8,7 +8,7 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg, as_fraction
+from ._utils import as_positive, as_nonneg, as_fraction, as_int_positive, as_nonempty
 from .queuing import QueueResult
 
 
@@ -38,8 +38,7 @@ def erlang_b(lam: float, mu: float, c: int) -> float:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    if not isinstance(c, int) or c < 1:
-        raise ValueError(f"'c' must be a positive integer, got {c!r}.")
+    c   = as_int_positive(c, "c")
     a = lam / mu  # offered traffic
 
     # Recursive formula (numerically stable for large c)
@@ -76,8 +75,7 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    if not isinstance(K, int) or K < 1:
-        raise ValueError(f"'K' must be a positive integer, got {K!r}.")
+    K   = as_int_positive(K, "K")
 
     rho = lam / mu
 
@@ -230,6 +228,7 @@ def monte_carlo_gg1(
     mu          = as_positive(mu, "mu")
     ca2         = as_nonneg(ca2, "ca2")
     cs2         = as_nonneg(cs2, "cs2")
+    n_customers = as_int_positive(n_customers, "n_customers")
     rho         = lam / mu
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
@@ -373,6 +372,7 @@ def line_balance(
     LineBalanceResult
     """
     names  = list(station_names)
+    as_nonempty(names, "station_names")
     cts    = [as_positive(ct, f"cycle_times[{i}]") for i, ct in enumerate(cycle_times)]
     takt   = as_positive(takt, "takt")
     n      = len(names)

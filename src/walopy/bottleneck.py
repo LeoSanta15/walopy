@@ -7,7 +7,7 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg
+from ._utils import as_positive, as_nonneg, as_nonempty
 
 
 @dataclass
@@ -114,6 +114,7 @@ def bottleneck_analysis(
     BottleneckResult
     """
     station_names  = list(station_names)
+    as_nonempty(station_names, "station_names")
     capacities     = [as_positive(c, f"capacity[{i}]") for i, c in enumerate(capacities)]
     demand_rate    = as_positive(demand_rate, "demand_rate")
     n              = len(station_names)

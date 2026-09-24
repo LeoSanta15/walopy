@@ -42,3 +42,8 @@ def test_routing_fractions():
 def test_mismatched_lengths_raises():
     with pytest.raises(ValueError):
         bottleneck_analysis(["A", "B"], [5.0], demand_rate=3.0)
+
+
+def test_empty_station_names_raises():
+    with pytest.raises(ValueError, match="station_names"):
+        bottleneck_analysis([], [], demand_rate=5.0)
