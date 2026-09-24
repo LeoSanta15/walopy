@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "walopy"
+version = "0.1.0"
+description = "Queuing theory, operations analysis, OEE, bottleneck analysis and KPI trees for Python"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "LeoSanta15", email = "angelsanta1@gmail.com" }]
+keywords = [
+    "queuing theory", "operations research", "little's law", "kingman",
+    "bottleneck", "OEE", "efficiency", "utilization", "unit cost", "KPI",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["numpy>=1.22", "pandas>=1.4", "matplotlib>=3.5"]
+
+[project.optional-dependencies]
+dev  = ["pytest>=7", "pytest-cov>=4", "ruff>=0.6", "mypy>=1.10"]
+docs = ["sphinx>=7", "sphinx-rtd-theme>=2", "myst-parser>=2"]
+
+[project.urls]
+Homepage  = "https://github.com/LeoSanta15/walopy"
+Issues    = "https://github.com/LeoSanta15/walopy/issues"
+Changelog = "https://github.com/LeoSanta15/walopy/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-q"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length    = 110
+target-version = "py39"
