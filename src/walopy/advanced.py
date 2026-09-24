@@ -561,7 +561,7 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     return pd.DataFrame({"n": ns, "P(N=n)": pmf, "P(N<=n)": np.cumsum(pmf)})
 
 
-def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:
+def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:  # noqa: E501
     """CDF of the sojourn time (time in system) for an M/M/1 queue.
 
     F(t) = 1 − exp(−(μ − λ)·t)
@@ -594,3 +594,210 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     cdf     = 1.0 - np.exp(-rate * t)
     pdf     = rate * np.exp(-rate * t)
     return pd.DataFrame({"t": t, "F(t)": cdf, "f(t)": pdf})
+
+
+# ---------------------------------------------------------------------------
+# M/M/c/K — multi-server finite capacity queue
+# ---------------------------------------------------------------------------
+
+def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
+    """M/M/c/K queue — *c* servers, system capacity *K* (including servers).
+
+    Customers arriving when the system is full are blocked (lost).
+    The system is always stable regardless of ρ because of the finite
+    capacity.
+
+    Parameters
+    ----------
+    lam : float
+        Arrival rate λ.
+    mu : float
+        Service rate μ per server.
+    c : int
+        Number of servers (≥ 1).
+    K : int
+        System capacity (maximum customers in system, ≥ c).
+
+    Returns
+    -------
+    QueueResult
+        ``rho`` is server utilization λ_eff / (c · μ).
+    """
+    lam = as_positive(lam, "lam")
+    mu  = as_positive(mu, "mu")
+    c   = as_int_positive(c, "c")
+    K   = as_int_positive(K, "K")
+    if K < c:
+        raise ValueError(f"'K' (system capacity) must be ≥ c (servers); got K={K}, c={c}.")
+
+    a   = lam / mu           # offered load
+    rho = a / c              # traffic intensity per server
+
+    # Unnormalised state probabilities:
+    #   p_n = a^n / n!          for n = 0 … c
+    #   p_n = a^n / (c! c^(n-c)) for n = c+1 … K
+    log_fact_c = sum(math.log(k) for k in range(1, c + 1))  # log(c!)
+
+    def _log_p(n: int) -> float:
+        if n <= c:
+            return n * math.log(a) - sum(math.log(k) for k in range(1, n + 1))
+        return n * math.log(a) - log_fact_c - (n - c) * math.log(c)
+
+    # Normalise in log-space for numerical stability
+    log_ps = [_log_p(n) for n in range(K + 1)]
+    max_lp = max(log_ps)
+    ps     = [math.exp(lp - max_lp) for lp in log_ps]
+    Z      = sum(ps)
+    Pn     = [p / Z for p in ps]
+
+    PK      = Pn[K]
+    lam_eff = lam * (1 - PK)
+    L       = sum(n * Pn[n] for n in range(K + 1))
+    Lq      = sum((n - c) * Pn[n] for n in range(c, K + 1))
+    W       = L / lam_eff  if lam_eff > 0 else float("inf")
+    Wq      = Lq / lam_eff if lam_eff > 0 else float("inf")
+    util    = lam_eff / (c * mu)  # effective server utilization
+
+    return QueueResult(
+        model=f"M/M/{c}/{K}",
+        lam=lam, mu=mu, servers=c,
+        rho=util, L=L, Lq=Lq, W=W, Wq=Wq,
+        params={
+            "K (capacity)": K,
+            "P0 (idle)": Pn[0],
+            "PK (blocking prob)": PK,
+            "λ_eff (effective rate)": lam_eff,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# M/M/1 non-preemptive Head-of-Line priority queue
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PriorityQueueResult:
+    """Result of a non-preemptive HOL priority queue analysis.
+
+    Each entry in *classes* is a dict with keys:
+    ``class_id``, ``lam``, ``rho``, ``Wq``, ``W``, ``Lq``, ``L``.
+
+    Attributes
+    ----------
+    classes : list[dict]
+        Per-class metrics in priority order (class 0 = highest priority).
+    rho_total : float
+        Total server utilization = sum(λ_k) / μ.
+    mu : float
+        Service rate.
+    """
+
+    classes: list[dict]
+    rho_total: float
+    mu: float
+    params: dict = field(default_factory=dict)
+
+    def to_frame(self) -> "pd.DataFrame":
+        return pd.DataFrame(self.classes)
+
+    def summary(self) -> str:
+        lines = [
+            f"M/M/1 Non-preemptive HOL priority  (μ={self.mu:.6g}, ρ={self.rho_total:.4g})",
+            f"{'Class':>6}  {'λ':>10}  {'ρ':>8}  {'Wq':>12}  {'W':>12}  {'Lq':>10}  {'L':>10}",
+            "-" * 72,
+        ]
+        for cl in self.classes:
+            lines.append(
+                f"{cl['class_id']:>6}  {cl['lam']:>10.4g}  {cl['rho']:>8.4f}  "
+                f"{cl['Wq']:>12.6g}  {cl['W']:>12.6g}  {cl['Lq']:>10.4g}  {cl['L']:>10.4g}"
+            )
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def mm1_priority(
+    lam_list: Sequence[float],
+    mu: float,
+    *,
+    class_names: Sequence[str] | None = None,
+) -> PriorityQueueResult:
+    """Non-preemptive Head-of-Line priority M/M/1 queue.
+
+    Class 0 has the highest priority; class N−1 the lowest.  Service is
+    FCFS within each priority class and non-preemptive (a lower-priority
+    customer in service is not interrupted).
+
+    The formula (Kleinrock, 1975):
+
+    .. code-block:: text
+
+        Wq_k = R / ((1 − σ_{k−1}) · (1 − σ_k))
+        where R = ρ / μ,  σ_k = Σ_{i=0}^{k} λ_i / μ,  σ_{−1} = 0.
+
+    Parameters
+    ----------
+    lam_list : sequence of float
+        Arrival rates λ_k for each class in *descending* priority order
+        (index 0 = highest priority).
+    mu : float
+        Service rate μ (same exponential server for all classes).
+    class_names : sequence of str, optional
+        Labels for the priority classes.  Defaults to '0', '1', …
+
+    Returns
+    -------
+    PriorityQueueResult
+
+    Examples
+    --------
+    >>> r = mm1_priority([2.0, 1.0], mu=5.0)
+    >>> r.classes[0]['Wq'] < r.classes[1]['Wq']   # high priority waits less
+    True
+    """
+    lams = [as_positive(l, f"lam_list[{i}]") for i, l in enumerate(lam_list)]
+    mu   = as_positive(mu, "mu")
+    N    = len(lams)
+    if N == 0:
+        raise ValueError("'lam_list' must contain at least one class.")
+
+    rho_total = sum(lams) / mu
+    if rho_total >= 1.0:
+        raise ValueError(f"System unstable: ρ_total = {rho_total:.4g} ≥ 1.")
+
+    names = list(class_names) if class_names else [str(i) for i in range(N)]
+    if len(names) != N:
+        raise ValueError("'class_names' must have the same length as 'lam_list'.")
+
+    # Residual service time for M/M/1 (exponential, cv²=1): R = ρ/μ
+    R = rho_total / mu
+
+    # Partial utilizations: sigma[k] = sum_{i=0}^{k} rho_i
+    rhos   = [l / mu for l in lams]
+    sigmas = [sum(rhos[:k + 1]) for k in range(N)]  # sigma[k]
+
+    classes = []
+    for k in range(N):
+        s_prev = sigmas[k - 1] if k > 0 else 0.0
+        s_k    = sigmas[k]
+        Wq_k   = R / ((1 - s_prev) * (1 - s_k))
+        W_k    = Wq_k + 1.0 / mu
+        Lq_k   = lams[k] * Wq_k
+        L_k    = lams[k] * W_k
+        classes.append({
+            "class_id": names[k],
+            "lam": lams[k],
+            "rho": rhos[k],
+            "Wq": Wq_k,
+            "W": W_k,
+            "Lq": Lq_k,
+            "L": L_k,
+        })
+
+    return PriorityQueueResult(
+        classes=classes,
+        rho_total=rho_total,
+        mu=mu,
+        params={"N_classes": N, "R (residual)": R},
+    )

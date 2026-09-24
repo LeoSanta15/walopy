@@ -560,3 +560,53 @@ def batch_model(
     if not has_errors and "_error" in result_df.columns:
         result_df = result_df.drop(columns=["_error"])
     return result_df
+
+
+# ---------------------------------------------------------------------------
+# compare — side-by-side comparison of multiple results
+# ---------------------------------------------------------------------------
+
+def compare(
+    *results: Any,
+    labels: Sequence[str] | None = None,
+) -> pd.DataFrame:
+    """Compare multiple walopy model results side by side.
+
+    Parameters
+    ----------
+    *results
+        Any walopy result objects (``QueueResult``, ``SimulationResult``,
+        ``EOQResult``, etc.) or plain dicts.
+    labels : sequence of str, optional
+        Row labels.  Defaults to ``'scenario_1'``, ``'scenario_2'``, …
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per result with a ``label`` column prepended.
+
+    Examples
+    --------
+    >>> from walopy import mm1, mmc, compare
+    >>> compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
+    """
+    rows = []
+    for i, r in enumerate(results):
+        label = labels[i] if (labels and i < len(labels)) else f"scenario_{i + 1}"
+        if hasattr(r, "to_frame"):
+            row = r.to_frame().iloc[0].to_dict()
+        elif isinstance(r, dict):
+            row = dict(r)
+        elif hasattr(r, "__dict__"):
+            row = {
+                k: v for k, v in vars(r).items()
+                if isinstance(v, (int, float, str, np.floating))
+                and not k.startswith("_")
+            }
+        else:
+            row = {"value": r}
+        row["label"] = label
+        # Move label to front
+        rows.append({"label": label, **{k: v for k, v in row.items() if k != "label"}})
+
+    return pd.DataFrame(rows)
