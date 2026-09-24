@@ -90,7 +90,11 @@ from .network import (
     jackson_network,
 )
 
-__version__ = "0.2.0"
+from importlib.metadata import version, PackageNotFoundError
+try:
+    __version__: str = version("walopy")
+except PackageNotFoundError:
+    __version__ = "0.2.0"  # fallback when running from source without install
 
 __all__ = [
     # queuing
