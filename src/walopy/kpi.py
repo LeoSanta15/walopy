@@ -178,48 +178,80 @@ def throughput_kpi_tree(
     )
 
 
-def cost_kpi_tree(
+def roi_kpi_tree(
+    revenue: float,
     fixed_cost: float,
     variable_cost_per_unit: float,
-    units_produced: float,
+    units_sold: float,
+    investment: float,
     *,
     currency: str = "$",
 ) -> KPINode:
-    """Build a cost KPI tree rooted at unit cost.
+    """Build a KPI tree rooted at ROI (Return on Investment).
+
+    ROI = Net Profit / Investment,  where
+    Net Profit = Revenue − Total Cost,
+    Total Cost = Fixed Cost + Variable Cost per unit × Units sold.
 
     Parameters
     ----------
+    revenue : float
+        Total revenue for the period.
     fixed_cost : float
         Total fixed cost for the period.
     variable_cost_per_unit : float
-        Variable cost per unit.
-    units_produced : float
-        Units produced in the period.
+        Variable cost per unit sold.
+    units_sold : float
+        Units sold in the period.
+    investment : float
+        Total capital invested.
     currency : str
-        Currency label for display.
+        Currency label for display (default '$').
 
     Returns
     -------
     KPINode
+        Root node with ROI and its full decomposition.
     """
-    fc_unit  = fixed_cost / units_produced if units_produced > 0 else 0.0
-    uc_total = fc_unit + variable_cost_per_unit
+    variable_cost = variable_cost_per_unit * units_sold
+    total_cost    = fixed_cost + variable_cost
+    net_profit    = revenue - total_cost
+    roi_val       = net_profit / investment if investment != 0 else 0.0
+
     return KPINode(
-        name="Unit Cost",
-        value=uc_total,
-        unit=f"{currency}/unit",
-        formula="Fixed/unit + Variable/unit",
+        name="ROI",
+        value=roi_val,
+        unit=f"{currency}/{currency}",
+        formula="Net Profit / Investment",
         children=[
             KPINode(
-                name="Fixed Cost / unit",
-                value=fc_unit,
-                unit=f"{currency}/unit",
-                formula="Fixed cost / Units produced",
+                name="Net Profit",
+                value=net_profit,
+                unit=currency,
+                formula="Revenue − Total Cost",
                 children=[
-                    KPINode(name="Fixed Cost",      value=fixed_cost,      unit=currency),
-                    KPINode(name="Units Produced",  value=units_produced,  unit="units"),
+                    KPINode(name="Revenue", value=revenue, unit=currency),
+                    KPINode(
+                        name="Total Cost",
+                        value=total_cost,
+                        unit=currency,
+                        formula="Fixed Cost + Variable Cost",
+                        children=[
+                            KPINode(name="Fixed Cost",     value=fixed_cost,     unit=currency),
+                            KPINode(
+                                name="Variable Cost",
+                                value=variable_cost,
+                                unit=currency,
+                                formula="Cost/unit × Units sold",
+                                children=[
+                                    KPINode(name="Cost / unit",  value=variable_cost_per_unit, unit=f"{currency}/unit"),
+                                    KPINode(name="Units Sold",   value=units_sold,             unit="units"),
+                                ],
+                            ),
+                        ],
+                    ),
                 ],
             ),
-            KPINode(name="Variable Cost / unit", value=variable_cost_per_unit, unit=f"{currency}/unit"),
+            KPINode(name="Investment", value=investment, unit=currency),
         ],
     )

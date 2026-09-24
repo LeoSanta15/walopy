@@ -33,7 +33,7 @@ from .kpi import (
     KPINode,
     oee_kpi_tree,
     throughput_kpi_tree,
-    cost_kpi_tree,
+    roi_kpi_tree,
 )
 
 __version__ = "0.1.0"
@@ -61,5 +61,5 @@ __all__ = [
     "KPINode",
     "oee_kpi_tree",
     "throughput_kpi_tree",
-    "cost_kpi_tree",
+    "roi_kpi_tree",
 ]

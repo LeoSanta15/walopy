@@ -44,6 +44,16 @@ tree = wl.oee_kpi_tree(availability=0.9, performance=0.8, quality=0.95)
 print(tree)
 df = tree.to_frame()
 fig = tree.plot()
+
+# ROI tree
+tree = wl.roi_kpi_tree(
+    revenue=50_000,
+    fixed_cost=10_000,
+    variable_cost_per_unit=8,
+    units_sold=2_000,
+    investment=20_000,
+)
+print(tree)   # ROI = 1.2  (120%)
 ```
 
 ## Costo unitario

@@ -40,6 +40,14 @@ tree = wl.oee_kpi_tree(0.9, 0.8, 0.95)
 print(tree)
 tree.to_frame()
 
+# ROI tree
+tree = wl.roi_kpi_tree(
+    revenue=50_000, fixed_cost=10_000,
+    variable_cost_per_unit=8, units_sold=2_000,
+    investment=20_000,
+)
+print(tree)   # ROI = 1.2  (120%)
+
 # --- Unit cost ---
 r = wl.unit_cost(fixed_cost=10_000, variable_cost_per_unit=8, units_produced=500)
 print(r)
@@ -52,7 +60,7 @@ print(r)
 | `walopy.queuing` | `mm1`, `mmc`, `md1`, `kingman`, `littles_law`, `QueueResult` |
 | `walopy.operations` | `oee`, `utilization_efficiency`, `unit_cost` |
 | `walopy.bottleneck` | `bottleneck_analysis`, `BottleneckResult` |
-| `walopy.kpi` | `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `cost_kpi_tree` |
+| `walopy.kpi` | `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `roi_kpi_tree` |
 | `walopy.plotting` | All `.plot()` back-ends |
 
 ## Requirements

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from walopy import KPINode, oee_kpi_tree, throughput_kpi_tree, cost_kpi_tree
+from walopy import KPINode, oee_kpi_tree, throughput_kpi_tree, roi_kpi_tree
 
 
 def test_oee_kpi_tree_root_value():
@@ -40,6 +40,32 @@ def test_throughput_kpi_tree():
     assert tree.value == pytest.approx(80 * 0.95)
 
 
-def test_cost_kpi_tree():
-    tree = cost_kpi_tree(fixed_cost=1000, variable_cost_per_unit=5, units_produced=200)
-    assert tree.value == pytest.approx(5 + 5)   # 1000/200 + 5
+def test_roi_kpi_tree():
+    tree = roi_kpi_tree(
+        revenue=50_000,
+        fixed_cost=10_000,
+        variable_cost_per_unit=8,
+        units_sold=2_000,
+        investment=20_000,
+    )
+    # Net Profit = 50000 - (10000 + 8*2000) = 50000 - 26000 = 24000
+    # ROI = 24000 / 20000 = 1.2
+    assert tree.value == pytest.approx(1.2)
+    net_profit_node = tree.find("Net Profit")
+    assert net_profit_node is not None
+    assert net_profit_node.value == pytest.approx(24_000)
+
+
+def test_roi_kpi_tree_structure():
+    tree = roi_kpi_tree(
+        revenue=10_000,
+        fixed_cost=2_000,
+        variable_cost_per_unit=5,
+        units_sold=1_000,
+        investment=5_000,
+    )
+    assert tree.find("Revenue") is not None
+    assert tree.find("Total Cost") is not None
+    assert tree.find("Fixed Cost") is not None
+    assert tree.find("Variable Cost") is not None
+    assert tree.find("Investment") is not None

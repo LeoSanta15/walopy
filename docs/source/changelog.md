@@ -11,5 +11,5 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - Utilización y eficiencia (`utilization_efficiency`).
 - Costo unitario (`unit_cost`).
 - Análisis de cuello de botella (`bottleneck_analysis`) con fracciones de routing.
-- Árboles de KPI: `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `cost_kpi_tree`.
+- Árboles de KPI: `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `roi_kpi_tree`.
 - Gráficas para cada módulo vía `.plot()`.
