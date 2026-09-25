@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.2.2] — 2026-09-25
+
+### Añadido
+- README exhaustivo con documentación completa de todas las funciones (20 secciones, ~1100 líneas)
+
+---
+
 ## [0.2.1] — 2026-09-24
 
 ### Corregido
