@@ -26,15 +26,17 @@ pip install walopy
 9. [Análisis de cuellos de botella](#9-análisis-de-cuellos-de-botella)
 10. [Balance de línea y tiempo takt](#10-balance-de-línea-y-tiempo-takt)
 11. [Análisis de punto de equilibrio](#11-análisis-de-punto-de-equilibrio)
-12. [Árboles de KPI](#12-árboles-de-kpi)
-13. [Solvers y optimización](#13-solvers-y-optimización)
-14. [Análisis de sensibilidad](#14-análisis-de-sensibilidad)
-15. [Escenarios en lote (batch_model)](#15-escenarios-en-lote-batch_model)
-16. [Comparar múltiples resultados](#16-comparar-múltiples-resultados)
-17. [Gráficas](#17-gráficas)
-18. [CLI](#18-cli)
-19. [Referencia de módulos](#19-referencia-de-módulos)
-20. [Requisitos](#20-requisitos)
+12. [Programación de producción (scheduling)](#12-programación-de-producción-scheduling)
+13. [Confiabilidad](#13-confiabilidad--reliability)
+14. [Árboles de KPI](#14-árboles-de-kpi)
+15. [Solvers y optimización](#15-solvers-y-optimización)
+16. [Análisis de sensibilidad](#16-análisis-de-sensibilidad)
+17. [Escenarios en lote (batch_model)](#17-escenarios-en-lote-batch_model)
+18. [Comparar múltiples resultados](#18-comparar-múltiples-resultados)
+19. [Gráficas](#19-gráficas)
+20. [CLI](#20-cli)
+21. [Referencia de módulos](#21-referencia-de-módulos)
+22. [Requisitos](#22-requisitos)
 
 ---
 
@@ -1018,7 +1020,7 @@ print(r.margin_of_safety_pct)     # 0.375 — porcentaje del margen de seguridad
 
 ---
 
-## 12. Árboles de KPI
+## 14. Árboles de KPI
 
 Los árboles de KPI crean jerarquías interactivas visualizadas como **treemap** o **sunburst** con Plotly.
 
@@ -1071,7 +1073,7 @@ fig.show()
 
 ---
 
-## 13. Solvers y optimización
+## 15. Solvers y optimización
 
 ### `solve_lam(metric, target, *, mu, model)` — Máxima tasa de llegada
 
@@ -1118,7 +1120,7 @@ r.plot()   # gráfica de costo vs número de servidores
 
 ---
 
-## 14. Análisis de sensibilidad
+## 16. Análisis de sensibilidad
 
 ### `sensitivity(model_fn, param, values, **fixed_kwargs)` — Barrido paramétrico
 
@@ -1149,7 +1151,7 @@ fig.show()
 
 ---
 
-## 15. Escenarios en lote (batch_model)
+## 17. Escenarios en lote (batch_model)
 
 ### `batch_model(model_fn, df, **fixed_kwargs)` — Aplicar modelo a un DataFrame
 
@@ -1184,7 +1186,7 @@ print(resultado[resultado["_error"].notna()])  # filas fallidas
 
 ---
 
-## 16. Comparar múltiples resultados
+## 18. Comparar múltiples resultados
 
 ### `compare(*results, labels)` — DataFrame comparativo
 
@@ -1209,7 +1211,7 @@ df2 = wl.compare(wl.mm1(1, 5), wl.mm1(2, 5), wl.mm1(3, 5))
 
 ---
 
-## 17. Gráficas
+## 19. Gráficas
 
 Todos los resultados exponen `.plot()` que devuelve una figura de Matplotlib o Plotly. También se pueden llamar directamente desde `walopy.plotting`.
 
@@ -1245,7 +1247,7 @@ fig.show()
 
 ---
 
-## 18. CLI
+## 20. CLI
 
 walopy incluye una interfaz de línea de comandos para uso rápido sin escribir código.
 
@@ -1287,14 +1289,175 @@ Wq    : 0.3   (avg wait time in queue)
 
 ---
 
-## 19. Referencia de módulos
+## 12. Programación de producción (scheduling)
+
+### Máquina única — `schedule_single`
+
+Asigna *n* trabajos a una sola máquina según una regla de prioridad.
+
+```python
+import walopy as wl
+
+p = [3, 1, 4, 1, 5]          # tiempos de proceso
+d = [8, 3, 10, 4, 12]         # fechas de entrega
+w = [2, 5, 1, 4, 1]           # pesos de importancia
+
+r = wl.schedule_single(p, rule="SPT", due_dates=d, weights=w,
+                        names=["A","B","C","D","E"])
+print(r)
+```
+
+```
+Rule                    : SPT
+Sequence                : B → D → A → C → E
+Makespan (Cmax)         : 14
+Total completion ΣCj    : 37
+Weighted completion ΣwCj: 89
+Max lateness            : 2
+Total tardiness ΣTj     : 2
+Tardy jobs              : 1
+```
+
+**Reglas disponibles**
+
+| `rule` | Criterio minimizado | Datos requeridos |
+|--------|---------------------|-----------------|
+| `'SPT'` | ΣCj (tiempo total de completación) | — |
+| `'EDD'` | Lmax (máxima tardanza) | `due_dates` |
+| `'WSPT'` | ΣwjCj (completación ponderada) | `weights` |
+| `'CR'` | Ratio crítico dj/pj | `due_dates` |
+| `'FIFO'` | Orden de llegada (línea base) | — |
+
+**Atributos de `ScheduleResult`**
+
+| Atributo | Descripción |
+|----------|-------------|
+| `rule` | Regla utilizada |
+| `sequence` | Lista de nombres en orden de procesamiento |
+| `jobs` | Lista de `JobSchedule` (por trabajo) |
+| `makespan` | Cmax = suma de tiempos de proceso |
+| `total_completion_time` | ΣCj |
+| `total_weighted_completion_time` | ΣwjCj |
+| `max_lateness` | max(Lj) |
+| `total_tardiness` | ΣTj |
+| `n_tardy` | Número de trabajos tarde |
+
+```python
+df = r.to_frame()  # columnas: Name, p, d, w, Start, C, L, T, Tardy
+```
+
+---
+
+### Flow-shop de 2 máquinas — `johnson_flowshop`
+
+El algoritmo de Johnson encuentra la secuencia óptima que minimiza el makespan cuando todos los trabajos pasan primero por M1 y luego por M2.
+
+```python
+m1 = [3, 8, 5, 7, 2]   # tiempos en máquina 1
+m2 = [5, 2, 8, 4, 6]   # tiempos en máquina 2
+
+r = wl.johnson_flowshop(m1, m2)
+print(r)
+```
+
+```
+Sequence : J1 → J5 → J4 → J3 → J2
+Makespan : 34
+```
+
+```python
+df = r.to_frame()
+# columnas: Job | M1 start | M1 end | M2 start | M2 end
+```
+
+---
+
+## 13. Confiabilidad — `reliability`
+
+Modelos de confiabilidad con distribución exponencial (tasa de falla constante).
+
+### Componente individual — `mtbf_analysis`
+
+```python
+r = wl.mtbf_analysis(failure_rate=0.01, mttr=5.0, t=100)
+print(r)
+```
+
+```
+Topology        : component
+Components      : 1
+Failure rates λ : ['0.01']
+MTBF            : 100
+R(t=100)        : 0.367879
+Availability    : 95.2381%
+```
+
+### Sistema en serie — `series_system`
+
+El sistema falla si **cualquier** componente falla. λ_sys = Σλi.
+
+```python
+r = wl.series_system([0.01, 0.02, 0.03], t=10)
+print(r.mtbf)      # 1/0.06 ≈ 16.67
+print(r.R_t)       # e^{-0.06·10} ≈ 0.549
+```
+
+### Sistema en paralelo — `parallel_system`
+
+El sistema opera si **al menos uno** de los componentes opera.  
+R_sys(t) = 1 − ∏(1 − e^{−λi·t}). MTBF calculado numéricamente.
+
+```python
+r = wl.parallel_system([0.01, 0.02], t=50)
+print(r.R_t)        # mayor que el sistema en serie
+print(r.mtbf)       # mayor que cualquier componente individual
+```
+
+### Sistema k-de-n — `koon_system`
+
+Opera si al menos **k** de **n** componentes idénticos están en servicio.  
+MTBF exacto = (1/λ) · Σ_{j=k}^{n} (1/j).
+
+```python
+# 2-de-3: requiere al menos 2 de 3 componentes idénticos
+r = wl.koon_system(n=3, k=2, failure_rate=0.01, t=50)
+print(r.mtbf)   # (1/0.01) * (1/2 + 1/3) ≈ 83.33
+print(r.R_t)
+```
+
+**Casos especiales**
+- `k=1` → equivale a `parallel_system` con n componentes idénticos.
+- `k=n` → equivale a `series_system` con n componentes idénticos.
+
+**Atributos de `ReliabilityResult`**
+
+| Atributo | Descripción |
+|----------|-------------|
+| `topology` | `'component'`, `'series'`, `'parallel'`, `'k-of-n'` |
+| `n_components` | Número de componentes |
+| `failure_rates` | Lista de λi |
+| `mtbf` | MTBF del sistema |
+| `R_t` | Confiabilidad R(t) si se proporcionó `t` |
+| `availability` | Disponibilidad estacionaria A si se proporcionó `mttr` |
+| `mttr` | Tiempo medio de reparación (si se proporcionó) |
+
+```python
+df = r.to_frame()   # columnas: Topology, Components, MTBF[, R(t), Availability]
+r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
+```
+
+---
+
+## 21. Referencia de módulos
 
 | Módulo | Funciones y clases principales |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
 | `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
-| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult` |
+| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult` |
+| `scheduling` | `schedule_single`, `johnson_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult` |
+| `reliability` | `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `ReliabilityResult` |
 | `network` | `jackson_network`, `JacksonResult`, `StationMetrics` |
 | `operations` | `oee`, `utilization_efficiency`, `unit_cost`, `OEEResult`, `UtilizationResult`, `UnitCostResult` |
 | `bottleneck` | `bottleneck_analysis`, `BottleneckResult`, `StationResult` |
@@ -1304,7 +1467,7 @@ Wq    : 0.3   (avg wait time in queue)
 
 ---
 
-## 20. Requisitos
+## 22. Requisitos
 
 ```
 Python ≥ 3.9

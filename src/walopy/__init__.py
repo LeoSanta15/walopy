@@ -113,6 +113,33 @@ from .network import (
     jackson_network,
 )
 
+# Inventory additions
+from .inventory import (
+    RQPolicyResult,
+    RSPolicyResult,
+    rq_policy,
+    rs_policy,
+    wagner_whitin,
+)
+
+# Scheduling
+from .scheduling import (
+    JobSchedule,
+    ScheduleResult,
+    FlowShopResult,
+    schedule_single,
+    johnson_flowshop,
+)
+
+# Reliability
+from .reliability import (
+    ReliabilityResult,
+    mtbf_analysis,
+    series_system,
+    parallel_system,
+    koon_system,
+)
+
 from importlib.metadata import version, PackageNotFoundError
 try:
     __version__: str = version("walopy")
@@ -205,4 +232,22 @@ __all__ = [
     "StationMetrics",
     "JacksonResult",
     "jackson_network",
+    # inventory additions
+    "RQPolicyResult",
+    "RSPolicyResult",
+    "rq_policy",
+    "rs_policy",
+    "wagner_whitin",
+    # scheduling
+    "JobSchedule",
+    "ScheduleResult",
+    "FlowShopResult",
+    "schedule_single",
+    "johnson_flowshop",
+    # reliability
+    "ReliabilityResult",
+    "mtbf_analysis",
+    "series_system",
+    "parallel_system",
+    "koon_system",
 ]
