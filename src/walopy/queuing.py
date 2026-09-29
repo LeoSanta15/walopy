@@ -300,3 +300,149 @@ def kingman(
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
         params={"ca² (arrival CV²)": ca2, "cs² (service CV²)": cs2},
     )
+
+
+# ---------------------------------------------------------------------------
+# M/G/1 — Pollaczek-Khinchine exact formula
+# ---------------------------------------------------------------------------
+
+def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
+    """M/G/1 queuing model — exact Pollaczek-Khinchine (P-K) mean-value formula.
+
+    Poisson arrivals with rate λ, general service time distribution with mean
+    1/μ and squared coefficient of variation cs².  The result is exact (not an
+    approximation) for any service distribution that shares those two moments.
+
+    Parameters
+    ----------
+    lam : float
+        Arrival rate λ.
+    mu : float
+        Service rate μ = 1 / E[S].
+    cs2 : float
+        Squared coefficient of variation of service times  cs² = Var[S] / E[S]².
+        Use the ``cv2_*`` helpers to compute this from distribution parameters.
+
+    Returns
+    -------
+    QueueResult
+
+    Notes
+    -----
+    P-K formula:  Wq = λ · E[S²] / (2 · (1 − ρ))
+    where  E[S²] = (1 + cs²) / μ².
+    """
+    lam  = as_positive(lam, "lam")
+    mu   = as_positive(mu, "mu")
+    cs2  = as_nonneg(cs2, "cs2")
+    rho  = lam / mu
+    if rho >= 1.0:
+        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+    ES2  = (1.0 + cs2) / mu**2          # E[S²]
+    Wq   = lam * ES2 / (2.0 * (1.0 - rho))
+    Lq   = lam * Wq
+    W    = Wq + 1.0 / mu
+    L    = lam * W
+    return QueueResult(
+        model="M/G/1 (P-K)", lam=lam, mu=mu, servers=1,
+        rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
+        params={"cs² (service CV²)": cs2},
+    )
+
+
+# ---------------------------------------------------------------------------
+# CV² helpers — squared coefficient of variation for common distributions
+# ---------------------------------------------------------------------------
+
+def cv2_triangular(a: float, m: float, b: float) -> float:
+    """CV² for a Triangular(a, m, b) distribution.
+
+    Parameters
+    ----------
+    a : float  Lower bound.
+    m : float  Mode (peak).
+    b : float  Upper bound.
+    """
+    if not (a <= m <= b):
+        raise ValueError("Triangular requires a ≤ m ≤ b.")
+    mean = (a + m + b) / 3.0
+    var  = (a**2 + m**2 + b**2 - a*m - a*b - m*b) / 18.0
+    return var / mean**2
+
+
+def cv2_uniform(a: float, b: float) -> float:
+    """CV² for a Uniform(a, b) distribution.
+
+    Parameters
+    ----------
+    a : float  Lower bound.
+    b : float  Upper bound (> a).
+    """
+    if b <= a:
+        raise ValueError("Uniform requires b > a.")
+    mean = (a + b) / 2.0
+    var  = (b - a)**2 / 12.0
+    return var / mean**2
+
+
+def cv2_normal(mean: float, std: float) -> float:
+    """CV² for a Normal(mean, std) distribution.
+
+    Parameters
+    ----------
+    mean : float  Mean (> 0 for service/inter-arrival times).
+    std  : float  Standard deviation (≥ 0).
+    """
+    as_positive(mean, "mean")
+    as_nonneg(std, "std")
+    return (std / mean) ** 2
+
+
+def cv2_erlang(k: int) -> float:
+    """CV² for an Erlang-k distribution.  cv² = 1/k.
+
+    Parameters
+    ----------
+    k : int  Shape parameter (≥ 1).
+    """
+    k = int(k)
+    if k < 1:
+        raise ValueError("Erlang-k requires k ≥ 1.")
+    return 1.0 / k
+
+
+def cv2_gamma(shape: float) -> float:
+    """CV² for a Gamma(shape, scale) distribution.  cv² = 1/shape.
+
+    Parameters
+    ----------
+    shape : float  Shape parameter α (> 0).
+    """
+    as_positive(shape, "shape")
+    return 1.0 / shape
+
+
+def cv2_lognormal(mean: float, std: float) -> float:
+    """CV² for a LogNormal distribution parameterised by its *actual* mean and std.
+
+    Parameters
+    ----------
+    mean : float  Mean of the lognormal variable (> 0).
+    std  : float  Standard deviation of the lognormal variable (> 0).
+    """
+    as_positive(mean, "mean")
+    as_positive(std, "std")
+    return (std / mean) ** 2
+
+
+def cv2_weibull(shape: float) -> float:
+    """CV² for a Weibull(shape, scale) distribution.
+
+    cv² = Γ(1 + 2/k) / Γ(1 + 1/k)² − 1
+
+    Parameters
+    ----------
+    shape : float  Shape parameter k (> 0).
+    """
+    as_positive(shape, "shape")
+    return math.gamma(1.0 + 2.0 / shape) / math.gamma(1.0 + 1.0 / shape) ** 2 - 1.0

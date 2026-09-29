@@ -9,6 +9,14 @@ from .queuing import (
     mmc,
     md1,
     kingman,
+    mg1,
+    cv2_triangular,
+    cv2_uniform,
+    cv2_normal,
+    cv2_erlang,
+    cv2_gamma,
+    cv2_lognormal,
+    cv2_weibull,
 )
 
 # Operations
@@ -54,6 +62,7 @@ from .advanced import (
     SimulationResult,
     LineBalanceResult,
     BreakEvenResult,
+    BreakEvenMultiResult,
     PriorityQueueResult,
     erlang_b,
     mm1k,
@@ -63,6 +72,8 @@ from .advanced import (
     takt_time,
     line_balance,
     break_even,
+    break_even_multi,
+    break_even_sales,
     queue_length_pmf,
     sojourn_cdf,
 )
@@ -76,9 +87,21 @@ from .fitting import (
 # Inventory
 from .inventory import (
     EOQResult,
+    EBQResult,
+    MultiItemResult,
+    ConstrainedMultiEOQResult,
+    LotSizingResult,
+    QuantityDiscountResult,
     ReorderResult,
     NewsvendorResult,
     eoq,
+    ebq,
+    eoq_multi,
+    ebq_multi,
+    eoq_multi_constrained,
+    lot_for_lot,
+    silver_meal,
+    eoq_quantity_discount,
     reorder_point,
     newsvendor,
 )
@@ -90,7 +113,62 @@ from .network import (
     jackson_network,
 )
 
-__version__ = "0.2.0"
+# Inventory additions
+from .inventory import (
+    RQPolicyResult,
+    RSPolicyResult,
+    ExchangeCurveResult,
+    SafetyStockCurveResult,
+    ABCResult,
+    XYZResult,
+    ABCXYZResult,
+    MRPResult,
+    rq_policy,
+    rs_policy,
+    wagner_whitin,
+    exchange_curve,
+    safety_stock_curve,
+    abc_analysis,
+    xyz_analysis,
+    abc_xyz,
+    mrp,
+)
+
+# Scheduling
+from .scheduling import (
+    JobSchedule,
+    ScheduleResult,
+    FlowShopResult,
+    NEHResult,
+    schedule_single,
+    johnson_flowshop,
+    neh_flowshop,
+)
+
+# Reliability
+from .reliability import (
+    ReliabilityResult,
+    WeibullResult,
+    mtbf_analysis,
+    series_system,
+    parallel_system,
+    koon_system,
+    weibull_analysis,
+)
+
+# Project scheduling
+from .project import (
+    ActivityResult,
+    ProjectResult,
+    cpm,
+    pert,
+)
+
+from importlib.metadata import version, PackageNotFoundError
+try:
+    __version__: str = version("walopy")
+except PackageNotFoundError:
+    __version__ = "0.2.0"  # fallback when running from source without install
 
 __all__ = [
     # queuing
@@ -100,6 +178,14 @@ __all__ = [
     "mmc",
     "md1",
     "kingman",
+    "mg1",
+    "cv2_triangular",
+    "cv2_uniform",
+    "cv2_normal",
+    "cv2_erlang",
+    "cv2_gamma",
+    "cv2_lognormal",
+    "cv2_weibull",
     # operations
     "OEEResult",
     "UtilizationResult",
@@ -130,6 +216,7 @@ __all__ = [
     "SimulationResult",
     "LineBalanceResult",
     "BreakEvenResult",
+    "BreakEvenMultiResult",
     "PriorityQueueResult",
     "erlang_b",
     "mm1k",
@@ -139,6 +226,8 @@ __all__ = [
     "takt_time",
     "line_balance",
     "break_even",
+    "break_even_multi",
+    "break_even_sales",
     "queue_length_pmf",
     "sojourn_cdf",
     # fitting
@@ -146,13 +235,64 @@ __all__ = [
     "fit_from_data",
     # inventory
     "EOQResult",
+    "EBQResult",
+    "MultiItemResult",
+    "ConstrainedMultiEOQResult",
+    "LotSizingResult",
+    "QuantityDiscountResult",
     "ReorderResult",
     "NewsvendorResult",
     "eoq",
+    "ebq",
+    "eoq_multi",
+    "ebq_multi",
+    "eoq_multi_constrained",
+    "lot_for_lot",
+    "silver_meal",
+    "eoq_quantity_discount",
     "reorder_point",
     "newsvendor",
     # network
     "StationMetrics",
     "JacksonResult",
     "jackson_network",
+    # inventory additions
+    "RQPolicyResult",
+    "RSPolicyResult",
+    "ExchangeCurveResult",
+    "SafetyStockCurveResult",
+    "ABCResult",
+    "XYZResult",
+    "ABCXYZResult",
+    "MRPResult",
+    "rq_policy",
+    "rs_policy",
+    "wagner_whitin",
+    "exchange_curve",
+    "safety_stock_curve",
+    "abc_analysis",
+    "xyz_analysis",
+    "abc_xyz",
+    "mrp",
+    # scheduling
+    "JobSchedule",
+    "ScheduleResult",
+    "FlowShopResult",
+    "NEHResult",
+    "schedule_single",
+    "johnson_flowshop",
+    "neh_flowshop",
+    # reliability
+    "ReliabilityResult",
+    "WeibullResult",
+    "mtbf_analysis",
+    "series_system",
+    "parallel_system",
+    "koon_system",
+    "weibull_analysis",
+    # project
+    "ActivityResult",
+    "ProjectResult",
+    "cpm",
+    "pert",
 ]

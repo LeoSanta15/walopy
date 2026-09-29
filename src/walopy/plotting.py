@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .kpi import KPINode
     from .solver import OptimizeResult
     from .advanced import SimulationResult, LineBalanceResult, BreakEvenResult
+    from .inventory import EOQResult
 
 # Brand-neutral palette
 BLUE   = "#1f4e9c"
@@ -539,6 +540,47 @@ def plot_break_even(
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
     )
+    return fig
+
+
+# ---------------------------------------------------------------------------
+# EOQ — cost curves
+# ---------------------------------------------------------------------------
+
+def plot_eoq(
+    result: "EOQResult",
+    *,
+    title: str | None = None,
+    figsize: tuple | None = None,
+) -> "plt.Figure":
+    """Total, holding, and ordering cost curves around the EOQ."""
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    p   = result.params
+    D   = p["demand_rate"]
+    K   = p["ordering_cost"]
+    h   = p["holding_cost"]
+    Q_star = result.eoq
+
+    Q_range = np.linspace(Q_star * 0.1, Q_star * 3.0, 400)
+    holding  = h * Q_range / 2.0
+    ordering = K * D / Q_range
+    total    = holding + ordering
+
+    fig, ax = plt.subplots(figsize=figsize or (8, 5))
+    ax.plot(Q_range, holding,  color=BLUE,   lw=2, label="Holding cost (hQ/2)")
+    ax.plot(Q_range, ordering, color=ORANGE, lw=2, label="Ordering cost (KD/Q)")
+    ax.plot(Q_range, total,    color=RED,    lw=2.5, label="Total cost")
+    ax.axvline(Q_star, color=GREEN, ls="--", lw=1.5,
+               label=f"EOQ = {Q_star:.4g}")
+    ax.scatter([Q_star], [result.total_cost], color=GREEN, zorder=5, s=70)
+    ax.set_xlabel("Order quantity Q")
+    ax.set_ylabel("Cost per unit time")
+    ax.set_title(title or "EOQ — Cost Curves", fontweight="bold")
+    ax.legend(fontsize=9)
+    ax.grid(alpha=0.25)
+    fig.tight_layout()
     return fig
 
 
