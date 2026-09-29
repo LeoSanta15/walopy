@@ -617,6 +617,204 @@ print(r_bajo.optimal_qty < 100)   # True
 
 ---
 
+### `ebq(demand_rate, setup_cost, holding_cost, production_rate)` — Lote Económico de Producción (EBQ/EPQ)
+
+Extiende el EOQ al caso en que la producción y el consumo ocurren **simultáneamente** (tasa de producción finita P > D).
+
+**Fórmula:**
+```
+Q* = √(2 · D · S / (h · (1 − D/P)))
+Inventario máximo = Q* · (1 − D/P)
+Inventario medio  = Inventario máximo / 2
+```
+
+```python
+r = wl.ebq(
+    demand_rate=1000,       # D: unidades/período
+    setup_cost=50,          # S: costo fijo de setup por lote
+    holding_cost=2,         # h: costo/unidad/período
+    production_rate=4000,   # P: tasa de producción (debe ser > D)
+)
+print(r)
+# EBQ (batch size)    : 258.2 units
+# Max inventory       : 193.6
+# Avg inventory       : 96.82
+# Order frequency     : 3.873 runs/period
+# Cycle time          : 0.2582 periods
+# Production time/cyc : 0.06455 periods
+# Total cost          : 193.6
+#   Holding cost      : 96.82
+#   Setup cost        : 96.82
+```
+
+**`EBQResult` — atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| `ebq` | Lote óptimo Q* |
+| `max_inventory` | Nivel máximo de inventario Q*(1−D/P) |
+| `avg_inventory` | Inventario promedio = max/2 |
+| `production_time` | Tiempo de producción por ciclo = Q*/P |
+| `cycle_time` | Duración del ciclo = Q*/D |
+| `total_cost` | Costo total mínimo |
+
+---
+
+### `eoq_multi(demand_rates, ordering_costs, holding_costs, *, names)` — EOQ multi-ítem independiente
+
+Resuelve el EOQ para cada ítem por separado sin restricciones compartidas.
+
+```python
+r = wl.eoq_multi(
+    demand_rates   = [1000, 500, 800],
+    ordering_costs = [50,   30,  40 ],
+    holding_costs  = [2,    1,   1.5],
+    names          = ["A", "B", "C"],
+)
+print(r.total_cost)   # suma de costos óptimos individuales
+df = r.to_frame()     # DataFrame con EOQ, costos y frecuencias por ítem
+```
+
+---
+
+### `ebq_multi(demand_rates, setup_costs, holding_costs, production_rates, *, names)` — EBQ multi-ítem independiente
+
+```python
+r = wl.ebq_multi(
+    demand_rates    = [1000, 500],
+    setup_costs     = [50,   30 ],
+    holding_costs   = [2,    1  ],
+    production_rates= [4000, 2000],
+)
+df = r.to_frame()   # EBQ, inventario máximo/medio, costo por ítem
+```
+
+---
+
+### `eoq_multi_constrained(demand_rates, ordering_costs, holding_costs, ...)` — EOQ multi-ítem con restricciones
+
+Minimiza el costo total de inventario sujeto a **restricciones lineales** sobre las cantidades de pedido mediante **relajación Lagrangiana** (búsqueda binaria sobre el multiplicador).
+
+**Restricciones soportadas:**
+
+| Parámetro | Restricción |
+|---|---|
+| `budget`, `budget_unit_costs` | Σ(c_i · Q_i / 2) ≤ budget — valor promedio en inventario |
+| `space`, `space_per_unit` | Σ(s_i · Q_i / 2) ≤ space — espacio promedio ocupado |
+| `constraints` | Lista de `{"name", "weights", "bound"}` — Σ(a_i · Q_i) ≤ B |
+
+```python
+# Restricción de presupuesto
+r = wl.eoq_multi_constrained(
+    [1000, 500, 800], [50, 30, 40], [2, 1, 1.5],
+    budget=5000,
+    budget_unit_costs=[10, 8, 12],   # costo unitario de compra
+)
+print(r.binding_constraints)   # ["budget"] si la restricción está activa
+print(r.lagrange_multipliers)  # {"budget": λ}
+df = r.to_frame()              # Q*, holding cost, ordering cost por ítem
+
+# Restricción de espacio
+r2 = wl.eoq_multi_constrained(
+    [1000, 500, 800], [50, 30, 40], [2, 1, 1.5],
+    space=200,
+    space_per_unit=[0.5, 0.3, 0.4],
+)
+
+# Restricción genérica: suma total de unidades pedidas ≤ 400
+r3 = wl.eoq_multi_constrained(
+    [1000, 500, 800], [50, 30, 40], [2, 1, 1.5],
+    constraints=[{"name": "total_qty", "weights": [1, 1, 1], "bound": 400}],
+)
+```
+
+**`ConstrainedMultiEOQResult` — atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| `items` | Lista de dicts por ítem: nombre, Q*, costos |
+| `total_cost` | Costo total bajo las restricciones |
+| `unconstrained_total_cost` | Costo sin restricciones (cota inferior) |
+| `lagrange_multipliers` | Diccionario {nombre_restricción: λ} |
+| `binding_constraints` | Nombres de restricciones activas (λ > 0) |
+
+---
+
+### `lot_for_lot(demands, setup_cost, holding_cost)` — Lote por Lote
+
+Heurística de dimensionado dinámico: ordena **exactamente la demanda de cada período**. Minimiza el costo de almacenamiento (cero inventario en tránsito) a cambio de un setup por período.
+
+```python
+demands = [100, 80, 0, 120, 60]   # demandas por período
+r = wl.lot_for_lot(demands, setup_cost=200, holding_cost=1)
+print(r.total_holding_cost)   # 0.0 — sin inventario residual
+print(r.n_orders)             # 4 — un pedido por período con demanda > 0
+print(r)
+# Method              : Lot-for-Lot
+# Number of orders    : 4
+# Total cost          : 800.0
+```
+
+---
+
+### `silver_meal(demands, setup_cost, holding_cost)` — Silver-Meal
+
+Heurística de dimensionado dinámico que **agrupa períodos** mientras el costo promedio por período decrece, reduciendo el número de setups.
+
+```python
+r = wl.silver_meal(demands, setup_cost=200, holding_cost=1)
+print(r.total_cost <= wl.lot_for_lot(demands, 200, 1).total_cost)  # True
+df = r.to_frame()   # pedidos: período, cantidad, períodos cubiertos
+```
+
+**`LotSizingResult` — atributos (Lot-for-Lot y Silver-Meal):**
+
+| Atributo | Descripción |
+|---|---|
+| `orders` | Lista de pedidos: período, cantidad, períodos cubiertos |
+| `total_cost` | Costo total (setup + almacenamiento) |
+| `total_setup_cost` | Costo total de setups |
+| `total_holding_cost` | Costo total de almacenamiento |
+| `n_orders` | Número de pedidos emitidos |
+| `method` | Nombre de la heurística usada |
+
+---
+
+### `eoq_quantity_discount(demand_rate, ordering_cost, holding_cost_rate, price_breaks)` — EOQ con descuentos por cantidad
+
+Evalúa todos los tramos de precio (all-units) y selecciona la cantidad que **minimiza el costo total anual** (compra + pedido + almacenamiento), ajustando el EOQ al tramo válido cuando cae fuera de rango.
+
+```python
+r = wl.eoq_quantity_discount(
+    demand_rate=1000,
+    ordering_cost=50,
+    holding_cost_rate=0.20,   # 20% del precio unitario por año
+    price_breaks=[
+        (0,    10.00),   # precio base
+        (500,   9.50),   # ≥ 500 unidades → $9.50
+        (1000,  9.00),   # ≥ 1000 unidades → $9.00
+    ],
+)
+print(r.optimal_qty)    # cantidad óptima seleccionada
+print(r.unit_price)     # precio en ese tramo
+print(r.total_cost)     # costo anual mínimo
+df = r.to_frame()       # todos los candidatos evaluados
+```
+
+**`QuantityDiscountResult` — atributos:**
+
+| Atributo | Descripción |
+|---|---|
+| `optimal_qty` | Cantidad óptima ajustada al tramo |
+| `unit_price` | Precio unitario en el tramo seleccionado |
+| `total_cost` | Costo total anual (compra + pedido + almacenamiento) |
+| `purchase_cost` | Costo de compra anual D · precio |
+| `ordering_cost_total` | Costo de pedido anual (D/Q) · K |
+| `holding_cost_total` | Costo de almacenamiento anual (Q/2) · h · precio |
+| `candidates` | Lista de todos los tramos evaluados |
+
+---
+
 ## 8. Análisis de operaciones
 
 ### `oee(availability, performance, quality)` — OEE
@@ -723,6 +921,56 @@ print(be.margin_of_safety_pct)   # 33.3% — margen de seguridad sobre ventas ac
 print(be.profit)                 # 5000.0 — beneficio con actual_units
 
 be.plot()   # líneas de ingresos/costos con BEP y zona de beneficio
+```
+
+### `break_even_multi(fixed_cost, prices, variable_costs, sales_mix)` — Multi-producto
+
+Calcula el punto de equilibrio para una mezcla de varios productos usando la **contribución marginal ponderada (WACM)**.
+
+**Fórmula:** WACM = Σ(CMᵢ × mixᵢ) / Σmixᵢ, luego BEP_total = FC / WACM
+
+```python
+r = wl.break_even_multi(
+    fixed_cost=120_000,
+    prices=[50, 80, 120],
+    variable_costs=[30, 50, 70],
+    sales_mix=[3, 2, 1],          # proporción de ventas
+)
+print(r.weighted_avg_cm)          # WACM ≈ 36.67
+print(r.bep_units_total)          # unidades totales en el punto de equilibrio
+print(r.bep_revenue_total)        # ingresos totales en el punto de equilibrio
+
+for item in r.items:
+    print(item["Name"], item["BEP units"])
+
+r.to_frame()    # DataFrame con una fila por producto
+```
+
+| Atributo | Descripción |
+|---|---|
+| `weighted_avg_cm` | Contribución marginal ponderada |
+| `bep_units_total` | Unidades totales en el BEP |
+| `bep_revenue_total` | Ingresos totales en el BEP |
+| `items` | Lista de dicts por producto con `BEP units`, `BEP revenue` |
+
+---
+
+### `break_even_sales(fixed_cost, variable_cost_ratio, *, actual_revenue)` — Punto de equilibrio en ingresos
+
+Calcula el BEP en términos de ingresos cuando los costos variables se expresan como porcentaje de las ventas.
+
+**Fórmula:** BEP = FC / (1 − RCV)
+
+```python
+r = wl.break_even_sales(
+    fixed_cost=50_000,
+    variable_cost_ratio=0.60,     # 60% de los ingresos son costos variables
+    actual_revenue=200_000,
+)
+print(r.bep_revenue)              # 125 000 — ingresos en el BEP
+print(r.contribution_margin_ratio) # 0.40 — margen de contribución
+print(r.margin_of_safety_units)   # 75 000 — margen de seguridad en ingresos
+print(r.margin_of_safety_pct)     # 0.375 — porcentaje del margen de seguridad
 ```
 
 ---
@@ -1001,9 +1249,9 @@ Wq    : 0.3   (avg wait time in queue)
 | Módulo | Funciones y clases principales |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `littles_law`, `QueueResult` |
-| `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult` |
+| `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
-| `inventory` | `eoq`, `reorder_point`, `newsvendor`, `EOQResult`, `ReorderResult`, `NewsvendorResult` |
+| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult` |
 | `network` | `jackson_network`, `JacksonResult`, `StationMetrics` |
 | `operations` | `oee`, `utilization_efficiency`, `unit_cost`, `OEEResult`, `UtilizationResult`, `UnitCostResult` |
 | `bottleneck` | `bottleneck_analysis`, `BottleneckResult`, `StationResult` |
