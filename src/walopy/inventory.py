@@ -1660,8 +1660,14 @@ class ExchangeCurveResult:
     curve_points: list
 
     def to_frame(self) -> "pd.DataFrame":
+        """Per-item quantities DataFrame: name, Q_eoq, Q_optimal, n_orders, investment."""
         import pandas as pd
         return pd.DataFrame(self.optimal_quantities)
+
+    def curve_to_frame(self) -> "pd.DataFrame":
+        """Exchange-curve hyperbola DataFrame: columns N (orders/yr) and I (investment)."""
+        import pandas as pd
+        return pd.DataFrame(self.curve_points)
 
     def summary(self) -> str:
         lines = [
