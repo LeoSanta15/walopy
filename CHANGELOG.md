@@ -18,6 +18,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ---
 
+
 ## [0.2.3] — 2026-09-29
 
 ### Cambiado
