@@ -1731,12 +1731,14 @@ def exchange_curve(
         raise ValueError(
             "Specify at most one of 'target_orders' or 'target_investment'."
         )
+    if len(items) == 0:
+        raise ValueError("'items' must contain at least one item.")
 
     parsed = []
     for idx, it in enumerate(items):
-        D  = as_positive(it["demand"],        f"items[{idx}]['demand']")
-        K  = as_positive(it["ordering_cost"], f"items[{idx}]['ordering_cost']")
-        h  = as_positive(it["holding_cost"],  f"items[{idx}]['holding_cost']")
+        D  = as_positive(float(it["demand"]),        f"items[{idx}]['demand']")
+        K  = as_positive(float(it["ordering_cost"]), f"items[{idx}]['ordering_cost']")
+        h  = as_positive(float(it["holding_cost"]),  f"items[{idx}]['holding_cost']")
         v  = float(it.get("unit_value", 1.0))
         nm = str(it.get("name", f"I{idx + 1}"))
         if v <= 0:
