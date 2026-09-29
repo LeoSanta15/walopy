@@ -2002,3 +2002,522 @@ def safety_stock_curve(
         optimal_quantities=opt_qtys,
         curve_points=curve_pts,
     )
+
+
+# ---------------------------------------------------------------------------
+# ABC / XYZ / ABC-XYZ classification
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ABCResult:
+    """ABC Pareto classification result.
+
+    Attributes
+    ----------
+    items : list[dict]
+        Items sorted descending by annual value; each dict has keys
+        ``name``, ``demand``, ``unit_value``, ``annual_value``,
+        ``cumulative_pct``, ``pct_value``, ``rank``, ``class``.
+    class_summary : dict
+        ``{A: {count, pct_items, pct_value}, B: …, C: …}``.
+    total_value : float
+        Total annual inventory value.
+    thresholds : dict
+        ``{a: float, b: float}`` used for classification.
+    """
+
+    items: list
+    class_summary: dict
+    total_value: float
+    thresholds: dict
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame(self.items)
+
+    def summary(self) -> str:
+        lines = [
+            f"Total annual value : {self.total_value:.6g}",
+            f"{'Class':<6} {'Items':>6}  {'%Items':>7}  {'%Value':>7}",
+            "-" * 32,
+        ]
+        for cls in ["A", "B", "C"]:
+            s = self.class_summary[cls]
+            lines.append(
+                f"  {cls}    {s['count']:>4}    {s['pct_items']:>6.1%}   {s['pct_value']:>6.1%}"
+            )
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+@dataclass
+class XYZResult:
+    """XYZ demand-variability classification result.
+
+    Attributes
+    ----------
+    items : list[dict]
+        Each dict has keys ``name``, ``cv``, ``class``.
+    class_summary : dict
+        ``{X: {count, pct_items}, Y: …, Z: …}``.
+    thresholds : dict
+        ``{x: float, y: float}`` CV boundaries.
+    """
+
+    items: list
+    class_summary: dict
+    thresholds: dict
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame(self.items)
+
+    def summary(self) -> str:
+        t = self.thresholds
+        ranges = {
+            "X": f"CV ≤ {t['x']:.2g}",
+            "Y": f"{t['x']:.2g} < CV ≤ {t['y']:.2g}",
+            "Z": f"CV > {t['y']:.2g}",
+        }
+        n_total = sum(s["count"] for s in self.class_summary.values())
+        lines = [
+            f"{'Class':<6} {'Items':>6}  {'%Items':>7}  {'CV range'}",
+            "-" * 42,
+        ]
+        for cls in ["X", "Y", "Z"]:
+            s = self.class_summary[cls]
+            lines.append(
+                f"  {cls}    {s['count']:>4}    {s['pct_items']:>6.1%}   {ranges[cls]}"
+            )
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+@dataclass
+class ABCXYZResult:
+    """Combined ABC-XYZ classification result.
+
+    Attributes
+    ----------
+    items : list[dict]
+        Each dict has keys ``name``, ``annual_value``, ``cv``,
+        ``abc_class``, ``xyz_class``, ``combined_class``.
+    matrix : dict
+        ``{(abc, xyz): count}`` for all 9 cells.
+    """
+
+    items: list
+    matrix: dict
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame(self.items)
+
+    def matrix_frame(self) -> "pd.DataFrame":
+        """Pivot table ABC (rows) × XYZ (columns) with item counts."""
+        import pandas as pd
+        data = {
+            xyz: {abc: self.matrix.get((abc, xyz), 0) for abc in ["A", "B", "C"]}
+            for xyz in ["X", "Y", "Z"]
+        }
+        return pd.DataFrame(data, index=["A", "B", "C"])
+
+    def summary(self) -> str:
+        lines = ["ABC\\XYZ   X     Y     Z   Total"]
+        for abc in ["A", "B", "C"]:
+            row_total = sum(self.matrix.get((abc, xyz), 0) for xyz in ["X", "Y", "Z"])
+            lines.append(
+                f"   {abc}    "
+                + "".join(f"  {self.matrix.get((abc, xyz), 0):3d}" for xyz in ["X", "Y", "Z"])
+                + f"   {row_total:4d}"
+            )
+        col_totals = [sum(self.matrix.get((abc, xyz), 0) for abc in ["A", "B", "C"]) for xyz in ["X", "Y", "Z"]]
+        grand = sum(col_totals)
+        lines.append("Total  " + "".join(f"  {c:3d}" for c in col_totals) + f"   {grand:4d}")
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def abc_analysis(
+    items: list,
+    *,
+    a_threshold: float = 0.80,
+    b_threshold: float = 0.95,
+) -> ABCResult:
+    """ABC Pareto classification of inventory items by annual value.
+
+    Items are sorted descending by annual value (demand × unit_value).
+    Classification follows cumulative percentage of total value:
+
+    - **A**: items whose cumulative value has not yet exceeded
+      *a_threshold* (typically top ~80% of value, ~20% of items).
+    - **B**: next band up to *b_threshold* (~15% of value).
+    - **C**: remainder (~5% of value, ~50% of items).
+
+    Parameters
+    ----------
+    items : list of dict
+        Each dict must have ``'demand'`` (annual demand) and
+        ``'unit_value'``.  Optional ``'name'`` key.
+    a_threshold : float
+        Cumulative value fraction that ends class A (default 0.80).
+    b_threshold : float
+        Cumulative value fraction that ends class B (default 0.95).
+
+    Returns
+    -------
+    ABCResult
+    """
+    if len(items) == 0:
+        raise ValueError("'items' must contain at least one item.")
+    if not (0.0 < a_threshold < b_threshold < 1.0):
+        raise ValueError("Must have 0 < a_threshold < b_threshold < 1.")
+
+    enriched = []
+    for i, it in enumerate(items):
+        nm  = it.get("name", f"Item{i + 1}")
+        D   = as_positive(float(it["demand"]),     f"items[{i}]['demand']")
+        v   = as_positive(float(it["unit_value"]), f"items[{i}]['unit_value']")
+        enriched.append({"name": str(nm), "demand": D, "unit_value": v,
+                         "annual_value": D * v})
+
+    enriched.sort(key=lambda x: -x["annual_value"])
+    n           = len(enriched)
+    total_value = sum(e["annual_value"] for e in enriched)
+
+    cum = 0.0
+    class_agg: dict = {"A": {"count": 0, "value": 0.0},
+                        "B": {"count": 0, "value": 0.0},
+                        "C": {"count": 0, "value": 0.0}}
+    for i, e in enumerate(enriched):
+        prev_pct = cum / total_value
+        cum += e["annual_value"]
+        e["cumulative_pct"] = cum / total_value
+        e["pct_value"]      = e["annual_value"] / total_value
+        e["rank"]           = i + 1
+        if prev_pct < a_threshold:
+            cls = "A"
+        elif prev_pct < b_threshold:
+            cls = "B"
+        else:
+            cls = "C"
+        e["class"] = cls
+        class_agg[cls]["count"] += 1
+        class_agg[cls]["value"] += e["annual_value"]
+
+    class_summary = {
+        cls: {
+            "count":     class_agg[cls]["count"],
+            "pct_items": class_agg[cls]["count"] / n,
+            "pct_value": class_agg[cls]["value"] / total_value,
+        }
+        for cls in ["A", "B", "C"]
+    }
+
+    return ABCResult(
+        items=enriched,
+        class_summary=class_summary,
+        total_value=total_value,
+        thresholds={"a": a_threshold, "b": b_threshold},
+    )
+
+
+def xyz_analysis(
+    items: list,
+    *,
+    x_threshold: float = 0.5,
+    y_threshold: float = 1.0,
+) -> XYZResult:
+    """XYZ classification of inventory items by demand variability (CV).
+
+    - **X**: CV ≤ *x_threshold* — stable, predictable demand.
+    - **Y**: *x_threshold* < CV ≤ *y_threshold* — moderate variability.
+    - **Z**: CV > *y_threshold* — erratic, hard to forecast.
+
+    Parameters
+    ----------
+    items : list of dict
+        Each dict must supply the coefficient of variation in one of two ways:
+
+        - ``'cv'`` directly, **or**
+        - ``'demand_std'`` **+** (``'demand_mean'`` or ``'demand_rate'``).
+
+        Optional ``'name'`` key.
+    x_threshold : float
+        Upper CV boundary for class X (default 0.5).
+    y_threshold : float
+        Upper CV boundary for class Y (default 1.0).
+
+    Returns
+    -------
+    XYZResult
+    """
+    if len(items) == 0:
+        raise ValueError("'items' must contain at least one item.")
+    if not (0.0 <= x_threshold < y_threshold):
+        raise ValueError("Must have 0 ≤ x_threshold < y_threshold.")
+
+    enriched = []
+    for i, it in enumerate(items):
+        nm = it.get("name", f"Item{i + 1}")
+        if "cv" in it:
+            cv = float(it["cv"])
+        else:
+            std  = float(it["demand_std"])
+            mean = float(it.get("demand_mean", it.get("demand_rate", 0.0)))
+            if mean <= 0:
+                raise ValueError(
+                    f"items[{i}]: 'demand_mean' (or 'demand_rate') must be > 0 when 'cv' is not provided."
+                )
+            cv = std / mean
+        if cv < 0:
+            raise ValueError(f"items[{i}]: CV must be ≥ 0, got {cv}.")
+        if cv <= x_threshold:
+            cls = "X"
+        elif cv <= y_threshold:
+            cls = "Y"
+        else:
+            cls = "Z"
+        enriched.append({"name": str(nm), "cv": cv, "class": cls})
+
+    n = len(enriched)
+    class_agg: dict = {"X": 0, "Y": 0, "Z": 0}
+    for e in enriched:
+        class_agg[e["class"]] += 1
+
+    class_summary = {
+        cls: {"count": class_agg[cls], "pct_items": class_agg[cls] / n}
+        for cls in ["X", "Y", "Z"]
+    }
+
+    return XYZResult(
+        items=enriched,
+        class_summary=class_summary,
+        thresholds={"x": x_threshold, "y": y_threshold},
+    )
+
+
+def abc_xyz(
+    items: list,
+    *,
+    a_threshold: float = 0.80,
+    b_threshold: float = 0.95,
+    x_threshold: float = 0.5,
+    y_threshold: float = 1.0,
+) -> ABCXYZResult:
+    """Combined ABC-XYZ classification.
+
+    Each item requires fields for both ABC (``demand``, ``unit_value``) and
+    XYZ (``cv`` or ``demand_std`` + ``demand_mean``/``demand_rate``).
+
+    Parameters
+    ----------
+    items : list of dict
+        Must supply fields required by both :func:`abc_analysis` and
+        :func:`xyz_analysis`.  ``name`` is optional.
+    a_threshold, b_threshold : float
+        ABC thresholds (see :func:`abc_analysis`).
+    x_threshold, y_threshold : float
+        XYZ thresholds (see :func:`xyz_analysis`).
+
+    Returns
+    -------
+    ABCXYZResult
+    """
+    abc_r = abc_analysis(items, a_threshold=a_threshold, b_threshold=b_threshold)
+    xyz_r = xyz_analysis(items, x_threshold=x_threshold, y_threshold=y_threshold)
+
+    abc_map = {e["name"]: e for e in abc_r.items}
+    xyz_map = {e["name"]: e for e in xyz_r.items}
+
+    combined = []
+    matrix: dict = {}
+    for e_abc in abc_r.items:
+        nm      = e_abc["name"]
+        e_xyz   = xyz_map[nm]
+        abc_cls = e_abc["class"]
+        xyz_cls = e_xyz["class"]
+        key     = (abc_cls, xyz_cls)
+        matrix[key] = matrix.get(key, 0) + 1
+        combined.append({
+            "name":          nm,
+            "annual_value":  e_abc["annual_value"],
+            "cv":            e_xyz["cv"],
+            "abc_class":     abc_cls,
+            "xyz_class":     xyz_cls,
+            "combined_class": f"{abc_cls}{xyz_cls}",
+        })
+
+    return ABCXYZResult(items=combined, matrix=matrix)
+
+
+# ---------------------------------------------------------------------------
+# MRP — single-level Material Requirements Planning
+# ---------------------------------------------------------------------------
+
+@dataclass
+class MRPResult:
+    """Single-level MRP result.
+
+    Attributes
+    ----------
+    item_name : str
+    periods : list
+        Period labels (1, 2, … or user-supplied).
+    gross_requirements : list[float]
+    scheduled_receipts : list[float]
+    projected_on_hand : list[float]
+        Ending on-hand inventory after all transactions each period.
+    net_requirements : list[float]
+    planned_receipts : list[float]
+        Planned order receipts arriving this period.
+    planned_releases : list[float]
+        Planned order releases (issued *lead_time* periods before receipt).
+    """
+
+    item_name: str
+    periods: list
+    gross_requirements: list
+    scheduled_receipts: list
+    projected_on_hand: list
+    net_requirements: list
+    planned_receipts: list
+    planned_releases: list
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame({
+            "Period":          self.periods,
+            "Gross_Req":       self.gross_requirements,
+            "Sched_Receipt":   self.scheduled_receipts,
+            "Proj_On_Hand":    self.projected_on_hand,
+            "Net_Req":         self.net_requirements,
+            "Planned_Receipt": self.planned_receipts,
+            "Planned_Release": self.planned_releases,
+        })
+
+    def summary(self) -> str:
+        hdr = f"{'Period':>8} {'GR':>8} {'SR':>8} {'OH':>8} {'NR':>8} {'PR':>8} {'PO':>8}"
+        lines = [f"Item: {self.item_name}", hdr, "-" * len(hdr)]
+        for i, p in enumerate(self.periods):
+            lines.append(
+                f"{str(p):>8} {self.gross_requirements[i]:>8.2f}"
+                f" {self.scheduled_receipts[i]:>8.2f}"
+                f" {self.projected_on_hand[i]:>8.2f}"
+                f" {self.net_requirements[i]:>8.2f}"
+                f" {self.planned_receipts[i]:>8.2f}"
+                f" {self.planned_releases[i]:>8.2f}"
+            )
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def mrp(
+    gross_requirements: Sequence[float],
+    *,
+    initial_on_hand: float = 0.0,
+    scheduled_receipts: Sequence[float] | None = None,
+    lead_time: int = 1,
+    lot_size: float | str = "LFL",
+    safety_stock: float = 0.0,
+    item_name: str = "Item",
+    periods: Sequence | None = None,
+) -> MRPResult:
+    """Single-level Material Requirements Planning (MRP).
+
+    Computes the standard MRP table: gross requirements → net requirements →
+    planned receipts → planned order releases.
+
+    Parameters
+    ----------
+    gross_requirements : sequence of float
+        Demand for each period (length T).
+    initial_on_hand : float
+        On-hand inventory at the start of period 1 (default 0).
+    scheduled_receipts : sequence of float, optional
+        Already-ordered receipts arriving each period (length T, default all 0).
+    lead_time : int
+        Replenishment lead time in periods (default 1).
+    lot_size : float or ``'LFL'``
+        Order policy: ``'LFL'`` (lot-for-lot) places the exact net requirement;
+        a positive float rounds up to the nearest multiple of that quantity.
+    safety_stock : float
+        Minimum desired ending on-hand each period (default 0).
+    item_name : str
+        Label for the item (default ``'Item'``).
+    periods : sequence, optional
+        Period labels (default 1, 2, …, T).
+
+    Returns
+    -------
+    MRPResult
+    """
+    GR  = [as_nonneg(float(g), f"gross_requirements[{i}]")
+           for i, g in enumerate(gross_requirements)]
+    T   = len(GR)
+    if T == 0:
+        raise ValueError("'gross_requirements' must not be empty.")
+
+    SR  = [0.0] * T
+    if scheduled_receipts is not None:
+        sr_list = list(scheduled_receipts)
+        if len(sr_list) != T:
+            raise ValueError("'scheduled_receipts' must have the same length as 'gross_requirements'.")
+        SR = [as_nonneg(float(s), f"scheduled_receipts[{i}]") for i, s in enumerate(sr_list)]
+
+    if not isinstance(lead_time, int) or lead_time < 0:
+        raise ValueError("'lead_time' must be a non-negative integer.")
+
+    SS = as_nonneg(float(safety_stock), "safety_stock")
+    if isinstance(lot_size, str):
+        if lot_size.upper() != "LFL":
+            raise ValueError("'lot_size' must be 'LFL' or a positive float.")
+        lot_q: float | None = None
+    else:
+        lot_q = as_positive(float(lot_size), "lot_size")
+
+    pds = list(periods) if periods is not None else list(range(1, T + 1))
+
+    OH  = initial_on_hand
+    NR_out: list  = [0.0] * T
+    PR_out: list  = [0.0] * T
+    OH_out: list  = [0.0] * T
+
+    for t in range(T):
+        available = OH + SR[t] - GR[t]
+        nr = max(0.0, SS - available)
+        if nr > 0.0:
+            pr = nr if lot_q is None else math.ceil(nr / lot_q) * lot_q
+        else:
+            pr = 0.0
+        OH = available + pr
+        NR_out[t] = nr
+        PR_out[t] = pr
+        OH_out[t] = OH
+
+    # Planned releases: release at period (t - lead_time) for receipt at t
+    POR: list = [0.0] * T
+    for t in range(T):
+        if PR_out[t] > 0.0:
+            rel = t - lead_time
+            if 0 <= rel < T:
+                POR[rel] += PR_out[t]
+
+    return MRPResult(
+        item_name=item_name,
+        periods=pds,
+        gross_requirements=GR,
+        scheduled_receipts=SR,
+        projected_on_hand=OH_out,
+        net_requirements=NR_out,
+        planned_receipts=PR_out,
+        planned_releases=POR,
+    )

@@ -313,3 +313,157 @@ def johnson_flowshop(
         machine1_schedule=m1_sched,
         machine2_schedule=m2_sched,
     )
+
+
+# ---------------------------------------------------------------------------
+# NEH heuristic — m-machine permutation flow-shop
+# ---------------------------------------------------------------------------
+
+def _flowshop_cmax(seq: list, T: list) -> tuple:
+    """Return (makespan, completion-time matrix) for a permutation flow-shop.
+
+    T[job][machine] = processing time; seq = list of job indices.
+    """
+    n = len(seq)
+    if n == 0:
+        return 0.0, []
+    m = len(T[seq[0]])
+    C: list = [[0.0] * m for _ in range(n)]
+    for i, job in enumerate(seq):
+        for j in range(m):
+            C[i][j] = T[job][j] + max(
+                C[i - 1][j] if i > 0 else 0.0,
+                C[i][j - 1] if j > 0 else 0.0,
+            )
+    return C[-1][-1], C
+
+
+@dataclass
+class NEHResult:
+    """NEH heuristic result for the m-machine permutation flow-shop.
+
+    Attributes
+    ----------
+    sequence : list[str]
+        Job processing order found by NEH.
+    makespan : float
+        Best makespan (Cmax) achieved.
+    n_machines : int
+        Number of machines.
+    machine_schedules : list[list[dict]]
+        ``machine_schedules[m_idx][j]`` — dict ``{name, start, end}`` for the
+        *j*-th job (in sequence order) on machine *m_idx*.
+    """
+
+    sequence: list
+    makespan: float
+    n_machines: int
+    machine_schedules: list
+
+    def to_frame(self) -> "pd.DataFrame":
+        """Return a Gantt DataFrame with start/end per machine for each job."""
+        import pandas as pd
+        rows = []
+        for idx, job in enumerate(self.sequence):
+            row: dict = {"Job": job}
+            for mi, m_sched in enumerate(self.machine_schedules):
+                row[f"M{mi + 1}_start"] = m_sched[idx]["start"]
+                row[f"M{mi + 1}_end"]   = m_sched[idx]["end"]
+            rows.append(row)
+        return pd.DataFrame(rows)
+
+    def summary(self) -> str:
+        return (
+            f"Algorithm : NEH heuristic\n"
+            f"Machines  : {self.n_machines}\n"
+            f"Sequence  : {' → '.join(str(s) for s in self.sequence)}\n"
+            f"Makespan  : {self.makespan:.4g}"
+        )
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def neh_flowshop(
+    times_matrix: Sequence[Sequence[float]],
+    *,
+    names: Sequence[str] | None = None,
+) -> NEHResult:
+    """NEH heuristic for the *m*-machine permutation flow-shop.
+
+    Nawaz, Enscore and Ham (1983) constructs a high-quality permutation by
+    iteratively inserting each job at the best position.  Runs in O(n²m) and
+    is the standard heuristic for permutation flow-shop scheduling.
+
+    For *m = 2* it always finds an optimal or near-optimal solution comparable
+    to Johnson's algorithm.
+
+    Parameters
+    ----------
+    times_matrix : sequence of sequences of float
+        ``times_matrix[i][j]`` — processing time of job *i* on machine *j*.
+        All values must be > 0; every row must have the same number of columns.
+    names : sequence of str, optional
+        Job labels.  Defaults to ``'J1', 'J2', …``.
+
+    Returns
+    -------
+    NEHResult
+    """
+    n = len(times_matrix)
+    if n == 0:
+        raise ValueError("'times_matrix' must contain at least one job.")
+    m_cnt = len(times_matrix[0])
+    if m_cnt == 0:
+        raise ValueError("Each job must have processing times for at least one machine.")
+    for i, row in enumerate(times_matrix):
+        if len(row) != m_cnt:
+            raise ValueError(
+                f"All rows must have the same length; row {i} has {len(row)} ≠ {m_cnt}."
+            )
+        for j, p in enumerate(row):
+            as_positive(float(p), f"times_matrix[{i}][{j}]")
+
+    if names is None:
+        names_list = [f"J{i + 1}" for i in range(n)]
+    else:
+        names_list = [str(s) for s in names]
+    if len(names_list) != n:
+        raise ValueError("'names' must have the same length as 'times_matrix'.")
+
+    T_mat = [[float(times_matrix[i][j]) for j in range(m_cnt)] for i in range(n)]
+
+    # Step 1: sort job indices descending by total processing time
+    order = sorted(range(n), key=lambda i: -sum(T_mat[i]))
+
+    # Step 2: iterative best-insertion
+    seq = [order[0]]
+    for k in range(1, n):
+        job = order[k]
+        best_cmax = math.inf
+        best_pos  = 0
+        for pos in range(len(seq) + 1):
+            candidate = seq[:pos] + [job] + seq[pos:]
+            cmax, _   = _flowshop_cmax(candidate, T_mat)
+            if cmax < best_cmax:
+                best_cmax = cmax
+                best_pos  = pos
+        seq = seq[:best_pos] + [job] + seq[best_pos:]
+
+    makespan, C_mat = _flowshop_cmax(seq, T_mat)
+
+    machine_schedules = []
+    for j in range(m_cnt):
+        m_sched = []
+        for i, job in enumerate(seq):
+            end   = C_mat[i][j]
+            start = end - T_mat[job][j]
+            m_sched.append({"name": names_list[job], "start": start, "end": end})
+        machine_schedules.append(m_sched)
+
+    return NEHResult(
+        sequence=[names_list[j] for j in seq],
+        makespan=makespan,
+        n_machines=m_cnt,
+        machine_schedules=machine_schedules,
+    )

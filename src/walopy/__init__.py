@@ -119,11 +119,19 @@ from .inventory import (
     RSPolicyResult,
     ExchangeCurveResult,
     SafetyStockCurveResult,
+    ABCResult,
+    XYZResult,
+    ABCXYZResult,
+    MRPResult,
     rq_policy,
     rs_policy,
     wagner_whitin,
     exchange_curve,
     safety_stock_curve,
+    abc_analysis,
+    xyz_analysis,
+    abc_xyz,
+    mrp,
 )
 
 # Scheduling
@@ -131,17 +139,29 @@ from .scheduling import (
     JobSchedule,
     ScheduleResult,
     FlowShopResult,
+    NEHResult,
     schedule_single,
     johnson_flowshop,
+    neh_flowshop,
 )
 
 # Reliability
 from .reliability import (
     ReliabilityResult,
+    WeibullResult,
     mtbf_analysis,
     series_system,
     parallel_system,
     koon_system,
+    weibull_analysis,
+)
+
+# Project scheduling
+from .project import (
+    ActivityResult,
+    ProjectResult,
+    cpm,
+    pert,
 )
 
 from importlib.metadata import version, PackageNotFoundError
@@ -241,21 +261,38 @@ __all__ = [
     "RSPolicyResult",
     "ExchangeCurveResult",
     "SafetyStockCurveResult",
+    "ABCResult",
+    "XYZResult",
+    "ABCXYZResult",
+    "MRPResult",
     "rq_policy",
     "rs_policy",
     "wagner_whitin",
     "exchange_curve",
     "safety_stock_curve",
+    "abc_analysis",
+    "xyz_analysis",
+    "abc_xyz",
+    "mrp",
     # scheduling
     "JobSchedule",
     "ScheduleResult",
     "FlowShopResult",
+    "NEHResult",
     "schedule_single",
     "johnson_flowshop",
+    "neh_flowshop",
     # reliability
     "ReliabilityResult",
+    "WeibullResult",
     "mtbf_analysis",
     "series_system",
     "parallel_system",
     "koon_system",
+    "weibull_analysis",
+    # project
+    "ActivityResult",
+    "ProjectResult",
+    "cpm",
+    "pert",
 ]
