@@ -9,6 +9,14 @@ from .queuing import (
     mmc,
     md1,
     kingman,
+    mg1,
+    cv2_triangular,
+    cv2_uniform,
+    cv2_normal,
+    cv2_erlang,
+    cv2_gamma,
+    cv2_lognormal,
+    cv2_weibull,
 )
 
 # Operations
@@ -119,6 +127,14 @@ __all__ = [
     "mmc",
     "md1",
     "kingman",
+    "mg1",
+    "cv2_triangular",
+    "cv2_uniform",
+    "cv2_normal",
+    "cv2_erlang",
+    "cv2_gamma",
+    "cv2_lognormal",
+    "cv2_weibull",
     # operations
     "OEEResult",
     "UtilizationResult",

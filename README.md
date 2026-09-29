@@ -163,6 +163,49 @@ r   = wl.kingman(**fit.to_model_kwargs())
 
 ---
 
+### `mg1(lam, mu, cs2)` — M/G/1 (Pollaczek-Khinchine exacto)
+
+Llegadas Poisson, servicio de **distribución arbitraria** parametrizado por su media (1/μ) y su variabilidad (cs²). La fórmula P-K es **exacta**, no una aproximación.
+
+**Fórmula P-K:**  
+Wq = λ · E[S²] / (2 · (1 − ρ)),   donde E[S²] = (1 + cs²) / μ²
+
+```python
+# Servicio con distribución triangular: calcular cs² primero
+cs2 = wl.cv2_triangular(a=2, m=5, b=10)   # a=mín, m=moda, b=máx
+r   = wl.mg1(lam=0.15, mu=1/5, cs2=cs2)
+
+# Equivalencia con M/M/1 (cs²=1) y M/D/1 (cs²=0)
+r_mm1 = wl.mg1(lam=3.0, mu=5.0, cs2=1.0)  # idéntico a mm1(3, 5)
+r_md1 = wl.mg1(lam=3.0, mu=5.0, cs2=0.0)  # idéntico a md1(3, 5)
+```
+
+#### Helpers `cv2_*` — CV² por distribución
+
+El CV² (varianza / media²) es el único parámetro de distribución que M/G/1 necesita:
+
+| Función | Distribución | CV² |
+|---|---|---|
+| `cv2_normal(mean, std)` | Normal | (σ/μ)² |
+| `cv2_triangular(a, m, b)` | Triangular | fórmula exacta |
+| `cv2_uniform(a, b)` | Uniforme | (b−a)² / (12·μ²) |
+| `cv2_erlang(k)` | Erlang-k | 1/k |
+| `cv2_gamma(shape)` | Gamma | 1/shape |
+| `cv2_lognormal(mean, std)` | Lognormal | (σ/μ)² |
+| `cv2_weibull(shape)` | Weibull | Γ(1+2/k)/Γ(1+1/k)²−1 |
+
+```python
+# Servicio con distribución Weibull de forma 2 (rayleigh)
+cs2 = wl.cv2_weibull(shape=2.0)      # ≈ 0.273
+r   = wl.mg1(lam=1.0, mu=2.0, cs2=cs2)
+print(r.Wq)   # tiempo medio de espera en cola
+
+# Servicio Erlang-3 (menos variable que exponencial)
+r = wl.mg1(lam=3.0, mu=5.0, cs2=wl.cv2_erlang(3))
+```
+
+---
+
 ### `littles_law(*, L, lam, W)` — Ley de Little
 
 Resuelve L = λ · W para la variable que falte. Exactamente uno de los tres parámetros debe ser `None`.
@@ -1248,7 +1291,7 @@ Wq    : 0.3   (avg wait time in queue)
 
 | Módulo | Funciones y clases principales |
 |---|---|
-| `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `littles_law`, `QueueResult` |
+| `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
 | `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult` |
