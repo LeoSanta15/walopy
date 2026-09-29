@@ -529,6 +529,213 @@ def break_even(
 
 
 # ---------------------------------------------------------------------------
+# Multi-product break-even
+# ---------------------------------------------------------------------------
+
+@dataclass
+class BreakEvenMultiResult:
+    """Multi-product break-even result.
+
+    Attributes
+    ----------
+    bep_units_total : float
+        Total break-even volume (all products combined).
+    bep_revenue_total : float
+        Total break-even revenue.
+    weighted_avg_cm : float
+        Weighted-average contribution margin per unit.
+    cm_ratio_weighted : float
+        Weighted CM ratio = WACM / weighted-average price.
+    items : list[dict]
+        Per-product: name, price, variable_cost, cm, mix_fraction,
+        bep_units, bep_revenue.
+    params : dict
+    """
+
+    bep_units_total: float
+    bep_revenue_total: float
+    weighted_avg_cm: float
+    cm_ratio_weighted: float
+    items: list
+    params: dict = field(default_factory=dict)
+
+    def to_frame(self) -> pd.DataFrame:
+        return pd.DataFrame(self.items)
+
+    def summary(self) -> str:
+        lines = [
+            f"Break-even (total units)  : {self.bep_units_total:.4g}",
+            f"Break-even (total revenue): {self.bep_revenue_total:.4g}",
+            f"Weighted avg CM           : {self.weighted_avg_cm:.4g}",
+            f"Weighted CM ratio         : {self.cm_ratio_weighted:.2%}",
+            "",
+            f"{'Product':<18} {'Price':>8} {'VC':>8} {'CM':>8} {'Mix':>6} {'BEP units':>10} {'BEP rev':>10}",
+            "-" * 72,
+        ]
+        for row in self.items:
+            lines.append(
+                f"{row['Name']:<18} {row['Price']:>8.4g} {row['Variable cost']:>8.4g} "
+                f"{row['CM']:>8.4g} {row['Mix']:>6.2%} {row['BEP units']:>10.4g} {row['BEP revenue']:>10.4g}"
+            )
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def break_even_multi(
+    fixed_cost: float,
+    prices: Sequence[float],
+    variable_costs: Sequence[float],
+    sales_mix: Sequence[float],
+    *,
+    names: Sequence[str] | None = None,
+) -> BreakEvenMultiResult:
+    """Multi-product break-even with sales mix.
+
+    Uses the weighted-average contribution margin (WACM) to find the
+    total break-even volume and then allocates by sales mix.
+
+    BEP_total = FC / WACM
+    BEP_i     = BEP_total × mix_i
+
+    Parameters
+    ----------
+    fixed_cost : float
+        Total fixed cost for the period.
+    prices : sequence of float
+        Selling price per unit for each product.
+    variable_costs : sequence of float
+        Variable cost per unit for each product.
+    sales_mix : sequence of float
+        Relative sales proportions (need not sum to 1; normalized internally).
+    names : sequence of str, optional
+        Product names.
+
+    Returns
+    -------
+    BreakEvenMultiResult
+
+    Examples
+    --------
+    >>> r = break_even_multi(
+    ...     fixed_cost=120_000,
+    ...     prices=[50, 80, 120],
+    ...     variable_costs=[30, 50, 70],
+    ...     sales_mix=[3, 2, 1],
+    ... )
+    >>> r.bep_units_total > 0
+    True
+    """
+    prices         = list(prices)
+    variable_costs = list(variable_costs)
+    sales_mix      = list(sales_mix)
+    n = len(prices)
+    if len(variable_costs) != n or len(sales_mix) != n:
+        raise ValueError("prices, variable_costs and sales_mix must have the same length.")
+    if names is None:
+        names = [f"Product-{i+1}" for i in range(n)]
+    fixed_cost = as_positive(fixed_cost, "fixed_cost")
+
+    total_mix = sum(sales_mix)
+    if total_mix <= 0:
+        raise ValueError("sales_mix values must be positive.")
+    mix_frac = [m / total_mix for m in sales_mix]
+
+    cms = [p - v for p, v in zip(prices, variable_costs)]
+    if any(cm <= 0 for cm in cms):
+        raise ValueError("All products must have a positive contribution margin (price > variable_cost).")
+
+    wacm     = sum(cm * mf for cm, mf in zip(cms, mix_frac))
+    avg_price = sum(p * mf for p, mf in zip(prices, mix_frac))
+    bep_total = fixed_cost / wacm
+    bep_rev_total = sum(bep_total * mix_frac[i] * prices[i] for i in range(n))
+
+    items = []
+    for i in range(n):
+        bep_i = bep_total * mix_frac[i]
+        items.append({
+            "Name": names[i],
+            "Price": prices[i],
+            "Variable cost": variable_costs[i],
+            "CM": cms[i],
+            "Mix": mix_frac[i],
+            "BEP units": bep_i,
+            "BEP revenue": bep_i * prices[i],
+        })
+
+    return BreakEvenMultiResult(
+        bep_units_total=bep_total,
+        bep_revenue_total=bep_rev_total,
+        weighted_avg_cm=wacm,
+        cm_ratio_weighted=wacm / avg_price,
+        items=items,
+        params={"fixed_cost": fixed_cost, "n_products": n},
+    )
+
+
+def break_even_sales(
+    fixed_cost: float,
+    variable_cost_ratio: float,
+    *,
+    actual_revenue: float | None = None,
+) -> "BreakEvenResult":
+    """Break-even point expressed as sales revenue.
+
+    Uses the contribution margin ratio (CMR) when costs are given as fractions
+    of revenue rather than per-unit figures.
+
+    BEP_sales = FC / CMR = FC / (1 − variable_cost_ratio)
+
+    Parameters
+    ----------
+    fixed_cost : float
+        Total fixed cost for the period.
+    variable_cost_ratio : float
+        Variable costs as a fraction of revenue ∈ (0, 1)  (e.g. 0.60 means
+        variable costs are 60% of every sales dollar).
+    actual_revenue : float, optional
+        Actual revenue for margin-of-safety calculation.
+
+    Returns
+    -------
+    BreakEvenResult
+
+    Examples
+    --------
+    >>> r = break_even_sales(fixed_cost=50_000, variable_cost_ratio=0.60)
+    >>> r.bep_revenue
+    125000.0
+    """
+    fc  = as_positive(fixed_cost, "fixed_cost")
+    vcr = as_fraction(variable_cost_ratio, "variable_cost_ratio")
+    if vcr == 0.0 or vcr == 1.0:
+        raise ValueError("'variable_cost_ratio' must be strictly between 0 and 1.")
+
+    cmr       = 1.0 - vcr
+    bep_sales = fc / cmr
+
+    mos_units = 0.0
+    mos_pct   = 0.0
+    params: dict = {"fixed_cost": fc, "variable_cost_ratio": vcr}
+    if actual_revenue is not None:
+        actual_revenue = as_positive(actual_revenue, "actual_revenue")
+        mos_units = actual_revenue - bep_sales
+        mos_pct   = mos_units / actual_revenue
+        params["actual_revenue"] = actual_revenue
+
+    return BreakEvenResult(
+        bep_units=math.nan,          # not meaningful in revenue-based form
+        bep_revenue=bep_sales,
+        contribution_margin=math.nan,
+        contribution_margin_ratio=cmr,
+        margin_of_safety_units=mos_units,
+        margin_of_safety_pct=mos_pct,
+        params=params,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Queue length PMF and sojourn CDF for M/M/1
 # ---------------------------------------------------------------------------
 
