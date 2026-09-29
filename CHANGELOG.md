@@ -2,7 +2,7 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
-## [0.2.4] — 2026-09-29
+## [0.2.5] — 2026-09-29
 
 ### Añadido
 - **`inventory`** — `ebq` / `EBQResult`: Lote Económico de Producción (EBQ/EPQ)
