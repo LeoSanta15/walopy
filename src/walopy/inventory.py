@@ -1618,3 +1618,181 @@ def rs_policy(
                 "lead_time": LT, "review_period": R, "demand_std": sd,
                 "lead_time_std": sl},
     )
+
+
+# ---------------------------------------------------------------------------
+# Exchange curves
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ExchangeCurveResult:
+    """Aggregate exchange-curve result for a family of items.
+
+    Attributes
+    ----------
+    n_orders_eoq : float
+        Total orders per year at the individual-EOQ point (k = 1).
+    investment_eoq : float
+        Total average inventory investment at the EOQ point.
+    multiplier : float
+        Scaling factor k applied to all EOQ quantities (k = 1 → EOQ).
+    n_orders_optimal : float
+        Total orders per year at the chosen policy point.
+    investment_optimal : float
+        Total average inventory investment at the chosen policy point.
+    target : str
+        Description of the target used (``'eoq'``, ``'orders'``, or
+        ``'investment'``).
+    optimal_quantities : list[dict]
+        Per-item dicts with keys ``name``, ``Q_eoq``, ``Q_optimal``,
+        ``n_orders``, ``investment``.
+    curve_points : list[dict]
+        Points on the exchange hyperbola: ``[{'N': …, 'I': …}, …]``.
+    """
+
+    n_orders_eoq: float
+    investment_eoq: float
+    multiplier: float
+    n_orders_optimal: float
+    investment_optimal: float
+    target: str
+    optimal_quantities: list
+    curve_points: list
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame(self.optimal_quantities)
+
+    def summary(self) -> str:
+        lines = [
+            f"Target                  : {self.target}",
+            f"Multiplier k            : {self.multiplier:.4f}",
+            f"N orders/yr  (EOQ)      : {self.n_orders_eoq:.4g}",
+            f"N orders/yr  (optimal)  : {self.n_orders_optimal:.4g}",
+            f"Investment   (EOQ)      : {self.investment_eoq:.4g}",
+            f"Investment   (optimal)  : {self.investment_optimal:.4g}",
+        ]
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def exchange_curve(
+    items: list,
+    *,
+    target_orders: float | None = None,
+    target_investment: float | None = None,
+    n_curve_points: int = 50,
+) -> ExchangeCurveResult:
+    """Aggregate exchange curve for a family of inventory items.
+
+    For a family of items each managed with an EOQ policy, varying a common
+    multiplier *k* on all order quantities traces a hyperbola in the
+    (N orders/year, average investment) plane:
+
+        N(k) = N* / k        I(k) = k · I*       →    N · I = N* · I*
+
+    The function computes the EOQ point (k=1) and, when a target is
+    supplied, solves for the k that meets it and re-scales all quantities.
+
+    Parameters
+    ----------
+    items : list of dict
+        Each dict must contain:
+
+        - ``demand`` (float) — annual demand Di.
+        - ``ordering_cost`` (float) — setup/ordering cost Ki.
+        - ``holding_cost`` (float) — holding cost per unit per year hi.
+
+        Optional keys:
+
+        - ``unit_value`` (float) — unit value vi for investment calculation
+          (default 1).
+        - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …).
+
+    target_orders : float, optional
+        Desired total orders per year.  Solves k = N* / target_orders.
+    target_investment : float, optional
+        Desired total average inventory investment.  Solves k = target / I*.
+    n_curve_points : int
+        Number of points on the plotted hyperbola (default 50).
+
+    Returns
+    -------
+    ExchangeCurveResult
+
+    Notes
+    -----
+    Only one of *target_orders* or *target_investment* may be specified.
+    If neither is given the EOQ point (k = 1) is returned.
+    """
+    if target_orders is not None and target_investment is not None:
+        raise ValueError(
+            "Specify at most one of 'target_orders' or 'target_investment'."
+        )
+
+    parsed = []
+    for idx, it in enumerate(items):
+        D  = as_positive(it["demand"],        f"items[{idx}]['demand']")
+        K  = as_positive(it["ordering_cost"], f"items[{idx}]['ordering_cost']")
+        h  = as_positive(it["holding_cost"],  f"items[{idx}]['holding_cost']")
+        v  = float(it.get("unit_value", 1.0))
+        nm = str(it.get("name", f"I{idx + 1}"))
+        if v <= 0:
+            raise ValueError(f"items[{idx}]['unit_value'] must be > 0.")
+        Q_eoq = math.sqrt(2 * D * K / h)
+        parsed.append({"name": nm, "D": D, "K": K, "h": h, "v": v, "Q_eoq": Q_eoq})
+
+    N_star = sum(p["D"] / p["Q_eoq"] for p in parsed)
+    I_star = sum(p["Q_eoq"] * p["v"] / 2.0 for p in parsed)
+
+    if target_orders is not None:
+        to = as_positive(target_orders, "target_orders")
+        k = N_star / to
+        target_label = f"orders={to:.4g}"
+    elif target_investment is not None:
+        ti = as_positive(target_investment, "target_investment")
+        k = ti / I_star
+        target_label = f"investment={ti:.4g}"
+    else:
+        k = 1.0
+        target_label = "eoq"
+
+    N_opt = N_star / k
+    I_opt = k * I_star
+
+    opt_qtys = []
+    for p in parsed:
+        Q_opt = k * p["Q_eoq"]
+        n_i   = p["D"] / Q_opt
+        inv_i = Q_opt * p["v"] / 2.0
+        opt_qtys.append({
+            "name":       p["name"],
+            "Q_eoq":      round(p["Q_eoq"], 6),
+            "Q_optimal":  round(Q_opt, 6),
+            "n_orders":   round(n_i, 6),
+            "investment": round(inv_i, 6),
+        })
+
+    # Hyperbola points: vary k from 0.1 to 5 × EOQ point
+    product = N_star * I_star
+    n_min = N_star * 0.1
+    n_max = N_star * 10.0
+    step  = (n_max - n_min) / (n_curve_points - 1)
+    curve_pts = [
+        {"N": round(n_min + i * step, 6),
+         "I": round(product / (n_min + i * step), 6)}
+        for i in range(n_curve_points)
+    ]
+
+    return ExchangeCurveResult(
+        n_orders_eoq=N_star,
+        investment_eoq=I_star,
+        multiplier=k,
+        n_orders_optimal=N_opt,
+        investment_optimal=I_opt,
+        target=target_label,
+        optimal_quantities=opt_qtys,
+        curve_points=curve_pts,
+    )

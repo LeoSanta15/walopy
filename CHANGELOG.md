@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.2.7] — 2026-09-29
+
+### Añadido
+- **`inventory`** — `exchange_curve` / `ExchangeCurveResult`: curvas de intercambio para familias de artículos; solver analítico por target de pedidos/año o inversión promedio; 17 nuevos tests (245 en total)
+
+---
+
 ## [0.2.6] — 2026-09-29
 
 ### Añadido
