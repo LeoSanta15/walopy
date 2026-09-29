@@ -26,17 +26,18 @@ pip install walopy
 9. [Análisis de cuellos de botella](#9-análisis-de-cuellos-de-botella)
 10. [Balance de línea y tiempo takt](#10-balance-de-línea-y-tiempo-takt)
 11. [Análisis de punto de equilibrio](#11-análisis-de-punto-de-equilibrio)
-12. [Programación de producción (scheduling)](#12-programación-de-producción-scheduling)
-13. [Confiabilidad](#13-confiabilidad--reliability)
-14. [Árboles de KPI](#14-árboles-de-kpi)
-15. [Solvers y optimización](#15-solvers-y-optimización)
-16. [Análisis de sensibilidad](#16-análisis-de-sensibilidad)
-17. [Escenarios en lote (batch_model)](#17-escenarios-en-lote-batch_model)
-18. [Comparar múltiples resultados](#18-comparar-múltiples-resultados)
-19. [Gráficas](#19-gráficas)
-20. [CLI](#20-cli)
-21. [Referencia de módulos](#21-referencia-de-módulos)
-22. [Requisitos](#22-requisitos)
+12. [Curvas de intercambio](#12-curvas-de-intercambio)
+13. [Programación de producción (scheduling)](#13-programación-de-producción-scheduling)
+14. [Confiabilidad](#14-confiabilidad--reliability)
+15. [Árboles de KPI](#15-árboles-de-kpi)
+16. [Solvers y optimización](#16-solvers-y-optimización)
+17. [Análisis de sensibilidad](#17-análisis-de-sensibilidad)
+18. [Escenarios en lote (batch_model)](#18-escenarios-en-lote-batch_model)
+19. [Comparar múltiples resultados](#19-comparar-múltiples-resultados)
+20. [Gráficas](#20-gráficas)
+21. [CLI](#21-cli)
+22. [Referencia de módulos](#22-referencia-de-módulos)
+23. [Requisitos](#23-requisitos)
 
 ---
 
@@ -1020,7 +1021,7 @@ print(r.margin_of_safety_pct)     # 0.375 — porcentaje del margen de seguridad
 
 ---
 
-## 14. Árboles de KPI
+## 15. Árboles de KPI
 
 Los árboles de KPI crean jerarquías interactivas visualizadas como **treemap** o **sunburst** con Plotly.
 
@@ -1073,7 +1074,7 @@ fig.show()
 
 ---
 
-## 15. Solvers y optimización
+## 16. Solvers y optimización
 
 ### `solve_lam(metric, target, *, mu, model)` — Máxima tasa de llegada
 
@@ -1120,7 +1121,7 @@ r.plot()   # gráfica de costo vs número de servidores
 
 ---
 
-## 16. Análisis de sensibilidad
+## 17. Análisis de sensibilidad
 
 ### `sensitivity(model_fn, param, values, **fixed_kwargs)` — Barrido paramétrico
 
@@ -1151,7 +1152,7 @@ fig.show()
 
 ---
 
-## 17. Escenarios en lote (batch_model)
+## 18. Escenarios en lote (batch_model)
 
 ### `batch_model(model_fn, df, **fixed_kwargs)` — Aplicar modelo a un DataFrame
 
@@ -1186,7 +1187,7 @@ print(resultado[resultado["_error"].notna()])  # filas fallidas
 
 ---
 
-## 18. Comparar múltiples resultados
+## 19. Comparar múltiples resultados
 
 ### `compare(*results, labels)` — DataFrame comparativo
 
@@ -1211,7 +1212,7 @@ df2 = wl.compare(wl.mm1(1, 5), wl.mm1(2, 5), wl.mm1(3, 5))
 
 ---
 
-## 19. Gráficas
+## 20. Gráficas
 
 Todos los resultados exponen `.plot()` que devuelve una figura de Matplotlib o Plotly. También se pueden llamar directamente desde `walopy.plotting`.
 
@@ -1247,7 +1248,7 @@ fig.show()
 
 ---
 
-## 20. CLI
+## 21. CLI
 
 walopy incluye una interfaz de línea de comandos para uso rápido sin escribir código.
 
@@ -1289,7 +1290,140 @@ Wq    : 0.3   (avg wait time in queue)
 
 ---
 
-## 12. Programación de producción (scheduling)
+## 12. Curvas de intercambio
+
+Herramientas para tomar decisiones de política agregada en familias de artículos.
+
+### Tipo 1 — ciclo: `exchange_curve`
+
+Traza la hipérbola entre número de pedidos por año (N) e inversión promedio en inventario de ciclo (I):
+
+```
+N(k) = N* / k      I(k) = k · I*      →      N · I = N* · I*  (constante)
+```
+
+Dado un target de N o de I, resuelve el multiplicador k óptimo y recalcula Q para cada artículo.
+
+```python
+import walopy as wl
+
+items = [
+    {"name": "A", "demand": 1000, "ordering_cost": 50,  "holding_cost": 2,  "unit_value": 10},
+    {"name": "B", "demand":  500, "ordering_cost": 30,  "holding_cost": 1,  "unit_value":  5},
+    {"name": "C", "demand": 2000, "ordering_cost": 100, "holding_cost": 4,  "unit_value":  8},
+]
+
+# Sin target → punto EOQ (k = 1)
+r = wl.exchange_curve(items)
+print(r)
+```
+
+```
+Target                  : eoq
+Multiplier k            : 1.0000
+N orders/yr  (EOQ)      : 87.27
+N orders/yr  (optimal)  : 87.27
+Investment   (EOQ)      : 5430
+Investment   (optimal)  : 5430
+```
+
+```python
+# Reducir a 20 pedidos/año (k > 1 → Q más grandes → más inversión)
+r = wl.exchange_curve(items, target_orders=20)
+
+# Limitar inversión a 3 000 (k < 1 → Q más pequeños → más pedidos)
+r = wl.exchange_curve(items, target_investment=3000)
+
+# Tabla por artículo
+df = r.to_frame()
+# columnas: name | Q_eoq | Q_optimal | n_orders | investment
+
+# Hipérbola para graficar
+curve = r.curve_to_frame()
+# columnas: N | I
+```
+
+**Parámetros de cada artículo**
+
+| Clave | Requerido | Descripción |
+|-------|-----------|-------------|
+| `demand` | ✓ | Demanda anual Di |
+| `ordering_cost` | ✓ | Costo de pedido Ki |
+| `holding_cost` | ✓ | Costo de mantenimiento hi |
+| `unit_value` | — | Valor unitario vi (default 1) |
+| `name` | — | Etiqueta (default I1, I2, …) |
+
+---
+
+### Tipo 2 — seguridad: `safety_stock_curve`
+
+Traza la curva entre inversión en stock de seguridad e nivel de servicio por ciclo usando una **política z común** para toda la familia:
+
+```
+SS_i(z) = z · σᵢ_DLT · vᵢ          σᵢ_DLT = √(Lᵢ·σ²_Di + D²ᵢ·σ²_Li)
+SS_total(z) = z · Σ σᵢ_DLT · vᵢ     SL(z) = Φ(z)
+```
+
+```python
+items = [
+    {"name": "A", "demand_rate": 100, "demand_std": 10, "lead_time": 2, "unit_value": 10},
+    {"name": "B", "demand_rate":  50, "demand_std":  5, "lead_time": 1, "unit_value":  5},
+    {"name": "C", "demand_rate": 200, "demand_std": 20, "lead_time": 3, "unit_value":  8},
+]
+
+# Target: nivel de servicio 95%
+r = wl.safety_stock_curve(items, target_service_level=0.95)
+print(r)
+```
+
+```
+Target          : service_level=95.0000%
+z               : 1.6449
+Service level   : 95.0000%
+SS investment   : 1 847
+```
+
+```python
+# Target: presupuesto máximo de SS
+r = wl.safety_stock_curve(items, target_ss_investment=1000)
+
+# Tabla por artículo (incluye punto de reorden cuando se da demand_rate)
+df = r.to_frame()
+# columnas: name | sigma_dlt | safety_stock | investment | reorder_point
+
+# Curva completa (z de −2 a 4)
+curve = r.curve_to_frame()
+# columnas: z | service_level | ss_investment
+```
+
+**Parámetros de cada artículo**
+
+| Clave | Requerido | Descripción |
+|-------|-----------|-------------|
+| `demand_std` | ✓ | Desviación estándar de la demanda |
+| `lead_time` | ✓ | Lead time medio |
+| `demand_rate` | — | Demanda media; activa columna `reorder_point` |
+| `lead_time_std` | — | Desviación estándar del lead time (default 0) |
+| `unit_value` | — | Valor unitario (default 1) |
+| `name` | — | Etiqueta (default I1, I2, …) |
+
+---
+
+### Relación entre ambas curvas
+
+| | Tipo 1 (ciclo) | Tipo 2 (seguridad) |
+|---|---|---|
+| **Función** | `exchange_curve` | `safety_stock_curve` |
+| **Decide** | Tamaño de lote Q | Punto de reorden r |
+| **Tradeoff** | N pedidos/año ↔ Inversión ciclo | Nivel de servicio ↔ SS |
+| **Resultado** | `ExchangeCurveResult` | `SafetyStockCurveResult` |
+| **Parámetro** | Multiplicador k | Factor z |
+
+Usadas juntas cubren la política completa `(Q, r)` para toda la familia.
+
+---
+
+## 13. Programación de producción (scheduling)
 
 ### Máquina única — `schedule_single`
 
@@ -1372,7 +1506,7 @@ df = r.to_frame()
 
 ---
 
-## 13. Confiabilidad — `reliability`
+## 14. Confiabilidad — `reliability`
 
 Modelos de confiabilidad con distribución exponencial (tasa de falla constante).
 
@@ -1448,14 +1582,14 @@ r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
 
 ---
 
-## 21. Referencia de módulos
+## 22. Referencia de módulos
 
 | Módulo | Funciones y clases principales |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
 | `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
-| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult` |
+| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult` |
 | `reliability` | `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `ReliabilityResult` |
 | `network` | `jackson_network`, `JacksonResult`, `StationMetrics` |
@@ -1467,7 +1601,7 @@ r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
 
 ---
 
-## 22. Requisitos
+## 23. Requisitos
 
 ```
 Python ≥ 3.9

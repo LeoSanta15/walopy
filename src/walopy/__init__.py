@@ -117,9 +117,13 @@ from .network import (
 from .inventory import (
     RQPolicyResult,
     RSPolicyResult,
+    ExchangeCurveResult,
+    SafetyStockCurveResult,
     rq_policy,
     rs_policy,
     wagner_whitin,
+    exchange_curve,
+    safety_stock_curve,
 )
 
 # Scheduling
@@ -235,9 +239,13 @@ __all__ = [
     # inventory additions
     "RQPolicyResult",
     "RSPolicyResult",
+    "ExchangeCurveResult",
+    "SafetyStockCurveResult",
     "rq_policy",
     "rs_policy",
     "wagner_whitin",
+    "exchange_curve",
+    "safety_stock_curve",
     # scheduling
     "JobSchedule",
     "ScheduleResult",
