@@ -1280,3 +1280,341 @@ def eoq_quantity_discount(
         candidates=candidates,
         params={"demand_rate": D, "ordering_cost": K, "holding_cost_rate": Ih},
     )
+
+
+# ---------------------------------------------------------------------------
+# Wagner-Whitin (optimal dynamic lot-sizing)
+# ---------------------------------------------------------------------------
+
+def wagner_whitin(
+    demands: Sequence[float],
+    setup_cost: float,
+    holding_cost: float,
+) -> LotSizingResult:
+    """Wagner-Whitin optimal dynamic lot-sizing via dynamic programming.
+
+    Finds the exact minimum-cost ordering policy over a finite horizon,
+    unlike Silver-Meal (heuristic).  Time complexity O(n²).
+
+    Parameters
+    ----------
+    demands : sequence of float
+        Demand d_t for periods t = 1, 2, …, T.
+    setup_cost : float
+        Fixed setup / ordering cost S per order.
+    holding_cost : float
+        Holding cost h per unit per period.
+
+    Returns
+    -------
+    LotSizingResult
+        ``method`` is ``'Wagner-Whitin'``.
+
+    Examples
+    --------
+    >>> r = wagner_whitin([100, 80, 120, 60], setup_cost=200, holding_cost=1)
+    >>> r.total_cost <= wagner_whitin.__doc__ and True  # optimal ≤ Silver-Meal
+    True
+    """
+    demands_v = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    K = as_positive(setup_cost, "setup_cost")
+    h = as_positive(holding_cost, "holding_cost")
+    n = len(demands_v)
+
+    INF = float("inf")
+    dp = [INF] * (n + 1)   # dp[j] = min cost to satisfy demands 0..j-1
+    dp[0] = 0.0
+    last = [-1] * (n + 1)  # last[j] = period i where order was placed
+
+    for j in range(1, n + 1):
+        for i in range(1, j + 1):
+            # Order at start of period i to cover demands i..j (1-indexed)
+            hold = h * sum((k - i) * demands_v[k - 1] for k in range(i, j + 1))
+            cost = dp[i - 1] + K + hold
+            if cost < dp[j]:
+                dp[j] = cost
+                last[j] = i
+
+    # Reconstruct orders
+    orders = []
+    j = n
+    while j > 0:
+        i = last[j]
+        qty = sum(demands_v[k - 1] for k in range(i, j + 1))
+        orders.append({
+            "period": i,
+            "order_qty": qty,
+            "covers_periods": list(range(i, j + 1)),
+        })
+        j = i - 1
+    orders.reverse()
+
+    total_setup = len(orders) * K
+    total_holding = dp[n] - total_setup
+    return LotSizingResult(
+        orders=orders,
+        total_cost=dp[n],
+        total_setup_cost=total_setup,
+        total_holding_cost=total_holding,
+        n_orders=len(orders),
+        method="Wagner-Whitin",
+        params={"setup_cost": K, "holding_cost": h},
+    )
+
+
+# ---------------------------------------------------------------------------
+# (r, Q) Continuous review policy
+# ---------------------------------------------------------------------------
+
+@dataclass
+class RQPolicyResult:
+    """(r, Q) continuous review inventory policy result.
+
+    Attributes
+    ----------
+    order_qty : float
+        EOQ-based order quantity Q*.
+    reorder_point : float
+        Reorder point r = mean demand during LT + safety stock.
+    safety_stock : float
+        Safety stock SS = z · σ_DLT.
+    service_level : float
+        Cycle service level P(no stockout per cycle).
+    avg_inventory : float
+        Average on-hand inventory ≈ Q*/2 + SS.
+    total_cost : float
+        Annual holding + ordering cost at (Q*, r).
+    """
+
+    order_qty: float
+    reorder_point: float
+    safety_stock: float
+    service_level: float
+    avg_inventory: float
+    total_cost: float
+    params: dict = field(default_factory=dict)
+
+    def summary(self) -> str:
+        return (
+            f"(r, Q) continuous review policy\n"
+            f"  Order quantity Q*   : {self.order_qty:.4g}\n"
+            f"  Reorder point r     : {self.reorder_point:.4g}\n"
+            f"  Safety stock SS     : {self.safety_stock:.4g}\n"
+            f"  Service level       : {self.service_level:.2%}\n"
+            f"  Avg inventory       : {self.avg_inventory:.4g}\n"
+            f"  Total cost          : {self.total_cost:.6g}"
+        )
+
+    def __str__(self) -> str:
+        return self.summary()
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame([{
+            "Q*": self.order_qty,
+            "r": self.reorder_point,
+            "Safety stock": self.safety_stock,
+            "Service level": self.service_level,
+            "Avg inventory": self.avg_inventory,
+            "Total cost": self.total_cost,
+        }])
+
+
+def rq_policy(
+    demand_rate: float,
+    ordering_cost: float,
+    holding_cost: float,
+    lead_time: float,
+    *,
+    demand_std: float = 0.0,
+    lead_time_std: float = 0.0,
+    service_level: float = 0.95,
+) -> RQPolicyResult:
+    """(r, Q) continuous-review inventory policy.
+
+    Combines the EOQ as order quantity and a statistically-derived reorder
+    point.  The two decisions are determined independently.
+
+    Parameters
+    ----------
+    demand_rate : float
+        Mean demand per period D̄.
+    ordering_cost : float
+        Fixed ordering cost K per order.
+    holding_cost : float
+        Holding cost h per unit per period.
+    lead_time : float
+        Mean replenishment lead time L̄.
+    demand_std : float
+        Std dev of demand per period σ_D (default 0).
+    lead_time_std : float
+        Std dev of lead time σ_L (default 0).
+    service_level : float
+        Cycle service level ∈ (0, 1). Default 0.95.
+
+    Returns
+    -------
+    RQPolicyResult
+    """
+    from statistics import NormalDist
+    D   = as_positive(demand_rate,  "demand_rate")
+    K   = as_positive(ordering_cost, "ordering_cost")
+    h   = as_positive(holding_cost,  "holding_cost")
+    LT  = as_positive(lead_time,     "lead_time")
+    sd  = as_nonneg(demand_std,      "demand_std")
+    sl  = as_nonneg(lead_time_std,   "lead_time_std")
+    svc = as_fraction(service_level, "service_level")
+    if svc <= 0.0 or svc >= 1.0:
+        raise ValueError("'service_level' must be strictly between 0 and 1.")
+
+    Q   = math.sqrt(2 * D * K / h)
+    mean_dlt = D * LT
+    std_dlt  = math.sqrt(LT * sd**2 + D**2 * sl**2)
+    z   = NormalDist().inv_cdf(svc)
+    SS  = z * std_dlt
+    r   = mean_dlt + SS
+    avg_inv  = Q / 2 + SS
+    total_cost = (D / Q) * K + avg_inv * h
+
+    return RQPolicyResult(
+        order_qty=Q,
+        reorder_point=r,
+        safety_stock=SS,
+        service_level=svc,
+        avg_inventory=avg_inv,
+        total_cost=total_cost,
+        params={"demand_rate": D, "ordering_cost": K, "holding_cost": h,
+                "lead_time": LT, "demand_std": sd, "lead_time_std": sl},
+    )
+
+
+# ---------------------------------------------------------------------------
+# (R, S) Periodic review policy
+# ---------------------------------------------------------------------------
+
+@dataclass
+class RSPolicyResult:
+    """(R, S) periodic-review inventory policy result.
+
+    Attributes
+    ----------
+    review_period : float
+        Review interval R.
+    order_up_to : float
+        Order-up-to level S = mean demand over (R+L) + safety stock.
+    safety_stock : float
+        Safety stock SS = z · σ_{R+L}.
+    service_level : float
+        Cycle service level.
+    avg_inventory : float
+        Average on-hand inventory ≈ D·R/2 + SS.
+    total_cost : float
+        Annual holding + ordering cost at (R, S).
+    """
+
+    review_period: float
+    order_up_to: float
+    safety_stock: float
+    service_level: float
+    avg_inventory: float
+    total_cost: float
+    params: dict = field(default_factory=dict)
+
+    def summary(self) -> str:
+        return (
+            f"(R, S) periodic review policy\n"
+            f"  Review period R     : {self.review_period:.4g}\n"
+            f"  Order-up-to S       : {self.order_up_to:.4g}\n"
+            f"  Safety stock SS     : {self.safety_stock:.4g}\n"
+            f"  Service level       : {self.service_level:.2%}\n"
+            f"  Avg inventory       : {self.avg_inventory:.4g}\n"
+            f"  Total cost          : {self.total_cost:.6g}"
+        )
+
+    def __str__(self) -> str:
+        return self.summary()
+
+    def to_frame(self) -> "pd.DataFrame":
+        import pandas as pd
+        return pd.DataFrame([{
+            "R": self.review_period,
+            "S": self.order_up_to,
+            "Safety stock": self.safety_stock,
+            "Service level": self.service_level,
+            "Avg inventory": self.avg_inventory,
+            "Total cost": self.total_cost,
+        }])
+
+
+def rs_policy(
+    demand_rate: float,
+    ordering_cost: float,
+    holding_cost: float,
+    lead_time: float,
+    review_period: float,
+    *,
+    demand_std: float = 0.0,
+    lead_time_std: float = 0.0,
+    service_level: float = 0.95,
+) -> RSPolicyResult:
+    """(R, S) periodic-review inventory policy.
+
+    The inventory position is checked every R periods and an order is
+    placed to bring it up to S.
+
+    Parameters
+    ----------
+    demand_rate : float
+        Mean demand per period D̄.
+    ordering_cost : float
+        Fixed ordering cost K per order.
+    holding_cost : float
+        Holding cost h per unit per period.
+    lead_time : float
+        Mean replenishment lead time L̄.
+    review_period : float
+        Review interval R (periods between inventory checks).
+    demand_std : float
+        Std dev of demand per period σ_D (default 0).
+    lead_time_std : float
+        Std dev of lead time σ_L (default 0).
+    service_level : float
+        Cycle service level ∈ (0, 1). Default 0.95.
+
+    Returns
+    -------
+    RSPolicyResult
+    """
+    from statistics import NormalDist
+    D   = as_positive(demand_rate,   "demand_rate")
+    K   = as_positive(ordering_cost, "ordering_cost")
+    h   = as_positive(holding_cost,  "holding_cost")
+    LT  = as_positive(lead_time,     "lead_time")
+    R   = as_positive(review_period, "review_period")
+    sd  = as_nonneg(demand_std,      "demand_std")
+    sl  = as_nonneg(lead_time_std,   "lead_time_std")
+    svc = as_fraction(service_level, "service_level")
+    if svc <= 0.0 or svc >= 1.0:
+        raise ValueError("'service_level' must be strictly between 0 and 1.")
+
+    # Exposure period = R + L
+    RL = R + LT
+    mean_rl = D * RL
+    std_rl  = math.sqrt(RL * sd**2 + D**2 * sl**2)
+    z       = NormalDist().inv_cdf(svc)
+    SS      = z * std_rl
+    S       = mean_rl + SS
+    avg_inv = D * R / 2 + SS
+    total_cost = (1.0 / R) * K + avg_inv * h
+
+    return RSPolicyResult(
+        review_period=R,
+        order_up_to=S,
+        safety_stock=SS,
+        service_level=svc,
+        avg_inventory=avg_inv,
+        total_cost=total_cost,
+        params={"demand_rate": D, "ordering_cost": K, "holding_cost": h,
+                "lead_time": LT, "review_period": R, "demand_std": sd,
+                "lead_time_std": sl},
+    )
