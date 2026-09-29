@@ -1804,3 +1804,201 @@ def exchange_curve(
         optimal_quantities=opt_qtys,
         curve_points=curve_pts,
     )
+
+
+# ---------------------------------------------------------------------------
+# Safety-stock exchange curve (Type 2)
+# ---------------------------------------------------------------------------
+
+@dataclass
+class SafetyStockCurveResult:
+    """Safety-stock exchange curve result for a family of items.
+
+    Uses a **common z-value** policy across all items, which is the standard
+    aggregate approach: all items share the same cycle service level Φ(z).
+
+    Attributes
+    ----------
+    z : float
+        Common z-value (standard normal quantile) applied.
+    service_level : float
+        Cycle service level = Φ(z).
+    ss_investment : float
+        Total safety-stock investment = z · Σ σᵢ_DLT · vᵢ.
+    target : str
+        Description of the target used.
+    optimal_quantities : list[dict]
+        Per-item dicts: ``name``, ``sigma_dlt``, ``safety_stock``,
+        ``investment``, ``reorder_point`` (only when ``demand_rate`` supplied).
+    curve_points : list[dict]
+        Points on the curve: ``[{'z': …, 'service_level': …,
+        'ss_investment': …}, …]``.
+    """
+
+    z: float
+    service_level: float
+    ss_investment: float
+    target: str
+    optimal_quantities: list
+    curve_points: list
+
+    def to_frame(self) -> "pd.DataFrame":
+        """Per-item safety-stock DataFrame."""
+        import pandas as pd
+        return pd.DataFrame(self.optimal_quantities)
+
+    def curve_to_frame(self) -> "pd.DataFrame":
+        """Full exchange curve DataFrame: z, service_level, ss_investment."""
+        import pandas as pd
+        return pd.DataFrame(self.curve_points)
+
+    def summary(self) -> str:
+        lines = [
+            f"Target          : {self.target}",
+            f"z               : {self.z:.4f}",
+            f"Service level   : {self.service_level:.4%}",
+            f"SS investment   : {self.ss_investment:.4g}",
+        ]
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def safety_stock_curve(
+    items: list,
+    *,
+    target_service_level: float | None = None,
+    target_ss_investment: float | None = None,
+    n_curve_points: int = 60,
+) -> SafetyStockCurveResult:
+    """Safety-stock exchange curve for a family of items (common-z policy).
+
+    With a **common z** all items share the same cycle service level Φ(z).
+    Varying z traces the exchange curve between aggregate SS investment and
+    service level:
+
+        SS_investment(z) = z · Σ σᵢ_DLT · vᵢ
+
+    Parameters
+    ----------
+    items : list of dict
+        Each dict must contain:
+
+        - ``demand_std`` (float) — standard deviation of demand per unit time.
+        - ``lead_time`` (float) — replenishment lead time (same time unit).
+
+        Optional keys:
+
+        - ``lead_time_std`` (float) — std dev of lead time (default 0).
+        - ``demand_rate`` (float) — mean demand per unit time; used to
+          compute the reorder point r = D·L + SS (default: omitted).
+        - ``unit_value`` (float) — unit value for investment (default 1).
+        - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …).
+
+    target_service_level : float, optional
+        Desired cycle service level ∈ (0, 1).  Solves z = Φ⁻¹(SL).
+    target_ss_investment : float, optional
+        Desired total SS investment.  Solves z = target / (Σ σᵢ_DLT · vᵢ).
+    n_curve_points : int
+        Number of points on the plotted curve (default 60, z from −2 to 4).
+
+    Returns
+    -------
+    SafetyStockCurveResult
+
+    Notes
+    -----
+    Only one of *target_service_level* or *target_ss_investment* may be given.
+    If neither is supplied, z = 0 (50 % service level) is used as the
+    baseline; pass ``target_service_level=0.95`` for the typical default.
+    """
+    if target_service_level is not None and target_ss_investment is not None:
+        raise ValueError(
+            "Specify at most one of 'target_service_level' or 'target_ss_investment'."
+        )
+    if len(items) == 0:
+        raise ValueError("'items' must contain at least one item.")
+
+    _norm = NormalDist()
+
+    parsed = []
+    for idx, it in enumerate(items):
+        sd   = as_nonneg(float(it["demand_std"]),  f"items[{idx}]['demand_std']")
+        L    = as_positive(float(it["lead_time"]), f"items[{idx}]['lead_time']")
+        sl   = float(it.get("lead_time_std", 0.0))
+        v    = float(it.get("unit_value", 1.0))
+        nm   = str(it.get("name", f"I{idx + 1}"))
+        D    = it.get("demand_rate")
+        D    = float(D) if D is not None else None
+        if v <= 0:
+            raise ValueError(f"items[{idx}]['unit_value'] must be > 0.")
+        if sl < 0:
+            raise ValueError(f"items[{idx}]['lead_time_std'] must be ≥ 0.")
+        # σ_DLT = √(L·σ_D² + D²·σ_L²)  — reduces to σ_D·√L when σ_L=0
+        if D is not None and sl > 0:
+            sigma_dlt = math.sqrt(L * sd**2 + D**2 * sl**2)
+        else:
+            sigma_dlt = sd * math.sqrt(L)
+        parsed.append({"name": nm, "sigma_dlt": sigma_dlt, "v": v, "D": D, "L": L})
+
+    total_sigma_v = sum(p["sigma_dlt"] * p["v"] for p in parsed)
+
+    # Solve for z
+    if target_service_level is not None:
+        sl_val = float(target_service_level)
+        if not (0.0 < sl_val < 1.0):
+            raise ValueError("'target_service_level' must be strictly between 0 and 1.")
+        z = _norm.inv_cdf(sl_val)
+        target_label = f"service_level={sl_val:.4%}"
+    elif target_ss_investment is not None:
+        ti = as_positive(float(target_ss_investment), "target_ss_investment")
+        if total_sigma_v == 0.0:
+            raise ValueError(
+                "All items have demand_std=0 — safety stock is always 0."
+            )
+        z = ti / total_sigma_v
+        target_label = f"ss_investment={ti:.4g}"
+    else:
+        z = 0.0
+        target_label = "baseline (z=0)"
+
+    sl_result = _norm.cdf(z)
+    ss_inv    = z * total_sigma_v
+
+    opt_qtys = []
+    for p in parsed:
+        ss_i   = z * p["sigma_dlt"]
+        inv_i  = z * p["sigma_dlt"] * p["v"]
+        row: dict = {
+            "name":          p["name"],
+            "sigma_dlt":     round(p["sigma_dlt"], 6),
+            "safety_stock":  round(ss_i, 6),
+            "investment":    round(inv_i, 6),
+        }
+        if p["D"] is not None:
+            row["reorder_point"] = round(p["D"] * p["L"] + ss_i, 6)
+        opt_qtys.append(row)
+
+    # Curve: z from −2 to 4
+    z_min, z_max = -2.0, 4.0
+    step = (z_max - z_min) / (n_curve_points - 1)
+    curve_pts = []
+    for i in range(n_curve_points):
+        zi   = z_min + i * step
+        sli  = _norm.cdf(zi)
+        ssi  = zi * total_sigma_v
+        curve_pts.append({
+            "z":             round(zi, 4),
+            "service_level": round(sli, 6),
+            "ss_investment": round(ssi, 6),
+        })
+
+    return SafetyStockCurveResult(
+        z=z,
+        service_level=sl_result,
+        ss_investment=ss_inv,
+        target=target_label,
+        optimal_quantities=opt_qtys,
+        curve_points=curve_pts,
+    )
