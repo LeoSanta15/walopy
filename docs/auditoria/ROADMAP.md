@@ -108,7 +108,7 @@ uv venv --python 3.9 v39 && uv pip install --python v39/bin/python -e ".[dev]" &
 
 ## Estado de ejecución (2026-10-02)
 
-Decisiones aplicadas: D-1 → todo en español (mensajes, avisos, CLI, README, docs); D-2 → sí (0.3.0); D-3 → sin cotas superiores, prueba semanal con las últimas versiones, extras de gráficas pospuestos; D-4 → demanda 0 es clase C; D-5 → sin tags históricos. Nueva decisión **D-6**: columnas de DataFrame, etiquetas de `summary()` y textos de gráficas siguen en inglés (cambiarlos rompe la API) — pendiente de su criterio.
+Decisiones aplicadas: D-1 → todo en español (mensajes, avisos, CLI, README, docs); D-2 → sí (0.3.0); D-3 → sin cotas superiores, prueba semanal con las últimas versiones, extras de gráficas pospuestos; D-4 → demanda 0 es clase C; D-5 → sin tags históricos. Decisión **D-6** (resuelta el 2026-10-02): se tradujo también todo lo que ve la persona usuaria (columnas de DataFrame, etiquetas de `summary()`, nodos KPI, textos de gráficas, docstrings), registrado como cambio que rompe compatibilidad en 0.3.0; los identificadores y las claves de datos siguen en inglés.
 
 | Tarea | Estado | Nota |
 |---|---|---|

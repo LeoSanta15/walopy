@@ -44,6 +44,8 @@ pip install -e . && python -c "import <paquete>"
 - [ ] `pytest` configurado en `pyproject.toml` (`testpaths`, `addopts`)
 - [ ] Fixture de semilla aleatoria (`rng = np.random.default_rng(seed)`) en `conftest.py`
 - [ ] Tests pasan en venv limpio
+- [ ] **Todo bug corregido tiene un test de regresión que FALLA en la versión anterior** (`scripts/verificar_regresion.py` + manifiesto `tests/regresiones.json`; un test que también pasa sin el fix no protege nada) *(C-32)*
+- [ ] Un test que verifica un detector (lint, idioma, barrido) incluye un **control negativo**: una entrada mala que debe ser señalada
 
 **Verificación:**
 ```bash
@@ -108,6 +110,10 @@ python -m pytest --cov=<paquete> --cov-report=term-missing -q
 - [ ] Jobs: tests, linter, tipos
 - [ ] Matrix multi-versión Python (mínimo versión mínima declarada + versión actual)
 - [ ] `fail-fast: false` en la matrix para ver todos los fallos
+- [ ] Los gates del Playbook (linter, tipos, cobertura, build, docs, `pip-audit`) son **jobs del CI**, no solo comandos de la lista *(C-15)*
+- [ ] Instalación de la rueda en un entorno limpio con comprobación de `py.typed` y de la versión
+- [ ] Job de regresión: los tests de cada bug fallan en el tag anterior (`verificar_regresion.py`, `fetch-depth: 0`)
+- [ ] Pasos de shell que buscan patrones: `if grep …; then exit 1; fi` (un `!` no detiene `set -e`) y excluyendo el propio archivo del patrón *(C-25, C-27)*
 
 **Verificación:**
 ```bash
@@ -126,6 +132,11 @@ cat .github/workflows/tests.yml | grep "python-version"
 - [ ] Manejo explícito de: NaN/inf, arrays vacíos, tipos incorrectos, casos degenerados (n=0, sigma=0)
 - [ ] Dependencias opcionales: `ImportError` capturado con mensaje `pip install X`
 - [ ] Estado global (matplotlib rcParams, warnings): usar context managers
+- [ ] **NaN antes de comparar**: `isfinite` primero, luego `<`/`<=` (con NaN toda comparación es `False`); `bool` no es un número ni un entero *(C-09)*
+- [ ] **Barrido de contrato** sobre todo `__all__`: cada argumento × `[nan, inf, -inf, -1, 0, None, "x", []]` solo puede dar `ValueError`/`TypeError` o un resultado finito, y cada función nueva debe entrar en la tabla *(C-14)*
+- [ ] Cotas de tamaño (`MAX_*`) en todo parámetro que dimensiona un cálculo y límite de iteraciones en las búsquedas *(C-18)*
+- [ ] Nada se recorta, fusiona ni descarta en silencio: duplicados → error, cota alcanzada → `UserWarning` *(C-13, C-16)*
+- [ ] Listas de registros (`list[dict]`): comprobar tipo y claves con mensaje `items[i]: falta la clave …`
 
 **Verificación:**
 ```bash
@@ -142,6 +153,8 @@ python -c "import numpy as np; import <paquete>; <paquete>.funcion_publica(np.ar
 - [ ] Docstring de cada función pública incluye sección `Raises` con condiciones
 - [ ] Tests parametrizados que cubren: vacío, NaN, n=1, n=2, valores extremos
 - [ ] Comportamiento con datos constantes (std=0) definido y testeado
+- [ ] Caso a escala: un tamaño 10× el caso típico (c = 150, n = 1000) con tiempo medido; fórmulas con potencias/factoriales sustituidas por recurrencias estables *(C-11, C-12)*
+- [ ] Resultados sin `-0.0` (`round(x, 10) + 0.0`) y empates de heurísticas con tolerancia relativa *(C-21, C-26)*
 
 **Verificación:**
 ```bash
@@ -158,6 +171,9 @@ python -m pytest tests/ -k "nan or edge or empty or zero" -v
 - [ ] Docstrings completos en todas las funciones públicas (parámetros, retorno, raises, ejemplo)
 - [ ] CHANGELOG.md con entradas por versión
 - [ ] Sphinx (o equivalente) construye sin warnings con `-W`
+- [ ] **Los ejemplos de README y docs son tests** y los doctests están activos (`--doctest-modules` en `addopts`, `--import-mode=importlib`) *(C-10, C-19)*
+- [ ] Cada símbolo de `__all__` aparece en README y Sphinx (test que compara ambos) *(C-17)*
+- [ ] En ejemplos, mostrar valores redondeados, no desigualdades con límites inventados *(C-20)*
 
 **Verificación:**
 ```bash
@@ -175,6 +191,9 @@ grep -r "TU_USUARIO\|PLACEHOLDER\|TODO" README.md docs/
 - [ ] Todos los errores de usuario son `ValueError` o `TypeError` con mensaje en español (o el idioma del proyecto)
 - [ ] Nombres consistentes: snake_case para funciones, PascalCase para clases
 - [ ] `__all__` completo en `__init__.py`
+- [ ] **Política de idioma comprobada por un test** (`tests/test_idioma.py`: mensajes, avisos y docstrings recorridos con `ast`, con control negativo); distinguir *claves de datos* (inmutables, en inglés) de *cabeceras de presentación* (`.rename(columns=…)`) *(C-30, C-31)*
+- [ ] Reemplazos masivos (glosarios) solo con revisión del diff y suite completa después de cada paso *(C-31)*
+- [ ] Capturas amplias (`except Exception`) solo con un parámetro explícito para propagar el error *(C-29)*
 
 ---
 
@@ -187,6 +206,9 @@ grep -r "TU_USUARIO\|PLACEHOLDER\|TODO" README.md docs/
 - [ ] Tags git para cada release (`vX.Y.Z`)
 - [ ] CI de publicación a PyPI en push de tag
 - [ ] `twine check dist/*` en CI antes de publicar
+- [ ] El job de publicación verifica que el tag coincide con la versión del paquete y repite tests, linter y tipos antes de construir
+- [ ] Test del fallback de `__version__` (paquete sin instalar) y de que los metadatos instalados coinciden *(C-24, C-08)*
+- [ ] Cada rama de trabajo parte de `origin/main` recién traído (`git merge-base --is-ancestor origin/main HEAD`); tras un merge *squash*, reiniciarla desde `main` *(C-28)*
 
 **Verificación:**
 ```bash
@@ -237,6 +259,7 @@ grep -r "TU_USUARIO\|spyc\|nombre_viejo" CLAUDE.md CONTRIBUTING.md
 - [ ] Benchmarks documentados para las operaciones críticas
 - [ ] `benchmarks/` con scripts reproducibles
 - [ ] Sin regresiones de rendimiento entre versiones mayores
+- [ ] **Complejidad anunciada verificada empíricamente** (tabla de tiempos con n creciente; test de tiempo con margen amplio) *(C-11)*
 
 **Verificación:**
 ```bash

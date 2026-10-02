@@ -1,4 +1,4 @@
-"""Open Jackson network of queues."""
+"""Red abierta de colas de Jackson."""
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -15,23 +15,23 @@ if TYPE_CHECKING:
 
 @dataclass
 class StationMetrics:
-    """Per-station metrics in a Jackson network.
+    """Métricas por estación en una red de Jackson.
 
     Attributes
     ----------
     name : str
     lam_total : float
-        Total arrival rate (external + routed from other stations).
+        Tasa total de llegadas (externas + ruteadas desde otras estaciones).
     lam_external : float
-        External (Poisson) arrival rate.
+        Tasa de llegadas externas (Poisson).
     mu : float
-        Service rate per server.
+        Tasa de servicio por servidor.
     servers : int
-        Number of servers.
+        Número de servidores.
     rho : float
-        Utilization = lam_total / (servers × mu).
+        Utilización = lam_total / (servidores × mu).
     L, Lq, W, Wq : float
-        Standard M/M/c metrics.
+        Métricas M/M/c estándar.
     """
 
     name: str
@@ -48,16 +48,16 @@ class StationMetrics:
 
 @dataclass
 class JacksonResult:
-    """Result of an open Jackson network analysis.
+    """Resultado del análisis de una red abierta de Jackson.
 
     Attributes
     ----------
     stations : list[StationMetrics]
-        Per-station metrics.
+        Métricas por estación.
     L_system : float
-        Total expected customers across all stations (sum of L_j).
+        Total esperado de clientes en todas las estaciones (suma de L_j).
     W_system : float
-        Mean sojourn time through the network = L_system / total external arrival rate.
+        Tiempo medio de permanencia en la red = L_system / tasa total de llegadas externas.
     params : dict
     """
 
@@ -69,7 +69,7 @@ class JacksonResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Station":   s.name,
+            "Estación":   s.name,
             "λ_ext":     s.lam_external,
             "λ_total":   s.lam_total,
             "μ":         s.mu,
@@ -83,7 +83,7 @@ class JacksonResult:
 
     def summary(self) -> str:
         hdr = (
-            f"{'Station':<20} {'λ_ext':>8} {'λ_tot':>8} {'c':>4} "
+            f"{'Estación':<20} {'λ_ext':>8} {'λ_tot':>8} {'c':>4} "
             f"{'ρ':>6} {'L':>8} {'Lq':>8} {'W':>10} {'Wq':>10}"
         )
         sep = "-" * len(hdr)
@@ -96,8 +96,8 @@ class JacksonResult:
             )
         lines += [
             sep,
-            f"L_system : {self.L_system:.6g}  (total customers in network)",
-            f"W_system : {self.W_system:.6g}  (mean sojourn time through network)",
+            f"L_sistema : {self.L_system:.6g}  (clientes totales en la red)",
+            f"W_sistema : {self.W_system:.6g}  (tiempo medio de permanencia en la red)",
         ]
         return "\n".join(lines)
 
@@ -113,29 +113,28 @@ def jackson_network(
     *,
     servers: Sequence[int] | None = None,
 ) -> JacksonResult:
-    """Analyse an open Jackson network of queues.
+    """Analiza una red abierta de colas de Jackson.
 
-    In an open Jackson network, customers arrive from outside according to
-    Poisson processes (rates *gamma*), receive exponential service at each
-    station they visit, and are routed probabilistically between stations
-    until they leave the system.  By the Jackson theorem each station
-    behaves as an independent M/M/c queue with the effective arrival rate
-    obtained from the traffic equations.
+    En una red abierta de Jackson los clientes llegan desde fuera según procesos
+    de Poisson (tasas *gamma*), reciben servicio exponencial en cada estación que
+    visitan y se enrutan de forma probabilística entre estaciones hasta salir
+    del sistema. Por el teorema de Jackson cada estación se comporta como una cola
+    M/M/c independiente con la tasa de llegada efectiva obtenida de las ecuaciones de tráfico.
 
     Parameters
     ----------
     station_names : sequence of str
-        Names of the J stations.
+        Nombres de las J estaciones.
     mu : sequence of float
-        Service rate μ_j per server at each station.
+        Tasa de servicio μ_j por servidor en cada estación.
     gamma : sequence of float
-        External (Poisson) arrival rate γ_j at each station (0 if none).
+        Tasa de llegadas externas (Poisson) γ_j en cada estación (0 si no hay).
     routing : (J, J) array-like
-        Routing matrix P where P[i][j] = probability of going from
-        station *i* to station *j* after service at *i*.
-        Rows must sum to ≤ 1; the remaining fraction leaves the system.
+        Matriz de ruteo P donde P[i][j] = probabilidad de ir de la estación *i* a la
+        estación *j* tras el servicio en *i*. Las filas deben sumar ≤ 1; la fracción
+        restante sale del sistema.
     servers : sequence of int, optional
-        Number of servers c_j at each station.  Defaults to 1 everywhere.
+        Número de servidores c_j en cada estación. Por defecto 1 en todas.
 
     Returns
     -------
@@ -144,7 +143,7 @@ def jackson_network(
     Raises
     ------
     ValueError
-        If the system is unstable (ρ_j ≥ 1 at any station).
+        Si el sistema es inestable (ρ_j ≥ 1 en alguna estación).
 
     Examples
     --------

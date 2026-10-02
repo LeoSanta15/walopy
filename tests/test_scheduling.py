@@ -83,7 +83,7 @@ def test_johnson_to_frame():
     df = wl.johnson_flowshop([2, 3], [4, 1]).to_frame()
     assert isinstance(df, pd.DataFrame)
     assert "Makespan" not in df.columns   # frame has job rows, not totals
-    assert "M1 start" in df.columns
+    assert "M1 inicio" in df.columns
 
 
 def test_johnson_names():

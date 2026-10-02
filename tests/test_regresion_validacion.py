@@ -251,7 +251,7 @@ def test_break_even_multi_rechaza_no_finitos(campo):
 
 def test_break_even_multi_acepta_pesos_relativos():
     r = wl.break_even_multi(1000.0, [10.0, 20.0], [4.0, 8.0], [3.0, 1.0])
-    assert r.items[0]["Mix"] == pytest.approx(0.75)
+    assert r.items[0]["Mezcla"] == pytest.approx(0.75)
 
 
 @pytest.mark.parametrize("n_max", [-1, -1.0, 2.5, True, None])

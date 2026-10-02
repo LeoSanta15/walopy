@@ -28,7 +28,7 @@ def test_mmc_coincide_con_nacimiento_muerte(c):
     p0, lq = _nacimiento_muerte(lam, mu, c, n_max=c + 40000)
     assert r.Lq == pytest.approx(lq, rel=1e-6)
     if p0 > 1e-250:
-        assert r.params["P0 (idle probability)"] == pytest.approx(p0, rel=1e-6)
+        assert r.params["P0 (prob. de sistema vacío)"] == pytest.approx(p0, rel=1e-6)
 
 
 def test_mmc_valores_historicos_no_cambian():
@@ -37,7 +37,7 @@ def test_mmc_valores_historicos_no_cambian():
     assert r.L == pytest.approx(3.4235027, rel=1e-6)
     # M/M/2 con λ=2, μ=3 a mano: a=2/3, ρ=1/3, P0=1/2, Lq = P0·a²·ρ / (2(1-ρ)²) = 1/12.
     r = wl.mmc(2.0, 3.0, 2)
-    assert r.params["P0 (idle probability)"] == pytest.approx(0.5, rel=1e-12)
+    assert r.params["P0 (prob. de sistema vacío)"] == pytest.approx(0.5, rel=1e-12)
     assert r.Lq == pytest.approx(1.0 / 12.0, rel=1e-12)
 
 
@@ -50,7 +50,7 @@ def test_mmc_carga_muy_grande_no_desborda():
 def test_mmc_pocas_llegadas_con_muchos_servidores():
     r = wl.mmc(1e-3, 1.0, 10_000)
     assert r.Lq == pytest.approx(0.0, abs=1e-12)
-    assert r.params["P0 (idle probability)"] == pytest.approx(math.exp(-1e-3), rel=1e-6)
+    assert r.params["P0 (prob. de sistema vacío)"] == pytest.approx(math.exp(-1e-3), rel=1e-6)
 
 
 def test_mmc_rechaza_demasiados_servidores():

@@ -64,7 +64,7 @@ def test_to_frame():
                          routing=[[0.0, 1.0], [0.0, 0.0]])
     df = r.to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "Station" in df.columns
+    assert "Estación" in df.columns
     assert len(df) == 2
 
 

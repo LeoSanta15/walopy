@@ -92,7 +92,7 @@ def test_to_frame():
     import pandas as pd
     df = wl.weibull_analysis(TIMES).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "shape_beta" in df.columns
+    assert "β (forma)" in df.columns
     assert "MTTF" in df.columns
 
 

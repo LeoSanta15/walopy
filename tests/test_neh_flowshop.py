@@ -84,9 +84,9 @@ def test_to_frame_columns():
     import pandas as pd
     df = wl.neh_flowshop(TIMES_4x2).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "M1_start" in df.columns
-    assert "M2_start" in df.columns
-    assert "M1_end"   in df.columns
+    assert "M1_inicio" in df.columns
+    assert "M2_inicio" in df.columns
+    assert "M1_fin"   in df.columns
 
 
 def test_no_negative_start_times():

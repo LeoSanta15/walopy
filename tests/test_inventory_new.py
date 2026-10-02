@@ -61,8 +61,8 @@ def test_eoq_multi_two_items():
 
 def test_eoq_multi_names():
     r = wl.eoq_multi([100, 200], [10, 20], [1, 2], names=["A", "B"])
-    assert r.items[0]["Name"] == "A"
-    assert r.items[1]["Name"] == "B"
+    assert r.items[0]["Artículo"] == "A"
+    assert r.items[1]["Artículo"] == "B"
 
 
 def test_eoq_multi_to_frame():
@@ -182,7 +182,7 @@ def test_lot_for_lot_total_cost():
 def test_lot_for_lot_to_frame():
     r = wl.lot_for_lot([100, 80, 120], 200, 1)
     df = r.to_frame()
-    assert "order_qty" in df.columns
+    assert "cantidad_pedido" in df.columns
 
 
 # ─── Silver-Meal ─────────────────────────────────────────────────────────────
@@ -221,13 +221,13 @@ def test_eoq_quantity_discount_selects_min_cost():
     )
     assert r.total_cost > 0
     # Must be minimum among all candidates
-    assert r.total_cost == min(c["Total cost"] for c in r.candidates)
+    assert r.total_cost == min(c["Costo total"] for c in r.candidates)
 
 
 def test_eoq_quantity_discount_to_frame():
     r = wl.eoq_quantity_discount(1000, 50, 0.2, [(0, 10.0), (500, 9.5)])
     df = r.to_frame()
-    assert "Total cost" in df.columns
+    assert "Costo total" in df.columns
 
 
 def test_eoq_quantity_discount_valid_price():
@@ -250,7 +250,7 @@ def test_break_even_multi_basic():
 
 def test_break_even_multi_sum_equals_total():
     r = wl.break_even_multi(120_000, [50, 80], [30, 50], [1, 1])
-    total_from_items = sum(item["BEP units"] for item in r.items)
+    total_from_items = sum(item["PE unidades"] for item in r.items)
     assert total_from_items == pytest.approx(r.bep_units_total, rel=1e-9)
 
 
@@ -264,7 +264,7 @@ def test_break_even_multi_wacm():
 def test_break_even_multi_to_frame():
     r = wl.break_even_multi(100_000, [50, 80], [30, 50], [1, 1])
     df = r.to_frame()
-    assert "BEP units" in df.columns
+    assert "PE unidades" in df.columns
 
 
 def test_break_even_multi_negative_cm_raises():

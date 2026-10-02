@@ -1,4 +1,4 @@
-"""Project scheduling: CPM (Critical Path Method) and PERT."""
+"""Programación de proyectos: CPM (método de la ruta crítica) y PERT."""
 from __future__ import annotations
 
 import math
@@ -15,35 +15,35 @@ if TYPE_CHECKING:
 
 @dataclass
 class ActivityResult:
-    """Scheduled activity from CPM / PERT.
+    """Actividad programada por CPM / PERT.
 
     Attributes
     ----------
     name : str
     duration : float
-        Deterministic duration (CPM) or PERT expected duration te.
+        Duración determinística (CPM) o duración esperada tₑ de PERT.
     predecessors : list[str]
     es : float
-        Early start.
+        Inicio más temprano.
     ef : float
-        Early finish.
+        Fin más temprano.
     ls : float
-        Late start.
+        Inicio más tardío.
     lf : float
-        Late finish.
+        Fin más tardío.
     total_float : float
-        Total float (slack) = LS − ES.
+        Holgura total = LS − ES.
     free_float : float
-        Free float = min(ES of successors) − EF.
+        Holgura libre = min(ES de los sucesores) − EF.
     is_critical : bool
     optimistic : float | None
-        PERT only.
+        Solo PERT.
     most_likely : float | None
-        PERT only.
+        Solo PERT.
     pessimistic : float | None
-        PERT only.
+        Solo PERT.
     variance : float | None
-        ((b − a) / 6)² — PERT only.
+        ((b − a) / 6)² — solo PERT.
     """
 
     name: str
@@ -64,21 +64,21 @@ class ActivityResult:
 
 @dataclass
 class ProjectResult:
-    """CPM / PERT project schedule result.
+    """Resultado de la programación de un proyecto con CPM / PERT.
 
     Attributes
     ----------
     activities : list[ActivityResult]
     critical_path : list[str]
-        Activity names on the critical path in topological order.
+        Nombres de las actividades de la ruta crítica en orden topológico.
     project_duration : float
-        Earliest project completion time (expected duration for PERT).
+        Menor tiempo de terminación del proyecto (duración esperada en PERT).
     method : str
-        ``'CPM'`` or ``'PERT'``.
+        ``'CPM'`` o ``'PERT'``.
     project_variance : float | None
-        Sum of critical-path variances (PERT only).
+        Suma de las varianzas de la ruta crítica (solo PERT).
     project_std : float | None
-        √(project_variance) (PERT only).
+        √(project_variance) (solo PERT).
     """
 
     activities: list
@@ -89,12 +89,12 @@ class ProjectResult:
     project_std: float | None = None
 
     def probability(self, target: float) -> float:
-        """P(project duration ≤ target) via normal approximation (PERT only).
+        """P(duración del proyecto ≤ objetivo) mediante aproximación normal (solo PERT).
 
         Parameters
         ----------
         target : float
-            Target project completion time T.
+            Tiempo objetivo T de terminación del proyecto.
 
         Returns
         -------
@@ -109,26 +109,26 @@ class ProjectResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Activity":    a.name,
-            "Duration":    a.duration,
-            "Predecessors": ", ".join(str(p) for p in a.predecessors),
+            "Actividad":    a.name,
+            "Duración":    a.duration,
+            "Predecesoras": ", ".join(str(p) for p in a.predecessors),
             "ES": a.es,  "EF": a.ef,
             "LS": a.ls,  "LF": a.lf,
-            "TF": a.total_float,
-            "FF": a.free_float,
-            "Critical": a.is_critical,
+            "HT": a.total_float,
+            "HL": a.free_float,
+            "Crítica": a.is_critical,
         } for a in self.activities])
 
     def summary(self) -> str:
         lines = [
-            f"Method           : {self.method}",
-            f"Project duration : {self.project_duration:.4g}",
-            f"Critical path    : {' → '.join(self.critical_path)}",
+            f"Método            : {self.method}",
+            f"Duración proyecto  : {self.project_duration:.4g}",
+            f"Ruta crítica       : {' → '.join(self.critical_path)}",
         ]
         if self.project_variance is not None:
             lines += [
-                f"Project variance : {self.project_variance:.4g}",
-                f"Project σ        : {self.project_std:.4g}",
+                f"Varianza proyecto  : {self.project_variance:.4g}",
+                f"σ del proyecto     : {self.project_std:.4g}",
             ]
         return "\n".join(lines)
 
@@ -164,7 +164,7 @@ def _leer_actividades(activities) -> list:
 
 
 def _toposort_and_succ(acts: dict) -> tuple:
-    """Kahn's algorithm. Returns (topo_order, successors_dict)."""
+    """Algoritmo de Kahn. Devuelve (orden_topológico, diccionario_de_sucesores)."""
     in_deg: dict = {name: 0 for name in acts}
     succ:   dict = {name: [] for name in acts}
     for name, act in acts.items():
@@ -190,7 +190,7 @@ def _toposort_and_succ(acts: dict) -> tuple:
 
 
 def _forward_backward(acts: dict, durations: dict) -> tuple:
-    """Forward + backward pass. Returns (ES, EF, LS, LF, T, succ)."""
+    """Pasada hacia adelante y hacia atrás. Devuelve (ES, EF, LS, LF, T, sucesores)."""
     order, succ = _toposort_and_succ(acts)
 
     ES: dict = {}
@@ -239,25 +239,25 @@ def _build_results(acts: dict, durations: dict, ES, EF, LS, LF, T, succ,
 # ---------------------------------------------------------------------------
 
 def cpm(activities: list) -> ProjectResult:
-    """Critical Path Method (CPM) for deterministic project scheduling.
+    """Método de la Ruta Crítica (CPM) para la programación determinística de proyectos.
 
-    Computes early/late start and finish times, total and free float, and
-    identifies the critical path (activities with zero total float).
+    Calcula los tiempos de inicio y fin más tempranos y más tardíos, las holguras total y
+    libre, e identifica la ruta crítica (actividades con holgura total cero).
 
     Parameters
     ----------
     activities : list of dict
-        Each dict must have:
+        Cada diccionario debe tener:
 
-        - ``'name'``: activity identifier (str).
-        - ``'duration'``: deterministic processing time (float ≥ 0).
-        - ``'predecessors'``: list of predecessor names (empty for start activities).
+        - ``'name'``: identificador de la actividad (str).
+        - ``'duration'``: tiempo de proceso determinístico (float ≥ 0).
+        - ``'predecessors'``: lista de nombres de predecesoras (vacía en las actividades iniciales).
 
     Returns
     -------
     ProjectResult
-        ``method = 'CPM'``.  ``project_variance`` and ``project_std`` are
-        ``None`` for CPM.
+        ``method = 'CPM'``. ``project_variance`` y ``project_std`` son
+        ``None`` en CPM.
 
 
     Raises
@@ -305,32 +305,32 @@ def cpm(activities: list) -> ProjectResult:
 
 
 def pert(activities: list) -> ProjectResult:
-    """PERT (Program Evaluation and Review Technique) project scheduling.
+    """Programación de proyectos PERT (Técnica de Evaluación y Revisión de Programas).
 
-    Uses the three-estimate beta-distribution approximation:
+    Usa la aproximación de la distribución beta con tres estimaciones:
 
-        te = (a + 4m + b) / 6       (expected duration)
-        σ² = ((b − a) / 6)²         (variance)
+        te = (a + 4m + b) / 6       (duración esperada)
+        σ² = ((b − a) / 6)²         (varianza)
 
-    The project duration distribution is approximated as normal with
-    μ = expected critical-path length and σ² = sum of critical-path variances.
+    La distribución de la duración del proyecto se aproxima como normal con
+    μ = longitud esperada de la ruta crítica y σ² = suma de las varianzas de la ruta crítica.
 
     Parameters
     ----------
     activities : list of dict
-        Each dict must have:
+        Cada diccionario debe tener:
 
-        - ``'name'``: activity identifier.
-        - ``'optimistic'`` (a): best-case duration.
-        - ``'most_likely'`` (m): most probable duration.
-        - ``'pessimistic'`` (b): worst-case duration.
-        - ``'predecessors'``: list of predecessor names.
+        - ``'name'``: identificador de la actividad.
+        - ``'optimistic'`` (a): duración en el mejor caso.
+        - ``'most_likely'`` (m): duración más probable.
+        - ``'pessimistic'`` (b): duración en el peor caso.
+        - ``'predecessors'``: lista de nombres de predecesoras.
 
     Returns
     -------
     ProjectResult
-        ``project_duration`` is the expected critical-path length.
-        Call ``.probability(T)`` for P(completion ≤ T).
+        ``project_duration`` es la longitud esperada de la ruta crítica.
+        Llame a ``.probability(T)`` para P(terminación ≤ T).
 
 
     Raises

@@ -1,4 +1,4 @@
-"""Advanced queuing models, simulation, line balancing and break-even analysis."""
+"""Modelos de colas avanzados, simulación, balance de línea y análisis de punto de equilibrio."""
 from __future__ import annotations
 
 import math
@@ -31,24 +31,24 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 def erlang_b(lam: float, mu: float, c: int) -> float:
-    """Erlang B formula — blocking probability for an M/M/c/c loss system.
+    """Fórmula Erlang B: probabilidad de bloqueo de un sistema de pérdida M/M/c/c.
 
-    In a loss system there is no waiting room: arriving customers who find
-    all *c* servers busy are lost (blocked).
+    En un sistema de pérdida no hay sala de espera: los clientes que llegan y encuentran
+    los *c* servidores ocupados se pierden (se bloquean).
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ per server.
+        Tasa de servicio μ por servidor.
     c : int
-        Number of servers (= system capacity).
+        Número de servidores (= capacidad del sistema).
 
     Returns
     -------
     float
-        Blocking probability B(c, a) ∈ [0, 1].
+        Probabilidad de bloqueo B(c, a) ∈ [0, 1].
 
     Raises
     ------
@@ -81,25 +81,25 @@ def erlang_b(lam: float, mu: float, c: int) -> float:
 # ---------------------------------------------------------------------------
 
 def mm1k(lam: float, mu: float, K: int) -> QueueResult:
-    """M/M/1/K queue — single server with finite waiting room.
+    """Cola M/M/1/K: un servidor con sala de espera finita.
 
-    The system capacity is *K* (server + queue).  Customers arriving when
-    the system is full are lost.
+    La capacidad del sistema es *K* (servidor + cola). Los clientes que llegan cuando
+    el sistema está lleno se pierden.
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ.
+        Tasa de servicio μ.
     K : int
-        System capacity (maximum customers in system, ≥ 1).
+        Capacidad del sistema (máximo de clientes en el sistema, ≥ 1).
 
     Returns
     -------
     QueueResult
-        Note: ``rho`` here is traffic intensity λ/μ (may be ≥ 1);
-        the system is always stable because of finite capacity.
+        Nota: aquí ``rho`` es la intensidad de tráfico λ/μ (puede ser ≥ 1);
+        el sistema siempre es estable por su capacidad finita.
 
     Raises
     ------
@@ -148,10 +148,10 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
         W=W,
         Wq=Wq,
         params={
-            "K (capacity)": K,
-            "P0 (idle)": Pn[0],
-            "PK (blocking prob)": PK,
-            "λ_eff (effective rate)": lam_eff,
+            "K (capacidad)": K,
+            "P0 (vacío)": Pn[0],
+            "PK (prob. de bloqueo)": PK,
+            "λ_eff (tasa efectiva)": lam_eff,
         },
     )
 
@@ -162,18 +162,18 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
 
 @dataclass
 class SimulationResult:
-    """Result of a Monte-Carlo G/G/1 simulation.
+    """Resultado de una simulación Monte Carlo G/G/1.
 
     Attributes
     ----------
     model : str
     lam, mu : float
     rho : float
-    Wq_mean : float  Average waiting time in queue.
-    W_mean  : float  Average sojourn time.
-    Lq : float  Average queue length (via Little's Law).
-    L  : float  Average system length.
-    Wq_p50, Wq_p90, Wq_p95, Wq_p99 : float  Percentiles of Wq.
+    Wq_mean : float  Tiempo de espera promedio en cola.
+    W_mean  : float  Tiempo de permanencia promedio.
+    Lq : float  Longitud promedio de la cola (por la ley de Little).
+    L  : float  Longitud promedio del sistema.
+    Wq_p50, Wq_p90, Wq_p95, Wq_p99 : float  Percentiles de Wq.
     n_customers : int
     params : dict
     """
@@ -200,27 +200,27 @@ class SimulationResult:
             "λ": self.lam,
             "μ": self.mu,
             "ρ": self.rho,
-            "Wq mean": self.Wq_mean,
-            "W mean": self.W_mean,
+            "Wq medio": self.Wq_mean,
+            "W medio": self.W_mean,
             "Lq": self.Lq,
             "L": self.L,
             "Wq p50": self.Wq_p50,
             "Wq p90": self.Wq_p90,
             "Wq p95": self.Wq_p95,
             "Wq p99": self.Wq_p99,
-            "N customers": self.n_customers,
+            "N clientes": self.n_customers,
         }])
 
     def summary(self) -> str:
         return (
-            f"Model  : {self.model}\n"
-            f"N      : {self.n_customers:,}\n"
-            f"ρ      : {self.rho:.4f}\n"
-            f"Wq mean: {self.Wq_mean:.6g}  (p50={self.Wq_p50:.4g}  p90={self.Wq_p90:.4g}"
+            f"Modelo   : {self.model}\n"
+            f"N        : {self.n_customers:,}\n"
+            f"ρ        : {self.rho:.4f}\n"
+            f"Wq medio : {self.Wq_mean:.6g}  (p50={self.Wq_p50:.4g}  p90={self.Wq_p90:.4g}"
             f"  p95={self.Wq_p95:.4g}  p99={self.Wq_p99:.4g})\n"
-            f"W mean : {self.W_mean:.6g}\n"
-            f"Lq     : {self.Lq:.6g}\n"
-            f"L      : {self.L:.6g}"
+            f"W medio  : {self.W_mean:.6g}\n"
+            f"Lq       : {self.Lq:.6g}\n"
+            f"L        : {self.L:.6g}"
         )
 
     def __str__(self) -> str:
@@ -240,27 +240,26 @@ def monte_carlo_gg1(
     n_customers: int = 20_000,
     seed: int | None = None,
 ) -> SimulationResult:
-    """Monte-Carlo simulation of a G/G/1 single-server queue.
+    """Simulación Monte Carlo de una cola G/G/1 de un servidor.
 
-    Inter-arrival and service times are drawn from Gamma distributions
-    matched to the given mean and squared coefficient of variation.
-    When CV² = 0 the times are deterministic; when CV² = 1 they are
-    exponential (recovering the M/M/1 case).
+    Los tiempos entre llegadas y de servicio se extraen de distribuciones Gamma ajustadas
+    a la media y al coeficiente de variación al cuadrado dados. Con CV² = 0 los tiempos son
+    determinísticos; con CV² = 1 son exponenciales (se recupera el caso M/M/1).
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ (= 1 / mean service time).
+        Tasa de servicio μ (= 1 / tiempo medio de servicio).
     ca2 : float
-        Squared coefficient of variation of inter-arrival times (≥ 0).
+        Coeficiente de variación al cuadrado de los tiempos entre llegadas (≥ 0).
     cs2 : float
-        Squared coefficient of variation of service times (≥ 0).
+        Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0).
     n_customers : int
-        Number of customers to simulate (default 20 000).
+        Número de clientes a simular (por defecto 20 000).
     seed : int, optional
-        Random seed for reproducibility.
+        Semilla aleatoria para reproducibilidad.
 
     Returns
     -------
@@ -318,7 +317,7 @@ def monte_carlo_gg1(
     pct        = np.percentile(wait, [50, 90, 95, 99])
 
     return SimulationResult(
-        model=f"G/G/1 simulation (ca²={ca2:.3g}, cs²={cs2:.3g})",
+        model=f"Simulación G/G/1 (ca²={ca2:.3g}, cs²={cs2:.3g})",
         lam=lam,
         mu=mu,
         rho=rho,
@@ -341,20 +340,20 @@ def monte_carlo_gg1(
 # ---------------------------------------------------------------------------
 
 def takt_time(available_time: float, demand: float) -> float:
-    """Compute takt time = available production time / customer demand.
+    """Calcula el tiempo takt = tiempo de producción disponible / demanda del cliente.
 
     Parameters
     ----------
     available_time : float
-        Net production time available in the period (same units as the
-        result, e.g. seconds, minutes).
+        Tiempo neto de producción disponible en el periodo (mismas unidades que el
+        resultado, p. ej. segundos o minutos).
     demand : float
-        Number of units (or customers) demanded in the same period.
+        Número de unidades (o clientes) demandadas en el mismo periodo.
 
     Returns
     -------
     float
-        Takt time (time per unit).
+        Tiempo takt (tiempo por unidad).
 
     Raises
     ------
@@ -378,22 +377,22 @@ def takt_time(available_time: float, demand: float) -> float:
 
 @dataclass
 class LineBalanceResult:
-    """Result of a production line balance analysis.
+    """Resultado del análisis de balance de una línea de producción.
 
     Attributes
     ----------
     takt : float
-        Takt time.
+        Tiempo takt.
     n_stations : int
-        Number of stations analysed.
+        Número de estaciones analizadas.
     balance_efficiency : float
-        Sum of cycle times / (n_stations × takt).
+        Suma de tiempos de ciclo / (n_stations × takt).
     theoretical_min_stations : int
-        ceil(sum(cycle times) / takt).
+        ceil(suma(tiempos de ciclo) / takt).
     stations : pd.DataFrame
-        Per-station metrics: name, cycle_time, idle_time, utilization, overloaded.
+        Métricas por estación: Estación, Tiempo_ciclo, Tiempo_ocioso, Utilización, Sobrecargada.
     bottleneck : str
-        Station with the highest cycle time.
+        Estación con el mayor tiempo de ciclo.
     """
 
     takt: float
@@ -406,11 +405,11 @@ class LineBalanceResult:
 
     def summary(self) -> str:
         return (
-            f"Takt time               : {self.takt:.6g}\n"
-            f"Stations                : {self.n_stations}\n"
-            f"Theoretical minimum     : {self.theoretical_min_stations}\n"
-            f"Balance efficiency      : {self.balance_efficiency:.2%}\n"
-            f"Bottleneck station      : {self.bottleneck}\n"
+            f"Tiempo takt             : {self.takt:.6g}\n"
+            f"Estaciones              : {self.n_stations}\n"
+            f"Mínimo teórico          : {self.theoretical_min_stations}\n"
+            f"Eficiencia de balance   : {self.balance_efficiency:.2%}\n"
+            f"Estación cuello de botella: {self.bottleneck}\n"
         )
 
     def __str__(self) -> str:
@@ -426,16 +425,16 @@ def line_balance(
     cycle_times: Sequence[float],
     takt: float,
 ) -> LineBalanceResult:
-    """Analyse the balance of a production or service line.
+    """Analiza el balance de una línea de producción o de servicio.
 
     Parameters
     ----------
     station_names : sequence of str
-        Station names.
+        Nombres de las estaciones.
     cycle_times : sequence of float
-        Actual cycle time per station.
+        Tiempo de ciclo real por estación.
     takt : float
-        Takt time (available time / demand).
+        Tiempo takt (tiempo disponible / demanda).
 
     Returns
     -------
@@ -473,11 +472,11 @@ def line_balance(
     min_stat    = math.ceil(sum_ct / takt)
 
     df = pd.DataFrame({
-        "Station":    names,
-        "CycleTime":  cts,
-        "IdleTime":   idle,
-        "Utilization": utils,
-        "Overloaded": overloaded,
+        "Estación":    names,
+        "Tiempo_ciclo":  cts,
+        "Tiempo_ocioso":   idle,
+        "Utilización": utils,
+        "Sobrecargada": overloaded,
     })
 
     return LineBalanceResult(
@@ -496,22 +495,22 @@ def line_balance(
 
 @dataclass
 class BreakEvenResult:
-    """Break-even analysis result.
+    """Resultado del análisis de punto de equilibrio.
 
     Attributes
     ----------
     bep_units : float
-        Break-even volume in units.
+        Volumen de equilibrio en unidades.
     bep_revenue : float
-        Break-even revenue.
+        Ingresos en el punto de equilibrio.
     contribution_margin : float
-        Price − variable cost per unit.
+        Precio − costo variable por unidad.
     contribution_margin_ratio : float
-        Contribution margin / price.
+        Margen de contribución / precio.
     margin_of_safety_units : float
-        Actual units − break-even units (if actual_units given).
+        Unidades reales − unidades de equilibrio (si se indica actual_units).
     margin_of_safety_pct : float
-        Margin of safety as fraction of actual units.
+        Margen de seguridad como fracción de las unidades reales.
     params : dict
     """
 
@@ -525,23 +524,23 @@ class BreakEvenResult:
 
     def to_frame(self) -> pd.DataFrame:
         return pd.DataFrame([{
-            "BEP (units)": self.bep_units,
-            "BEP (revenue)": self.bep_revenue,
-            "Contribution margin": self.contribution_margin,
-            "CM ratio": self.contribution_margin_ratio,
-            "Margin of safety (units)": self.margin_of_safety_units,
-            "Margin of safety (%)": self.margin_of_safety_pct,
+            "PE (unidades)": self.bep_units,
+            "PE (ingresos)": self.bep_revenue,
+            "Margen de contribución": self.contribution_margin,
+            "Razón MC": self.contribution_margin_ratio,
+            "Margen de seguridad (unidades)": self.margin_of_safety_units,
+            "Margen de seguridad (%)": self.margin_of_safety_pct,
         }])
 
     def summary(self) -> str:
         lines = [
-            f"Break-even (units)  : {self.bep_units:.4g}",
-            f"Break-even (revenue): {self.bep_revenue:.4g}",
-            f"Contribution margin : {self.contribution_margin:.4g}",
-            f"CM ratio            : {self.contribution_margin_ratio:.2%}",
+            f"Punto de equilibrio (unidades): {self.bep_units:.4g}",
+            f"Punto de equilibrio (ingresos): {self.bep_revenue:.4g}",
+            f"Margen de contribución        : {self.contribution_margin:.4g}",
+            f"Razón de contribución         : {self.contribution_margin_ratio:.2%}",
         ]
         if self.margin_of_safety_units:
-            lines.append(f"Margin of safety    : {self.margin_of_safety_units:.4g} units ({self.margin_of_safety_pct:.2%})")
+            lines.append(f"Margen de seguridad           : {self.margin_of_safety_units:.4g} unidades ({self.margin_of_safety_pct:.2%})")
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -559,18 +558,18 @@ def break_even(
     *,
     actual_units: float | None = None,
 ) -> BreakEvenResult:
-    """Compute break-even point and contribution margin.
+    """Calcula el punto de equilibrio y el margen de contribución.
 
     Parameters
     ----------
     fixed_cost : float
-        Total fixed cost for the period.
+        Costo fijo total del periodo.
     price_per_unit : float
-        Selling price per unit.
+        Precio de venta por unidad.
     variable_cost_per_unit : float
-        Variable cost per unit.
+        Costo variable por unidad.
     actual_units : float, optional
-        Actual production/sales volume (for margin-of-safety calculation).
+        Volumen real de producción o ventas (para calcular el margen de seguridad).
 
     Returns
     -------
@@ -632,21 +631,21 @@ def break_even(
 
 @dataclass
 class BreakEvenMultiResult:
-    """Multi-product break-even result.
+    """Resultado del punto de equilibrio con varios productos.
 
     Attributes
     ----------
     bep_units_total : float
-        Total break-even volume (all products combined).
+        Volumen de equilibrio total (todos los productos combinados).
     bep_revenue_total : float
-        Total break-even revenue.
+        Ingresos de equilibrio totales.
     weighted_avg_cm : float
-        Weighted-average contribution margin per unit.
+        Margen de contribución promedio ponderado por unidad.
     cm_ratio_weighted : float
-        Weighted CM ratio = WACM / weighted-average price.
+        Razón de MC ponderada = MCP / precio promedio ponderado.
     items : list[dict]
-        Per-product: name, price, variable_cost, cm, mix_fraction,
-        bep_units, bep_revenue.
+        Por producto: Producto, Precio, Costo variable, MC, Mezcla,
+        PE unidades, PE ingresos.
     params : dict
     """
 
@@ -662,18 +661,18 @@ class BreakEvenMultiResult:
 
     def summary(self) -> str:
         lines = [
-            f"Break-even (total units)  : {self.bep_units_total:.4g}",
-            f"Break-even (total revenue): {self.bep_revenue_total:.4g}",
-            f"Weighted avg CM           : {self.weighted_avg_cm:.4g}",
-            f"Weighted CM ratio         : {self.cm_ratio_weighted:.2%}",
+            f"Punto de equilibrio (unidades totales): {self.bep_units_total:.4g}",
+            f"Punto de equilibrio (ingresos totales): {self.bep_revenue_total:.4g}",
+            f"MC ponderado promedio                 : {self.weighted_avg_cm:.4g}",
+            f"Razón MC ponderada                    : {self.cm_ratio_weighted:.2%}",
             "",
-            f"{'Product':<18} {'Price':>8} {'VC':>8} {'CM':>8} {'Mix':>6} {'BEP units':>10} {'BEP rev':>10}",
+            f"{'Producto':<18} {'Precio':>8} {'CV':>8} {'MC':>8} {'Mezcla':>6} {'PE unid.':>10} {'PE ingr.':>10}",
             "-" * 72,
         ]
         for row in self.items:
             lines.append(
-                f"{row['Name']:<18} {row['Price']:>8.4g} {row['Variable cost']:>8.4g} "
-                f"{row['CM']:>8.4g} {row['Mix']:>6.2%} {row['BEP units']:>10.4g} {row['BEP revenue']:>10.4g}"
+                f"{row['Producto']:<18} {row['Precio']:>8.4g} {row['Costo variable']:>8.4g} "
+                f"{row['MC']:>8.4g} {row['Mezcla']:>6.2%} {row['PE unidades']:>10.4g} {row['PE ingresos']:>10.4g}"
             )
         return "\n".join(lines)
 
@@ -689,26 +688,26 @@ def break_even_multi(
     *,
     names: Sequence[str] | None = None,
 ) -> BreakEvenMultiResult:
-    """Multi-product break-even with sales mix.
+    """Punto de equilibrio con varios productos y mezcla de ventas.
 
-    Uses the weighted-average contribution margin (WACM) to find the
-    total break-even volume and then allocates by sales mix.
+    Usa el margen de contribución promedio ponderado (MCP) para hallar el volumen de
+    equilibrio total y luego lo reparte según la mezcla de ventas.
 
-    BEP_total = FC / WACM
-    BEP_i     = BEP_total × mix_i
+    PE_total = CF / MCP
+    PE_i     = PE_total × mezcla_i
 
     Parameters
     ----------
     fixed_cost : float
-        Total fixed cost for the period.
+        Costo fijo total del periodo.
     prices : sequence of float
-        Selling price per unit for each product.
+        Precio de venta por unidad de cada producto.
     variable_costs : sequence of float
-        Variable cost per unit for each product.
+        Costo variable por unidad de cada producto.
     sales_mix : sequence of float
-        Relative sales proportions (need not sum to 1; normalized internally).
+        Proporciones relativas de venta (no necesitan sumar 1; se normalizan internamente).
     names : sequence of str, optional
-        Product names.
+        Nombres de los productos.
 
     Returns
     -------
@@ -741,7 +740,7 @@ def break_even_multi(
     if len(variable_costs) != n or len(sales_mix) != n:
         raise ValueError("prices, variable_costs y sales_mix deben tener la misma longitud.")
     if names is None:
-        names = [f"Product-{i+1}" for i in range(n)]
+        names = [f"Producto-{i+1}" for i in range(n)]
     elif len(list(names)) != n:
         raise ValueError("'names' debe tener la misma longitud que prices.")
     fixed_cost = as_positive(fixed_cost, "fixed_cost")
@@ -764,13 +763,13 @@ def break_even_multi(
     for i in range(n):
         bep_i = bep_total * mix_frac[i]
         items.append({
-            "Name": names[i],
-            "Price": prices[i],
-            "Variable cost": variable_costs[i],
-            "CM": cms[i],
-            "Mix": mix_frac[i],
-            "BEP units": bep_i,
-            "BEP revenue": bep_i * prices[i],
+            "Producto": names[i],
+            "Precio": prices[i],
+            "Costo variable": variable_costs[i],
+            "MC": cms[i],
+            "Mezcla": mix_frac[i],
+            "PE unidades": bep_i,
+            "PE ingresos": bep_i * prices[i],
         })
 
     return BreakEvenMultiResult(
@@ -789,22 +788,22 @@ def break_even_sales(
     *,
     actual_revenue: float | None = None,
 ) -> BreakEvenResult:
-    """Break-even point expressed as sales revenue.
+    """Punto de equilibrio expresado como ingresos por ventas.
 
-    Uses the contribution margin ratio (CMR) when costs are given as fractions
-    of revenue rather than per-unit figures.
+    Usa la razón de margen de contribución (RMC) cuando los costos se dan como fracción
+    de los ingresos y no por unidad.
 
-    BEP_sales = FC / CMR = FC / (1 − variable_cost_ratio)
+    PE_ventas = CF / RMC = CF / (1 − variable_cost_ratio)
 
     Parameters
     ----------
     fixed_cost : float
-        Total fixed cost for the period.
+        Costo fijo total del periodo.
     variable_cost_ratio : float
-        Variable costs as a fraction of revenue ∈ (0, 1)  (e.g. 0.60 means
-        variable costs are 60% of every sales dollar).
+        Costos variables como fracción de los ingresos ∈ (0, 1)  (p. ej. 0.60 significa
+        que los costos variables son el 60 % de cada peso vendido).
     actual_revenue : float, optional
-        Actual revenue for margin-of-safety calculation.
+        Ingresos reales para calcular el margen de seguridad.
 
     Returns
     -------
@@ -858,23 +857,23 @@ def break_even_sales(
 # ---------------------------------------------------------------------------
 
 def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
-    """Probability mass function of the number of customers in an M/M/1 system.
+    """Función de masa de probabilidad del número de clientes en un sistema M/M/1.
 
     P(N = n) = (1 − ρ) · ρ^n
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ.
+        Tasa de servicio μ.
     n_max : int
-        Maximum queue length to compute (default 30).
+        Longitud máxima de cola a calcular (por defecto 30).
 
     Returns
     -------
     pd.DataFrame
-        Columns: ``n``, ``P(N=n)``, ``P(N<=n)``.
+        Columnas: ``n``, ``P(N=n)``, ``P(N<=n)``.
 
     Raises
     ------
@@ -906,25 +905,25 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
 
 
 def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:
-    """CDF of the sojourn time (time in system) for an M/M/1 queue.
+    """FDA del tiempo de permanencia (tiempo en el sistema) de una cola M/M/1.
 
     F(t) = 1 − exp(−(μ − λ)·t)
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ.
+        Tasa de servicio μ.
     t_max : float, optional
-        Upper bound of time axis (defaults to 5 × mean sojourn time).
+        Cota superior del eje de tiempo (por defecto 5 × tiempo medio de permanencia).
     n_points : int
-        Number of evaluation points.
+        Número de puntos de evaluación.
 
     Returns
     -------
     pd.DataFrame
-        Columns: ``t``, ``F(t)`` (CDF), ``f(t)`` (PDF).
+        Columnas: ``t``, ``F(t)`` (FDA), ``f(t)`` (densidad).
 
     Raises
     ------
@@ -961,27 +960,26 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
 # ---------------------------------------------------------------------------
 
 def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
-    """M/M/c/K queue — *c* servers, system capacity *K* (including servers).
+    """Cola M/M/c/K: *c* servidores y capacidad del sistema *K* (incluidos los servidores).
 
-    Customers arriving when the system is full are blocked (lost).
-    The system is always stable regardless of ρ because of the finite
-    capacity.
+    Los clientes que llegan cuando el sistema está lleno se bloquean (se pierden).
+    El sistema siempre es estable, sea cual sea ρ, por su capacidad finita.
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ per server.
+        Tasa de servicio μ por servidor.
     c : int
-        Number of servers (≥ 1).
+        Número de servidores (≥ 1).
     K : int
-        System capacity (maximum customers in system, ≥ c).
+        Capacidad del sistema (máximo de clientes en el sistema, ≥ c).
 
     Returns
     -------
     QueueResult
-        ``rho`` is server utilization λ_eff / (c · μ).
+        ``rho`` es la utilización del servidor λ_eff / (c · μ).
 
     Raises
     ------
@@ -1036,10 +1034,10 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
         lam=lam, mu=mu, servers=c,
         rho=util, L=L, Lq=Lq, W=W, Wq=Wq,
         params={
-            "K (capacity)": K,
-            "P0 (idle)": Pn[0],
-            "PK (blocking prob)": PK,
-            "λ_eff (effective rate)": lam_eff,
+            "K (capacidad)": K,
+            "P0 (vacío)": Pn[0],
+            "PK (prob. de bloqueo)": PK,
+            "λ_eff (tasa efectiva)": lam_eff,
         },
     )
 
@@ -1050,19 +1048,19 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
 
 @dataclass
 class PriorityQueueResult:
-    """Result of a non-preemptive HOL priority queue analysis.
+    """Resultado del análisis de una cola con prioridades HOL no expropiativas.
 
-    Each entry in *classes* is a dict with keys:
+    Cada entrada de *classes* es un diccionario con las claves:
     ``class_id``, ``lam``, ``rho``, ``Wq``, ``W``, ``Lq``, ``L``.
 
     Attributes
     ----------
     classes : list[dict]
-        Per-class metrics in priority order (class 0 = highest priority).
+        Métricas por clase en orden de prioridad (clase 0 = mayor prioridad).
     rho_total : float
-        Total server utilization = sum(λ_k) / μ.
+        Utilización total del servidor = suma(λ_k) / μ.
     mu : float
-        Service rate.
+        Tasa de servicio.
     """
 
     classes: list[dict]
@@ -1071,12 +1069,14 @@ class PriorityQueueResult:
     params: dict = field(default_factory=dict)
 
     def to_frame(self) -> pd.DataFrame:
-        return pd.DataFrame(self.classes)
+        return pd.DataFrame(self.classes).rename(
+            columns={"class_id": "id_clase", "lam": "λ", "rho": "ρ"}
+        )
 
     def summary(self) -> str:
         lines = [
-            f"M/M/1 Non-preemptive HOL priority  (μ={self.mu:.6g}, ρ={self.rho_total:.4g})",
-            f"{'Class':>6}  {'λ':>10}  {'ρ':>8}  {'Wq':>12}  {'W':>12}  {'Lq':>10}  {'L':>10}",
+            f"M/M/1 con prioridad HOL no expropiativa  (μ={self.mu:.6g}, ρ={self.rho_total:.4g})",
+            f"{'Clase':>6}  {'λ':>10}  {'ρ':>8}  {'Wq':>12}  {'W':>12}  {'Lq':>10}  {'L':>10}",
             "-" * 72,
         ]
         for cl in self.classes:
@@ -1096,28 +1096,27 @@ def mm1_priority(
     *,
     class_names: Sequence[str] | None = None,
 ) -> PriorityQueueResult:
-    """Non-preemptive Head-of-Line priority M/M/1 queue.
+    """Cola M/M/1 con prioridades Head-of-Line (HOL) no expropiativas.
 
-    Class 0 has the highest priority; class N−1 the lowest.  Service is
-    FCFS within each priority class and non-preemptive (a lower-priority
-    customer in service is not interrupted).
+    La clase 0 tiene la mayor prioridad; la clase N−1 la menor. El servicio es FCFS dentro de
+    cada clase y no expropiativo (un cliente de menor prioridad en servicio no se interrumpe).
 
-    The formula (Kleinrock, 1975):
+    La fórmula (Kleinrock, 1975):
 
     .. code-block:: text
 
         Wq_k = R / ((1 − σ_{k−1}) · (1 − σ_k))
-        where R = ρ / μ,  σ_k = Σ_{i=0}^{k} λ_i / μ,  σ_{−1} = 0.
+        donde R = ρ / μ,  σ_k = Σ_{i=0}^{k} λ_i / μ,  σ_{−1} = 0.
 
     Parameters
     ----------
     lam_list : sequence of float
-        Arrival rates λ_k for each class in *descending* priority order
-        (index 0 = highest priority).
+        Tasas de llegada λ_k de cada clase en orden *descendente* de prioridad
+        (índice 0 = mayor prioridad).
     mu : float
-        Service rate μ (same exponential server for all classes).
+        Tasa de servicio μ (el mismo servidor exponencial para todas las clases).
     class_names : sequence of str, optional
-        Labels for the priority classes.  Defaults to '0', '1', …
+        Etiquetas de las clases de prioridad. Por defecto '0', '1', …
 
     Returns
     -------
@@ -1182,5 +1181,5 @@ def mm1_priority(
         classes=classes,
         rho_total=rho_total,
         mu=mu,
-        params={"N_classes": N, "R (residual)": R},
+        params={"N_clases": N, "R (residual)": R},
     )

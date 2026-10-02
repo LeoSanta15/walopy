@@ -1,4 +1,4 @@
-"""KPI tree — hierarchical decomposition and cascade of operational KPIs."""
+"""Árbol de KPI: descomposición jerárquica y cascada de KPI operativos."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -13,20 +13,20 @@ from ._utils import as_finite_scalar, as_fraction, as_nonneg, as_positive
 
 @dataclass
 class KPINode:
-    """A node in a KPI tree.
+    """Un nodo de un árbol de KPI.
 
     Parameters
     ----------
     name : str
-        KPI name.
+        Nombre del KPI.
     value : float
-        Computed or provided value.
+        Valor calculado o proporcionado.
     unit : str
-        Unit of measure (e.g. '%', 'units/h', '$').
+        Unidad de medida (p. ej. '%', 'unidades/h', '$').
     formula : str
-        Human-readable formula string (for display).
+        Fórmula legible (para mostrar).
     children : list[KPINode]
-        Sub-KPIs that feed into this node.
+        Sub-KPI que alimentan a este nodo.
     """
 
     name: str
@@ -40,7 +40,7 @@ class KPINode:
     # ------------------------------------------------------------------ #
 
     def find(self, name: str) -> KPINode | None:
-        """Depth-first search by name."""
+        """Búsqueda en profundidad por nombre."""
         if self.name == name:
             return self
         for child in self.children:
@@ -50,7 +50,7 @@ class KPINode:
         return None
 
     def leaves(self) -> list[KPINode]:
-        """Return all leaf nodes (nodes with no children)."""
+        """Devuelve todos los nodos hoja (nodos sin hijos)."""
         if not self.children:
             return [self]
         result = []
@@ -63,12 +63,14 @@ class KPINode:
     # ------------------------------------------------------------------ #
 
     def to_frame(self) -> pd.DataFrame:
-        """Flatten the tree into a DataFrame (depth-first)."""
+        """Aplana el árbol en un DataFrame (en profundidad)."""
         import pandas as pd
 
         rows: list[dict] = []
         self._collect(rows, depth=0)
-        return pd.DataFrame(rows)
+        return pd.DataFrame(rows).rename(
+            columns={"depth": "nivel", "name": "nombre", "value": "valor", "unit": "unidad", "formula": "fórmula"}
+        )
 
     def _collect(self, rows: list[dict], depth: int) -> None:
         rows.append({
@@ -94,7 +96,7 @@ class KPINode:
         return self.summary()
 
     def plot(self, **kwargs) -> go.Figure:
-        """Render an interactive Plotly treemap (or sunburst with ``kind='sunburst'``)."""
+        """Genera un treemap interactivo de Plotly (o un sunburst con ``kind='sunburst'``)."""
         from .plotting import plot_kpi_tree
         return plot_kpi_tree(self, **kwargs)
 
@@ -108,21 +110,21 @@ def oee_kpi_tree(
     performance: float,
     quality: float,
 ) -> KPINode:
-    """Build a KPI tree rooted at OEE.
+    """Construye un árbol de KPI con raíz en el OEE.
 
     Parameters
     ----------
     availability : float
-        A factor [0, 1].
+        Factor A [0, 1].
     performance : float
-        P factor [0, 1].
+        Factor P [0, 1].
     quality : float
-        Q factor [0, 1].
+        Factor Q [0, 1].
 
     Returns
     -------
     KPINode
-        Root node with OEE and its three sub-KPIs.
+        Nodo raíz con el OEE y sus tres sub-KPI.
 
     Raises
     ------
@@ -147,9 +149,9 @@ def oee_kpi_tree(
         unit="%",
         formula="A × P × Q",
         children=[
-            KPINode(name="Availability", value=availability, unit="%", formula="(Planned − Downtime) / Planned"),
-            KPINode(name="Performance",  value=performance,  unit="%", formula="Ideal CT / Actual CT"),
-            KPINode(name="Quality",      value=quality,      unit="%", formula="Good units / Total units"),
+            KPINode(name="Disponibilidad", value=availability, unit="%", formula="(Planificado − Paradas) / Planificado"),
+            KPINode(name="Rendimiento",  value=performance,  unit="%", formula="Ciclo ideal / Ciclo real"),
+            KPINode(name="Calidad",      value=quality,      unit="%", formula="Unidades buenas / Unidades totales"),
         ],
     )
 
@@ -161,18 +163,18 @@ def throughput_kpi_tree(
     *,
     time_unit: str = "h",
 ) -> KPINode:
-    """Build a KPI tree rooted at effective throughput.
+    """Construye un árbol de KPI con raíz en el throughput efectivo.
 
     Parameters
     ----------
     actual_throughput : float
-        Actual good units per ``time_unit``.
+        Unidades buenas reales por ``time_unit``.
     capacity : float
-        Installed capacity per ``time_unit``.
+        Capacidad instalada por ``time_unit``.
     defect_rate : float
-        Fraction of defective units [0, 1).
+        Fracción de unidades defectuosas [0, 1).
     time_unit : str
-        Label for the time unit (default 'h').
+        Etiqueta de la unidad de tiempo (por defecto 'h').
 
     Returns
     -------
@@ -198,22 +200,22 @@ def throughput_kpi_tree(
     utilization = actual_throughput / capacity
     good_rate   = 1.0 - defect_rate
     return KPINode(
-        name="Effective Throughput",
+        name="Throughput efectivo",
         value=actual_throughput * good_rate,
-        unit=f"units/{time_unit}",
-        formula="Actual × (1 − Defect rate)",
+        unit=f"unidades/{time_unit}",
+        formula="Real × (1 − Tasa de defectos)",
         children=[
             KPINode(
-                name="Actual Throughput",
+                name="Throughput real",
                 value=actual_throughput,
-                unit=f"units/{time_unit}",
+                unit=f"unidades/{time_unit}",
                 formula="",
                 children=[
-                    KPINode(name="Capacity",    value=capacity,    unit=f"units/{time_unit}"),
-                    KPINode(name="Utilization", value=utilization, unit="%", formula="Actual / Capacity"),
+                    KPINode(name="Capacidad",    value=capacity,    unit=f"unidades/{time_unit}"),
+                    KPINode(name="Utilización", value=utilization, unit="%", formula="Real / Capacidad"),
                 ],
             ),
-            KPINode(name="Good Rate", value=good_rate, unit="%", formula="1 − Defect rate"),
+            KPINode(name="Tasa de buenos", value=good_rate, unit="%", formula="1 − Tasa de defectos"),
         ],
     )
 
@@ -227,31 +229,31 @@ def roi_kpi_tree(
     *,
     currency: str = "$",
 ) -> KPINode:
-    """Build a KPI tree rooted at ROI (Return on Investment).
+    """Construye un árbol de KPI con raíz en el ROI (retorno sobre la inversión).
 
-    ROI = Net Profit / Investment,  where
-    Net Profit = Revenue − Total Cost,
-    Total Cost = Fixed Cost + Variable Cost per unit × Units sold.
+    ROI = Utilidad neta / Inversión,  donde
+    Utilidad neta = Ingresos − Costo total,
+    Costo total = Costo fijo + Costo variable por unidad × Unidades vendidas.
 
     Parameters
     ----------
     revenue : float
-        Total revenue for the period.
+        Ingresos totales del periodo.
     fixed_cost : float
-        Total fixed cost for the period.
+        Costo fijo total del periodo.
     variable_cost_per_unit : float
-        Variable cost per unit sold.
+        Costo variable por unidad vendida.
     units_sold : float
-        Units sold in the period.
+        Unidades vendidas en el periodo.
     investment : float
-        Total capital invested.
+        Capital total invertido.
     currency : str
-        Currency label for display (default '$').
+        Etiqueta de la moneda para mostrar (por defecto '$').
 
     Returns
     -------
     KPINode
-        Root node with ROI and its full decomposition.
+        Nodo raíz con el ROI y toda su descomposición.
 
     Raises
     ------
@@ -286,36 +288,36 @@ def roi_kpi_tree(
         name="ROI",
         value=roi_val,
         unit=f"{currency}/{currency}",
-        formula="Net Profit / Investment",
+        formula="Utilidad neta / Inversión",
         children=[
             KPINode(
-                name="Net Profit",
+                name="Utilidad neta",
                 value=net_profit,
                 unit=currency,
-                formula="Revenue − Total Cost",
+                formula="Ingresos − Costo total",
                 children=[
-                    KPINode(name="Revenue", value=revenue, unit=currency),
+                    KPINode(name="Ingresos", value=revenue, unit=currency),
                     KPINode(
-                        name="Total Cost",
+                        name="Costo total",
                         value=total_cost,
                         unit=currency,
-                        formula="Fixed Cost + Variable Cost",
+                        formula="Costo fijo + Costo variable",
                         children=[
-                            KPINode(name="Fixed Cost",     value=fixed_cost,     unit=currency),
+                            KPINode(name="Costo fijo",     value=fixed_cost,     unit=currency),
                             KPINode(
-                                name="Variable Cost",
+                                name="Costo variable",
                                 value=variable_cost,
                                 unit=currency,
-                                formula="Cost/unit × Units sold",
+                                formula="Costo/unidad × Unidades vendidas",
                                 children=[
-                                    KPINode(name="Cost / unit",  value=variable_cost_per_unit, unit=f"{currency}/unit"),
-                                    KPINode(name="Units Sold",   value=units_sold,             unit="units"),
+                                    KPINode(name="Costo / unidad",  value=variable_cost_per_unit, unit=f"{currency}/unidad"),
+                                    KPINode(name="Unidades vendidas",   value=units_sold,             unit="unidades"),
                                 ],
                             ),
                         ],
                     ),
                 ],
             ),
-            KPINode(name="Investment", value=investment, unit=currency),
+            KPINode(name="Inversión", value=investment, unit=currency),
         ],
     )

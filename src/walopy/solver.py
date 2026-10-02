@@ -1,4 +1,4 @@
-"""Solvers: find optimal parameters or user-defined targets for queuing / operations models."""
+"""Solvers: encuentran parámetros óptimos o metas definidas por la persona usuaria en modelos de colas y operaciones."""
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -39,7 +39,7 @@ def _bisect(f: Callable[[float], float], a: float, b: float,
 
 
 def _get_metric(result: Any, metric: str) -> float:
-    """Extract a named metric from any result dataclass."""
+    """Extrae una métrica por nombre de cualquier dataclass de resultado."""
     if not hasattr(result, metric):
         valid = [k for k in vars(result) if not k.startswith("_")]
         raise ValueError(f"Métrica desconocida '{metric}'. Opciones válidas: {valid}")
@@ -52,22 +52,22 @@ def _get_metric(result: Any, metric: str) -> float:
 
 @dataclass
 class SolverResult:
-    """Result of a parameter-target solve.
+    """Resultado de resolver un parámetro para alcanzar una meta.
 
     Attributes
     ----------
     param : str
-        Name of the parameter that was solved.
+        Nombre del parámetro resuelto.
     value : float
-        Found parameter value.
+        Valor del parámetro encontrado.
     target_metric : str
-        Metric that was constrained.
+        Métrica que se restringió.
     target_value : float
-        Desired value of the metric.
+        Valor deseado de la métrica.
     achieved_value : float
-        Actual metric value at the solution.
+        Valor real de la métrica en la solución.
     model_result : Any
-        Full model result at the solution point.
+        Resultado completo del modelo en el punto solución.
     converged : bool
     params : dict
     """
@@ -82,12 +82,12 @@ class SolverResult:
     params: dict = field(default_factory=dict)
 
     def summary(self) -> str:
-        status = "converged" if self.converged else "NOT converged"
+        status = "convergió" if self.converged else "NO convergió"
         return (
             f"Solver [{status}]\n"
-            f"  Solved param  : {self.param} = {self.value:.6g}\n"
-            f"  Target metric : {self.target_metric} ≤ {self.target_value:.6g}\n"
-            f"  Achieved      : {self.target_metric} = {self.achieved_value:.6g}"
+            f"  Parámetro resuelto : {self.param} = {self.value:.6g}\n"
+            f"  Métrica objetivo   : {self.target_metric} ≤ {self.target_value:.6g}\n"
+            f"  Logrado            : {self.target_metric} = {self.achieved_value:.6g}"
         )
 
     def __str__(self) -> str:
@@ -96,18 +96,18 @@ class SolverResult:
 
 @dataclass
 class OptimizeResult:
-    """Result of a cost-minimization over number of servers.
+    """Resultado de minimizar el costo según el número de servidores.
 
     Attributes
     ----------
     optimal_servers : int
-        Number of servers that minimizes total cost.
+        Número de servidores que minimiza el costo total.
     min_cost : float
-        Minimum total cost per unit time.
+        Costo total mínimo por unidad de tiempo.
     cost_breakdown : pd.DataFrame
-        Cost components for every c evaluated.
+        Componentes del costo para cada c evaluado.
     model_result : Any
-        Full queuing result at the optimal c.
+        Resultado completo de colas en el c óptimo.
     params : dict
     """
 
@@ -119,8 +119,8 @@ class OptimizeResult:
 
     def summary(self) -> str:
         return (
-            f"Optimal servers : {self.optimal_servers}\n"
-            f"Minimum cost    : {self.min_cost:.6g} per unit time\n"
+            f"Servidores óptimos : {self.optimal_servers}\n"
+            f"Costo mínimo       : {self.min_cost:.6g} por unidad de tiempo\n"
         )
 
     def __str__(self) -> str:
@@ -145,22 +145,22 @@ def solve_lam(
     ca2: float = 1.0,
     cs2: float = 1.0,
 ) -> SolverResult:
-    """Find the maximum arrival rate λ such that *target_metric* ≤ *target_value*.
+    """Encuentra la máxima tasa de llegadas λ tal que *target_metric* ≤ *target_value*.
 
     Parameters
     ----------
     target_metric : str
-        One of ``'Wq'``, ``'W'``, ``'Lq'``, ``'L'``, ``'rho'``.
+        Una de ``'Wq'``, ``'W'``, ``'Lq'``, ``'L'``, ``'rho'``.
     target_value : float
-        Desired upper bound for the metric.
+        Cota superior deseada de la métrica.
     mu : float
-        Service rate (fixed).
+        Tasa de servicio (fija).
     model : {'mm1', 'mmc', 'md1', 'gg1'}
-        Queuing model to use.
+        Modelo de colas a usar.
     c : int
-        Number of servers (only for ``'mmc'``).
+        Número de servidores (solo para ``'mmc'``).
     ca2, cs2 : float
-        Squared CVs (only for ``'gg1'`` / Kingman).
+        CV² (solo para ``'gg1'`` / Kingman).
 
     Returns
     -------
@@ -239,21 +239,21 @@ def solve_mu(
     ca2: float = 1.0,
     cs2: float = 1.0,
 ) -> SolverResult:
-    """Find the minimum service rate μ such that *target_metric* ≤ *target_value*.
+    """Encuentra la mínima tasa de servicio μ tal que *target_metric* ≤ *target_value*.
 
     Parameters
     ----------
     target_metric : str
-        One of ``'Wq'``, ``'W'``, ``'Lq'``, ``'L'``, ``'rho'``.
+        Una de ``'Wq'``, ``'W'``, ``'Lq'``, ``'L'``, ``'rho'``.
     target_value : float
-        Desired upper bound for the metric.
+        Cota superior deseada de la métrica.
     lam : float
-        Arrival rate (fixed).
+        Tasa de llegadas (fija).
     model : {'mm1', 'mmc', 'md1', 'gg1'}
     c : int
-        Servers (only for ``'mmc'``).
+        Servidores (solo para ``'mmc'``).
     ca2, cs2 : float
-        Squared CVs (only for ``'gg1'``).
+        CV² (solo para ``'gg1'``).
 
     Returns
     -------
@@ -330,20 +330,20 @@ def solve_servers(
     mu: float,
     c_max: int = 100,
 ) -> SolverResult:
-    """Find the minimum number of servers *c* such that *target_metric* ≤ *target_value*.
+    """Encuentra el mínimo número de servidores *c* tal que *target_metric* ≤ *target_value*.
 
     Parameters
     ----------
     target_metric : str
-        One of ``'Wq'``, ``'W'``, ``'Lq'``, ``'L'``, ``'rho'``.
+        Una de ``'Wq'``, ``'W'``, ``'Lq'``, ``'L'``, ``'rho'``.
     target_value : float
-        Desired upper bound.
+        Cota superior deseada.
     lam : float
-        Arrival rate.
+        Tasa de llegadas.
     mu : float
-        Service rate per server.
+        Tasa de servicio por servidor.
     c_max : int
-        Maximum number of servers to try (default 100).
+        Máximo de servidores a probar (por defecto 100).
 
     Returns
     -------
@@ -376,7 +376,7 @@ def solve_servers(
         achieved = _get_metric(result, target_metric)
         if achieved <= target_value:
             return SolverResult(
-                param="c (servers)",
+                param="c (servidores)",
                 value=float(c),
                 target_metric=target_metric,
                 target_value=target_value,
@@ -403,22 +403,22 @@ def optimize_servers(
     cost_per_wait: float,
     c_max: int = 50,
 ) -> OptimizeResult:
-    """Find the number of servers *c* that minimizes total cost per unit time.
+    """Encuentra el número de servidores *c* que minimiza el costo total por unidad de tiempo.
 
-    Total cost = c × cost_per_server + Lq × cost_per_wait
+    Costo total = c × cost_per_server + Lq × cost_per_wait
 
     Parameters
     ----------
     lam : float
-        Arrival rate.
+        Tasa de llegadas.
     mu : float
-        Service rate per server.
+        Tasa de servicio por servidor.
     cost_per_server : float
-        Cost per server per unit time.
+        Costo por servidor por unidad de tiempo.
     cost_per_wait : float
-        Cost per unit waiting in queue per unit time.
+        Costo por unidad esperando en cola por unidad de tiempo.
     c_max : int
-        Maximum servers to evaluate (default 50).
+        Máximo de servidores a evaluar (por defecto 50).
 
     Returns
     -------
@@ -491,23 +491,23 @@ def sensitivity(
     values: Sequence[float],
     **fixed_kwargs: Any,
 ) -> pd.DataFrame:
-    """Vary one model parameter and return a DataFrame of all KPIs.
+    """Varía un parámetro del modelo y devuelve un DataFrame con todos los KPI.
 
     Parameters
     ----------
     model_fn : callable
-        Any walopy model function (e.g. ``mm1``, ``mmc``, ``kingman``).
+        Cualquier función de modelo de walopy (p. ej. ``mm1``, ``mmc``, ``kingman``).
     param : str
-        Name of the parameter to vary (must match the function's argument).
+        Nombre del parámetro a variar (debe coincidir con el argumento de la función).
     values : sequence of float
-        Values to evaluate.
+        Valores a evaluar.
     **fixed_kwargs
-        All other parameters of ``model_fn`` (fixed).
+        Todos los demás parámetros de ``model_fn`` (fijos).
 
     Returns
     -------
     pd.DataFrame
-        One row per value with the swept parameter and all result fields.
+        Una fila por valor con el parámetro barrido y todos los campos del resultado.
 
 
     Raises
@@ -553,36 +553,35 @@ def batch_model(
     errors: str = "collect",
     **fixed_kwargs: Any,
 ) -> pd.DataFrame:
-    """Apply a walopy model to every row of a DataFrame.
+    """Aplica un modelo de walopy a cada fila de un DataFrame.
 
-    Each row's column values are passed as keyword arguments to *model_fn*.
-    Values in *fixed_kwargs* serve as defaults; row values always override them.
-    NaN cells in the input row are dropped before the call, so a sparse
-    DataFrame can represent multiple model configurations in one table.
+    Los valores de las columnas de cada fila se pasan como argumentos con nombre a *model_fn*.
+    Los valores de *fixed_kwargs* sirven como predeterminados; los valores de la fila siempre
+    los reemplazan. Las celdas NaN de la fila de entrada se descartan antes de la llamada, de
+    modo que un DataFrame disperso puede representar varias configuraciones del modelo en una tabla.
 
     Parameters
     ----------
     model_fn : callable
-        Any walopy model function (e.g. ``mm1``, ``mmc``, ``kingman``,
+        Cualquier función de modelo de walopy (p. ej. ``mm1``, ``mmc``, ``kingman``,
         ``oee``, ``break_even``).
     df : pd.DataFrame
-        One row per scenario.  Column names must match parameter names of
+        Una fila por escenario. Los nombres de columna deben coincidir con los parámetros de
         *model_fn*.
     errors : {'collect', 'raise'}
         ``'collect'`` (por defecto): una fila que falla no detiene el lote; su mensaje queda en la
         columna ``_error``. ``'raise'``: la primera excepción se propaga.
     **fixed_kwargs
-        Additional parameters shared across all rows (e.g. ``mu=5.0``).
-        A column in *df* with the same name takes precedence.
+        Parámetros adicionales compartidos por todas las filas (p. ej. ``mu=5.0``).
+        Una columna de *df* con el mismo nombre tiene precedencia.
 
     Returns
     -------
     pd.DataFrame
-        One row per input row with all original columns plus the model's
-        scalar output fields appended.  The input DataFrame's index is
-        preserved.  If any row raises an exception an ``_error`` column is
-        added; it contains the error message for failed rows and ``None``
-        for successful ones.
+        Una fila por cada fila de entrada con todas las columnas originales más los campos
+        escalares de salida del modelo. Se conserva el índice del DataFrame de entrada. Si alguna
+        fila lanza una excepción se agrega una columna ``_error`` con el mensaje de las filas
+        fallidas y ``None`` en las exitosas.
 
 
     Raises
@@ -657,20 +656,20 @@ def compare(
     *results: Any,
     labels: Sequence[str] | None = None,
 ) -> pd.DataFrame:
-    """Compare multiple walopy model results side by side.
+    """Compara varios resultados de modelos de walopy lado a lado.
 
     Parameters
     ----------
     *results
-        Any walopy result objects (``QueueResult``, ``SimulationResult``,
-        ``EOQResult``, etc.) or plain dicts.
+        Cualquier objeto de resultado de walopy (``QueueResult``, ``SimulationResult``,
+        ``EOQResult``, etc.) o diccionarios simples.
     labels : sequence of str, optional
-        Row labels.  Defaults to ``'scenario_1'``, ``'scenario_2'``, …
+        Etiquetas de las filas. Por defecto ``'escenario_1'``, ``'escenario_2'``, …
 
     Returns
     -------
     pd.DataFrame
-        One row per result with a ``label`` column prepended.
+        Una fila por resultado con una columna ``label`` al inicio.
 
 
     Raises
@@ -685,12 +684,12 @@ def compare(
     --------
     >>> from walopy import mm1, mmc, compare
     >>> tabla = compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
-    >>> tabla["c (servers)"].tolist()
+    >>> tabla["c (servidores)"].tolist()
     [1, 2]
     """
     rows: list[dict[str, Any]] = []
     for i, r in enumerate(results):
-        label = labels[i] if (labels and i < len(labels)) else f"scenario_{i + 1}"
+        label = labels[i] if (labels and i < len(labels)) else f"escenario_{i + 1}"
         if hasattr(r, "to_frame"):
             row = r.to_frame().iloc[0].to_dict()
         elif isinstance(r, dict):

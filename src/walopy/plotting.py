@@ -1,4 +1,4 @@
-"""All plotting functions for walopy.  Matplotlib and Plotly are imported lazily."""
+"""Todas las funciones de gráficas de walopy. Matplotlib y Plotly se importan de forma perezosa."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -36,7 +36,7 @@ def plot_queue_sensitivity(
     title: str | None = None,
     figsize: tuple | None = None,
 ) -> plt.Figure:
-    """Plot Wq and Lq as a function of utilization ρ around the operating point."""
+    """Grafica Wq y Lq en función de la utilización ρ alrededor del punto de operación."""
     import matplotlib.pyplot as plt
     import numpy as np
 
@@ -54,18 +54,18 @@ def plot_queue_sensitivity(
         Lq_curve = rho_range**2 / (1 - rho_range)
 
     for ax, y_curve, y_point, ylabel, label in [
-        (axes[0], Wq_curve, result.Wq, "Wq (avg wait time)", "Wq"),
-        (axes[1], Lq_curve, result.Lq, "Lq (avg queue length)", "Lq"),
+        (axes[0], Wq_curve, result.Wq, "Wq (espera media en cola)", "Wq"),
+        (axes[1], Lq_curve, result.Lq, "Lq (longitud media de cola)", "Lq"),
     ]:
-        ax.plot(rho_range, y_curve, color=BLUE, lw=2, label=f"{label} curve")
+        ax.plot(rho_range, y_curve, color=BLUE, lw=2, label=f"curva de {label}")
         ax.axvline(result.rho, color=ORANGE, ls="--", lw=1.5, label=f"ρ = {result.rho:.3f}")
         ax.scatter([result.rho], [y_point], color=RED, zorder=5, s=60)
-        ax.set_xlabel("Utilization ρ")
+        ax.set_xlabel("Utilización ρ")
         ax.set_ylabel(ylabel)
         ax.legend(fontsize=8)
         ax.grid(alpha=0.25)
 
-    fig.suptitle(title or f"{result.model} — Queue Sensitivity", fontweight="bold")
+    fig.suptitle(title or f"{result.model} — Sensibilidad de la cola", fontweight="bold")
     fig.tight_layout()
     return fig
 
@@ -80,7 +80,7 @@ def plot_queue_metrics(
     title: str | None = None,
     figsize: tuple | None = None,
 ) -> plt.Figure:
-    """Bar chart of the main queuing KPIs."""
+    """Gráfico de barras de los principales KPI de colas."""
     import matplotlib.pyplot as plt
 
     labels = ["ρ", "L", "Lq", "W", "Wq"]
@@ -96,8 +96,8 @@ def plot_queue_metrics(
             f"{val:.4g}",
             ha="center", va="bottom", fontsize=9,
         )
-    ax.set_ylabel("Value")
-    ax.set_title(title or f"{result.model} — KPI Summary", fontweight="bold")
+    ax.set_ylabel("Valor")
+    ax.set_title(title or f"{result.model} — Resumen de KPI", fontweight="bold")
     ax.grid(axis="y", alpha=0.25)
     fig.tight_layout()
     return fig
@@ -113,10 +113,10 @@ def plot_oee(
     title: str | None = None,
     figsize: tuple | None = None,
 ) -> plt.Figure:
-    """Horizontal bar chart showing OEE decomposition."""
+    """Gráfico de barras horizontales con la descomposición del OEE."""
     import matplotlib.pyplot as plt
 
-    labels = ["Availability", "Performance", "Quality", "OEE"]
+    labels = ["Disponibilidad", "Rendimiento", "Calidad", "OEE"]
     values = [
         result.availability,
         result.performance,
@@ -135,10 +135,10 @@ def plot_oee(
             f"{val:.1%}",
             va="center", fontsize=10,
         )
-    ax.axvline(0.85, color=GRAY, ls="--", lw=1, label="World-class (85%)")
-    ax.set_xlabel("Factor value")
+    ax.axvline(0.85, color=GRAY, ls="--", lw=1, label="Clase mundial (85%)")
+    ax.set_xlabel("Valor del factor")
     ax.legend(fontsize=8)
-    ax.set_title(title or "OEE Decomposition", fontweight="bold")
+    ax.set_title(title or "Descomposición del OEE", fontweight="bold")
     fig.tight_layout()
     return fig
 
@@ -153,7 +153,7 @@ def plot_bottleneck(
     title: str | None = None,
     figsize: tuple | None = None,
 ) -> plt.Figure:
-    """Bar chart of station utilizations with bottleneck highlighted."""
+    """Gráfico de barras de utilización por estación con el cuello de botella resaltado."""
     import matplotlib.pyplot as plt
 
     names  = [s.name for s in result.stations]
@@ -169,11 +169,11 @@ def plot_bottleneck(
             f"{u:.1%}",
             ha="center", va="bottom", fontsize=9,
         )
-    ax.axhline(1.0, color=RED, ls="--", lw=1.2, label="Capacity limit")
+    ax.axhline(1.0, color=RED, ls="--", lw=1.2, label="Límite de capacidad")
     ax.set_ylim(0, max(1.1, max(utils) * 1.1))
-    ax.set_ylabel("Utilization")
+    ax.set_ylabel("Utilización")
     ax.legend(fontsize=8)
-    ax.set_title(title or f"Bottleneck: {result.bottleneck}", fontweight="bold")
+    ax.set_title(title or f"Cuello de botella: {result.bottleneck}", fontweight="bold")
     fig.tight_layout()
     return fig
 
@@ -188,22 +188,22 @@ def plot_kpi_tree(
     title: str | None = None,
     kind: str = "treemap",
 ) -> go.Figure:
-    """Interactive KPI tree using Plotly.
+    """Árbol de KPI interactivo con Plotly.
 
     Parameters
     ----------
     root : KPINode
-        Root of the KPI hierarchy.
+        Raíz de la jerarquía de KPI.
     title : str, optional
-        Figure title.  Defaults to "KPI Tree — <root.name>".
+        Título de la figura. Por defecto "Árbol de KPI — <root.name>".
     kind : {'treemap', 'sunburst'}
-        Chart type.  'treemap' (default) uses area to encode value;
-        'sunburst' uses a radial layout.
+        Tipo de gráfico. 'treemap' (por defecto) codifica el valor con el área;
+        'sunburst' usa una disposición radial.
 
     Returns
     -------
     plotly.graph_objects.Figure
-        Call ``.show()`` to display or ``.write_html()`` to save.
+        Llame a ``.show()`` para mostrarla o a ``.write_html()`` para guardarla.
     """
     import plotly.graph_objects as go
 
@@ -228,7 +228,7 @@ def plot_kpi_tree(
 
     _collect(root)
 
-    chart_title = title or f"KPI Tree — {root.name}"
+    chart_title = title or f"Árbol de KPI — {root.name}"
 
     if kind == "sunburst":
         trace = go.Sunburst(
@@ -284,17 +284,17 @@ def plot_sensitivity(
     *,
     title: str | None = None,
 ) -> go.Figure:
-    """Line chart of KPI metrics swept over one parameter.
+    """Gráfico de líneas de KPI al variar un parámetro.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Output of ``walopy.solver.sensitivity()``.
+        Salida de ``walopy.solver.sensitivity()``.
     param : str
-        Name of the swept parameter (x-axis).
+        Nombre del parámetro barrido (eje x).
     metrics : list of str, optional
-        Columns to plot.  Defaults to ``['rho', 'Wq', 'Lq', 'W', 'L']``
-        (filtered to those present in *df*).
+        Columnas a graficar. Por defecto ``['rho', 'Wq', 'Lq', 'W', 'L']``
+        (filtradas a las presentes en *df*).
     title : str, optional
     """
     import plotly.graph_objects as go
@@ -315,9 +315,9 @@ def plot_sensitivity(
         ))
 
     fig.update_layout(
-        title=dict(text=title or f"Sensitivity: {param}", font=dict(size=16)),
+        title=dict(text=title or f"Sensibilidad: {param}", font=dict(size=16)),
         xaxis_title=param,
-        yaxis_title="Value",
+        yaxis_title="Valor",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
@@ -334,7 +334,7 @@ def plot_optimize_servers(
     *,
     title: str | None = None,
 ) -> go.Figure:
-    """Bar + line chart showing cost breakdown per number of servers."""
+    """Gráfico de barras y línea con el desglose de costos por número de servidores."""
     import plotly.graph_objects as go
 
     df  = result.cost_breakdown
@@ -342,30 +342,30 @@ def plot_optimize_servers(
 
     fig.add_trace(go.Bar(
         x=df["c"], y=df["server_cost"],
-        name="Server cost", marker_color=BLUE, opacity=0.8,
+        name="Costo de servidores", marker_color=BLUE, opacity=0.8,
     ))
     fig.add_trace(go.Bar(
         x=df["c"], y=df["wait_cost"],
-        name="Waiting cost", marker_color=ORANGE, opacity=0.8,
+        name="Costo de espera", marker_color=ORANGE, opacity=0.8,
     ))
     fig.add_trace(go.Scatter(
         x=df["c"], y=df["total_cost"],
-        mode="lines+markers", name="Total cost",
+        mode="lines+markers", name="Costo total",
         line=dict(color=RED, width=2.5),
         marker=dict(size=7),
     ))
     fig.add_vline(
         x=result.optimal_servers,
         line=dict(color=GREEN, width=2, dash="dash"),
-        annotation_text=f"Optimal c = {result.optimal_servers}",
+        annotation_text=f"c óptimo = {result.optimal_servers}",
         annotation_position="top right",
     )
 
     fig.update_layout(
         barmode="stack",
-        title=dict(text=title or "Server Cost Optimization", font=dict(size=16)),
-        xaxis_title="Number of servers (c)",
-        yaxis_title="Cost per unit time",
+        title=dict(text=title or "Optimización del costo de servidores", font=dict(size=16)),
+        xaxis_title="Número de servidores (c)",
+        yaxis_title="Costo por unidad de tiempo",
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
     )
@@ -382,12 +382,12 @@ def plot_simulation(
     title: str | None = None,
     n_bins: int = 60,
 ) -> go.Figure:
-    """Histogram of simulated waiting times with percentile annotations."""
+    """Histograma de tiempos de espera simulados con anotaciones de percentiles."""
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
     Wq   = result._Wq_array
-    fig  = make_subplots(rows=1, cols=2, subplot_titles=["Wq Distribution", "Wq CDF"])
+    fig  = make_subplots(rows=1, cols=2, subplot_titles=["Distribución de Wq", "FDA de Wq"])
 
     # Histogram
     counts, edges = __import__("numpy").histogram(Wq, bins=n_bins)
@@ -407,7 +407,7 @@ def plot_simulation(
     sorted_Wq = __import__("numpy").sort(Wq)
     cdf        = __import__("numpy").arange(1, len(sorted_Wq) + 1) / len(sorted_Wq)
     fig.add_trace(go.Scatter(x=sorted_Wq, y=cdf, mode="lines",
-                              name="Empirical CDF",
+                              name="FDA empírica",
                               line=dict(color=BLUE, width=2)), row=1, col=2)
     for pct_val, pct_label, color in [
         (result.Wq_p90, "p90=90%", ORANGE),
@@ -426,10 +426,10 @@ def plot_simulation(
         showlegend=False,
         margin=dict(t=80, l=60, r=20, b=60),
     )
-    fig.update_xaxes(title_text="Wq (wait time)", row=1, col=1)
-    fig.update_xaxes(title_text="Wq (wait time)", row=1, col=2)
-    fig.update_yaxes(title_text="Count", row=1, col=1)
-    fig.update_yaxes(title_text="Cumulative probability", row=1, col=2)
+    fig.update_xaxes(title_text="Wq (tiempo de espera)", row=1, col=1)
+    fig.update_xaxes(title_text="Wq (tiempo de espera)", row=1, col=2)
+    fig.update_yaxes(title_text="Frecuencia", row=1, col=1)
+    fig.update_yaxes(title_text="Probabilidad acumulada", row=1, col=2)
     return fig
 
 
@@ -442,18 +442,18 @@ def plot_line_balance(
     *,
     title: str | None = None,
 ) -> go.Figure:
-    """Bar chart of cycle times per station with takt time reference line."""
+    """Gráfico de barras de tiempos de ciclo por estación con la línea de referencia del takt."""
     import plotly.graph_objects as go
 
     df     = result.stations
-    colors = [RED if ov else BLUE for ov in df["Overloaded"]]
+    colors = [RED if ov else BLUE for ov in df["Sobrecargada"]]
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=df["Station"], y=df["CycleTime"],
-        name="Cycle time",
+        x=df["Estación"], y=df["Tiempo_ciclo"],
+        name="Tiempo de ciclo",
         marker_color=colors,
-        text=[f"{ct:.3g}" for ct in df["CycleTime"]],
+        text=[f"{ct:.3g}" for ct in df["Tiempo_ciclo"]],
         textposition="outside",
     ))
     fig.add_hline(
@@ -463,19 +463,19 @@ def plot_line_balance(
         annotation_position="top right",
     )
     fig.add_trace(go.Bar(
-        x=df["Station"], y=df["IdleTime"],
-        name="Idle time",
+        x=df["Estación"], y=df["Tiempo_ocioso"],
+        name="Tiempo ocioso",
         marker_color=GRAY, opacity=0.45,
     ))
 
     fig.update_layout(
         barmode="stack",
         title=dict(
-            text=title or f"Line Balance — eff. {result.balance_efficiency:.1%}",
+            text=title or f"Balance de línea — efic. {result.balance_efficiency:.1%}",
             font=dict(size=16),
         ),
-        xaxis_title="Station",
-        yaxis_title="Time",
+        xaxis_title="Estación",
+        yaxis_title="Tiempo",
         legend=dict(orientation="h", yanchor="bottom", y=1.02),
         margin=dict(t=80, l=60, r=20, b=60),
     )
@@ -492,7 +492,7 @@ def plot_break_even(
     title: str | None = None,
     unit_range_factor: float = 2.0,
 ) -> go.Figure:
-    """Revenue and total cost lines with break-even point highlighted."""
+    """Líneas de ingresos y costo total con el punto de equilibrio resaltado."""
     import numpy as np
     import plotly.graph_objects as go
 
@@ -512,17 +512,17 @@ def plot_break_even(
     cost  = fc + vcu * units
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=units, y=rev,  mode="lines", name="Revenue",
+    fig.add_trace(go.Scatter(x=units, y=rev,  mode="lines", name="Ingresos",
                               line=dict(color=GREEN, width=2.5)))
-    fig.add_trace(go.Scatter(x=units, y=cost, mode="lines", name="Total Cost",
+    fig.add_trace(go.Scatter(x=units, y=cost, mode="lines", name="Costo total",
                               line=dict(color=RED, width=2.5)))
     fig.add_trace(go.Scatter(
         x=[bep], y=[result.bep_revenue],
         mode="markers+text",
-        text=[f"BEP ({bep:.0f} {'ventas' if en_ventas else 'units'})"],
+        text=[f"PE ({bep:.0f} {'ventas' if en_ventas else 'unidades'})"],
         textposition="top right",
         marker=dict(color=ORANGE, size=12, symbol="star"),
-        name="Break-even",
+        name="Punto de equilibrio",
     ))
 
     # Shade profit / loss regions
@@ -531,17 +531,17 @@ def plot_break_even(
         y=np.concatenate([np.where(rev > cost, rev, cost),
                           np.where(rev > cost, cost, cost)[::-1]]),
         fill="toself", fillcolor="rgba(46,139,87,0.12)",
-        line=dict(color="rgba(0,0,0,0)"), name="Profit zone",
+        line=dict(color="rgba(0,0,0,0)"), name="Zona de utilidad",
     ))
 
     if actual is not None:
         fig.add_vline(x=actual, line=dict(color=BLUE, width=1.5, dash="dot"),
-                      annotation_text=f"Actual ({actual:.0f})", annotation_position="top left")
+                      annotation_text=f"Real ({actual:.0f})", annotation_position="top left")
 
     fig.update_layout(
-        title=dict(text=title or "Break-Even Analysis", font=dict(size=16)),
-        xaxis_title="Ventas" if en_ventas else "Units",
-        yaxis_title="Amount",
+        title=dict(text=title or "Análisis de punto de equilibrio", font=dict(size=16)),
+        xaxis_title="Ventas" if en_ventas else "Unidades",
+        yaxis_title="Monto",
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
     )
@@ -558,7 +558,7 @@ def plot_eoq(
     title: str | None = None,
     figsize: tuple | None = None,
 ) -> plt.Figure:
-    """Total, holding, and ordering cost curves around the EOQ."""
+    """Curvas de costo total, de mantener y de ordenar alrededor del EOQ."""
     import matplotlib.pyplot as plt
     import numpy as np
 
@@ -574,15 +574,15 @@ def plot_eoq(
     total    = holding + ordering
 
     fig, ax = plt.subplots(figsize=figsize or (8, 5))
-    ax.plot(Q_range, holding,  color=BLUE,   lw=2, label="Holding cost (hQ/2)")
-    ax.plot(Q_range, ordering, color=ORANGE, lw=2, label="Ordering cost (KD/Q)")
-    ax.plot(Q_range, total,    color=RED,    lw=2.5, label="Total cost")
+    ax.plot(Q_range, holding,  color=BLUE,   lw=2, label="Costo de mantener (hQ/2)")
+    ax.plot(Q_range, ordering, color=ORANGE, lw=2, label="Costo de ordenar (KD/Q)")
+    ax.plot(Q_range, total,    color=RED,    lw=2.5, label="Costo total")
     ax.axvline(Q_star, color=GREEN, ls="--", lw=1.5,
                label=f"EOQ = {Q_star:.4g}")
     ax.scatter([Q_star], [result.total_cost], color=GREEN, zorder=5, s=70)
-    ax.set_xlabel("Order quantity Q")
-    ax.set_ylabel("Cost per unit time")
-    ax.set_title(title or "EOQ — Cost Curves", fontweight="bold")
+    ax.set_xlabel("Cantidad de pedido Q")
+    ax.set_ylabel("Costo por unidad de tiempo")
+    ax.set_title(title or "EOQ — Curvas de costo", fontweight="bold")
     ax.legend(fontsize=9)
     ax.grid(alpha=0.25)
     fig.tight_layout()
@@ -599,12 +599,12 @@ def plot_queue_distribution(
     *,
     title: str | None = None,
 ) -> go.Figure:
-    """Two-panel chart: queue-length PMF (bar) and sojourn-time CDF (line)."""
+    """Gráfico de dos paneles: PMF de la longitud de la cola (barras) y FDA del tiempo de permanencia (línea)."""
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 
     fig = make_subplots(rows=1, cols=2,
-                        subplot_titles=["P(N = n) — Queue length", "F(t) — Sojourn time CDF"])
+                        subplot_titles=["P(N = n) — Longitud de la cola", "F(t) — FDA del tiempo de permanencia"])
 
     fig.add_trace(go.Bar(x=pmf_df["n"], y=pmf_df["P(N=n)"],
                           name="P(N=n)", marker_color=BLUE, opacity=0.8), row=1, col=1)
@@ -621,11 +621,11 @@ def plot_queue_distribution(
                               yaxis="y3"), row=1, col=2)
 
     fig.update_layout(
-        title=dict(text=title or "M/M/1 Distributions", font=dict(size=16)),
+        title=dict(text=title or "Distribuciones M/M/1", font=dict(size=16)),
         margin=dict(t=80, l=60, r=20, b=60),
     )
-    fig.update_xaxes(title_text="n (customers)", row=1, col=1)
-    fig.update_xaxes(title_text="t (time)", row=1, col=2)
-    fig.update_yaxes(title_text="Probability", row=1, col=1)
+    fig.update_xaxes(title_text="n (clientes)", row=1, col=1)
+    fig.update_xaxes(title_text="t (tiempo)", row=1, col=2)
+    fig.update_yaxes(title_text="Probabilidad", row=1, col=1)
     fig.update_yaxes(title_text="F(t) / f(t)", row=1, col=2)
     return fig

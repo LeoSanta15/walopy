@@ -35,7 +35,7 @@ def test_ww_to_frame():
     import pandas as pd
     df = wl.wagner_whitin([100, 80, 120], 200, 1).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "order_qty" in df.columns
+    assert "cantidad_pedido" in df.columns
 
 
 def test_ww_total_cost_components():

@@ -123,9 +123,9 @@ def test_to_frame_columns():
     df = wl.exchange_curve(ITEMS, target_orders=20).to_frame()
     assert isinstance(df, pd.DataFrame)
     assert "Q_eoq" in df.columns
-    assert "Q_optimal" in df.columns
-    assert "n_orders" in df.columns
-    assert "investment" in df.columns
+    assert "Q_óptima" in df.columns
+    assert "n_pedidos" in df.columns
+    assert "inversión" in df.columns
 
 
 def test_to_frame_row_count():

@@ -39,7 +39,7 @@ def test_erlang_b_one_server():
 def test_mm1k_finite_capacity():
     r = mm1k(lam=5.0, mu=3.0, K=10)  # ρ > 1 but finite K → stable
     assert 0 < r.L < 10
-    assert 0 < r.params["PK (blocking prob)"] < 1
+    assert 0 < r.params["PK (prob. de bloqueo)"] < 1
 
 
 def test_mm1k_large_k_approaches_mm1():
@@ -53,7 +53,7 @@ def test_mm1k_large_k_approaches_mm1():
 
 def test_mm1k_blocking_prob_zero_for_small_load():
     r = mm1k(lam=0.1, mu=10.0, K=5)
-    assert r.params["PK (blocking prob)"] < 0.001
+    assert r.params["PK (prob. de bloqueo)"] < 0.001
 
 
 # --- Monte Carlo ---
@@ -108,9 +108,9 @@ def test_line_balance_basic():
 
 def test_line_balance_overloaded_station():
     r = line_balance(["X", "Y"], [12.0, 8.0], takt=10.0)
-    df = r.stations.set_index("Station")
-    assert df.loc["X", "Overloaded"]
-    assert not df.loc["Y", "Overloaded"]
+    df = r.stations.set_index("Estación")
+    assert df.loc["X", "Sobrecargada"]
+    assert not df.loc["Y", "Sobrecargada"]
 
 
 # --- Break-even ---

@@ -149,9 +149,9 @@ def test_to_frame_columns():
     import pandas as pd
     df = wl.safety_stock_curve(ITEMS, target_service_level=0.95).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "safety_stock"  in df.columns
-    assert "investment"    in df.columns
-    assert "reorder_point" in df.columns
+    assert "stock_de_seguridad"  in df.columns
+    assert "inversión"    in df.columns
+    assert "punto_de_reorden" in df.columns
 
 
 def test_curve_to_frame_columns():
@@ -159,8 +159,8 @@ def test_curve_to_frame_columns():
     df = wl.safety_stock_curve(ITEMS).curve_to_frame()
     assert isinstance(df, pd.DataFrame)
     assert "z"             in df.columns
-    assert "service_level" in df.columns
-    assert "ss_investment" in df.columns
+    assert "nivel_de_servicio" in df.columns
+    assert "inversión_ss" in df.columns
 
 
 def test_curve_points_count():

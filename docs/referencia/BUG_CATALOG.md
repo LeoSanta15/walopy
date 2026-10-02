@@ -201,3 +201,70 @@
 | **C-06 Efecto secundario de refactor** | Validación añadida en función base rompe llamada interna válida | Al añadir validación, buscar todas las llamadas internas con `grep`; añadir parámetro escape-hatch explícito | Tests de integración de módulos que se llaman entre sí | BUG-06 |
 | **C-07 Estado global de entorno** | La librería modifica estado global (rcParams) contaminando el entorno del usuario | Usar context managers (`rc_context`, `warnings.catch_warnings`) | Test que verifica estado antes/después de la llamada | BUG-12 |
 | **C-08 Versión múltiple fuente** | La versión se gestiona en N>1 lugares y se desincroniza | Única fuente de verdad: `importlib.metadata` o `setuptools-scm` | `assert pccpy.__version__ == importlib.metadata.version("pccpy")` en test | L-10 |
+
+---
+
+## FICHAS DE BUGS DE WALOPY (v0.2.8 → v0.3.0)
+
+> Bugs hallados en la auditoría de `2cc17c1` (v0.2.8) y corregidos en v0.3.0. El identificador `W-nn` es el mismo que usa
+> `tests/regresiones.json`, que enlaza cada bug con los tests que lo cubren y con la versión (`ref`) contra la que **deben fallar**
+> (`scripts/verificar_regresion.py`, job `regresion` del CI). Detalle y evidencia en `docs/auditoria/HALLAZGOS.md` (K-nn/N-nn) y trazabilidad completa en `docs/auditoria/TRAZABILIDAD.md`.
+
+| ID | Hallazgo | Síntoma | Causa raíz | Solución | Test de regresión | Clase |
+|---|---|---|---|---|---|---|
+| **W-01** | K-01 | `cpm` con duración NaN/inf devuelve `project_duration = nan/inf` | `dur < 0.0` es `False` para NaN; ruta sin pasar por `_utils` | `as_nonneg` en la ingesta de actividades | `test_cpm_rechaza_duracion_no_valida` | C-09 |
+| **W-02** | K-01 | `mtbf_analysis(t=-1)` da fiabilidad 1,01; `series/parallel/koon` aceptan `t` NaN/inf | `t` y `mttr` sin validar | `_validar_t_mttr` + `as_float_list` | `test_mtbf_rechaza_t_y_mttr_no_validos`, `test_sistemas_…`, `test_koon_…` | C-09 |
+| **W-03** | K-01 | `mrp(initial_on_hand=nan)` propaga NaN; negativo aceptado | `initial_on_hand` sin validar | `as_finite_scalar` | `test_mrp_rechaza_existencia_inicial_no_valida` | C-09 |
+| **W-04** | K-01 | `weibull_analysis([nan, …])` → `OverflowError` crudo | tiempos sin validar | `as_float_list(kind="positive")` | `test_weibull_rechaza_tiempos_no_finitos` | C-09 |
+| **W-05** | K-02 | `cv2_uniform(nan, 3)` → `nan`; `break_even_multi` con NaN; `queue_length_pmf(n_max=-1)` → vacío | validadores ausentes en funciones auxiliares | `_utils` en cada punto de ingesta | `test_cv2_*`, `test_break_even_multi_*`, `test_queue_length_pmf_*`, `test_sojourn_cdf_*` | C-14 |
+| **W-06** | K-03 | `abc_analysis([{"name": "a"}])` → `KeyError`; `"abc"` → `AttributeError` | acceso directo a claves | `_leer_items` con errores `items[i]: falta la clave …` | `test_abc_items_mal_formados_dan_errores_claros`, `test_mrp_entradas_mal_formadas` | C-01 |
+| **W-07** | K-04 | un artículo con demanda 0 hace fallar todo el análisis ABC | `as_positive` en un caso límite válido | `as_nonneg`; todo 0 → `ValueError` explícito | `test_abc_acepta_articulos_sin_demanda_como_clase_c` | C-02 |
+| **W-08** | K-05 | Weibull con datos constantes: β = 100 sin aviso (MLE) o `ZeroDivisionError` (RRY) | cota fija del solucionador y división por 0 | `ValueError` en datos constantes; `UserWarning` si la cota recorta | `test_weibull_datos_constantes_…`, `test_weibull_casi_constante_…` | C-16 |
+| **W-09** | K-06 | `mmc(145, 1, 150)` → `OverflowError` | `a**n / n!` desborda `float` | recurrencia de Erlang-B | `tests/test_mmc_estable.py` (11 tests) | C-12 |
+| **W-10** | K-07 | `eoq_multi_constrained(budget=-1)` se cuelga; `budget=0` → `ZeroDivisionError` | presupuesto sin validar y búsqueda sin cota | validación + bisección acotada | `test_eoq_restringido_*` | C-18 |
+| **W-11** | K-08 / N-09 | `series_system([])` → `ZeroDivisionError`; `mrp([])` → `IndexError` | política de entrada vacía inconsistente | `ValueError` uniforme | `test_sistemas_rechazan_lista_vacia`, `test_listas_vacias_son_value_error` | C-01 |
+| **W-12** | N-01 | `break_even_sales(...).plot()` → `KeyError: 'price_per_unit'`; `plotting.py` con 0 % de cobertura | resultado sin los parámetros que usa la gráfica; ningún test ejecutaba las gráficas | `plot_break_even` admite `break_even_sales` + `tests/test_plotting.py` | `test_break_even_sales_usa_eje_de_ventas` | C-15 |
+| **W-13** | N-03 | `wagner_whitin(n=1000)` 10,2 s y `neh_flowshop(n=200)` 5,3 s frente a O(n²) / O(n²m) anunciados | sumas recalculadas en el doble bucle; makespan completo por inserción | sumas acumuladas y aceleración de Taillard | `test_wagner_whitin_n1000_es_rapido`, `test_neh_n200_m10_es_rapido` | C-11 |
+| **W-14** | N-04 | `cpm` con dos actividades `A` conserva la última sin aviso | volcado en `dict` | `ValueError` por nombre duplicado | `test_actividades_duplicadas_se_rechazan`, `test_actividad_sin_nombre_o_duracion_da_error_claro` | C-13 |
+| **W-15** | N-04 | `abc_xyz` con nombres repetidos empareja el artículo equivocado | emparejamiento por nombre | emparejar por posición (clave `index`) | `test_abc_xyz_con_nombres_repetidos_empareja_por_posicion` | C-13 |
+| **W-16** | N-05 | `mrp(lead_time=5)` descarta órdenes que caen antes del periodo 1 | recorte silencioso | `UserWarning` + campo `past_due_releases` | `test_mrp_avisa_de_liberaciones_vencidas` | C-16 |
+| **W-17** | N-06 | `mmck(…, K=10**7)` y `monte_carlo_gg1(n=10**9)` no terminan | parámetros de tamaño sin cota | `MAX_SERVIDORES`, `MAX_ESTADOS`, `MAX_CLIENTES` en `_utils` | `test_tamanos_absurdos_se_rechazan_de_inmediato`, `test_mmc_rechaza_demasiados_servidores` | C-18 |
+| **W-18** | N-07 | `mmc(2, 3, True)` se interpreta como `c=1` | `bool` es subclase de `int` | rechazar `bool` en los validadores | `test_bool_no_se_acepta_como_entero`, `test_bool_no_se_acepta_como_numero` | C-01 |
+| **W-19** | — (hallado al reforzar tests) | holguras `-0.0` en tablas de CPM/PERT | `round(-1e-16, 10)` devuelve `-0.0` | `round(x, 10) + 0.0` | `test_holguras_sin_cero_negativo` | C-26 |
+| **W-20** | K-13 | `__version__` sin fallback correcto cuando el paquete no está instalado | versión duplicada/obsoleta | `importlib.metadata` con fallback `0+unknown` (lo comprueba el test) | `test_sin_instalar_la_version_es_desconocida` | C-08 |
+| **W-21** | N-14 | `batch_model` captura cualquier excepción y la oculta; columna `_error` condicional | `except Exception` sin opción | parámetro `errors="collect"\|"raise"` y columna `_error` solo si hay fallos | `test_batch_model_errors_raise_propaga_la_excepcion`, `…_invalido`, `…_sin_errores_…` | C-29 |
+| **W-22** | K-01…K-03 | 30 excepciones inesperadas, 2 bloqueos y 26 entradas basura en el barrido de 67 funciones | validación solo en parte de las rutas | barrido permanente de la API (tabla `BASE` + candidatos + `ACEPTADOS`) | `test_contrato_de_entradas` (67 funciones) | C-14 |
+| **W-23** | K-10 | 13 de 61 bloques del README y 6 de 23 doctests fallaban | documentación escrita sin ejecutarla; `--doctest-modules` desactivado | README y doctests son tests (`test_readme.py`, `--doctest-modules`) | gate: `tests/test_readme.py` y los doctests (sin selector antiguo reproducible) | C-10, C-19 |
+| **W-24** | K-11 / K-12 / N-02 | CI en verde sin ruff, mypy, build, docs ni cobertura; 78 errores de mypy; publicación sin tests | el CI solo ejecutaba `pytest` | jobs de calidad en `ci.yml`; `publish.yml` verifica tag y tests | gate de CI (no es un test de pytest) | C-15, C-17 |
+| **W-25** | N-12 | 524 textos en inglés visibles (mensajes, avisos, docstrings) | política de idioma sin comprobación automática | traducción + `tests/test_idioma.py` | `test_textos_visibles_en_espanol` (15 módulos) | C-30 |
+
+---
+
+## TAXONOMÍA DE CLASES DE ERROR — ampliación con walopy
+
+| Clase | Descripción | Cómo prevenirla | Cómo detectarla | Bugs |
+|---|---|---|---|---|
+| **C-09 NaN pasa las comparaciones** | `x <= 0` es `False` para NaN; `inf` tampoco se rechaza; el valor llega al cálculo | `isfinite` **antes** de comparar; validador central | barrido `[nan, inf, -inf, -1, 0, None, "x"]` por argumento | W-01…W-04 |
+| **C-10 Documentación con API inventada** | los ejemplos del README usan parámetros o atributos inexistentes | bloques de código del README convertidos en tests | ejecutar todos los bloques | W-23 |
+| **C-11 Complejidad documentada ≠ real** | el docstring anuncia O(n²) y el código es O(n³) | medir con tamaños crecientes; benchmark | tabla de tiempos n = 100/400/1000 | W-13 |
+| **C-12 Desbordamiento por fórmula directa** | `a**n / n!` desborda para tamaños realistas | recurrencias estables, `lgamma`, logaritmos | prueba a escala 10× el caso típico | W-09 |
+| **C-13 Duplicados fusionados en silencio** | lista de dicts con clave de identidad volcada a un `dict` | rechazar duplicados al ingerir; emparejar por posición | test con nombres repetidos | W-14, W-15 |
+| **C-14 Validación solo en parte de las rutas** | existe la capa central pero hay rutas que no la usan | barrido sobre `__all__` | test de contrato | W-05, W-22 |
+| **C-15 CI verde que no verifica / módulo sin cobertura** | el CI no ejecuta los gates del Playbook; hay código sin ningún test | gates en el CI; cobertura por módulo | comparar `ci.yml` con la batería | W-12, W-24 |
+| **C-16 Recorte o descarte silencioso** | cota fija del solucionador o datos fuera de horizonte descartados sin aviso | `UserWarning` o error cuando se toca la cota | datos degenerados y casi constantes | W-08, W-16 |
+| **C-17 Funcionalidad publicada sin documentación** | símbolos nuevos de `__all__` ausentes de README/Sphinx | test que compare `__all__` con la documentación | `tests/test_documentacion.py` | W-24 |
+| **C-18 Parámetros sin cota → bloqueo** | tamaños o presupuestos sin límite permiten cálculos que no terminan | cotas máximas con mensaje; límite de iteraciones | barrido con 1e7, 1e9, 0, negativos y `--timeout` | W-10, W-17 |
+| **C-19 Doctests que nunca se ejecutan** | `--doctest-modules` desactivado: ejemplos rotos sin que nadie lo vea | `--doctest-modules` en `addopts` desde el primer ejemplo | `test_los_doctests_estan_activos` | W-23 |
+| **C-20 Ejemplo con borde numérico** | `100 < x < 130` falla si `x == 100.0` | mostrar el valor redondeado | doctests | — |
+| **C-21 Empates numéricos en heurísticas** | un empate exacto se resuelve distinto al cambiar el orden de las sumas | tolerancia relativa (1e-12) y datos enteros en los tests | comparar con la versión directa | — |
+| **C-22 Referencia externa menos precisa que el código** | `scipy…fit` difería de la raíz exacta | constantes de referencia con `brentq` (1e-15) y su origen documentado | contraste cruzado de dos métodos | — |
+| **C-23 Nombre que colisiona con una opción** | `from importlib.metadata import version` en `conf.py` | importar el módulo, no nombres genéricos | `sphinx -W` | — |
+| **C-24 Metadatos de instalación obsoletos** | `egg-info` antiguo entra en `sys.path` | `--import-mode=importlib`; reinstalar al subir la versión | `test_version_coincide_con_metadatos` | W-20 |
+| **C-25 Comprobación que coincide con su propio comando** | el `grep` de referencias obsoletas se encuentra a sí mismo | excluir `.github/` y el archivo con el patrón | ejecutar el paso localmente | — |
+| **C-26 `-0.0` en resultados** | `round(-1e-16, 10)` → `-0.0` | sumar `0.0` tras redondear | comparar con `math.copysign` | W-19 |
+| **C-27 `!` en scripts no detiene la ejecución** | `! grep` con `set -e` no falla | `if grep …; then exit 1; fi` | probar el paso con una coincidencia forzada | — |
+| **C-28 Rama creada desde una base antigua** | la rama partía de v0.2.0 y el PR tuvo conflictos en 6 archivos | rama desde `origin/main` recién traído | `git merge-base --is-ancestor origin/main HEAD` | — |
+| **C-29 Captura amplia que oculta errores** | `except Exception` sin opción de propagar | parámetro explícito (`errors=`) y columna estable | test con una función que lanza | W-21 |
+| **C-30 Texto visible sin política comprobada** | la política «texto en español» existía pero nada la verificaba: 524 hallazgos en v0.2.8 y 2 más que escaparon a la traducción manual | `tests/test_idioma.py` recorre mensajes, avisos y docstrings con `ast` | el propio test (con control negativo) | W-25 |
+| **C-31 Reemplazo global sin contexto** | un glosario aplicado a todo el árbol cambió una clave de datos (`"method"`) y un valor de ejemplo (`"Name"`) | separar *claves de datos* (se quedan) de *cabeceras de presentación* (`.rename(columns=…)`); revisar el diff y ejecutar los tests tras cada reemplazo | la suite completa | — |
+| **C-32 Test de regresión que no falla en el código anterior** | tests de `-0.0` y de `__version__` pasaban también sin el fix: no protegían nada | ejecutar los tests contra el tag anterior | `scripts/verificar_regresion.py` | W-19, W-20 |

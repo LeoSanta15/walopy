@@ -1,4 +1,4 @@
-"""walopy — Queuing theory, operations analysis and KPI trees for Python."""
+"""walopy — Herramientas de investigación de operaciones para Python: colas, inventarios, scheduling, proyectos, confiabilidad, OEE y árboles de KPI."""
 from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version

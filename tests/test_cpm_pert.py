@@ -93,8 +93,8 @@ def test_cpm_to_frame():
     import pandas as pd
     df = wl.cpm(CPM_ACTS).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "Critical" in df.columns
-    assert "TF" in df.columns
+    assert "Crítica" in df.columns
+    assert "HT" in df.columns
 
 
 def test_cpm_simple_linear():
@@ -169,11 +169,17 @@ def test_pert_invalid_estimates_raises():
 
 
 def test_holguras_sin_cero_negativo():
-    # Con duraciones PERT fraccionarias la resta LS - ES puede dar -1e-16: debe mostrarse como 0.0
+    # Con duraciones PERT fraccionarias (te = 16/3, 13/3, …) la resta LS - ES daba -1e-16 y se
+    # mostraba como -0.0 en to_frame(); debe ser 0.0 (signo positivo).
     acts = [
-        {"name": "A", "optimistic": 3, "most_likely": 5, "pessimistic": 9, "predecessors": []},
-        {"name": "B", "optimistic": 2, "most_likely": 4, "pessimistic": 8, "predecessors": ["A"]},
-        {"name": "C", "optimistic": 4, "most_likely": 6, "pessimistic": 10, "predecessors": ["B"]},
+        {"name": "Diseño", "optimistic": 3, "most_likely": 5, "pessimistic": 9, "predecessors": []},
+        {"name": "Compras", "optimistic": 2, "most_likely": 4, "pessimistic": 8, "predecessors": ["Diseño"]},
+        {"name": "Montaje", "optimistic": 4, "most_likely": 6, "pessimistic": 10, "predecessors": ["Compras"]},
+        {"name": "Software", "optimistic": 5, "most_likely": 7, "pessimistic": 12, "predecessors": ["Diseño"]},
+        {"name": "Pruebas", "optimistic": 2, "most_likely": 3, "pessimistic": 6, "predecessors": ["Montaje", "Software"]},
     ]
-    for a in wl.pert(acts).activities:
-        assert math.copysign(1.0, a.total_float) > 0 and math.copysign(1.0, a.free_float) > 0
+    r = wl.pert(acts)
+    for a in r.activities:
+        assert math.copysign(1.0, a.total_float) > 0, f"{a.name}: TF = {a.total_float!r}"
+        assert math.copysign(1.0, a.free_float) > 0, f"{a.name}: FF = {a.free_float!r}"
+    assert "-0.0" not in r.to_frame().to_string()

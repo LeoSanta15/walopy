@@ -14,7 +14,7 @@ def test_oee_kpi_tree_root_value():
 
 def test_kpi_node_find():
     tree = oee_kpi_tree(0.9, 0.8, 0.95)
-    node = tree.find("Performance")
+    node = tree.find("Rendimiento")
     assert node is not None
     assert node.value == pytest.approx(0.8)
 
@@ -31,7 +31,7 @@ def test_kpi_to_frame():
     tree = oee_kpi_tree(0.9, 0.8, 0.95)
     df = tree.to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "name" in df.columns
+    assert "nombre" in df.columns
     assert len(df) == 4  # root + 3 children
 
 
@@ -51,7 +51,7 @@ def test_roi_kpi_tree():
     # Net Profit = 50000 - (10000 + 8*2000) = 50000 - 26000 = 24000
     # ROI = 24000 / 20000 = 1.2
     assert tree.value == pytest.approx(1.2)
-    net_profit_node = tree.find("Net Profit")
+    net_profit_node = tree.find("Utilidad neta")
     assert net_profit_node is not None
     assert net_profit_node.value == pytest.approx(24_000)
 
@@ -64,11 +64,11 @@ def test_roi_kpi_tree_structure():
         units_sold=1_000,
         investment=5_000,
     )
-    assert tree.find("Revenue") is not None
-    assert tree.find("Total Cost") is not None
-    assert tree.find("Fixed Cost") is not None
-    assert tree.find("Variable Cost") is not None
-    assert tree.find("Investment") is not None
+    assert tree.find("Ingresos") is not None
+    assert tree.find("Costo total") is not None
+    assert tree.find("Costo fijo") is not None
+    assert tree.find("Costo variable") is not None
+    assert tree.find("Inversión") is not None
 
 
 def test_oee_kpi_tree_nan_raises():

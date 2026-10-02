@@ -16,7 +16,7 @@ K-09…K-13 y N-01…N-16 (ver `docs/auditoria/ROADMAP.md`).
 - **`cv2_erlang(k)`** exige un entero ≥ 1 (antes truncaba `2.5` a `2`).
 - **Listas vacías** en `lot_for_lot`, `silver_meal`, `wagner_whitin`, `schedule_single` y `series_system`/`parallel_system` lanzan `ValueError`.
 - **Nombres de actividad duplicados** en `cpm`/`pert` lanzan `ValueError` (antes se fusionaban en silencio).
-- **Mensajes de error y avisos en español** (el texto cambia; los tipos de excepción no). La ayuda del CLI también está en español.
+- **Todo texto que ve la persona usuaria está en español** (los identificadores del código siguen en inglés): mensajes de error y avisos, ayuda del CLI, docstrings, etiquetas de `summary()`, títulos y ejes de las gráficas, nombres de nodos de los árboles de KPI y los **encabezados de columna de los `DataFrame`** (`to_frame()`, `compare()`, …) y las claves de `params` con etiqueta legible. Ejemplos: `"Total cost"` → `"Costo total"`, `"λ (arrival rate)"` → `"λ (tasa de llegada)"`, `M1_start` → `M1_inicio`, `TF`/`FF` → `HT`/`HL`, columnas ABC/XYZ → `clase`, `valor_anual`, `pct_acumulado`; `compare()` etiqueta por defecto `escenario_1`. Las claves de los diccionarios de datos (`items[i]["class"]`, `result.params["fixed_cost"]`) y los atributos de los resultados no cambian.
 - **Cotas de tamaño:** `c` ≤ 10⁶, `K`/`n_max`/`n_points` ≤ 10⁶, `n_customers` ≤ 10⁷.
 - `abc_analysis` acepta artículos con demanda 0 (clase C); si todas son 0 lanza `ValueError`.
 - `weibull_analysis` lanza `ValueError` si todos los tiempos son iguales y `UserWarning` si β alcanza la cota 100.
@@ -44,8 +44,12 @@ K-09…K-13 y N-01…N-16 (ver `docs/auditoria/ROADMAP.md`).
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, plantillas de issues y de PR; `CLAUDE.md` y `CONTRIBUTING.md` reescritos.
 - CI: ruff, mypy, cobertura (global ≥ 85 % y por módulo ≥ 70 %), build + `twine check`, Sphinx `-W`, `pip-audit`,
   matriz Python 3.9–3.13, dependencias mínimas y prueba semanal con las últimas versiones; la publicación verifica antes de publicar.
-- Tests: 357 → 1 165 (contrato de entradas sobre las 67 funciones, regresiones, referencias externas fijas, gráficas, CLI,
-  README, documentación, ejemplos, complejidad y doctests). Cobertura 80 % → 91 %.
+- Tests: 357 → 1 260 (contrato de entradas sobre las 67 funciones, regresiones, referencias externas fijas, gráficas, CLI,
+  README, documentación, ejemplos, complejidad, doctests, política de idioma y trazabilidad). Cobertura 80 % → 94,7 %.
+- Trazabilidad de bugs: `tests/regresiones.json` (25 bugs `W-nn`), `scripts/verificar_regresion.py` (los tests de regresión deben **fallar** en la versión anterior; job `regresion` del CI),
+  `tests/test_trazabilidad.py` y `tests/test_idioma.py` (mensajes, avisos y docstrings en español). `CLAUDE.md` pasa a 17 reglas (R-16 y R-17).
+  El catálogo de bugs y el Playbook de `docs/referencia/` incorporan las lecciones de walopy; ver `docs/auditoria/TRAZABILIDAD.md` y `REGLAS_PROPUESTAS.md`.
+- Extra de desarrollo `pytest-timeout` (la verificación de regresiones detecta bloqueos del código anterior).
 
 ### Notas
 - Los tags `v0.2.4` y `v0.2.6` nunca se crearon en GitHub (las versiones sí se publicaron); no se reconstruyen.
