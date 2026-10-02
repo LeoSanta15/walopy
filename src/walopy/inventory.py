@@ -353,8 +353,8 @@ def newsvendor(
     Examples
     --------
     >>> r = newsvendor(demand_mean=100, demand_std=20, price=10, cost=6, salvage=2)
-    >>> 100 < r.optimal_qty < 130
-    True
+    >>> round(r.optimal_qty, 2)  # razón crítica 0.5 → cuantil de la mediana
+    100.0
     """
     mu  = as_positive(demand_mean, "demand_mean")
     sig = as_nonneg(demand_std, "demand_std")
@@ -1328,7 +1328,7 @@ def wagner_whitin(
     Examples
     --------
     >>> r = wagner_whitin([100, 80, 120, 60], setup_cost=200, holding_cost=1)
-    >>> r.total_cost <= wagner_whitin.__doc__ and True  # optimal ≤ Silver-Meal
+    >>> r.total_cost <= silver_meal([100, 80, 120, 60], setup_cost=200, holding_cost=1).total_cost
     True
     """
     demands_v = as_float_list(demands, "demands", kind="nonneg")

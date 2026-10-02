@@ -494,7 +494,7 @@ def weibull_analysis(
     >>> # Generate Weibull(β=2, η=100) data via inverse CDF
     >>> times = [100 * (-math.log(1 - p)) ** 0.5 for p in [.1,.2,.3,.4,.5,.6,.7,.8,.9]]
     >>> r = weibull_analysis(times)
-    >>> 1.5 < r.shape < 2.5
+    >>> 2.0 < r.shape < 3.0  # cuantiles equiespaciados: menos dispersión que una muestra aleatoria
     True
     """
     t_list = as_float_list(failure_times, "failure_times", min_len=2)

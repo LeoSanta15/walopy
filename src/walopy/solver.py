@@ -526,7 +526,8 @@ def batch_model(
     >>> from walopy import mm1
     >>> from walopy.solver import batch_model
     >>> scenarios = pd.DataFrame({"lam": [1.0, 2.0, 3.0, 4.0], "mu": [5.0, 5.0, 5.0, 5.0]})
-    >>> batch_model(mm1, scenarios)
+    >>> batch_model(mm1, scenarios)["rho"].round(2).tolist()
+    [0.2, 0.4, 0.6, 0.8]
     """
     if errors not in ("collect", "raise"):
         raise ValueError("'errors' debe ser 'collect' o 'raise'.")
@@ -601,7 +602,9 @@ def compare(
     Examples
     --------
     >>> from walopy import mm1, mmc, compare
-    >>> compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
+    >>> tabla = compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
+    >>> tabla["c (servers)"].tolist()
+    [1, 2]
     """
     rows: list[dict[str, Any]] = []
     for i, r in enumerate(results):

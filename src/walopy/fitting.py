@@ -143,7 +143,8 @@ def fit_from_data(
     >>> ia  = rng.exponential(scale=0.2, size=1000)   # true λ = 5
     >>> svc = rng.exponential(scale=0.1, size=1000)   # true μ = 10
     >>> fit = fit_from_data(ia, svc)
-    >>> round(fit.lam, 1), round(fit.mu, 1)  # ≈ (5.0, 10.0)
+    >>> round(fit.lam, 1), round(fit.mu, 1)  # cercano a los valores verdaderos (5.0, 10.0)
+    (4.9, 9.8)
     """
     if inter_arrivals is not None and arrival_timestamps is not None:
         raise ValueError("Indique 'inter_arrivals' o 'arrival_timestamps', no ambos.")
