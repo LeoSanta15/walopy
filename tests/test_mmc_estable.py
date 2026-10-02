@@ -54,5 +54,5 @@ def test_mmc_pocas_llegadas_con_muchos_servidores():
 
 
 def test_mmc_rechaza_demasiados_servidores():
-    with pytest.raises(ValueError, match="servidores"):
+    with pytest.raises(ValueError, match="no puede superar"):
         wl.mmc(1.0, 1.0, 10**7)

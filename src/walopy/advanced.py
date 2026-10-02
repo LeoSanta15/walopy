@@ -8,7 +8,17 @@ from dataclasses import dataclass, field
 import numpy as np
 import pandas as pd
 
-from ._utils import as_fraction, as_int_positive, as_nonempty, as_nonneg, as_positive
+from ._utils import (
+    MAX_CLIENTES,
+    MAX_ESTADOS,
+    MAX_SERVIDORES,
+    as_float_list,
+    as_fraction,
+    as_int_positive,
+    as_nonempty,
+    as_nonneg,
+    as_positive,
+)
 from .queuing import QueueResult
 
 # ---------------------------------------------------------------------------
@@ -37,7 +47,7 @@ def erlang_b(lam: float, mu: float, c: int) -> float:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    c   = as_int_positive(c, "c")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     a = lam / mu  # offered traffic
 
     # Recursive formula (numerically stable for large c)
@@ -74,7 +84,7 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    K   = as_int_positive(K, "K")
+    K   = as_int_positive(K, "K", max=MAX_ESTADOS)
 
     rho = lam / mu
 
@@ -227,7 +237,7 @@ def monte_carlo_gg1(
     mu          = as_positive(mu, "mu")
     ca2         = as_nonneg(ca2, "ca2")
     cs2         = as_nonneg(cs2, "cs2")
-    n_customers = as_int_positive(n_customers, "n_customers")
+    n_customers = as_int_positive(n_customers, "n_customers", max=MAX_CLIENTES)
     rho         = lam / mu
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
@@ -626,19 +636,21 @@ def break_even_multi(
     >>> r.bep_units_total > 0
     True
     """
-    prices         = list(prices)
-    variable_costs = list(variable_costs)
-    sales_mix      = list(sales_mix)
+    prices         = as_float_list(prices, "prices")
+    variable_costs = as_float_list(variable_costs, "variable_costs", kind="nonneg")
+    sales_mix      = as_float_list(sales_mix, "sales_mix", kind="nonneg")
     n = len(prices)
     if len(variable_costs) != n or len(sales_mix) != n:
-        raise ValueError("prices, variable_costs and sales_mix must have the same length.")
+        raise ValueError("prices, variable_costs y sales_mix deben tener la misma longitud.")
     if names is None:
         names = [f"Product-{i+1}" for i in range(n)]
+    elif len(list(names)) != n:
+        raise ValueError("'names' debe tener la misma longitud que prices.")
     fixed_cost = as_positive(fixed_cost, "fixed_cost")
 
     total_mix = sum(sales_mix)
     if total_mix <= 0:
-        raise ValueError("sales_mix values must be positive.")
+        raise ValueError("La suma de sales_mix debe ser positiva.")
     mix_frac = [m / total_mix for m in sales_mix]
 
     cms = [p - v for p, v in zip(prices, variable_costs)]
@@ -762,6 +774,10 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     rho = lam / mu
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+    if isinstance(n_max, bool) or not isinstance(n_max, (int, np.integer)):
+        raise TypeError(f"'n_max' debe ser un entero >= 0, se recibió {type(n_max).__name__!r}.")
+    if not 0 <= n_max <= MAX_ESTADOS:
+        raise ValueError(f"'n_max' debe estar entre 0 y {MAX_ESTADOS}, se recibió {n_max!r}.")
     ns    = np.arange(0, n_max + 1)
     pmf   = (1 - rho) * rho**ns
     return pd.DataFrame({"n": ns, "P(N=n)": pmf, "P(N<=n)": np.cumsum(pmf)})
@@ -793,8 +809,9 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     rho = lam / mu
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+    n_points = as_int_positive(n_points, "n_points", max=MAX_ESTADOS)
     W_mean = 1.0 / (mu - lam)
-    t_upper = t_max if t_max is not None else 5.0 * W_mean
+    t_upper = as_positive(t_max, "t_max") if t_max is not None else 5.0 * W_mean
     t       = np.linspace(0, t_upper, n_points)
     rate    = mu - lam
     cdf     = 1.0 - np.exp(-rate * t)
@@ -831,8 +848,8 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    c   = as_int_positive(c, "c")
-    K   = as_int_positive(K, "K")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    K   = as_int_positive(K, "K", max=MAX_ESTADOS)
     if K < c:
         raise ValueError(f"'K' (system capacity) must be ≥ c (servers); got K={K}, c={c}.")
 

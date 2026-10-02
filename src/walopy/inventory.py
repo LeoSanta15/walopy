@@ -1041,7 +1041,7 @@ def lot_for_lot(
     >>> r.total_holding_cost
     0.0
     """
-    demands    = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    demands    = as_float_list(demands, "demands", kind="nonneg")
     setup_cost = as_positive(setup_cost, "setup_cost")
     holding_cost = as_positive(holding_cost, "holding_cost")
 
@@ -1092,7 +1092,7 @@ def silver_meal(
     >>> r.total_cost <= lot_for_lot([100, 80, 120, 60], 200, 1).total_cost
     True
     """
-    demands    = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    demands    = as_float_list(demands, "demands", kind="nonneg")
     setup_cost = as_positive(setup_cost, "setup_cost")
     holding_cost = as_positive(holding_cost, "holding_cost")
     T = len(demands)
@@ -1325,7 +1325,7 @@ def wagner_whitin(
     >>> r.total_cost <= wagner_whitin.__doc__ and True  # optimal ≤ Silver-Meal
     True
     """
-    demands_v = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    demands_v = as_float_list(demands, "demands", kind="nonneg")
     K = as_positive(setup_cost, "setup_cost")
     h = as_positive(holding_cost, "holding_cost")
     n = len(demands_v)

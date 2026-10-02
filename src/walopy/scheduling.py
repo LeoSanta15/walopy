@@ -5,7 +5,7 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from ._utils import as_positive
+from ._utils import as_float_list, as_positive
 
 
 @dataclass
@@ -164,6 +164,7 @@ def schedule_single(
     -------
     ScheduleResult
     """
+    processing_times = as_float_list(processing_times, "processing_times")
     n = len(processing_times)
     if names is None:
         names = [f"J{i + 1}" for i in range(n)]

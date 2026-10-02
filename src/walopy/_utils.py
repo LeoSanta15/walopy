@@ -43,8 +43,17 @@ def as_fraction(value: float, name: str) -> float:
     return v
 
 
-def as_int_positive(value: int, name: str) -> int:
-    """Valida que un valor sea un entero positivo (acepta enteros de numpy; rechaza float y bool)."""
+# Cotas de tamaño: evitan cálculos de duración prácticamente infinita con parámetros absurdos.
+MAX_SERVIDORES = 10**6
+MAX_ESTADOS = 10**6
+MAX_CLIENTES = 10**7
+
+
+def as_int_positive(value: int, name: str, *, max: int | None = None) -> int:
+    """Valida que un valor sea un entero positivo (acepta enteros de numpy; rechaza float y bool).
+
+    Si se indica ``max``, rechaza valores mayores (cota para evitar bloqueos).
+    """
     if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
         raise TypeError(
             f"'{name}' debe ser un entero positivo, se recibió {type(value).__name__!r} = {value!r}."
@@ -52,6 +61,8 @@ def as_int_positive(value: int, name: str) -> int:
     v = int(value)
     if v < 1:
         raise ValueError(f"'{name}' debe ser >= 1, se recibió {value!r}.")
+    if max is not None and v > max:
+        raise ValueError(f"'{name}' no puede superar {max}, se recibió {value!r}.")
     return v
 
 

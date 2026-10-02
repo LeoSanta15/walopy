@@ -4,9 +4,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-from ._utils import as_int_positive, as_nonneg, as_positive
-
-MAX_SERVIDORES = 10**6  # cota para evitar bucles de duración prácticamente infinita
+from ._utils import MAX_SERVIDORES, as_finite_scalar, as_int_positive, as_nonneg, as_positive
 
 
 @dataclass
@@ -194,9 +192,7 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    c   = as_int_positive(c, "c")
-    if c > MAX_SERVIDORES:
-        raise ValueError(f"'c' no puede superar {MAX_SERVIDORES} servidores, se recibió {c}.")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     rho = lam / (c * mu)
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < c·μ.")
@@ -370,9 +366,14 @@ def cv2_triangular(a: float, m: float, b: float) -> float:
     m : float  Mode (peak).
     b : float  Upper bound.
     """
+    a = as_finite_scalar(a, "a")
+    m = as_finite_scalar(m, "m")
+    b = as_finite_scalar(b, "b")
     if not (a <= m <= b):
-        raise ValueError("Triangular requires a ≤ m ≤ b.")
+        raise ValueError("La triangular requiere a ≤ m ≤ b.")
     mean = (a + m + b) / 3.0
+    if mean == 0.0:
+        raise ValueError("La media de la distribución es 0: CV² no está definido.")
     var  = (a**2 + m**2 + b**2 - a*m - a*b - m*b) / 18.0
     return var / mean**2
 
@@ -385,9 +386,13 @@ def cv2_uniform(a: float, b: float) -> float:
     a : float  Lower bound.
     b : float  Upper bound (> a).
     """
+    a = as_finite_scalar(a, "a")
+    b = as_finite_scalar(b, "b")
     if b <= a:
-        raise ValueError("Uniform requires b > a.")
+        raise ValueError("La uniforme requiere b > a.")
     mean = (a + b) / 2.0
+    if mean == 0.0:
+        raise ValueError("La media de la distribución es 0: CV² no está definido.")
     var  = (b - a)**2 / 12.0
     return var / mean**2
 
@@ -412,9 +417,7 @@ def cv2_erlang(k: int) -> float:
     ----------
     k : int  Shape parameter (≥ 1).
     """
-    k = int(k)
-    if k < 1:
-        raise ValueError("Erlang-k requires k ≥ 1.")
+    k = as_int_positive(k, "k")
     return 1.0 / k
 
 

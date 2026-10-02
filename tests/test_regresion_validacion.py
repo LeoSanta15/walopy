@@ -224,3 +224,82 @@ def test_eoq_restringido_restriccion_personalizada_mal_formada():
 def test_eoq_restringido_valido_sigue_funcionando():
     r = wl.eoq_multi_constrained([1000, 500], [50, 30], [2, 1], budget=3000, budget_unit_costs=[10, 5])
     assert r.total_cost >= r.unconstrained_total_cost
+
+
+# ─── K-02: entradas que se aceptaban en silencio ──────────────────────────────────────────────
+
+@pytest.mark.parametrize("malo", [NAN, INF, -INF])
+def test_cv2_uniforme_y_triangular_rechazan_no_finitos(malo):
+    with pytest.raises(ValueError):
+        wl.cv2_uniform(malo, 3.0)
+    with pytest.raises(ValueError):
+        wl.cv2_triangular(1.0, 2.0, malo)
+
+
+def test_cv2_media_cero_da_error_claro():
+    with pytest.raises(ValueError, match="media"):
+        wl.cv2_uniform(-1.0, 1.0)
+
+
+@pytest.mark.parametrize("campo", ["prices", "variable_costs", "sales_mix"])
+def test_break_even_multi_rechaza_no_finitos(campo):
+    kw = dict(prices=[10.0, 20.0], variable_costs=[4.0, 8.0], sales_mix=[3.0, 1.0])
+    kw[campo] = [NAN, 1.0]
+    with pytest.raises(ValueError, match=campo):
+        wl.break_even_multi(1000.0, **kw)
+
+
+def test_break_even_multi_acepta_pesos_relativos():
+    r = wl.break_even_multi(1000.0, [10.0, 20.0], [4.0, 8.0], [3.0, 1.0])
+    assert r.items[0]["Mix"] == pytest.approx(0.75)
+
+
+@pytest.mark.parametrize("n_max", [-1, -1.0, 2.5, True, None])
+def test_queue_length_pmf_valida_n_max(n_max):
+    with pytest.raises((ValueError, TypeError)):
+        wl.queue_length_pmf(2.0, 3.0, n_max=n_max)
+
+
+def test_queue_length_pmf_n_max_cero_es_valido():
+    assert len(wl.queue_length_pmf(2.0, 3.0, n_max=0)) == 1
+
+
+# ─── N-06: cotas de tamaño (antes se bloqueaba el proceso) ─────────────────────────────────────
+
+def test_tamanos_absurdos_se_rechazan_de_inmediato():
+    with pytest.raises(ValueError, match="no puede superar"):
+        wl.monte_carlo_gg1(2.0, 3.0, 1.0, 1.0, n_customers=10**9)
+    with pytest.raises(ValueError, match="no puede superar"):
+        wl.mmck(2.0, 3.0, 2, 10**7)
+    with pytest.raises(ValueError, match="no puede superar"):
+        wl.mmc(2.0, 3.0, 10**7)
+    with pytest.raises(ValueError, match="no puede superar"):
+        wl.mm1k(2.0, 3.0, 10**7)
+    with pytest.raises(ValueError, match="no puede superar"):
+        wl.sojourn_cdf(2.0, 3.0, n_points=10**7)
+
+
+def test_sojourn_cdf_valida_t_max():
+    with pytest.raises(ValueError, match="t_max"):
+        wl.sojourn_cdf(2.0, 3.0, t_max=-1.0)
+
+
+# ─── N-09: política uniforme de entradas vacías ────────────────────────────────────────────────
+
+@pytest.mark.parametrize("fn,args", [
+    ("lot_for_lot", ([], 10.0, 1.0)),
+    ("silver_meal", ([], 10.0, 1.0)),
+    ("wagner_whitin", ([], 10.0, 1.0)),
+    ("schedule_single", ([],)),
+    ("mrp", ([],)),
+])
+def test_listas_vacias_son_value_error(fn, args):
+    with pytest.raises(ValueError):
+        getattr(wl, fn)(*args)
+
+
+def test_cv2_erlang_valida_k_entero():
+    for malo in (2.5, True, INF, -INF, NAN, 0, -3):
+        with pytest.raises((ValueError, TypeError)):
+            wl.cv2_erlang(malo)
+    assert wl.cv2_erlang(4) == pytest.approx(0.25)
