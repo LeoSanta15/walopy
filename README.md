@@ -156,7 +156,9 @@ r = wl.kingman(lam=3.0, mu=5.0, ca2=0.5, cs2=1.0)
 r = wl.kingman(lam=3.0, mu=5.0, ca2=1.0, cs2=3.0)
 
 # Recuperar parámetros ajustados desde datos reales y usarlos directamente
-fit = wl.fit_from_data(inter_arrivals=..., service_times=...)
+import numpy as np
+rng = np.random.default_rng(42)
+fit = wl.fit_from_data(inter_arrivals=rng.exponential(0.2, 500), service_times=rng.exponential(0.1, 500))
 r   = wl.kingman(**fit.to_model_kwargs())
 ```
 
@@ -229,12 +231,12 @@ Cola con **capacidad finita** K (servidor + sala de espera). Los clientes que ll
 
 **Parámetros adicionales en `result.params`:**
 - `PK (blocking prob)` — probabilidad de rechazo (sistema lleno)
-- `lam_eff` — tasa de llegada efectiva = λ · (1 − P_K)
+- `λ_eff (effective rate)` — tasa de llegada efectiva = λ · (1 − P_K)
 
 ```python
 r = wl.mm1k(lam=5.0, mu=3.0, K=10)
 print(r.params["PK (blocking prob)"])  # fracción de clientes rechazados
-print(r.params["lam_eff"])             # tasa real de entrada al sistema
+print(r.params["λ_eff (effective rate)"])  # tasa real de entrada al sistema
 ```
 
 ---
@@ -418,8 +420,9 @@ print(fit_ia.mu)     # None
 ts  = np.cumsum(rng.exponential(0.2, 1000))   # timestamps acumulados
 fit = wl.fit_from_data(arrival_timestamps=ts)
 
-# 4. Conectar directamente con un modelo
-r = wl.kingman(**fit.to_model_kwargs())  # usa lam, mu, ca2, cs2
+# 4. Conectar directamente con un modelo (necesita λ, μ, ca² y cs²: ajuste con ambas muestras)
+fit_completo = wl.fit_from_data(ia, svc)
+r = wl.kingman(**fit_completo.to_model_kwargs())  # usa lam, mu, ca2, cs2
 ```
 
 **`FitResult` — atributos:**
@@ -880,21 +883,21 @@ print(r)
 r.plot()    # gráfica horizontal con referencia world-class (85%)
 ```
 
-### `utilization_efficiency(actual_output, max_output)` — Utilización
+### `utilization_efficiency(actual_output, capacity)` — Utilización
 
 ```python
-r = wl.utilization_efficiency(actual_output=750, max_output=1000)
+r = wl.utilization_efficiency(actual_output=750, capacity=1000)
 print(r.utilization)         # 0.75 — 75% de utilización
-print(r.idle_fraction)       # 0.25 — 25% capacidad ociosa
+print(1 - r.utilization)     # 0.25 — 25% de capacidad ociosa
 ```
 
-### `unit_cost(fixed_cost, variable_cost, units)` — Costo unitario
+### `unit_cost(fixed_cost, variable_cost_per_unit, units_produced)` — Costo unitario
 
 ```python
-r = wl.unit_cost(fixed_cost=10_000, variable_cost=5_000, units=500)
-print(r.unit_cost)           # 30.0 $/unidad
-print(r.fixed_cost_per_unit) # 20.0
-print(r.var_cost_per_unit)   # 10.0
+r = wl.unit_cost(fixed_cost=10_000, variable_cost_per_unit=10, units_produced=500)
+print(r.unit_cost)               # 30.0 $/unidad
+print(r.fixed_cost_per_unit)     # 20.0
+print(r.variable_cost_per_unit)  # 10.0
 ```
 
 ---
@@ -931,19 +934,19 @@ takt = wl.takt_time(available_time=480, demand=60)
 print(takt)   # 8.0 min/unidad
 ```
 
-### `line_balance(names, cycle_times, takt)` — Balance de línea
+### `line_balance(station_names, cycle_times, takt)` — Balance de línea
 
 Analiza si cada estación puede cumplir con el tiempo takt y calcula la eficiencia de balance.
 
 ```python
 lb = wl.line_balance(
-    names=["A", "B", "C"],
+    station_names=["A", "B", "C"],
     cycle_times=[5.0, 9.0, 4.0],
     takt=10.0,
 )
 print(lb.bottleneck)           # "B" — estación más lenta
-print(lb.balance_efficiency)   # 0.60 — 60% de eficiencia
-print(lb.total_idle_time)      # tiempo ocioso total
+print(lb.balance_efficiency)   # eficiencia de balance de la línea
+print(lb.theoretical_min_stations)  # número mínimo teórico de estaciones
 
 lb.plot()  # barras de cycle time vs takt
 ```
@@ -963,8 +966,8 @@ be = wl.break_even(
 )
 print(be.bep_units)              # 1000.0 — punto de equilibrio en unidades
 print(be.bep_revenue)            # 25000.0 — ingresos en el punto de equilibrio
-print(be.margin_of_safety_pct)   # 33.3% — margen de seguridad sobre ventas actuales
-print(be.profit)                 # 5000.0 — beneficio con actual_units
+print(be.margin_of_safety_pct)   # 0.333 — margen de seguridad (fracción) sobre ventas actuales
+print(be.margin_of_safety_units) # 500.0 — unidades por encima del punto de equilibrio
 
 be.plot()   # líneas de ingresos/costos con BEP y zona de beneficio
 ```
@@ -1061,11 +1064,13 @@ tree.plot()
 ### `KPINode` — árbol personalizado
 
 ```python
-root = wl.KPINode("EBITDA", value=100_000, unit="€")
-rev  = root.add_child("Revenue",        value=200_000, unit="€")
-cost = root.add_child("Operating costs", value=100_000, unit="€")
-rev.add_child("Product A", value=120_000, unit="€")
-rev.add_child("Product B", value=80_000,  unit="€")
+rev = wl.KPINode("Revenue", value=200_000, unit="€", children=[
+    wl.KPINode("Product A", value=120_000, unit="€"),
+    wl.KPINode("Product B", value=80_000, unit="€"),
+])
+cost = wl.KPINode("Operating costs", value=100_000, unit="€")
+root = wl.KPINode("EBITDA", value=100_000, unit="€", formula="Revenue − Operating costs",
+                  children=[rev, cost])
 
 from walopy.plotting import plot_kpi_tree
 fig = plot_kpi_tree(root, kind="treemap")
@@ -1076,28 +1081,28 @@ fig.show()
 
 ## 16. Solvers y optimización
 
-### `solve_lam(metric, target, *, mu, model)` — Máxima tasa de llegada
+### `solve_lam(target_metric, target_value, *, mu, model)` — Máxima tasa de llegada
 
 Encuentra la mayor λ tal que una métrica no supere el objetivo.
 
 ```python
-r = wl.solve_lam("Wq", target=0.5, mu=5.0, model="mm1")
+r = wl.solve_lam("Wq", 0.5, mu=5.0, model="mm1")
 print(r.value)          # λ máxima ≈ 3.33
 print(r.achieved_value) # Wq ≈ 0.5
 print(r.model_result)   # QueueResult completo en la solución
 ```
 
-### `solve_mu(metric, target, *, lam, model)` — Mínima tasa de servicio
+### `solve_mu(target_metric, target_value, *, lam, model)` — Mínima tasa de servicio
 
 ```python
-r = wl.solve_mu("Wq", target=0.3, lam=3.0, model="mm1")
+r = wl.solve_mu("Wq", 0.3, lam=3.0, model="mm1")
 print(r.value)   # μ mínima necesaria ≈ 5.0
 ```
 
-### `solve_servers(metric, target, *, lam, mu)` — Mínimo número de servidores
+### `solve_servers(target_metric, target_value, *, lam, mu)` — Mínimo número de servidores
 
 ```python
-r = wl.solve_servers("Wq", target=0.1, lam=8.0, mu=5.0)
+r = wl.solve_servers("Wq", 0.1, lam=8.0, mu=5.0)
 print(r.value)         # c mínimo = 3
 print(r.model_result)  # QueueResult para M/M/3
 ```
@@ -1114,7 +1119,7 @@ r = wl.optimize_servers(
     cost_per_wait=5.0,      # costo por unidad de tiempo de espera de cada cliente
 )
 print(r.optimal_servers)   # c óptimo
-print(r.optimal_cost)      # costo mínimo
+print(r.min_cost)          # costo mínimo
 
 r.plot()   # gráfica de costo vs número de servidores
 ```
@@ -1181,8 +1186,12 @@ escenarios3 = pd.DataFrame({
 })
 resultado3 = wl.batch_model(wl.mmc, escenarios3, lam=8.0, mu=5.0)
 
-# Las filas con error quedan marcadas en "_error"
-print(resultado[resultado["_error"].notna()])  # filas fallidas
+# Las filas con error quedan marcadas en "_error" (la columna solo existe si alguna fila falla;
+# aquí c=1 es inestable porque λ=8 > μ=5)
+print(resultado3[resultado3["_error"].notna()])  # filas fallidas
+
+# Para que la primera excepción se propague en lugar de recogerse:
+# wl.batch_model(wl.mmc, escenarios3, errors="raise", lam=8.0, mu=5.0)
 ```
 
 ---
