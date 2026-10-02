@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "walopy"
-version = "0.2.8"
+version = "0.3.0"
 description = "Herramientas de investigación de operaciones: colas, inventarios, scheduling, CPM/PERT, confiabilidad, OEE, cuellos de botella y árboles de KPI"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -50,7 +50,7 @@ walopy = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "src/walopy"]
-addopts   = "-q --doctest-modules"
+addopts   = "-q --doctest-modules --import-mode=importlib"
 filterwarnings = [
     "error",
     # matplotlib 3.5 con pyparsing >= 3.1 en Python 3.9: aviso de terceros ajeno a walopy

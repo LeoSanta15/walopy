@@ -1,6 +1,6 @@
 # ROADMAP — walopy (de nivel 2 parcial a nivel 3 sólido, con base para nivel 4)
 
-> Plan priorizado a partir de `DIAGNOSTICO.md` y `HALLAZGOS.md`. **Pendiente de aprobación (Paso 5).** No se ha modificado código.
+> Plan priorizado a partir de `DIAGNOSTICO.md` y `HALLAZGOS.md`. **Aprobado y ejecutado el 2026-10-02** (ver «Estado de ejecución» al final).
 > Esfuerzo: S ≤ 2 h · M ≤ 1 día · L > 1 día. Regla de ejecución: ningún fix sin test de regresión; tras cada fase se ejecuta la batería completa y se actualiza `SCORECARD.md`.
 
 ## Batería de verificación (se ejecuta al cerrar cada fase)
@@ -105,3 +105,32 @@ uv venv --python 3.9 v39 && uv pip install --python v39/bin/python -e ".[dev]" &
 - **Reescrituras numéricas (1.3, 2.3):** se protegen con las referencias independientes ya construidas en esta auditoría (birth-death, fuerza bruta, scipy) convertidas en tests permanentes.
 - **Activar el CI antes de tiempo (2.6):** dejaría el repositorio en rojo; por eso va al final de la Fase 2.
 - **Alcance:** las tareas 3.2 y 3.3 son las más largas; pueden ir en una versión 0.3.1 sin bloquear el release.
+
+## Estado de ejecución (2026-10-02)
+
+Decisiones aplicadas: D-1 → todo en español (mensajes, avisos, CLI, README, docs); D-2 → sí (0.3.0); D-3 → sin cotas superiores, prueba semanal con las últimas versiones, extras de gráficas pospuestos; D-4 → demanda 0 es clase C; D-5 → sin tags históricos. Nueva decisión **D-6**: columnas de DataFrame, etiquetas de `summary()` y textos de gráficas siguen en inglés (cambiarlos rompe la API) — pendiente de su criterio.
+
+| Tarea | Estado | Nota |
+|---|---|---|
+| 0.1–0.5 | Hechas | `CLAUDE.md`, `pyproject.toml`, `py.typed`, versión, autofix de ruff, SECURITY/CoC/plantillas |
+| 1.1 | Hecha | `tests/test_contrato_entradas.py` (0 incumplimientos en 67 funciones) |
+| 1.2 | Hecha | Validación central en CPM/PERT, MTBF, sistemas, MRP, Weibull, `cv2_*`, break-even, PMF/CDF |
+| 1.3 | Hecha | `mmc` estable (Erlang-B), contraste con nacimiento-muerte hasta c = 1000 |
+| 1.4–1.8 | Hechas | `eoq_multi_constrained`, duplicados CPM, ABC/XYZ, Weibull degenerado, MRP vencidas |
+| 1.9 | Parcial | Listas vacías y cotas de tamaño hechas; **magnitudes extremas (K-08) no se rechazan** (impacto bajo) |
+| 1.10–1.11 | Hechas | `tests/test_plotting.py`, `tests/test_cli.py`; `break_even_sales().plot()` corregido |
+| 2.1–2.2 | Hechas | `TYPE_CHECKING`, `TypedDict` y `dict[str, Any]`; ruff y mypy en 0 |
+| 2.3 | Hecha | `wagner_whitin` O(n²) real, NEH con Taillard; `tests/test_complejidad.py` |
+| 2.4 | Hecha | `batch_model(errors=…)`; la columna `_error` condicional se mantiene (documentada) |
+| 2.5 | Hecha | `test_v026.py` dividido por tema; constantes externas en `tests/test_referencias_externas.py` |
+| 2.6 | Hecha | Jobs del CI verificados en GitHub; publicación con verificación previa |
+| 2.7–2.8 | Hechas | Listas vacías → `ValueError`; `bool` rechazado; `from None` |
+| 2.9 (nueva) | Parcial | Mensajes, avisos y CLI en español; cuerpo de docstrings pendiente |
+| 3.1–3.2 | Hechas | README corregido y ampliado con test; Sphinx de 13 módulos; `tests/test_documentacion.py` |
+| 3.3 | Hecha | `Raises` y `Examples` en las 70 funciones; doctests en `pytest` |
+| 3.4 | Hecha | `benchmarks/bench_core.py`, `docs/source/rendimiento.md`, job informativo |
+| 3.5 | **No hecha** | Requiere TestPyPI; `attestations: false` se mantiene |
+| 3.6 | Hecha | `examples/` + `tests/test_ejemplos.py` |
+| 4.1–4.2 | Hechas | Versión 0.3.0; rueda instalada en entornos limpios 3.9 y 3.13 con ejemplos ejecutados |
+| 4.3 | Pendiente | PR abierto; merge y release a cargo de la persona propietaria |
+| 4.4 | No se hace | D-5 |

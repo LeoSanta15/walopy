@@ -55,3 +55,32 @@
 - **R-14 (nueva):** *Al añadir una función a `__all__`, añadirla a la documentación y a los tests de contrato de entrada.* (C-14, C-17)
 - **R-15 (nueva):** *Cada complejidad anunciada tiene un benchmark que la respalda.* (C-11)
 - **R-16 (nueva):** *Los ejemplos de README/docs son tests.* (C-10)
+
+## Lecciones surgidas durante la ejecución (Paso 6)
+
+| Clase | Qué pasó | Cómo prevenirlo |
+|---|---|---|
+| **C-19 Doctests que nunca se ejecutan** | 6 de los 23 doctests existentes estaban rotos (valores inventados, comparaciones con `str`, salidas no declaradas) porque `pytest` no ejecutaba `--doctest-modules` | Activar `--doctest-modules` en `addopts` desde el primer ejemplo |
+| **C-20 Ejemplo de documentación con borde numérico** | `100 < r.optimal_qty < 130` fallaba porque el resultado era exactamente 100.0 | En ejemplos, mostrar el valor redondeado en vez de una desigualdad con límites inventados |
+| **C-21 Empates numéricos en heurísticas** | Con datos decimales, un empate exacto entre dos posiciones de inserción se resolvió distinto tras cambiar el orden de las sumas y la heurística divergió (3,6 % de makespan) | Resolver empates con tolerancia relativa (1e-12) y comparar en los tests con datos enteros (empates exactos) |
+| **C-22 Referencia externa menos precisa que el código** | `scipy.stats.weibull_min.fit` difería en el 6.º decimal de la raíz exacta de la verosimilitud; el código era el correcto | Para constantes de referencia, resolver la ecuación con un método de alta tolerancia (`brentq`, 1e-15) y documentar su origen |
+| **C-23 Nombre que colisiona con una opción de la herramienta** | En `docs/source/conf.py`, `from importlib.metadata import version` hizo que Sphinx tratara la función como la opción `version` y fallara al volcar el inventario | Importar el módulo (`from importlib import metadata`), no nombres genéricos, en archivos de configuración |
+| **C-24 Metadatos de instalación obsoletos entran en `sys.path`** | `pytest --doctest-modules` insertaba `src/` en `sys.path` y `importlib.metadata` leía el `walopy.egg-info` desactualizado | `--import-mode=importlib` en `addopts`; reinstalar al subir la versión |
+| **C-25 Comprobación de texto que coincide con su propio comando** | El paso del CI que busca referencias obsoletas se encontró a sí mismo en `ci.yml` y falló | Excluir `.github/` y el archivo que contiene el patrón; probar el comando localmente antes de subirlo |
+| **C-26 `-0.0` en resultados** | `round(-1e-16, 10)` devuelve `-0.0` y aparece en tablas | Sumar `0.0` tras redondear |
+| **C-27 `!` en scripts de shell no detiene la ejecución** | `! grep …` con `set -e` no falla cuando grep encuentra coincidencias | Usar `if grep …; then exit 1; fi` |
+| **C-28 Rama de trabajo creada desde una base antigua** | (L-16 ya registrado) la rama partía de v0.2.0 y el PR tuvo conflictos | Crear cada rama desde `origin/main` actualizado |
+
+### Herramientas reutilizables producidas
+
+- `tests/test_contrato_entradas.py`: barrido de entradas inválidas sobre toda la API (plantilla: tabla `BASE` + candidatos por tipo + lista `ACEPTADOS` justificada).
+- `tests/test_readme.py` y `tests/test_documentacion.py`: ejemplos de la documentación como tests y comparación de `__all__` con README/Sphinx.
+- `scripts/comprobar_cobertura_modulos.py`: mínimo de cobertura por módulo a partir de `coverage.json`.
+- `benchmarks/bench_core.py`: plantilla de benchmarks con semillas fijas y salida en Markdown.
+
+### Ajustes propuestos al Playbook (adicionales)
+
+1. **Nivel 3 → Documentación:** exigir `--doctest-modules` en `addopts` y ejemplos con `Raises` en todas las funciones públicas.
+2. **Nivel 2 → CI:** incluir un job de instalación de la rueda en un entorno limpio con comprobación de `py.typed` y de la versión.
+3. **Nivel 4 → Versionado:** el job de publicación debe verificar que la etiqueta del release coincide con la versión del paquete y repetir tests y linters antes de construir.
+4. **Plantilla de auditoría:** al aprobar el plan, crear la rama desde `origin/main` y registrar las decisiones D-n con su respuesta.
