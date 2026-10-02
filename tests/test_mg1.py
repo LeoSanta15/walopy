@@ -1,11 +1,9 @@
 """Tests for M/G/1 (P-K) and CV² distribution helpers."""
 from __future__ import annotations
 
-import math
 import pytest
 
 import walopy as wl
-
 
 # ─── M/G/1 correctness ───────────────────────────────────────────────────────
 

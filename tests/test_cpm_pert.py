@@ -1,7 +1,10 @@
 """Tests for CPM and PERT project scheduling."""
 from __future__ import annotations
+
 import math
+
 import pytest
+
 import walopy as wl
 
 # Classic 6-activity network

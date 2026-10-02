@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import math
 from statistics import NormalDist
+
 import pytest
+
 import walopy as wl
 
 _norm = NormalDist()

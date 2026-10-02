@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from walopy import KPINode, oee_kpi_tree, throughput_kpi_tree, roi_kpi_tree
+from walopy import oee_kpi_tree, roi_kpi_tree, throughput_kpi_tree
 
 
 def test_oee_kpi_tree_root_value():
@@ -72,7 +72,6 @@ def test_roi_kpi_tree_structure():
 
 
 def test_oee_kpi_tree_nan_raises():
-    import math
     with pytest.raises((ValueError, TypeError)):
         oee_kpi_tree(float("nan"), 0.8, 0.95)
 
@@ -83,7 +82,6 @@ def test_oee_kpi_tree_out_of_range_raises():
 
 
 def test_roi_kpi_tree_nan_raises():
-    import math
     with pytest.raises((ValueError, TypeError)):
         roi_kpi_tree(float("nan"), 10_000, 8, 2_000, 20_000)
 

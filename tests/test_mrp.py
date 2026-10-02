@@ -1,6 +1,8 @@
 """Tests for MRP (single-level Material Requirements Planning)."""
 from __future__ import annotations
+
 import pytest
+
 import walopy as wl
 
 GR = [0, 50, 0, 30, 60, 20]  # 6 periods

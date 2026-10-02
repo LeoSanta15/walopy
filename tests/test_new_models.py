@@ -1,11 +1,10 @@
 """Tests for mmck, mm1_priority, and compare."""
 from __future__ import annotations
 
-import pytest
 import pandas as pd
+import pytest
 
-from walopy import mmck, mm1_priority, compare, mm1, mmc
-
+from walopy import compare, mm1, mm1_priority, mmc, mmck
 
 # --- M/M/c/K ---
 
@@ -112,8 +111,9 @@ def test_compare_cli_version():
 
 
 def test_cli_mm1():
-    from io import StringIO
     import sys
+    from io import StringIO
+
     from walopy.__main__ import main
 
     captured = StringIO()

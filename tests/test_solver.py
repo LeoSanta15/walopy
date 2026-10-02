@@ -2,12 +2,20 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import pytest
 
-import pandas as pd
-
-from walopy import mm1, mmc, kingman
-from walopy import solve_lam, solve_mu, solve_servers, optimize_servers, sensitivity, batch_model
+from walopy import (
+    batch_model,
+    kingman,
+    mm1,
+    mmc,
+    optimize_servers,
+    sensitivity,
+    solve_lam,
+    solve_mu,
+    solve_servers,
+)
 
 
 def test_solve_lam_wq():

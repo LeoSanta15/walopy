@@ -1,11 +1,9 @@
 """Tests for queuing models."""
 from __future__ import annotations
 
-import math
 import pytest
-import numpy as np
 
-from walopy import littles_law, mm1, mmc, md1, kingman
+from walopy import kingman, littles_law, md1, mm1, mmc
 
 
 def test_littles_law_L():

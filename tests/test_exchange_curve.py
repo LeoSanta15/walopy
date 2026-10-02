@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import math
-import pytest
-import walopy as wl
 
+import pytest
+
+import walopy as wl
 
 ITEMS = [
     {"name": "A", "demand": 1000, "ordering_cost": 50,  "holding_cost": 2,  "unit_value": 10},

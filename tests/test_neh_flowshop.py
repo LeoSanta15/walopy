@@ -1,6 +1,8 @@
 """Tests for NEH flow-shop heuristic."""
 from __future__ import annotations
+
 import pytest
+
 import walopy as wl
 
 # 3-job / 3-machine classic example

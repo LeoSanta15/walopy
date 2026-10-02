@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from walopy import fit_from_data, FitResult
+from walopy import fit_from_data
 
 
 def test_fit_exponential_ia():
