@@ -1,4 +1,4 @@
-"""Reliability engineering: exponential failure model, series/parallel/k-of-n systems."""
+"""Ingeniería de confiabilidad: modelo exponencial de fallas, sistemas serie, paralelo y k-de-n, y Weibull."""
 from __future__ import annotations
 
 import math
@@ -21,7 +21,7 @@ def _validar_t_mttr(t: float | None, mttr: float | None) -> tuple:
 
 
 def _mtbf_numeric(R_func, lam_min: float) -> float:
-    """Numerically integrate R(t) from 0 to infinity (trapezoidal, ~10 000 steps)."""
+    """Integra numéricamente R(t) de 0 a infinito (trapezoidal, ~10 000 pasos)."""
     T = 20.0 / lam_min          # upper bound where R ≈ e^{-20} ≈ 2e-9
     N = 10_000
     dt = T / N
@@ -34,26 +34,26 @@ def _mtbf_numeric(R_func, lam_min: float) -> float:
 
 @dataclass
 class ReliabilityResult:
-    """System reliability result.
+    """Resultado de confiabilidad de un sistema.
 
     Attributes
     ----------
     topology : str
-        ``'series'``, ``'parallel'``, ``'k-of-n'``, or ``'component'``.
+        ``'series'``, ``'parallel'``, ``'k-of-n'`` o ``'component'``.
     n_components : int
-        Number of components in the system.
+        Número de componentes del sistema.
     failure_rates : list[float]
-        Individual component failure rates λi (failures/time unit).
+        Tasas de falla individuales λi de los componentes (fallas/unidad de tiempo).
     mtbf : float
-        Mean time between failures of the system.
+        Tiempo medio entre fallas del sistema.
     t : float or None
-        Time at which R(t) was evaluated (if provided).
+        Tiempo en que se evaluó R(t) (si se indicó).
     R_t : float or None
-        System reliability R(t) at the requested t.
+        Confiabilidad del sistema R(t) en el t pedido.
     availability : float or None
-        Steady-state availability A = MTBF / (MTBF + MTTR), if mttr given.
+        Disponibilidad en régimen estacionario A = MTBF / (MTBF + MTTR), si se indicó mttr.
     mttr : float or None
-        Mean time to repair, if provided.
+        Tiempo medio de reparación, si se indicó.
     """
 
     topology: str
@@ -67,21 +67,21 @@ class ReliabilityResult:
     params: dict = field(default_factory=dict)
 
     def R(self, t: float) -> float:
-        """Compute system reliability R(t) using the stored topology."""
+        """Calcula la confiabilidad R(t) del sistema con la topología almacenada."""
         return _r_system(self.topology, self.failure_rates,
                          self.params.get("k"), t)
 
     def summary(self) -> str:
         lines = [
-            f"Topology        : {self.topology}",
-            f"Components      : {self.n_components}",
-            f"Failure rates λ : {[f'{l:.4g}' for l in self.failure_rates]}",
+            f"Topología       : {self.topology}",
+            f"Componentes     : {self.n_components}",
+            f"Tasas de falla λ: {[f'{l:.4g}' for l in self.failure_rates]}",
             f"MTBF            : {self.mtbf:.6g}",
         ]
         if self.t is not None:
             lines.append(f"R(t={self.t:.4g})       : {self.R_t:.6g}")
         if self.availability is not None:
-            lines.append(f"Availability    : {self.availability:.4%}")
+            lines.append(f"Disponibilidad  : {self.availability:.4%}")
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -90,14 +90,14 @@ class ReliabilityResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         row: dict = {
-            "Topology": self.topology,
-            "Components": self.n_components,
+            "Topología": self.topology,
+            "Componentes": self.n_components,
             "MTBF": self.mtbf,
         }
         if self.t is not None:
             row[f"R(t={self.t})"] = self.R_t
         if self.availability is not None:
-            row["Availability"] = self.availability
+            row["Disponibilidad"] = self.availability
         return pd.DataFrame([row])
 
 
@@ -136,16 +136,16 @@ def mtbf_analysis(
     mttr: float | None = None,
     t: float | None = None,
 ) -> ReliabilityResult:
-    """Single-component reliability with exponential failure distribution.
+    """Confiabilidad de un componente con distribución exponencial de fallas.
 
     Parameters
     ----------
     failure_rate : float
-        Failure rate λ (failures per time unit, e.g. 0.01 failures/hour).
+        Tasa de falla λ (fallas por unidad de tiempo, p. ej. 0.01 fallas/hora).
     mttr : float, optional
-        Mean time to repair. If given, computes steady-state availability.
+        Tiempo medio de reparación. Si se indica, calcula la disponibilidad en régimen estacionario.
     t : float, optional
-        Time at which R(t) = e^{−λt} is evaluated.
+        Tiempo en que se evalúa R(t) = e^{−λt}.
 
     Returns
     -------
@@ -187,18 +187,18 @@ def series_system(
     t: float | None = None,
     mttr: float | None = None,
 ) -> ReliabilityResult:
-    """Reliability of a series system (all components must work).
+    """Confiabilidad de un sistema en serie (todos los componentes deben funcionar).
 
     R_sys(t) = ∏ e^{−λi·t} = e^{−(Σλi)·t}
 
     Parameters
     ----------
     failure_rates : sequence of float
-        Component failure rates λi.
+        Tasas de falla λi de los componentes.
     t : float, optional
-        Time for R(t) evaluation.
+        Tiempo para evaluar R(t).
     mttr : float, optional
-        Mean time to repair for availability calculation.
+        Tiempo medio de reparación para calcular la disponibilidad.
 
     Returns
     -------
@@ -242,20 +242,20 @@ def parallel_system(
     t: float | None = None,
     mttr: float | None = None,
 ) -> ReliabilityResult:
-    """Reliability of a parallel system (at least one component must work).
+    """Confiabilidad de un sistema en paralelo (al menos un componente debe funcionar).
 
     R_sys(t) = 1 − ∏(1 − e^{−λi·t})
 
-    MTBF is computed numerically (∫₀^∞ R_sys(t) dt).
+    El MTBF se calcula numéricamente (∫₀^∞ R_sys(t) dt).
 
     Parameters
     ----------
     failure_rates : sequence of float
-        Component failure rates λi.
+        Tasas de falla λi de los componentes.
     t : float, optional
-        Time for R(t) evaluation.
+        Tiempo para evaluar R(t).
     mttr : float, optional
-        Mean time to repair for availability calculation.
+        Tiempo medio de reparación para calcular la disponibilidad.
 
     Returns
     -------
@@ -304,28 +304,28 @@ def koon_system(
     t: float | None = None,
     mttr: float | None = None,
 ) -> ReliabilityResult:
-    """Reliability of a k-out-of-n system (at least k of n identical components work).
+    """Confiabilidad de un sistema k-de-n (funcionan al menos k de n componentes idénticos).
 
-    All components are identical with failure rate λ.
+    Todos los componentes son idénticos con tasa de falla λ.
 
     R_sys(t) = Σ_{j=k}^{n} C(n,j) · e^{−jλt} · (1 − e^{−λt})^{n−j}
 
-    MTBF (exact, identical exponential):
+    MTBF (exacto, exponenciales idénticas):
     MTBF = (1/λ) · Σ_{j=k}^{n} (−1)^{j−k} · C(n,j) · C(j−1, k−1) · (1/j)
-    which simplifies to  (1/λ) · Σ_{i=k}^{n} 1/i  for the standard k-of-n.
+    que se simplifica a  (1/λ) · Σ_{i=k}^{n} 1/i  para el k-de-n estándar.
 
     Parameters
     ----------
     n : int
-        Total number of components.
+        Número total de componentes.
     k : int
-        Minimum number of working components required (1 ≤ k ≤ n).
+        Número mínimo de componentes que deben funcionar (1 ≤ k ≤ n).
     failure_rate : float
-        Component failure rate λ.
+        Tasa de falla λ de los componentes.
     t : float, optional
-        Time for R(t) evaluation.
+        Tiempo para evaluar R(t).
     mttr : float, optional
-        Mean time to repair for availability calculation.
+        Tiempo medio de reparación para calcular la disponibilidad.
 
     Returns
     -------
@@ -377,30 +377,30 @@ def koon_system(
 
 @dataclass
 class WeibullResult:
-    """Two-parameter Weibull analysis result.
+    """Resultado del análisis Weibull de dos parámetros.
 
-    The CDF is F(t) = 1 − exp(−(t/η)^β).
+    La FDA es F(t) = 1 − exp(−(t/η)^β).
 
     Attributes
     ----------
     shape : float
-        Shape parameter β.
-        β < 1 → decreasing failure rate (infant mortality).
-        β = 1 → constant failure rate (exponential model).
-        β > 1 → increasing failure rate (wear-out).
+        Parámetro de forma β.
+        β < 1 → tasa de falla decreciente (mortalidad infantil).
+        β = 1 → tasa de falla constante (modelo exponencial).
+        β > 1 → tasa de falla creciente (desgaste).
     scale : float
-        Scale parameter η (characteristic life); F(η) ≈ 63.2 %.
+        Parámetro de escala η (vida característica); F(η) ≈ 63.2 %.
     mttf : float
-        Mean time to failure = η · Γ(1 + 1/β).
+        Tiempo medio hasta la falla = η · Γ(1 + 1/β).
     b10 : float
-        B10 life — time at which 10 % of the population has failed.
+        Vida B10: tiempo en el que ha fallado el 10 % de la población.
     b50 : float
-        Median life (50 % failed).
+        Vida mediana (50 % ha fallado).
     method : str
-        Estimation method: ``'MLE'`` (maximum likelihood) or
-        ``'RRY'`` (rank regression on Y / probability plotting).
+        Método de estimación: ``'MLE'`` (máxima verosimilitud) o
+        ``'RRY'`` (regresión de rangos sobre Y / papel de probabilidad).
     n : int
-        Number of failure times used.
+        Número de tiempos de falla utilizados.
     """
 
     shape: float
@@ -412,21 +412,21 @@ class WeibullResult:
     n: int
 
     def R(self, t: float) -> float:
-        """Reliability at time *t*: R(t) = exp(−(t/η)^β)."""
+        """Confiabilidad en el tiempo *t*: R(t) = exp(−(t/η)^β)."""
         return math.exp(-((t / self.scale) ** self.shape))
 
     def F(self, t: float) -> float:
-        """Unreliability (CDF) at time *t*: F(t) = 1 − R(t)."""
+        """No confiabilidad (FDA) en el tiempo *t*: F(t) = 1 − R(t)."""
         return 1.0 - self.R(t)
 
     def h(self, t: float) -> float:
-        """Instantaneous hazard rate: h(t) = (β/η)·(t/η)^(β−1)."""
+        """Tasa de falla instantánea: h(t) = (β/η)·(t/η)^(β−1)."""
         return (self.shape / self.scale) * ((t / self.scale) ** (self.shape - 1.0))
 
     def b_life(self, pct: float) -> float:
-        """Time at which *pct* percent of the population has failed.
+        """Tiempo en el que ha fallado el porcentaje *pct* de la población.
 
-        E.g. ``b_life(10)`` returns the B10 life.
+        Por ejemplo, ``b_life(10)`` devuelve la vida B10.
         """
         p = pct / 100.0
         if not (0.0 < p < 1.0):
@@ -435,12 +435,12 @@ class WeibullResult:
 
     def summary(self) -> str:
         return (
-            f"Method       : {self.method} (n={self.n})\n"
-            f"Shape β      : {self.shape:.4f}\n"
-            f"Scale η      : {self.scale:.4g}\n"
+            f"Método       : {self.method} (n={self.n})\n"
+            f"Forma β      : {self.shape:.4f}\n"
+            f"Escala η     : {self.scale:.4g}\n"
             f"MTTF         : {self.mttf:.4g}\n"
-            f"B10 life     : {self.b10:.4g}\n"
-            f"B50 (median) : {self.b50:.4g}"
+            f"Vida B10     : {self.b10:.4g}\n"
+            f"B50 (mediana): {self.b50:.4g}"
         )
 
     def __str__(self) -> str:
@@ -449,18 +449,18 @@ class WeibullResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "shape_beta": self.shape,
-            "scale_eta":  self.scale,
+            "β (forma)":  self.shape,
+            "η (escala)": self.scale,
             "MTTF":       self.mttf,
             "B10":        self.b10,
             "B50":        self.b50,
-            "method":     self.method,
+            "método":     self.method,
             "n":          self.n,
         }])
 
 
 def _weibull_mle_beta(failure_times: list) -> float:
-    """Solve for Weibull β via MLE using bisection (normalized for stability)."""
+    """Resuelve la forma β de Weibull por máxima verosimilitud con bisección (normalizada por estabilidad)."""
     n     = len(failure_times)
     ln_t  = [math.log(t) for t in failure_times]
     # Normalize by geometric mean: u_i = t_i / geom_mean.
@@ -503,7 +503,7 @@ def _weibull_mle_beta(failure_times: list) -> float:
 
 
 def _weibull_rry(failure_times: list) -> tuple:
-    """Estimate β and η via rank regression on Y (probability plotting)."""
+    """Estima β y η por regresión de rangos sobre Y (papel de probabilidad)."""
     n       = len(failure_times)
     t_sort  = sorted(failure_times)
     # Benard's median rank approximation
@@ -527,17 +527,17 @@ def weibull_analysis(
     *,
     method: str = "MLE",
 ) -> WeibullResult:
-    """Fit a two-parameter Weibull distribution to complete failure data.
+    """Ajusta una distribución Weibull de dos parámetros a datos de falla completos.
 
     F(t) = 1 − exp(−(t/η)^β)
 
     Parameters
     ----------
     failure_times : sequence of float
-        Observed failure times (all must be > 0).  At least 2 values required.
+        Tiempos de falla observados (todos deben ser > 0). Se requieren al menos 2 valores.
     method : str
-        ``'MLE'`` (default) — maximum-likelihood estimation via bisection;
-        ``'RRY'`` — rank regression on Y (probability-plotting method, faster).
+        ``'MLE'`` (por defecto): máxima verosimilitud mediante bisección;
+        ``'RRY'``: regresión de rangos sobre Y (método de papel de probabilidad, más rápido).
 
     Returns
     -------

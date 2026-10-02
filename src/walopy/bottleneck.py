@@ -1,4 +1,4 @@
-"""Bottleneck analysis for multi-station production / service systems."""
+"""Análisis de cuellos de botella en sistemas de producción o servicio con varias estaciones."""
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class StationResult:
-    """Metrics for a single station in a flow line."""
+    """Métricas de una estación individual en una línea de flujo."""
 
     name: str
     demand_rate: float
@@ -29,18 +29,18 @@ class StationResult:
 
 @dataclass
 class BottleneckResult:
-    """Result of a bottleneck analysis across multiple stations.
+    """Resultado de un análisis de cuello de botella sobre varias estaciones.
 
     Attributes
     ----------
     stations : list[StationResult]
-        Per-station metrics.
+        Métricas por estación.
     bottleneck : str
-        Name of the bottleneck station.
+        Nombre de la estación cuello de botella.
     system_throughput : float
-        Maximum sustainable throughput (limited by the bottleneck).
+        Throughput máximo sostenible (limitado por el cuello de botella).
     demand_rate : float
-        Required throughput (arrival rate to the system).
+        Throughput requerido (tasa de llegada al sistema).
     params : dict
     """
 
@@ -51,30 +51,30 @@ class BottleneckResult:
     params: dict = field(default_factory=dict)
 
     def to_frame(self) -> pd.DataFrame:
-        """Export per-station metrics as a DataFrame."""
+        """Exporta las métricas por estación como un DataFrame."""
         rows = []
         for s in self.stations:
             rows.append({
-                "Station": s.name,
-                "Demand rate": s.demand_rate,
-                "Capacity": s.capacity,
-                "Utilization": s.utilization,
-                "Slack": s.slack,
-                "Bottleneck": s.is_bottleneck,
+                "Estación": s.name,
+                "Tasa de demanda": s.demand_rate,
+                "Capacidad": s.capacity,
+                "Utilización": s.utilization,
+                "Holgura": s.slack,
+                "Cuello de botella": s.is_bottleneck,
             })
         return pd.DataFrame(rows)
 
     def summary(self) -> str:
         lines = [
-            f"Bottleneck station  : {self.bottleneck}",
-            f"System throughput   : {self.system_throughput:.6g}",
-            f"Demand rate         : {self.demand_rate:.6g}",
+            f"Estación cuello de botella: {self.bottleneck}",
+            f"Throughput del sistema    : {self.system_throughput:.6g}",
+            f"Tasa de demanda           : {self.demand_rate:.6g}",
             "",
-            f"{'Station':<20} {'Demand':>10} {'Capacity':>10} {'Util':>8} {'Slack':>10}",
+            f"{'Estación':<20} {'Demanda':>10} {'Capacidad':>10} {'Util.':>8} {'Holgura':>10}",
             "-" * 62,
         ]
         for s in self.stations:
-            marker = " ← BN" if s.is_bottleneck else ""
+            marker = " ← CB" if s.is_bottleneck else ""
             lines.append(
                 f"{s.name:<20} {s.demand_rate:>10.4g} {s.capacity:>10.4g} "
                 f"{s.utilization:>7.2%} {s.slack:>10.4g}{marker}"
@@ -96,22 +96,22 @@ def bottleneck_analysis(
     *,
     routing_fractions: Sequence[float] | None = None,
 ) -> BottleneckResult:
-    """Identify the bottleneck in a multi-station system.
+    """Identifica el cuello de botella de un sistema con varias estaciones.
 
-    The bottleneck is the station with the highest utilization
-    (demand_rate × routing_fraction / capacity).
+    El cuello de botella es la estación con mayor utilización
+    (demand_rate × fracción_de_ruteo / capacidad).
 
     Parameters
     ----------
     station_names : sequence of str
-        Names of the stations (in flow order).
+        Nombres de las estaciones (en orden de flujo).
     capacities : sequence of float
-        Maximum throughput of each station per unit time.
+        Throughput máximo de cada estación por unidad de tiempo.
     demand_rate : float
-        Arrival (demand) rate entering the system.
+        Tasa de llegada (demanda) que entra al sistema.
     routing_fractions : sequence of float, optional
-        Fraction of the flow visiting each station.  Defaults to 1.0 for
-        every station (all units visit all stations sequentially).
+        Fracción del flujo que visita cada estación. Por defecto 1.0 en
+        todas (todas las unidades visitan todas las estaciones en secuencia).
 
     Returns
     -------

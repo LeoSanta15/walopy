@@ -1,4 +1,4 @@
-"""OEE, efficiency, utilization, throughput and unit-cost analysis."""
+"""Análisis de OEE, eficiencia, utilización, throughput y costo unitario."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -13,20 +13,20 @@ if TYPE_CHECKING:
 
 @dataclass
 class OEEResult:
-    """Overall Equipment Effectiveness decomposition.
+    """Descomposición de la Eficiencia Global del Equipo (OEE).
 
     Attributes
     ----------
     availability : float
-        A — fraction of planned time the asset was running.
+        A — fracción del tiempo planificado en que el activo estuvo funcionando.
     performance : float
-        P — fraction of actual speed vs. ideal speed.
+        P — fracción de la velocidad real respecto de la ideal.
     quality : float
-        Q — fraction of good units out of total units produced.
+        Q — fracción de unidades buenas sobre el total producido.
     oee : float
         OEE = A × P × Q.
     params : dict
-        Raw input values retained for reference.
+        Valores de entrada originales, conservados como referencia.
     """
 
     availability: float
@@ -39,19 +39,19 @@ class OEEResult:
         import pandas as pd
 
         return pd.DataFrame([{
-            "Availability (A)": self.availability,
-            "Performance (P)": self.performance,
-            "Quality (Q)": self.quality,
+            "Disponibilidad (A)": self.availability,
+            "Rendimiento (P)": self.performance,
+            "Calidad (Q)": self.quality,
             "OEE": self.oee,
             **self.params,
         }])
 
     def summary(self) -> str:
         lines = [
-            f"Availability (A) : {self.availability:.2%}",
-            f"Performance  (P) : {self.performance:.2%}",
-            f"Quality      (Q) : {self.quality:.2%}",
-            f"OEE              : {self.oee:.2%}",
+            f"Disponibilidad (A) : {self.availability:.2%}",
+            f"Rendimiento    (P) : {self.performance:.2%}",
+            f"Calidad        (Q) : {self.quality:.2%}",
+            f"OEE                : {self.oee:.2%}",
         ]
         for k, v in self.params.items():
             lines.append(f"  {k}: {v}")
@@ -77,34 +77,34 @@ def oee(
     total_units: float | None = None,
     defective_units: float | None = None,
 ) -> OEEResult:
-    """Compute Overall Equipment Effectiveness (OEE).
+    """Calcula la Eficiencia Global del Equipo (OEE).
 
-    You can either supply the three factors directly (A, P, Q each in [0,1])
-    or let the function derive them from raw inputs.
+    Se pueden indicar directamente los tres factores (A, P, Q, cada uno en [0, 1])
+    o dejar que la función los derive de datos crudos.
 
     Parameters
     ----------
     availability : float
-        Fraction of planned production time the equipment was available [0, 1].
-        Pass 0.0 if you prefer to derive from ``planned_time`` and ``downtime``.
+        Fracción del tiempo de producción planificado en que el equipo estuvo disponible [0, 1].
+        Indique 0.0 si prefiere derivarla de ``planned_time`` y ``downtime``.
     performance : float
-        Fraction of actual vs. ideal throughput rate [0, 1].
-        Pass 0.0 if you prefer to derive from cycle times.
+        Fracción de la tasa de producción real respecto de la ideal [0, 1].
+        Indique 0.0 si prefiere derivarla de los tiempos de ciclo.
     quality : float
-        Fraction of good units [0, 1].
-        Pass 0.0 if you prefer to derive from unit counts.
+        Fracción de unidades buenas [0, 1].
+        Indique 0.0 si prefiere derivarla de los conteos de unidades.
     planned_time : float, optional
-        Total planned production time.
+        Tiempo de producción planificado total.
     downtime : float, optional
-        Total unplanned downtime.
+        Paradas no planificadas totales.
     ideal_cycle_time : float, optional
-        Ideal (minimum) cycle time per unit.
+        Tiempo de ciclo ideal (mínimo) por unidad.
     actual_cycle_time : float, optional
-        Actual average cycle time per unit.
+        Tiempo de ciclo promedio real por unidad.
     total_units : float, optional
-        Total units produced (good + defective).
+        Total de unidades producidas (buenas + defectuosas).
     defective_units : float, optional
-        Defective / rework units.
+        Unidades defectuosas o para retrabajo.
 
     Returns
     -------
@@ -169,18 +169,18 @@ def oee(
 
 @dataclass
 class UtilizationResult:
-    """Utilization and efficiency metrics for a resource.
+    """Métricas de utilización y eficiencia de un recurso.
 
     Attributes
     ----------
     utilization : float
-        Fraction of capacity actually consumed (λ/μ or similar).
+        Fracción de la capacidad realmente consumida (λ/μ o similar).
     efficiency : float
-        Output actually produced / theoretical maximum output.
+        Salida realmente producida / salida máxima teórica.
     throughput : float
-        Actual units (or work) completed per unit time.
+        Unidades (o trabajo) realmente completadas por unidad de tiempo.
     capacity : float
-        Maximum achievable throughput.
+        Throughput máximo alcanzable.
     params : dict
     """
 
@@ -194,19 +194,19 @@ class UtilizationResult:
         import pandas as pd
 
         return pd.DataFrame([{
-            "Utilization": self.utilization,
-            "Efficiency": self.efficiency,
+            "Utilización": self.utilization,
+            "Eficiencia": self.efficiency,
             "Throughput": self.throughput,
-            "Capacity": self.capacity,
+            "Capacidad": self.capacity,
             **self.params,
         }])
 
     def summary(self) -> str:
         return (
-            f"Utilization : {self.utilization:.2%}\n"
-            f"Efficiency  : {self.efficiency:.2%}\n"
+            f"Utilización : {self.utilization:.2%}\n"
+            f"Eficiencia  : {self.efficiency:.2%}\n"
             f"Throughput  : {self.throughput:.6g}\n"
-            f"Capacity    : {self.capacity:.6g}"
+            f"Capacidad   : {self.capacity:.6g}"
         )
 
     def __str__(self) -> str:
@@ -219,18 +219,18 @@ def utilization_efficiency(
     *,
     standard_output: float | None = None,
 ) -> UtilizationResult:
-    """Compute utilization and efficiency.
+    """Calcula la utilización y la eficiencia.
 
     Parameters
     ----------
     actual_output : float
-        Units (or work) actually produced per unit time.
+        Unidades (o trabajo) realmente producidas por unidad de tiempo.
     capacity : float
-        Maximum units per unit time (installed capacity).
+        Máximo de unidades por unidad de tiempo (capacidad instalada).
     standard_output : float, optional
-        Expected / standard output per unit time.  If provided,
-        efficiency = actual_output / standard_output;
-        otherwise efficiency = actual_output / capacity.
+        Salida esperada o estándar por unidad de tiempo. Si se indica,
+        eficiencia = actual_output / standard_output;
+        de lo contrario eficiencia = actual_output / capacity.
 
     Returns
     -------
@@ -270,12 +270,12 @@ def utilization_efficiency(
 
 @dataclass
 class UnitCostResult:
-    """Unit cost breakdown.
+    """Desglose del costo unitario.
 
     Attributes
     ----------
     unit_cost : float
-        Total cost per unit produced.
+        Costo total por unidad producida.
     fixed_cost_per_unit : float
     variable_cost_per_unit : float
     total_cost : float
@@ -294,21 +294,21 @@ class UnitCostResult:
         import pandas as pd
 
         return pd.DataFrame([{
-            "Units produced": self.units_produced,
-            "Fixed cost / unit": self.fixed_cost_per_unit,
-            "Variable cost / unit": self.variable_cost_per_unit,
-            "Total unit cost": self.unit_cost,
-            "Total cost": self.total_cost,
+            "Unidades producidas": self.units_produced,
+            "Costo fijo / unidad": self.fixed_cost_per_unit,
+            "Costo variable / unidad": self.variable_cost_per_unit,
+            "Costo unitario total": self.unit_cost,
+            "Costo total": self.total_cost,
             **self.params,
         }])
 
     def summary(self) -> str:
         return (
-            f"Units produced      : {self.units_produced:.6g}\n"
-            f"Fixed cost / unit   : {self.fixed_cost_per_unit:.6g}\n"
-            f"Variable cost / unit: {self.variable_cost_per_unit:.6g}\n"
-            f"Total unit cost     : {self.unit_cost:.6g}\n"
-            f"Total cost          : {self.total_cost:.6g}"
+            f"Unidades producidas    : {self.units_produced:.6g}\n"
+            f"Costo fijo / unidad    : {self.fixed_cost_per_unit:.6g}\n"
+            f"Costo variable / unidad: {self.variable_cost_per_unit:.6g}\n"
+            f"Costo unitario total   : {self.unit_cost:.6g}\n"
+            f"Costo total            : {self.total_cost:.6g}"
         )
 
     def __str__(self) -> str:
@@ -322,18 +322,18 @@ def unit_cost(
     *,
     overhead_rate: float = 0.0,
 ) -> UnitCostResult:
-    """Compute unit cost with fixed, variable and optional overhead.
+    """Calcula el costo unitario con costos fijos, variables y gastos indirectos opcionales.
 
     Parameters
     ----------
     fixed_cost : float
-        Total fixed cost for the period.
+        Costo fijo total del periodo.
     variable_cost_per_unit : float
-        Variable cost per unit produced.
+        Costo variable por unidad producida.
     units_produced : float
-        Number of units produced.
+        Número de unidades producidas.
     overhead_rate : float, optional
-        Overhead as a fraction of variable cost (default 0).
+        Gastos indirectos como fracción del costo variable (por defecto 0).
 
     Returns
     -------

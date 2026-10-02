@@ -1,4 +1,4 @@
-"""CLI entry point: python -m walopy [--version] <model> [params]"""
+"""Punto de entrada del CLI: python -m walopy [--version] <modelo> [parámetros]"""
 from __future__ import annotations
 
 import argparse
@@ -21,7 +21,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument("--version", action="version", version=f"walopy {__version__}")
 
-    sub = parser.add_subparsers(dest="model", metavar="MODEL")
+    sub = parser.add_subparsers(dest="model", metavar="MODELO")
 
     # --- mm1 ---
     p1 = sub.add_parser("mm1", help="Cola M/M/1 de un servidor")

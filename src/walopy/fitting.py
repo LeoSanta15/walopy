@@ -1,4 +1,4 @@
-"""Parameter estimation from observed arrival / service time data."""
+"""Estimación de parámetros a partir de tiempos observados de llegada y de servicio."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,26 +12,26 @@ if TYPE_CHECKING:
 
 @dataclass
 class FitResult:
-    """Parameters estimated from observed inter-arrival and/or service times.
+    """Parámetros estimados a partir de tiempos entre llegadas y/o de servicio observados.
 
     Attributes
     ----------
     lam : float or None
-        Estimated arrival rate λ = 1 / mean(inter-arrival times).
+        Tasa de llegadas estimada λ = 1 / media(tiempos entre llegadas).
     mu : float or None
-        Estimated service rate μ = 1 / mean(service_times).
+        Tasa de servicio estimada μ = 1 / media(service_times).
     ca2 : float or None
-        Estimated squared CV of inter-arrival times.
+        CV² estimado de los tiempos entre llegadas.
     cs2 : float or None
-        Estimated squared CV of service times.
+        CV² estimado de los tiempos de servicio.
     n_arrivals : int
-        Number of inter-arrival intervals used.
+        Número de intervalos entre llegadas utilizados.
     n_services : int
-        Number of service time observations used.
+        Número de observaciones de tiempo de servicio utilizadas.
     mean_ia, std_ia : float or None
-        Sample mean and std of inter-arrival times.
+        Media y desviación muestrales de los tiempos entre llegadas.
     mean_svc, std_svc : float or None
-        Sample mean and std of service times.
+        Media y desviación muestrales de los tiempos de servicio.
     """
 
     lam: float | None
@@ -47,20 +47,20 @@ class FitResult:
     params: dict = field(default_factory=dict)
 
     def summary(self) -> str:
-        lines = ["FitResult"]
+        lines = ["Ajuste (FitResult)"]
         if self.lam is not None:
             lines += [
-                f"  λ (arrival rate)  : {self.lam:.6g}  (n={self.n_arrivals})",
-                f"  mean inter-arrival: {self.mean_ia:.6g}",
-                f"  std  inter-arrival: {self.std_ia:.6g}",
-                f"  ca² (arrival CV²) : {self.ca2:.6g}",
+                f"  λ (tasa de llegada)     : {self.lam:.6g}  (n={self.n_arrivals})",
+                f"  media entre llegadas    : {self.mean_ia:.6g}",
+                f"  desv. entre llegadas    : {self.std_ia:.6g}",
+                f"  ca² (CV² de llegadas)   : {self.ca2:.6g}",
             ]
         if self.mu is not None:
             lines += [
-                f"  μ (service rate)  : {self.mu:.6g}  (n={self.n_services})",
-                f"  mean service time : {self.mean_svc:.6g}",
-                f"  std  service time : {self.std_svc:.6g}",
-                f"  cs² (service CV²) : {self.cs2:.6g}",
+                f"  μ (tasa de servicio)    : {self.mu:.6g}  (n={self.n_services})",
+                f"  media de servicio       : {self.mean_svc:.6g}",
+                f"  desv. de servicio       : {self.std_svc:.6g}",
+                f"  cs² (CV² de servicio)   : {self.cs2:.6g}",
             ]
         return "\n".join(lines)
 
@@ -68,7 +68,7 @@ class FitResult:
         return self.summary()
 
     def to_model_kwargs(self) -> dict:
-        """Return a dict ready to unpack into ``mm1()``, ``kingman()``, etc."""
+        """Devuelve un diccionario listo para desempaquetar en ``mm1()``, ``kingman()``, etc."""
         out: dict = {}
         if self.lam is not None:
             out["lam"] = self.lam
@@ -97,7 +97,7 @@ class FitResult:
 
 
 def _fit_times(times: np.ndarray, name: str) -> tuple[float, float, float, float]:
-    """Return (rate, cv2, mean, std) from a 1D array of positive durations."""
+    """Devuelve (tasa, cv2, media, desviación) a partir de un arreglo 1D de duraciones positivas."""
     arr = np.asarray(times, dtype=float).ravel()
     if arr.size < 2:
         raise ValueError(f"'{name}' debe contener al menos 2 observaciones.")
@@ -116,25 +116,25 @@ def fit_from_data(
     *,
     arrival_timestamps: np.ndarray | None = None,
 ) -> FitResult:
-    """Estimate queuing model parameters from observed data.
+    """Estima los parámetros de un modelo de colas a partir de datos observados.
 
-    Pass inter-arrival times **or** arrival timestamps (not both).
-    At least one of the arrival or service arrays must be provided.
+    Indique los tiempos entre llegadas **o** las marcas de tiempo de llegada (no ambos).
+    Debe proporcionarse al menos uno de los arreglos de llegadas o de servicio.
 
     Parameters
     ----------
     inter_arrivals : array-like of float, optional
-        Observed inter-arrival time intervals (all strictly positive).
+        Intervalos observados entre llegadas (todos estrictamente positivos).
     service_times : array-like of float, optional
-        Observed service time durations (all strictly positive).
+        Duraciones de servicio observadas (todas estrictamente positivas).
     arrival_timestamps : array-like of float, optional
-        Absolute arrival timestamps in ascending order; inter-arrival times
-        are derived as consecutive differences.
+        Marcas de tiempo absolutas de llegada en orden ascendente; los tiempos
+        entre llegadas se obtienen como diferencias consecutivas.
 
     Returns
     -------
     FitResult
-        Estimated λ, μ, ca², cs² and sample statistics.
+        λ, μ, ca², cs² estimados y estadísticos muestrales.
 
 
     Raises

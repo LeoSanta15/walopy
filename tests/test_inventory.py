@@ -61,7 +61,7 @@ def test_rop_higher_service_higher_ss():
 
 def test_rop_to_frame():
     df = reorder_point(50, 2, demand_std=5, service_level=0.95).to_frame()
-    assert "Reorder point" in df.columns
+    assert "Punto de reorden" in df.columns
 
 
 def test_rop_service_level_1_raises():

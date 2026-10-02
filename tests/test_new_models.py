@@ -12,7 +12,7 @@ def test_mmck_basic_stability():
     # rho > 1 but finite K keeps system stable
     r = mmck(lam=5.0, mu=3.0, c=1, K=10)
     assert 0 < r.L < 10
-    assert 0 < r.params["PK (blocking prob)"] < 1
+    assert 0 < r.params["PK (prob. de bloqueo)"] < 1
 
 
 def test_mmck_large_k_approaches_mmc():
@@ -29,7 +29,7 @@ def test_mmck_k_less_than_c_raises():
 
 def test_mmck_blocking_prob_near_zero_light_load():
     r = mmck(lam=0.1, mu=10.0, c=2, K=20)
-    assert r.params["PK (blocking prob)"] < 0.001
+    assert r.params["PK (prob. de bloqueo)"] < 0.001
 
 
 def test_mmck_numpy_int():
@@ -92,8 +92,8 @@ def test_compare_basic():
 
 def test_compare_default_labels():
     df = compare(mm1(1, 5), mm1(2, 5))
-    assert "scenario_1" in df["label"].values
-    assert "scenario_2" in df["label"].values
+    assert "escenario_1" in df["label"].values
+    assert "escenario_2" in df["label"].values
 
 
 def test_compare_has_kpi_columns():

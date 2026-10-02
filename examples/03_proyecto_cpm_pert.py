@@ -11,7 +11,7 @@ actividades = [
 
 pert = wl.pert(actividades)
 print(pert)
-print(pert.to_frame()[["Activity", "Duration", "ES", "EF", "TF", "Critical"]])
+print(pert.to_frame()[["Actividad", "Duración", "ES", "EF", "HT", "Crítica"]])
 for plazo in (20, 22, 24):
     print(f"P(terminar en {plazo} semanas) = {pert.probability(plazo):.1%}")
 

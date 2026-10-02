@@ -83,14 +83,14 @@ import walopy as wl
 
 r = wl.mm1(lam=3.0, mu=5.0)
 print(r)
-# Model : M/M/1
-# λ     : 3.0   (arrival rate)
-# μ     : 5.0   (service rate per server)
-# ρ     : 0.6   (utilization)
-# L     : 1.5   (avg units in system)
-# Lq    : 0.9   (avg units in queue)
-# W     : 0.5   (avg time in system)
-# Wq    : 0.3   (avg wait time in queue)
+# Modelo : M/M/1
+# λ      : 3.0   (tasa de llegada)
+# μ      : 5.0   (tasa de servicio por servidor)
+# ρ      : 0.6   (utilización por servidor)
+# L      : 1.5   (unidades promedio en el sistema)
+# Lq     : 0.9   (unidades promedio en cola)
+# W      : 0.5   (tiempo promedio en el sistema)
+# Wq     : 0.3   (tiempo promedio de espera en cola)
 
 df = r.to_frame()   # exportar a DataFrame
 r.plot()            # gráfica Wq y Lq vs ρ
@@ -236,8 +236,8 @@ Cola con **capacidad finita** K (servidor + sala de espera). Los clientes que ll
 
 ```python
 r = wl.mm1k(lam=5.0, mu=3.0, K=10)
-print(r.params["PK (blocking prob)"])  # fracción de clientes rechazados
-print(r.params["λ_eff (effective rate)"])  # tasa real de entrada al sistema
+print(r.params["PK (prob. de bloqueo)"])  # fracción de clientes rechazados
+print(r.params["λ_eff (tasa efectiva)"])  # tasa real de entrada al sistema
 ```
 
 ---
@@ -248,7 +248,7 @@ Multi-servidor con capacidad finita. Generaliza tanto M/M/c (K→∞) como M/M/1
 
 ```python
 r = wl.mmck(lam=8.0, mu=3.0, c=2, K=20)
-print(r.params["PK (blocking prob)"])
+print(r.params["PK (prob. de bloqueo)"])
 
 # Verificación: con K muy grande se acerca a M/M/c
 r_inf  = wl.mmc(lam=3.0, mu=5.0, c=2)
@@ -537,12 +537,12 @@ r = wl.eoq(
     holding_cost=2,      # h: costo por unidad por período
 )
 print(r)
-# EOQ (order quantity): 223.6 units
-# Order frequency     : 4.472 orders/period
-# Cycle time          : 0.2236 periods
-# Total cost          : 447.2
-#   Holding cost      : 223.6
-#   Ordering cost     : 223.6   ← iguales en el óptimo
+# EOQ (cantidad de pedido): 223.6 unidades
+# Frecuencia de pedidos   : 4.472 pedidos/periodo
+# Tiempo de ciclo         : 0.2236 periodos
+# Costo total             : 447.2
+#   Costo de mantener     : 223.6
+#   Costo de ordenar      : 223.6   ← iguales en el óptimo
 
 r.plot()            # gráfica de curvas de costo
 df = r.to_frame()
@@ -580,11 +580,11 @@ r = wl.reorder_point(
     service_level=0.95,  # nivel de servicio deseado
 )
 print(r)
-# Reorder point   : 132.4 units
-# Safety stock    : 32.4 units
-# Service level   : 95.00%
-# z-score         : 1.645
-# Mean demand LT  : 100.0
+# Punto de reorden    : 132.4 unidades
+# Stock de seguridad  : 32.4 unidades
+# Nivel de servicio   : 95.00%
+# z                   : 1.645
+# Demanda media en LT : 100.0
 # Std demand LT   : 19.72
 
 # Sin variabilidad → solo demanda esperada durante LT
@@ -632,14 +632,14 @@ r = wl.newsvendor(
     salvage=2,       # valor residual de unidades no vendidas
 )
 print(r)
-# Optimal quantity   : 100.0 units
-# Critical ratio     : 0.5
-# Expected profit    : 320.0
-# Expected sales     : 100.0
-# Expected leftover  : 0.0
-# Expected stockout  : 0.0
-# Underage cost Cu   : 4.0
-# Overage cost  Co   : 4.0
+# Cantidad óptima     : 100.0 unidades
+# Razón crítica       : 0.5
+# Utilidad esperada   : 320.0
+# Ventas esperadas    : 100.0
+# Sobrante esperado   : 0.0
+# Faltante esperado   : 0.0
+# Costo de subestimar Cu: 4.0
+# Costo de sobrestimar Co: 4.0
 
 # Producto con alto margen → pedir por encima de la media
 r_alto = wl.newsvendor(demand_mean=100, demand_std=20,
@@ -686,15 +686,15 @@ r = wl.ebq(
     production_rate=4000,   # P: tasa de producción (debe ser > D)
 )
 print(r)
-# EBQ (batch size)    : 258.2 units
-# Max inventory       : 193.6
-# Avg inventory       : 96.82
-# Order frequency     : 3.873 runs/period
-# Cycle time          : 0.2582 periods
-# Production time/cyc : 0.06455 periods
-# Total cost          : 193.6
-#   Holding cost      : 96.82
-#   Setup cost        : 96.82
+# EBQ (tamaño de lote): 258.2 unidades
+# Inventario máximo   : 193.6
+# Inventario promedio : 96.82
+# Frecuencia de lotes : 3.873 lotes/periodo
+# Tiempo de ciclo     : 0.2582 periodos
+# Tiempo de producción: 0.06455 periodos
+# Costo total         : 193.6
+#   Costo de mantener : 96.82
+#   Costo de preparación: 96.82
 ```
 
 **`EBQResult` — atributos:**
@@ -800,9 +800,9 @@ r = wl.lot_for_lot(demands, setup_cost=200, holding_cost=1)
 print(r.total_holding_cost)   # 0.0 — sin inventario residual
 print(r.n_orders)             # 4 — un pedido por período con demanda > 0
 print(r)
-# Method              : Lot-for-Lot
-# Number of orders    : 4
-# Total cost          : 800.0
+# Método               : Lote por lote
+# Número de pedidos    : 4
+# Costo total          : 800.0
 ```
 
 ---
@@ -886,13 +886,13 @@ items = [
 
 abc = wl.abc_analysis(items)
 print(abc)                       # resumen por clase: A = 2 artículos (80 % del valor)
-print(abc.to_frame()[["name", "annual_value", "cumulative_pct", "class"]])
+print(abc.to_frame()[["artículo", "valor_anual", "pct_acumulado", "clase"]])
 
 # XYZ: cada artículo aporta 'cv' directamente o 'demand_std' + 'demand_mean' (o 'demand_rate')
 xyz = wl.xyz_analysis([
     {"name": i["name"], "demand_std": i["demand_std"], "demand_mean": i["demand"]} for i in items
 ])
-print(xyz.to_frame())            # columnas: name, cv, class
+print(xyz.to_frame())            # columnas: artículo, cv, clase
 
 # ABC-XYZ: matriz de conteos (filas ABC, columnas XYZ)
 combo = wl.abc_xyz([{**i, "cv": i["demand_std"] / i["demand"]} for i in items])
@@ -941,7 +941,7 @@ Si el `lead_time` es mayor que el periodo en que se necesita la orden, la libera
 
 ### `oee(availability, performance, quality)` — OEE
 
-Calcula la **Eficiencia Global de los Equipos** (OEE = Availability × Performance × Quality).
+Calcula la **Eficiencia Global de los Equipos** (OEE = Disponibilidad × Rendimiento × Calidad).
 
 ```python
 r = wl.oee(
@@ -988,7 +988,7 @@ r = wl.bottleneck_analysis(
     demand_rate=70.0,                  # demanda requerida
 )
 print(r)
-# Bottleneck: Soldadura  (capacidad 80 < demanda 70 con menor margen)
+# Cuello de botella: Soldadura  (capacidad 80 < demanda 70 con menor margen)
 # Utilization: Corte=58.3%, Soldadura=87.5%, Pintura=70.0%
 
 r.plot()   # barras de utilización con cuello de botella en rojo
@@ -1063,7 +1063,7 @@ print(r.bep_units_total)          # unidades totales en el punto de equilibrio
 print(r.bep_revenue_total)        # ingresos totales en el punto de equilibrio
 
 for item in r.items:
-    print(item["Name"], item["BEP units"])
+    print(item["Producto"], item["PE unidades"])
 
 r.to_frame()    # DataFrame con una fila por producto
 ```
@@ -1126,12 +1126,12 @@ print(r)
 ```
 
 ```
-Target                  : eoq
-Multiplier k            : 1.0000
-N orders/yr  (EOQ)      : 87.27
-N orders/yr  (optimal)  : 87.27
-Investment   (EOQ)      : 5430
-Investment   (optimal)  : 5430
+Objetivo                : eoq
+Multiplicador k         : 1.0000
+N pedidos/año (EOQ)     : 87.27
+N pedidos/año (óptimo)  : 87.27
+Inversión (EOQ)         : 5430
+Inversión (óptimo)      : 5430
 ```
 
 ```python
@@ -1143,7 +1143,7 @@ r = wl.exchange_curve(items, target_investment=3000)
 
 # Tabla por artículo
 df = r.to_frame()
-# columnas: name | Q_eoq | Q_optimal | n_orders | investment
+# columnas: artículo | Q_eoq | Q_óptima | n_pedidos | inversión
 
 # Hipérbola para graficar
 curve = r.curve_to_frame()
@@ -1184,10 +1184,10 @@ print(r)
 ```
 
 ```
-Target          : service_level=95.0000%
-z               : 1.6449
-Service level   : 95.0000%
-SS investment   : 1 847
+Objetivo          : nivel_de_servicio=95.0000%
+z                 : 1.6449
+Nivel de servicio : 95.0000%
+Inversión en SS   : 1 847
 ```
 
 ```python
@@ -1196,7 +1196,7 @@ r = wl.safety_stock_curve(items, target_ss_investment=1000)
 
 # Tabla por artículo (incluye punto de reorden cuando se da demand_rate)
 df = r.to_frame()
-# columnas: name | sigma_dlt | safety_stock | investment | reorder_point
+# columnas: artículo | sigma_dlt | stock_de_seguridad | inversión | punto_de_reorden
 
 # Curva completa (z de −2 a 4)
 curve = r.curve_to_frame()
@@ -1249,14 +1249,14 @@ print(r)
 ```
 
 ```
-Rule                    : SPT
-Sequence                : B → D → A → C → E
+Regla                   : SPT
+Secuencia               : B → D → A → C → E
 Makespan (Cmax)         : 14
-Total completion ΣCj    : 37
-Weighted completion ΣwCj: 89
-Max lateness            : 2
-Total tardiness ΣTj     : 2
-Tardy jobs              : 1
+Finalización total ΣCj  : 37
+Finalización pond. ΣwCj : 89
+Retraso máximo          : 2
+Tardanza total ΣTj      : 2
+Trabajos con retraso    : 1
 ```
 
 **Reglas disponibles**
@@ -1284,7 +1284,7 @@ Tardy jobs              : 1
 | `n_tardy` | Número de trabajos tarde |
 
 ```python
-df = r.to_frame()  # columnas: Name, p, d, w, Start, C, L, T, Tardy
+df = r.to_frame()  # columnas: Trabajo, p, d, w, Inicio, C, L, T, Con retraso
 ```
 
 ---
@@ -1302,8 +1302,8 @@ print(r)
 ```
 
 ```
-Sequence : J1 → J5 → J4 → J3 → J2
-Makespan : 34
+Secuencia : J1 → J5 → J4 → J3 → J2
+Makespan  : 34
 ```
 
 ```python
@@ -1325,7 +1325,7 @@ porcentuales del óptimo.
 tiempos = [[5, 9, 8], [9, 3, 10], [9, 4, 5], [4, 8, 8]]
 r = wl.neh_flowshop(tiempos, names=["P1", "P2", "P3", "P4"])
 print(r)               # secuencia y makespan
-print(r.to_frame())    # Gantt: columnas M1_start, M1_end, M2_start, ...
+print(r.to_frame())    # Gantt: columnas M1_inicio, M1_fin, M2_inicio, ...
 print(r.sequence, r.makespan)
 ```
 
@@ -1343,12 +1343,12 @@ print(r)
 ```
 
 ```
-Topology        : component
-Components      : 1
-Failure rates λ : ['0.01']
+Topología       : component
+Componentes     : 1
+Tasas de falla λ: ['0.01']
 MTBF            : 100
 R(t=100)        : 0.367879
-Availability    : 95.2381%
+Disponibilidad  : 95.2381%
 ```
 
 ### Sistema en serie — `series_system`
@@ -1401,7 +1401,7 @@ print(r.R_t)
 | `mttr` | Tiempo medio de reparación (si se proporcionó) |
 
 ```python
-df = r.to_frame()   # columnas: Topology, Components, MTBF[, R(t), Availability]
+df = r.to_frame()   # columnas: Topología, Componentes, MTBF[, R(t), Disponibilidad]
 r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
 ```
 
@@ -1439,7 +1439,7 @@ ciclos y los predecesores desconocidos lanzan `ValueError`.
 
 ### CPM — duraciones determinísticas
 
-Paso hacia adelante (ES, EF) y hacia atrás (LS, LF); holgura total TF = LS − ES, holgura libre FF y ruta crítica (TF = 0).
+Paso hacia adelante (ES, EF) y hacia atrás (LS, LF); holgura total HT = LS − ES, holgura libre HL y ruta crítica (HT = 0).
 
 ```python
 acts = [
@@ -1450,7 +1450,7 @@ acts = [
 ]
 r = wl.cpm(acts)
 print(r)                    # duración 8, ruta crítica A → B → D
-print(r.to_frame())         # ES, EF, LS, LF, TF, FF y si es crítica
+print(r.to_frame())         # ES, EF, LS, LF, HT, HL y si es crítica
 print(r.critical_path)      # ['A', 'B', 'D']
 ```
 
@@ -1658,8 +1658,8 @@ df = wl.compare(
     wl.md1(3.0, 5.0),
     labels=["M/M/1", "M/M/2", "M/D/1"],
 )
-print(df[["label", "ρ (utilization)", "Wq (wait time)", "L (system)"]])
-#    label  ρ (utilization)  Wq (wait time)  L (system)
+print(df[["label", "ρ (utilización)", "Wq (tiempo de espera)", "L (en el sistema)"]])
+#    label  ρ (utilización)  Wq (tiempo de espera)  L (en el sistema)
 # 0  M/M/1          0.6         0.3000         1.50
 # 1  M/M/2          0.3         0.0302         1.02
 # 2  M/D/1          0.6         0.1500         1.05
@@ -1680,7 +1680,7 @@ Todos los resultados exponen `.plot()` que devuelve una figura de Matplotlib o P
 | `OEEResult.plot()` | Matplotlib | Barras horizontales OEE con referencia 85% |
 | `BottleneckResult.plot()` | Matplotlib | Utilización por estación, cuello de botella en rojo |
 | `EOQResult.plot()` | Matplotlib | Curvas de costo de mantener, ordenar y total |
-| `LineBalanceResult.plot()` | Plotly | Cycle time vs takt por estación |
+| `LineBalanceResult.plot()` | Plotly | Tiempo de ciclo vs takt por estación |
 | `BreakEvenResult.plot()` | Plotly | Líneas ingreso/costo con BEP y zona de beneficio |
 | `SimulationResult.plot()` | Plotly | Histograma de Wq + CDF empírica con percentiles |
 | `OptimizeResult.plot()` | Plotly | Costo por servidor, costo de espera y total vs c |
@@ -1735,14 +1735,14 @@ python -m walopy --version
 
 Ejemplo de salida:
 ```
-Model : M/M/1
-λ     : 3.0   (arrival rate)
-μ     : 5.0   (service rate per server)
-ρ     : 0.6   (utilization)
-L     : 1.5   (avg units in system)
-Lq    : 0.9   (avg units in queue)
-W     : 0.5   (avg time in system)
-Wq    : 0.3   (avg wait time in queue)
+Modelo : M/M/1
+λ      : 3.0   (tasa de llegada)
+μ      : 5.0   (tasa de servicio por servidor)
+ρ      : 0.6   (utilización por servidor)
+L      : 1.5   (unidades promedio en el sistema)
+Lq     : 0.9   (unidades promedio en cola)
+W      : 0.5   (tiempo promedio en el sistema)
+Wq     : 0.3   (tiempo promedio de espera en cola)
   P0      : 0.4
 ```
 

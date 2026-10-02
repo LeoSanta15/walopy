@@ -1,4 +1,4 @@
-"""Queuing theory models: M/M/1, M/M/c, M/D/1, G/G/1 (Kingman), Little's Law."""
+"""Modelos de teoría de colas: M/M/1, M/M/c, M/D/1, M/G/1, G/G/1 (Kingman) y ley de Little."""
 from __future__ import annotations
 
 import math
@@ -14,30 +14,30 @@ if TYPE_CHECKING:
 
 @dataclass
 class QueueResult:
-    """Result of a queuing model computation.
+    """Resultado del cálculo de un modelo de colas.
 
     Attributes
     ----------
     model : str
-        Model name (e.g. 'M/M/1').
+        Nombre del modelo (p. ej. 'M/M/1').
     lam : float
-        Arrival rate (units/time).
+        Tasa de llegadas (unidades/tiempo).
     mu : float
-        Service rate per server (units/time).
+        Tasa de servicio por servidor (unidades/tiempo).
     servers : int
-        Number of servers *c*.
+        Número de servidores *c*.
     rho : float
-        Server utilization (traffic intensity per server).
+        Utilización del servidor (intensidad de tráfico por servidor).
     L : float
-        Average number of units in the system (Little's Law).
+        Número promedio de unidades en el sistema (ley de Little).
     Lq : float
-        Average number of units in the queue.
+        Número promedio de unidades en cola.
     W : float
-        Average time in the system.
+        Tiempo promedio en el sistema.
     Wq : float
-        Average time in the queue (waiting time).
+        Tiempo promedio en cola (tiempo de espera).
     params : dict
-        Additional model-specific parameters.
+        Parámetros adicionales propios del modelo.
     """
 
     model: str
@@ -52,33 +52,33 @@ class QueueResult:
     params: dict = field(default_factory=dict)
 
     def to_frame(self) -> pd.DataFrame:
-        """Export key KPIs as a one-row DataFrame."""
+        """Exporta los KPI principales como un DataFrame de una fila."""
         import pandas as pd
 
         return pd.DataFrame([{
             "model": self.model,
-            "λ (arrival rate)": self.lam,
-            "μ (service rate)": self.mu,
-            "c (servers)": self.servers,
-            "ρ (utilization)": self.rho,
-            "L (system)": self.L,
-            "Lq (queue)": self.Lq,
-            "W (system time)": self.W,
-            "Wq (wait time)": self.Wq,
+            "λ (tasa de llegada)": self.lam,
+            "μ (tasa de servicio)": self.mu,
+            "c (servidores)": self.servers,
+            "ρ (utilización)": self.rho,
+            "L (en el sistema)": self.L,
+            "Lq (en cola)": self.Lq,
+            "W (tiempo en el sistema)": self.W,
+            "Wq (tiempo de espera)": self.Wq,
             **self.params,
         }])
 
     def summary(self) -> str:
         lines = [
-            f"Model : {self.model}",
-            f"λ     : {self.lam:.6g}  (arrival rate)",
-            f"μ     : {self.mu:.6g}  (service rate per server)",
-            f"c     : {self.servers}  (servers)",
-            f"ρ     : {self.rho:.6g}  (utilization per server)",
-            f"L     : {self.L:.6g}  (avg units in system)",
-            f"Lq    : {self.Lq:.6g}  (avg units in queue)",
-            f"W     : {self.W:.6g}  (avg time in system)",
-            f"Wq    : {self.Wq:.6g}  (avg wait time in queue)",
+            f"Modelo : {self.model}",
+            f"λ      : {self.lam:.6g}  (tasa de llegada)",
+            f"μ      : {self.mu:.6g}  (tasa de servicio por servidor)",
+            f"c      : {self.servers}  (servidores)",
+            f"ρ      : {self.rho:.6g}  (utilización por servidor)",
+            f"L      : {self.L:.6g}  (unidades promedio en el sistema)",
+            f"Lq     : {self.Lq:.6g}  (unidades promedio en cola)",
+            f"W      : {self.W:.6g}  (tiempo promedio en el sistema)",
+            f"Wq     : {self.Wq:.6g}  (tiempo promedio de espera en cola)",
         ]
         for k, v in self.params.items():
             lines.append(f"  {k:8s}: {v:.6g}" if isinstance(v, float) else f"  {k:8s}: {v}")
@@ -102,21 +102,21 @@ def littles_law(
     lam: float | None = None,
     W: float | None = None,
 ) -> float:
-    """Solve Little's Law  L = λ · W  for the missing variable.
+    """Resuelve la ley de Little  L = λ · W  para la variable faltante.
 
     Parameters
     ----------
     L :
-        Average number of items in the system.
+        Número promedio de elementos en el sistema.
     lam :
-        Average arrival rate.
+        Tasa promedio de llegadas.
     W :
-        Average time an item spends in the system.
+        Tiempo promedio que un elemento pasa en el sistema.
 
     Returns
     -------
     float
-        The value of the missing variable.
+        Valor de la variable faltante.
 
     Raises
     ------
@@ -146,14 +146,14 @@ def littles_law(
 # ---------------------------------------------------------------------------
 
 def mm1(lam: float, mu: float) -> QueueResult:
-    """M/M/1 queuing model.
+    """Modelo de colas M/M/1.
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ (must be < μ for stability).
+        Tasa de llegadas λ (debe ser < μ para que el sistema sea estable).
     mu : float
-        Service rate μ per server.
+        Tasa de servicio μ por servidor.
 
     Returns
     -------
@@ -185,7 +185,7 @@ def mm1(lam: float, mu: float) -> QueueResult:
     return QueueResult(
         model="M/M/1", lam=lam, mu=mu, servers=1,
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
-        params={"P0 (idle probability)": 1 - rho},
+        params={"P0 (prob. de sistema vacío)": 1 - rho},
     )
 
 
@@ -194,16 +194,16 @@ def mm1(lam: float, mu: float) -> QueueResult:
 # ---------------------------------------------------------------------------
 
 def mmc(lam: float, mu: float, c: int) -> QueueResult:
-    """M/M/c multi-server queuing model.
+    """Modelo de colas M/M/c de varios servidores.
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ per server.
+        Tasa de servicio μ por servidor.
     c : int
-        Number of servers (≥ 1).
+        Número de servidores (≥ 1).
 
     Returns
     -------
@@ -251,7 +251,7 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
         model=f"M/M/{c}", lam=lam, mu=mu, servers=c,
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
         params={
-            "P0 (idle probability)": P0,
+            "P0 (prob. de sistema vacío)": P0,
             "C(c,a) Erlang-C": Pq,
         },
     )
@@ -262,14 +262,14 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
 # ---------------------------------------------------------------------------
 
 def md1(lam: float, mu: float) -> QueueResult:
-    """M/D/1 model — Poisson arrivals, deterministic (constant) service time.
+    """Modelo M/D/1: llegadas de Poisson y tiempo de servicio determinístico (constante).
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ = 1 / service_time.
+        Tasa de servicio μ = 1 / tiempo_de_servicio.
 
     Returns
     -------
@@ -314,22 +314,22 @@ def kingman(
     ca2: float,
     cs2: float,
 ) -> QueueResult:
-    """G/G/1 queuing model via Kingman's (VUT) approximation.
+    """Modelo de colas G/G/1 mediante la aproximación de Kingman (VUT).
 
-    The mean queue waiting time is approximated as::
+    El tiempo medio de espera en cola se aproxima como::
 
         Wq ≈ (ρ / (1 − ρ)) · ((ca² + cs²) / 2) · (1 / μ)
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ (= 1 / mean_service_time).
+        Tasa de servicio μ (= 1 / tiempo_medio_de_servicio).
     ca2 : float
-        Squared coefficient of variation of inter-arrival times (≥ 0).
+        Coeficiente de variación al cuadrado de los tiempos entre llegadas (≥ 0).
     cs2 : float
-        Squared coefficient of variation of service times (≥ 0).
+        Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0).
 
     Returns
     -------
@@ -363,7 +363,7 @@ def kingman(
     return QueueResult(
         model="G/G/1 (Kingman)", lam=lam, mu=mu, servers=1,
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
-        params={"ca² (arrival CV²)": ca2, "cs² (service CV²)": cs2},
+        params={"ca² (CV² de llegadas)": ca2, "cs² (CV² de servicio)": cs2},
     )
 
 
@@ -372,21 +372,21 @@ def kingman(
 # ---------------------------------------------------------------------------
 
 def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
-    """M/G/1 queuing model — exact Pollaczek-Khinchine (P-K) mean-value formula.
+    """Modelo de colas M/G/1: fórmula exacta de valores medios de Pollaczek-Khinchine (P-K).
 
-    Poisson arrivals with rate λ, general service time distribution with mean
-    1/μ and squared coefficient of variation cs².  The result is exact (not an
-    approximation) for any service distribution that shares those two moments.
+    Llegadas de Poisson con tasa λ y distribución general del tiempo de servicio con media
+    1/μ y coeficiente de variación al cuadrado cs². El resultado es exacto (no una
+    aproximación) para cualquier distribución de servicio que comparta esos dos momentos.
 
     Parameters
     ----------
     lam : float
-        Arrival rate λ.
+        Tasa de llegadas λ.
     mu : float
-        Service rate μ = 1 / E[S].
+        Tasa de servicio μ = 1 / E[S].
     cs2 : float
-        Squared coefficient of variation of service times  cs² = Var[S] / E[S]².
-        Use the ``cv2_*`` helpers to compute this from distribution parameters.
+        Coeficiente de variación al cuadrado del servicio  cs² = Var[S] / E[S]².
+        Use las funciones ``cv2_*`` para calcularlo a partir de los parámetros de la distribución.
 
     Returns
     -------
@@ -394,8 +394,8 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
 
     Notes
     -----
-    P-K formula:  Wq = λ · E[S²] / (2 · (1 − ρ))
-    where  E[S²] = (1 + cs²) / μ².
+    Fórmula P-K:  Wq = λ · E[S²] / (2 · (1 − ρ))
+    donde  E[S²] = (1 + cs²) / μ².
 
     Raises
     ------
@@ -425,7 +425,7 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
     return QueueResult(
         model="M/G/1 (P-K)", lam=lam, mu=mu, servers=1,
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
-        params={"cs² (service CV²)": cs2},
+        params={"cs² (CV² de servicio)": cs2},
     )
 
 
@@ -434,13 +434,13 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
 # ---------------------------------------------------------------------------
 
 def cv2_triangular(a: float, m: float, b: float) -> float:
-    """CV² for a Triangular(a, m, b) distribution.
+    """CV² de una distribución Triangular(a, m, b).
 
     Parameters
     ----------
-    a : float  Lower bound.
-    m : float  Mode (peak).
-    b : float  Upper bound.
+    a : float  Cota inferior.
+    m : float  Moda (pico).
+    b : float  Cota superior.
 
     Raises
     ------
@@ -469,12 +469,12 @@ def cv2_triangular(a: float, m: float, b: float) -> float:
 
 
 def cv2_uniform(a: float, b: float) -> float:
-    """CV² for a Uniform(a, b) distribution.
+    """CV² de una distribución Uniforme(a, b).
 
     Parameters
     ----------
-    a : float  Lower bound.
-    b : float  Upper bound (> a).
+    a : float  Cota inferior.
+    b : float  Cota superior (> a).
 
     Raises
     ------
@@ -502,12 +502,12 @@ def cv2_uniform(a: float, b: float) -> float:
 
 
 def cv2_normal(mean: float, std: float) -> float:
-    """CV² for a Normal(mean, std) distribution.
+    """CV² de una distribución Normal(media, desviación).
 
     Parameters
     ----------
-    mean : float  Mean (> 0 for service/inter-arrival times).
-    std  : float  Standard deviation (≥ 0).
+    mean : float  Media (> 0 para tiempos de servicio o entre llegadas).
+    std  : float  Desviación estándar (≥ 0).
 
     Raises
     ------
@@ -528,11 +528,11 @@ def cv2_normal(mean: float, std: float) -> float:
 
 
 def cv2_erlang(k: int) -> float:
-    """CV² for an Erlang-k distribution.  cv² = 1/k.
+    """CV² de una distribución Erlang-k.  cv² = 1/k.
 
     Parameters
     ----------
-    k : int  Shape parameter (≥ 1).
+    k : int  Parámetro de forma (≥ 1).
 
     Raises
     ------
@@ -553,11 +553,11 @@ def cv2_erlang(k: int) -> float:
 
 
 def cv2_gamma(shape: float) -> float:
-    """CV² for a Gamma(shape, scale) distribution.  cv² = 1/shape.
+    """CV² de una distribución Gamma(forma, escala).  cv² = 1/forma.
 
     Parameters
     ----------
-    shape : float  Shape parameter α (> 0).
+    shape : float  Parámetro de forma α (> 0).
 
     Raises
     ------
@@ -577,12 +577,12 @@ def cv2_gamma(shape: float) -> float:
 
 
 def cv2_lognormal(mean: float, std: float) -> float:
-    """CV² for a LogNormal distribution parameterised by its *actual* mean and std.
+    """CV² de una distribución Lognormal parametrizada por su media y desviación *reales*.
 
     Parameters
     ----------
-    mean : float  Mean of the lognormal variable (> 0).
-    std  : float  Standard deviation of the lognormal variable (> 0).
+    mean : float  Media de la variable lognormal (> 0).
+    std  : float  Desviación estándar de la variable lognormal (> 0).
 
     Raises
     ------
@@ -603,13 +603,13 @@ def cv2_lognormal(mean: float, std: float) -> float:
 
 
 def cv2_weibull(shape: float) -> float:
-    """CV² for a Weibull(shape, scale) distribution.
+    """CV² de una distribución Weibull(forma, escala).
 
     cv² = Γ(1 + 2/k) / Γ(1 + 1/k)² − 1
 
     Parameters
     ----------
-    shape : float  Shape parameter k (> 0).
+    shape : float  Parámetro de forma k (> 0).
 
     Raises
     ------

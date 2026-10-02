@@ -88,8 +88,8 @@ def test_abc_to_frame_columns():
     import pandas as pd
     df = wl.abc_analysis(ITEMS).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "class" in df.columns
-    assert "annual_value" in df.columns
+    assert "clase" in df.columns
+    assert "valor_anual" in df.columns
 
 
 def test_abc_empty_raises():
@@ -141,7 +141,7 @@ def test_xyz_to_frame():
     df = wl.xyz_analysis(XYZ_ITEMS).to_frame()
     assert isinstance(df, pd.DataFrame)
     assert "cv" in df.columns
-    assert "class" in df.columns
+    assert "clase" in df.columns
 
 
 def test_xyz_empty_raises():

@@ -1,4 +1,4 @@
-"""Production scheduling: single-machine dispatching rules and Johnson's flow-shop."""
+"""Programación de la producción: reglas de despacho de una máquina, flow-shop de Johnson y heurística NEH."""
 from __future__ import annotations
 
 import math
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class JobSchedule:
-    """Per-job result after scheduling."""
+    """Resultado por trabajo tras la programación."""
 
     name: str
     processing_time: float
@@ -43,28 +43,28 @@ class JobSchedule:
 
 @dataclass
 class ScheduleResult:
-    """Single-machine scheduling result.
+    """Resultado de la programación de una máquina.
 
     Attributes
     ----------
     rule : str
-        Dispatching rule used.
+        Regla de despacho utilizada.
     sequence : list[str]
-        Job names in processing order.
+        Nombres de los trabajos en orden de procesamiento.
     jobs : list[JobSchedule]
-        Per-job schedule details.
+        Detalle de la programación por trabajo.
     makespan : float
-        Total elapsed time (sum of all processing times).
+        Tiempo total transcurrido (suma de todos los tiempos de proceso).
     total_completion_time : float
-        Sum of job completion times ΣCj.
+        Suma de los tiempos de finalización ΣCj.
     total_weighted_completion_time : float
-        Sum of weighted completion times ΣwjCj.
+        Suma ponderada de los tiempos de finalización ΣwjCj.
     max_lateness : float
-        Maximum lateness max(Lj).
+        Retraso máximo max(Lj).
     total_tardiness : float
-        Sum of tardiness ΣTj.
+        Suma de las tardanzas ΣTj.
     n_tardy : int
-        Number of tardy jobs.
+        Número de trabajos con retraso.
     """
 
     rule: str
@@ -80,27 +80,27 @@ class ScheduleResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Name": j.name,
+            "Trabajo": j.name,
             "p": j.processing_time,
             "d": j.due_date,
             "w": j.weight,
-            "Start": j.start_time,
+            "Inicio": j.start_time,
             "C": j.completion_time,
             "L": j.lateness,
             "T": j.tardiness,
-            "Tardy": j.is_tardy,
+            "Con retraso": j.is_tardy,
         } for j in self.jobs])
 
     def summary(self) -> str:
         lines = [
-            f"Rule                    : {self.rule}",
-            f"Sequence                : {' → '.join(self.sequence)}",
+            f"Regla                   : {self.rule}",
+            f"Secuencia               : {' → '.join(self.sequence)}",
             f"Makespan (Cmax)         : {self.makespan:.4g}",
-            f"Total completion ΣCj    : {self.total_completion_time:.4g}",
-            f"Weighted completion ΣwCj: {self.total_weighted_completion_time:.4g}",
-            f"Max lateness            : {self.max_lateness:.4g}",
-            f"Total tardiness ΣTj     : {self.total_tardiness:.4g}",
-            f"Tardy jobs              : {self.n_tardy}",
+            f"Finalización total ΣCj  : {self.total_completion_time:.4g}",
+            f"Finalización pond. ΣwCj : {self.total_weighted_completion_time:.4g}",
+            f"Retraso máximo          : {self.max_lateness:.4g}",
+            f"Tardanza total ΣTj      : {self.total_tardiness:.4g}",
+            f"Trabajos con retraso    : {self.n_tardy}",
         ]
         return "\n".join(lines)
 
@@ -156,27 +156,27 @@ def schedule_single(
     weights: Sequence[float] | None = None,
     names: Sequence[str] | None = None,
 ) -> ScheduleResult:
-    """Single-machine scheduling with classic priority dispatching rules.
+    """Programación de una máquina con reglas clásicas de despacho por prioridad.
 
     Parameters
     ----------
     processing_times : sequence of float
-        Processing time pj for each job (> 0).
+        Tiempo de proceso pj de cada trabajo (> 0).
     rule : str
-        Dispatching rule:
+        Regla de despacho:
 
-        - ``'SPT'``  Shortest Processing Time — minimises ΣCj.
-        - ``'EDD'``  Earliest Due Date — minimises max lateness.
-        - ``'WSPT'`` Weighted SPT (Smith's rule) — minimises ΣwjCj.
-        - ``'CR'``   Critical Ratio — jobs ordered by dj / pj.
-        - ``'FIFO'`` Input order (baseline).
+        - ``'SPT'``  Menor tiempo de proceso primero — minimiza ΣCj.
+        - ``'EDD'``  Fecha de entrega más próxima primero — minimiza el retraso máximo.
+        - ``'WSPT'`` SPT ponderado (regla de Smith) — minimiza ΣwjCj.
+        - ``'CR'``   Razón crítica — trabajos ordenados por dj / pj.
+        - ``'FIFO'`` Orden de llegada (referencia).
 
     due_dates : sequence of float, optional
-        Due date dj for each job. Required for EDD and CR.
+        Fecha de entrega dj de cada trabajo. Obligatoria para EDD y CR.
     weights : sequence of float, optional
-        Importance weight wj (> 0). Required for WSPT. Default 1.
+        Peso de importancia wj (> 0). Obligatorio para WSPT. Por defecto 1.
     names : sequence of str, optional
-        Job labels. Default 'J1', 'J2', …
+        Etiquetas de los trabajos. Por defecto 'J1', 'J2', …
 
     Returns
     -------
@@ -248,18 +248,18 @@ def schedule_single(
 
 @dataclass
 class FlowShopResult:
-    """Johnson's 2-machine flow-shop result.
+    """Resultado del flow-shop de dos máquinas de Johnson.
 
     Attributes
     ----------
     sequence : list[str]
-        Optimal job processing sequence.
+        Secuencia óptima de procesamiento de los trabajos.
     makespan : float
-        Total elapsed time (completion of last job on machine 2).
+        Tiempo total transcurrido (finalización del último trabajo en la máquina 2).
     machine1_schedule : list[dict]
-        Per-job dicts with keys ``name``, ``start``, ``end``.
+        Un diccionario por trabajo con las claves ``name``, ``start``, ``end``.
     machine2_schedule : list[dict]
-        Per-job dicts with keys ``name``, ``start``, ``end``.
+        Un diccionario por trabajo con las claves ``name``, ``start``, ``end``.
     """
 
     sequence: list
@@ -272,16 +272,16 @@ class FlowShopResult:
         rows = []
         for a, b in zip(self.machine1_schedule, self.machine2_schedule):
             rows.append({
-                "Job": a["name"],
-                "M1 start": a["start"], "M1 end": a["end"],
-                "M2 start": b["start"], "M2 end": b["end"],
+                "Trabajo": a["name"],
+                "M1 inicio": a["start"], "M1 fin": a["end"],
+                "M2 inicio": b["start"], "M2 fin": b["end"],
             })
         return pd.DataFrame(rows)
 
     def summary(self) -> str:
         return (
-            f"Sequence : {' → '.join(self.sequence)}\n"
-            f"Makespan : {self.makespan:.4g}"
+            f"Secuencia : {' → '.join(self.sequence)}\n"
+            f"Makespan  : {self.makespan:.4g}"
         )
 
     def __str__(self) -> str:
@@ -294,20 +294,19 @@ def johnson_flowshop(
     *,
     names: Sequence[str] | None = None,
 ) -> FlowShopResult:
-    """Johnson's algorithm for the 2-machine flow-shop problem.
+    """Algoritmo de Johnson para el flow-shop de dos máquinas.
 
-    All jobs are processed first on machine 1 and then on machine 2 in
-    the **same** sequence.  The algorithm finds the sequence that minimises
-    makespan.
+    Todos los trabajos se procesan primero en la máquina 1 y luego en la máquina 2 en la
+    **misma** secuencia. El algoritmo encuentra la secuencia que minimiza el makespan.
 
     Parameters
     ----------
     m1_times : sequence of float
-        Processing time on machine 1 for each job (aj > 0).
+        Tiempo de proceso en la máquina 1 de cada trabajo (aj > 0).
     m2_times : sequence of float
-        Processing time on machine 2 for each job (bj > 0).
+        Tiempo de proceso en la máquina 2 de cada trabajo (bj > 0).
     names : sequence of str, optional
-        Job labels. Default 'J1', 'J2', …
+        Etiquetas de los trabajos. Por defecto 'J1', 'J2', …
 
     Returns
     -------
@@ -372,9 +371,9 @@ def johnson_flowshop(
 # ---------------------------------------------------------------------------
 
 def _flowshop_cmax(seq: list, T: list) -> tuple:
-    """Return (makespan, completion-time matrix) for a permutation flow-shop.
+    """Devuelve (makespan, matriz de tiempos de finalización) de un flow-shop de permutación.
 
-    T[job][machine] = processing time; seq = list of job indices.
+    T[trabajo][máquina] = tiempo de proceso; seq = lista de índices de trabajos.
     """
     n = len(seq)
     if n == 0:
@@ -425,19 +424,19 @@ def _mejor_insercion(seq: list, job: int, T: list, m: int) -> int:
 
 @dataclass
 class NEHResult:
-    """NEH heuristic result for the m-machine permutation flow-shop.
+    """Resultado de la heurística NEH para el flow-shop de permutación con m máquinas.
 
     Attributes
     ----------
     sequence : list[str]
-        Job processing order found by NEH.
+        Orden de procesamiento de los trabajos encontrado por NEH.
     makespan : float
-        Best makespan (Cmax) achieved.
+        Mejor makespan (Cmax) alcanzado.
     n_machines : int
-        Number of machines.
+        Número de máquinas.
     machine_schedules : list[list[dict]]
-        ``machine_schedules[m_idx][j]`` — dict ``{name, start, end}`` for the
-        *j*-th job (in sequence order) on machine *m_idx*.
+        ``machine_schedules[m_idx][j]``: diccionario ``{name, start, end}`` del
+        *j*-ésimo trabajo (en orden de secuencia) en la máquina *m_idx*.
     """
 
     sequence: list
@@ -446,22 +445,22 @@ class NEHResult:
     machine_schedules: list
 
     def to_frame(self) -> pd.DataFrame:
-        """Return a Gantt DataFrame with start/end per machine for each job."""
+        """Devuelve un DataFrame de Gantt con inicio y fin por máquina para cada trabajo."""
         import pandas as pd
         rows = []
         for idx, job in enumerate(self.sequence):
-            row: dict = {"Job": job}
+            row: dict = {"Trabajo": job}
             for mi, m_sched in enumerate(self.machine_schedules):
-                row[f"M{mi + 1}_start"] = m_sched[idx]["start"]
-                row[f"M{mi + 1}_end"]   = m_sched[idx]["end"]
+                row[f"M{mi + 1}_inicio"] = m_sched[idx]["start"]
+                row[f"M{mi + 1}_fin"]   = m_sched[idx]["end"]
             rows.append(row)
         return pd.DataFrame(rows)
 
     def summary(self) -> str:
         return (
-            f"Algorithm : NEH heuristic\n"
-            f"Machines  : {self.n_machines}\n"
-            f"Sequence  : {' → '.join(str(s) for s in self.sequence)}\n"
+            f"Algoritmo : heurística NEH\n"
+            f"Máquinas  : {self.n_machines}\n"
+            f"Secuencia : {' → '.join(str(s) for s in self.sequence)}\n"
             f"Makespan  : {self.makespan:.4g}"
         )
 
@@ -484,10 +483,10 @@ def neh_flowshop(
     Parameters
     ----------
     times_matrix : sequence of sequences of float
-        ``times_matrix[i][j]`` — processing time of job *i* on machine *j*.
-        All values must be > 0; every row must have the same number of columns.
+        ``times_matrix[i][j]``: tiempo de proceso del trabajo *i* en la máquina *j*.
+        Todos los valores deben ser > 0; todas las filas deben tener el mismo número de columnas.
     names : sequence of str, optional
-        Job labels.  Defaults to ``'J1', 'J2', …``.
+        Etiquetas de los trabajos. Por defecto ``'J1', 'J2', …``.
 
     Returns
     -------

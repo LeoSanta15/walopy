@@ -80,8 +80,8 @@ def test_mrp_to_frame_columns():
     import pandas as pd
     df = wl.mrp(GR).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "Gross_Req" in df.columns
-    assert "Planned_Release" in df.columns
+    assert "Req_bruto" in df.columns
+    assert "Lib_plan" in df.columns
 
 
 def test_mrp_custom_periods():

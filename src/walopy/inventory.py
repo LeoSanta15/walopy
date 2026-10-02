@@ -1,4 +1,4 @@
-"""Inventory models: EOQ, EBQ, reorder point, newsvendor, multi-item, constrained, dynamic lot-sizing."""
+"""Modelos de inventario: EOQ, EBQ, punto de reorden, newsvendor, multi-artículo, con restricciones, dimensionado dinámico de lotes, curvas de intercambio, ABC/XYZ y MRP."""
 from __future__ import annotations
 
 import math
@@ -19,24 +19,41 @@ if TYPE_CHECKING:
 # Economic Order Quantity
 # ---------------------------------------------------------------------------
 
+# Encabezados visibles (español) de los DataFrame que se construyen desde listas de diccionarios.
+# Las claves de los diccionarios (identificadores) permanecen en inglés.
+_COL_LOTES = {"period": "periodo", "order_qty": "cantidad_pedido", "covers_periods": "periodos_cubiertos"}
+_COL_CANTIDADES = {
+    "name": "artículo", "Q_eoq": "Q_eoq", "Q_optimal": "Q_óptima", "n_orders": "n_pedidos",
+    "investment": "inversión", "sigma_dlt": "sigma_dlt", "safety_stock": "stock_de_seguridad",
+    "reorder_point": "punto_de_reorden",
+}
+_COL_CURVA_CICLO = {"N": "N (pedidos/año)", "I": "I (inversión)"}
+_COL_CURVA_SEGURIDAD = {"service_level": "nivel_de_servicio", "ss_investment": "inversión_ss"}
+_COL_ARTICULOS = {
+    "name": "artículo", "demand": "demanda", "unit_value": "valor_unitario", "annual_value": "valor_anual",
+    "index": "índice", "cumulative_pct": "pct_acumulado", "pct_value": "pct_valor", "rank": "posición",
+    "class": "clase", "abc_class": "clase_abc", "xyz_class": "clase_xyz", "combined_class": "clase_combinada",
+}
+
+
 @dataclass
 class EOQResult:
-    """Economic Order Quantity result.
+    """Resultado de la Cantidad Económica de Pedido (EOQ).
 
     Attributes
     ----------
     eoq : float
-        Optimal order quantity Q*.
+        Cantidad óptima de pedido Q*.
     total_cost : float
-        Minimum total cost per period at Q*.
+        Costo total mínimo por periodo en Q*.
     holding_cost_total : float
-        Annual holding cost component at Q*.
+        Componente anual del costo de mantener en Q*.
     ordering_cost_total : float
-        Annual ordering cost component at Q*.
+        Componente anual del costo de ordenar en Q*.
     order_frequency : float
-        Number of orders per period.
+        Número de pedidos por periodo.
     cycle_time : float
-        Average time between orders (1 / order_frequency).
+        Tiempo promedio entre pedidos (1 / order_frequency).
     params : dict
     """
 
@@ -50,12 +67,12 @@ class EOQResult:
 
     def summary(self) -> str:
         return (
-            f"EOQ (order quantity): {self.eoq:.4g} units\n"
-            f"Order frequency     : {self.order_frequency:.4g} orders/period\n"
-            f"Cycle time          : {self.cycle_time:.4g} periods\n"
-            f"Total cost          : {self.total_cost:.6g}\n"
-            f"  Holding cost      : {self.holding_cost_total:.6g}\n"
-            f"  Ordering cost     : {self.ordering_cost_total:.6g}"
+            f"EOQ (cantidad de pedido): {self.eoq:.4g} unidades\n"
+            f"Frecuencia de pedidos   : {self.order_frequency:.4g} pedidos/periodo\n"
+            f"Tiempo de ciclo         : {self.cycle_time:.4g} periodos\n"
+            f"Costo total             : {self.total_cost:.6g}\n"
+            f"  Costo de mantener     : {self.holding_cost_total:.6g}\n"
+            f"  Costo de ordenar      : {self.ordering_cost_total:.6g}"
         )
 
     def __str__(self) -> str:
@@ -65,11 +82,11 @@ class EOQResult:
         import pandas as pd
         return pd.DataFrame([{
             "EOQ": self.eoq,
-            "Total cost": self.total_cost,
-            "Holding cost": self.holding_cost_total,
-            "Ordering cost": self.ordering_cost_total,
-            "Order frequency": self.order_frequency,
-            "Cycle time": self.cycle_time,
+            "Costo total": self.total_cost,
+            "Costo de mantener": self.holding_cost_total,
+            "Costo de ordenar": self.ordering_cost_total,
+            "Frecuencia de pedidos": self.order_frequency,
+            "Tiempo de ciclo": self.cycle_time,
         }])
 
     def plot(self, **kwargs) -> plt.Figure:
@@ -82,18 +99,18 @@ def eoq(
     ordering_cost: float,
     holding_cost: float,
 ) -> EOQResult:
-    """Economic Order Quantity — Wilson / Harris formula.
+    """Cantidad Económica de Pedido: fórmula de Wilson / Harris.
 
     Q* = sqrt(2 · D · K / h)
 
     Parameters
     ----------
     demand_rate : float
-        Demand per period *D* (units/period).
+        Demanda por periodo *D* (unidades/periodo).
     ordering_cost : float
-        Fixed cost per order *K* ($/order).
+        Costo fijo por pedido *K* ($/pedido).
     holding_cost : float
-        Holding cost per unit per period *h* ($/unit/period).
+        Costo de mantener por unidad y periodo *h* ($/unidad/periodo).
 
     Returns
     -------
@@ -140,22 +157,22 @@ def eoq(
 
 @dataclass
 class ReorderResult:
-    """Reorder point and safety stock result.
+    """Resultado del punto de reorden y el stock de seguridad.
 
     Attributes
     ----------
     reorder_point : float
-        Inventory level at which to place a replenishment order.
+        Nivel de inventario al que se emite un pedido de reposición.
     safety_stock : float
-        Buffer stock = z · σ_{DLT}.
+        Stock de amortiguación = z · σ_{DLT}.
     service_level : float
-        Cycle service level (P(no stockout per cycle)).
+        Nivel de servicio por ciclo (P(no hay faltante en el ciclo)).
     z_score : float
-        Safety factor z corresponding to the service level.
+        Factor de seguridad z correspondiente al nivel de servicio.
     mean_demand_lt : float
-        Expected demand during lead time D̄ · L̄.
+        Demanda esperada durante el tiempo de entrega D̄ · L̄.
     std_demand_lt : float
-        Std dev of demand during lead time √(L̄σ_D² + D̄²σ_L²).
+        Desviación estándar de la demanda durante el tiempo de entrega √(L̄σ_D² + D̄²σ_L²).
     params : dict
     """
 
@@ -169,12 +186,12 @@ class ReorderResult:
 
     def summary(self) -> str:
         return (
-            f"Reorder point   : {self.reorder_point:.4g} units\n"
-            f"Safety stock    : {self.safety_stock:.4g} units\n"
-            f"Service level   : {self.service_level:.2%}\n"
-            f"z-score         : {self.z_score:.4g}\n"
-            f"Mean demand LT  : {self.mean_demand_lt:.4g}\n"
-            f"Std demand LT   : {self.std_demand_lt:.4g}"
+            f"Punto de reorden    : {self.reorder_point:.4g} unidades\n"
+            f"Stock de seguridad  : {self.safety_stock:.4g} unidades\n"
+            f"Nivel de servicio   : {self.service_level:.2%}\n"
+            f"z                   : {self.z_score:.4g}\n"
+            f"Demanda media en LT : {self.mean_demand_lt:.4g}\n"
+            f"Desv. demanda en LT : {self.std_demand_lt:.4g}"
         )
 
     def __str__(self) -> str:
@@ -183,12 +200,12 @@ class ReorderResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Reorder point": self.reorder_point,
-            "Safety stock": self.safety_stock,
-            "Service level": self.service_level,
-            "z-score": self.z_score,
-            "Mean demand LT": self.mean_demand_lt,
-            "Std demand LT": self.std_demand_lt,
+            "Punto de reorden": self.reorder_point,
+            "Stock de seguridad": self.safety_stock,
+            "Nivel de servicio": self.service_level,
+            "z": self.z_score,
+            "Demanda media en LT": self.mean_demand_lt,
+            "Desv. demanda en LT": self.std_demand_lt,
         }])
 
 
@@ -200,26 +217,26 @@ def reorder_point(
     lead_time_std: float = 0.0,
     service_level: float = 0.95,
 ) -> ReorderResult:
-    """Compute the reorder point (ROP) and safety stock.
+    """Calcula el punto de reorden (ROP) y el stock de seguridad.
 
     ROP = D̄ · L̄ + z · σ_{DLT}
 
-    where σ_{DLT} = √(L̄ · σ_D² + D̄² · σ_L²)  and  z is the z-score
-    corresponding to the desired cycle service level.
+    donde σ_{DLT} = √(L̄ · σ_D² + D̄² · σ_L²)  y  z es el valor normal estándar
+    correspondiente al nivel de servicio por ciclo deseado.
 
     Parameters
     ----------
     demand_rate : float
-        Mean demand rate D̄ (units/period).
+        Tasa media de demanda D̄ (unidades/periodo).
     lead_time : float
-        Mean lead time L̄ (in same time units as demand_rate).
+        Tiempo de entrega medio L̄ (en las mismas unidades de tiempo que demand_rate).
     demand_std : float
-        Standard deviation of demand per period σ_D (default 0).
+        Desviación estándar de la demanda por periodo σ_D (por defecto 0).
     lead_time_std : float
-        Standard deviation of lead time σ_L (default 0).
+        Desviación estándar del tiempo de entrega σ_L (por defecto 0).
     service_level : float
-        Probability of no stockout per replenishment cycle ∈ (0, 1).
-        Default 0.95.
+        Probabilidad de no tener faltante por ciclo de reposición ∈ (0, 1).
+        Por defecto 0.95.
 
     Returns
     -------
@@ -274,16 +291,16 @@ def reorder_point(
 
 @dataclass
 class NewsvendorResult:
-    """Result of the newsvendor model.
+    """Resultado del modelo newsvendor.
 
     Attributes
     ----------
     optimal_qty : float
-        Optimal order quantity Q* = F^{-1}(CR).
+        Cantidad óptima de pedido Q* = F^{-1}(CR).
     critical_ratio : float
         Cu / (Cu + Co).
     expected_profit : float
-        Expected profit at Q*.
+        Utilidad esperada en Q*.
     expected_sales : float
         E[min(D, Q*)].
     expected_leftover : float
@@ -291,9 +308,9 @@ class NewsvendorResult:
     expected_stockout : float
         E[max(D - Q*, 0)].
     underage_cost : float
-        Cu = price − cost.
+        Cu = precio − costo.
     overage_cost : float
-        Co = cost − salvage.
+        Co = costo − valor de rescate.
     params : dict
     """
 
@@ -309,14 +326,14 @@ class NewsvendorResult:
 
     def summary(self) -> str:
         return (
-            f"Optimal quantity   : {self.optimal_qty:.4g} units\n"
-            f"Critical ratio     : {self.critical_ratio:.4g}\n"
-            f"Expected profit    : {self.expected_profit:.6g}\n"
-            f"Expected sales     : {self.expected_sales:.4g}\n"
-            f"Expected leftover  : {self.expected_leftover:.4g}\n"
-            f"Expected stockout  : {self.expected_stockout:.4g}\n"
-            f"Underage cost Cu   : {self.underage_cost:.4g}\n"
-            f"Overage cost  Co   : {self.overage_cost:.4g}"
+            f"Cantidad óptima     : {self.optimal_qty:.4g} unidades\n"
+            f"Razón crítica       : {self.critical_ratio:.4g}\n"
+            f"Utilidad esperada   : {self.expected_profit:.6g}\n"
+            f"Ventas esperadas    : {self.expected_sales:.4g}\n"
+            f"Sobrante esperado   : {self.expected_leftover:.4g}\n"
+            f"Faltante esperado   : {self.expected_stockout:.4g}\n"
+            f"Costo de subestimar Cu: {self.underage_cost:.4g}\n"
+            f"Costo de sobrestimar Co: {self.overage_cost:.4g}"
         )
 
     def __str__(self) -> str:
@@ -326,11 +343,11 @@ class NewsvendorResult:
         import pandas as pd
         return pd.DataFrame([{
             "Q*": self.optimal_qty,
-            "Critical ratio": self.critical_ratio,
-            "Expected profit": self.expected_profit,
-            "Expected sales": self.expected_sales,
-            "Expected leftover": self.expected_leftover,
-            "Expected stockout": self.expected_stockout,
+            "Razón crítica": self.critical_ratio,
+            "Utilidad esperada": self.expected_profit,
+            "Ventas esperadas": self.expected_sales,
+            "Sobrante esperado": self.expected_leftover,
+            "Faltante esperado": self.expected_stockout,
             "Cu": self.underage_cost,
             "Co": self.overage_cost,
         }])
@@ -344,24 +361,24 @@ def newsvendor(
     *,
     salvage: float = 0.0,
 ) -> NewsvendorResult:
-    """Newsvendor (single-period inventory) model with normal demand.
+    """Modelo newsvendor (inventario de un solo periodo) con demanda normal.
 
-    Optimal quantity Q* = F^{-1}(Cu / (Cu + Co)) where
-    Cu = price − cost  (underage / lost-profit cost),
-    Co = cost − salvage  (overage / holding cost for unsold units).
+    Cantidad óptima Q* = F^{-1}(Cu / (Cu + Co)) donde
+    Cu = precio − costo  (costo de subestimar: utilidad perdida),
+    Co = costo − valor de rescate  (costo de sobrestimar: unidades no vendidas).
 
     Parameters
     ----------
     demand_mean : float
-        Mean demand μ_D.
+        Demanda media μ_D.
     demand_std : float
-        Standard deviation of demand σ_D (≥ 0; 0 = deterministic).
+        Desviación estándar de la demanda σ_D (≥ 0; 0 = determinística).
     price : float
-        Selling price per unit.
+        Precio de venta por unidad.
     cost : float
-        Purchase / production cost per unit.
+        Costo de compra o producción por unidad.
     salvage : float
-        Salvage value per unsold unit (default 0).
+        Valor de rescate por unidad no vendida (por defecto 0).
 
     Returns
     -------
@@ -443,28 +460,28 @@ def newsvendor(
 
 @dataclass
 class EBQResult:
-    """Economic Batch Quantity (EPQ) result.
+    """Resultado de la Cantidad Económica de Lote (EPQ).
 
     Attributes
     ----------
     ebq : float
-        Optimal production batch Q*.
+        Lote óptimo de producción Q*.
     total_cost : float
-        Minimum total cost per period.
+        Costo total mínimo por periodo.
     holding_cost_total : float
-        Annual holding cost component at Q*.
+        Componente anual del costo de mantener en Q*.
     setup_cost_total : float
-        Annual setup cost component at Q*.
+        Componente anual del costo de preparación en Q*.
     max_inventory : float
-        Maximum inventory level = Q*(1 − D/P).
+        Nivel máximo de inventario = Q*(1 − D/P).
     avg_inventory : float
-        Average inventory level = max_inventory / 2.
+        Nivel promedio de inventario = max_inventory / 2.
     production_time : float
-        Fraction of cycle spent producing = Q*/P.
+        Fracción del ciclo dedicada a producir = Q*/P.
     cycle_time : float
-        Length of one replenishment cycle = Q*/D.
+        Duración de un ciclo de reposición = Q*/D.
     order_frequency : float
-        Number of production runs per period = D/Q*.
+        Número de corridas de producción por periodo = D/Q*.
     params : dict
     """
 
@@ -481,15 +498,15 @@ class EBQResult:
 
     def summary(self) -> str:
         return (
-            f"EBQ (batch size)    : {self.ebq:.4g} units\n"
-            f"Max inventory       : {self.max_inventory:.4g}\n"
-            f"Avg inventory       : {self.avg_inventory:.4g}\n"
-            f"Order frequency     : {self.order_frequency:.4g} runs/period\n"
-            f"Cycle time          : {self.cycle_time:.4g} periods\n"
-            f"Production time/cyc : {self.production_time:.4g} periods\n"
-            f"Total cost          : {self.total_cost:.6g}\n"
-            f"  Holding cost      : {self.holding_cost_total:.6g}\n"
-            f"  Setup cost        : {self.setup_cost_total:.6g}"
+            f"EBQ (tamaño de lote): {self.ebq:.4g} unidades\n"
+            f"Inventario máximo   : {self.max_inventory:.4g}\n"
+            f"Inventario promedio : {self.avg_inventory:.4g}\n"
+            f"Frecuencia de lotes : {self.order_frequency:.4g} lotes/periodo\n"
+            f"Tiempo de ciclo     : {self.cycle_time:.4g} periodos\n"
+            f"Tiempo de producción: {self.production_time:.4g} periodos\n"
+            f"Costo total         : {self.total_cost:.6g}\n"
+            f"  Costo de mantener : {self.holding_cost_total:.6g}\n"
+            f"  Costo de preparación: {self.setup_cost_total:.6g}"
         )
 
     def __str__(self) -> str:
@@ -499,13 +516,13 @@ class EBQResult:
         import pandas as pd
         return pd.DataFrame([{
             "EBQ": self.ebq,
-            "Total cost": self.total_cost,
-            "Holding cost": self.holding_cost_total,
-            "Setup cost": self.setup_cost_total,
-            "Max inventory": self.max_inventory,
-            "Avg inventory": self.avg_inventory,
-            "Order frequency": self.order_frequency,
-            "Cycle time": self.cycle_time,
+            "Costo total": self.total_cost,
+            "Costo de mantener": self.holding_cost_total,
+            "Costo de preparación": self.setup_cost_total,
+            "Inventario máximo": self.max_inventory,
+            "Inventario promedio": self.avg_inventory,
+            "Frecuencia de lotes": self.order_frequency,
+            "Tiempo de ciclo": self.cycle_time,
         }])
 
 
@@ -515,20 +532,20 @@ def ebq(
     holding_cost: float,
     production_rate: float,
 ) -> EBQResult:
-    """Economic Batch Quantity (Economic Production Quantity).
+    """Cantidad Económica de Lote (Cantidad Económica de Producción).
 
     Q* = sqrt(2 · D · S / (h · (1 − D/P)))
 
     Parameters
     ----------
     demand_rate : float
-        Demand per period D (units/period).
+        Demanda por periodo D (unidades/periodo).
     setup_cost : float
-        Fixed setup cost per production run S ($/run).
+        Costo fijo de preparación por corrida de producción S ($/corrida).
     holding_cost : float
-        Holding cost per unit per period h ($/unit/period).
+        Costo de mantener por unidad y periodo h ($/unidad/periodo).
     production_rate : float
-        Production rate P (units/period).  Must exceed demand_rate.
+        Tasa de producción P (unidades/periodo). Debe superar a demand_rate.
 
     Returns
     -------
@@ -585,15 +602,15 @@ def ebq(
 
 @dataclass
 class MultiItemResult:
-    """Result for a multi-item independent inventory analysis.
+    """Resultado de un análisis de inventario independiente de varios artículos.
 
     Attributes
     ----------
     items : list[dict]
-        Per-item results with keys: name, eoq/ebq, total_cost, holding_cost,
-        ordering_cost, order_frequency, cycle_time.
+        Resultados por artículo con las claves: Artículo, EOQ/EBQ, Costo total,
+        Costo de mantener, Costo de ordenar (o de preparación), Frecuencia, Tiempo de ciclo.
     total_cost : float
-        Sum of individual optimal costs.
+        Suma de los costos óptimos individuales.
     params : dict
     """
 
@@ -607,7 +624,7 @@ class MultiItemResult:
 
     def summary(self) -> str:
         df = self.to_frame()
-        lines = [df.to_string(index=False), f"\nTotal cost: {self.total_cost:.6g}"]
+        lines = [df.to_string(index=False), f"\nCosto total: {self.total_cost:.6g}"]
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -621,20 +638,20 @@ def eoq_multi(
     *,
     names: Sequence[str] | None = None,
 ) -> MultiItemResult:
-    """Independent multi-item Economic Order Quantity.
+    """Cantidad Económica de Pedido independiente para varios artículos.
 
-    Solves each item independently; no shared constraints.
+    Resuelve cada artículo por separado; no hay restricciones compartidas.
 
     Parameters
     ----------
     demand_rates : sequence of float
-        Demand rate D_i for each item.
+        Tasa de demanda D_i de cada artículo.
     ordering_costs : sequence of float
-        Fixed ordering cost K_i for each item.
+        Costo fijo de ordenar K_i de cada artículo.
     holding_costs : sequence of float
-        Holding cost h_i per unit per period for each item.
+        Costo de mantener h_i por unidad y periodo de cada artículo.
     names : sequence of str, optional
-        Item names.  Defaults to Item-1, Item-2, …
+        Nombres de los artículos. Por defecto Artículo-1, Artículo-2, …
 
     Returns
     -------
@@ -662,20 +679,20 @@ def eoq_multi(
     if len(ordering_costs) != n or len(holding_costs) != n:
         raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
-        names = [f"Item-{i+1}" for i in range(n)]
+        names = [f"Artículo-{i+1}" for i in range(n)]
 
     items = []
     total_cost = 0.0
     for i in range(n):
         r = eoq(demand_rates[i], ordering_costs[i], holding_costs[i])
         items.append({
-            "Name": names[i],
+            "Artículo": names[i],
             "EOQ": r.eoq,
-            "Total cost": r.total_cost,
-            "Holding cost": r.holding_cost_total,
-            "Ordering cost": r.ordering_cost_total,
-            "Order frequency": r.order_frequency,
-            "Cycle time": r.cycle_time,
+            "Costo total": r.total_cost,
+            "Costo de mantener": r.holding_cost_total,
+            "Costo de ordenar": r.ordering_cost_total,
+            "Frecuencia de pedidos": r.order_frequency,
+            "Tiempo de ciclo": r.cycle_time,
         })
         total_cost += r.total_cost
 
@@ -691,7 +708,7 @@ def ebq_multi(
     *,
     names: Sequence[str] | None = None,
 ) -> MultiItemResult:
-    """Independent multi-item Economic Batch Quantity.
+    """Cantidad Económica de Lote independiente para varios artículos.
 
     Parameters
     ----------
@@ -728,21 +745,21 @@ def ebq_multi(
     if not (len(setup_costs) == len(holding_costs) == len(production_rates) == n):
         raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
-        names = [f"Item-{i+1}" for i in range(n)]
+        names = [f"Artículo-{i+1}" for i in range(n)]
 
     items = []
     total_cost = 0.0
     for i in range(n):
         r = ebq(demand_rates[i], setup_costs[i], holding_costs[i], production_rates[i])
         items.append({
-            "Name": names[i],
+            "Artículo": names[i],
             "EBQ": r.ebq,
-            "Total cost": r.total_cost,
-            "Holding cost": r.holding_cost_total,
-            "Setup cost": r.setup_cost_total,
-            "Max inventory": r.max_inventory,
-            "Avg inventory": r.avg_inventory,
-            "Order frequency": r.order_frequency,
+            "Costo total": r.total_cost,
+            "Costo de mantener": r.holding_cost_total,
+            "Costo de preparación": r.setup_cost_total,
+            "Inventario máximo": r.max_inventory,
+            "Inventario promedio": r.avg_inventory,
+            "Frecuencia de lotes": r.order_frequency,
         })
         total_cost += r.total_cost
 
@@ -761,7 +778,7 @@ def _eoq_lagrangian_bisect(
     other_weights: list | None = None,
     tol: float = 1e-9,
 ) -> tuple[float, list[float]]:
-    """Find λ via bisect for a single constraint sum(w_i * Q_i(λ)) = bound."""
+    """Encuentra λ por bisección para una restricción sum(w_i * Q_i(λ)) = cota."""
     n = len(D)
 
     def h_eff(i: int, lam: float) -> float:
@@ -806,20 +823,20 @@ def _eoq_lagrangian_bisect(
 
 @dataclass
 class ConstrainedMultiEOQResult:
-    """Constrained multi-item EOQ result (Lagrangian relaxation).
+    """Resultado del EOQ multi-artículo con restricciones (relajación lagrangiana).
 
     Attributes
     ----------
     items : list[dict]
-        Per-item optimal quantities and costs.
+        Cantidades óptimas y costos por artículo.
     total_cost : float
-        Total inventory cost at optimal quantities.
+        Costo total de inventario en las cantidades óptimas.
     unconstrained_total_cost : float
-        Total cost of unconstrained EOQ (lower bound).
+        Costo total del EOQ sin restricciones (cota inferior).
     lagrange_multipliers : dict[str, float]
-        Lagrange multiplier λ for each constraint.
+        Multiplicador de Lagrange λ de cada restricción.
     binding_constraints : list[str]
-        Names of active (binding) constraints.
+        Nombres de las restricciones activas.
     params : dict
     """
 
@@ -836,14 +853,14 @@ class ConstrainedMultiEOQResult:
 
     def summary(self) -> str:
         lines = [
-            f"Total cost (constrained)  : {self.total_cost:.6g}",
-            f"Total cost (unconstrained): {self.unconstrained_total_cost:.6g}",
-            f"Binding constraints: {', '.join(self.binding_constraints) or 'none'}",
+            f"Costo total (con restricciones): {self.total_cost:.6g}",
+            f"Costo total (sin restricciones) : {self.unconstrained_total_cost:.6g}",
+            f"Restricciones activas: {', '.join(self.binding_constraints) or 'ninguna'}",
             "",
         ]
         for row in self.items:
             lines.append(
-                f"  {row['Name']:<16} Q*={row['Q*']:.4g}  TC={row['Total cost']:.4g}"
+                f"  {row['Artículo']:<16} Q*={row['Q*']:.4g}  CT={row['Costo total']:.4g}"
             )
         return "\n".join(lines)
 
@@ -863,26 +880,26 @@ def eoq_multi_constrained(
     space_per_unit: Sequence[float] | None = None,
     constraints: list[dict] | None = None,
 ) -> ConstrainedMultiEOQResult:
-    """Constrained multi-item EOQ via Lagrangian relaxation.
+    """EOQ multi-artículo con restricciones mediante relajación lagrangiana.
 
-    Minimises sum of inventory costs subject to linear constraints on
-    order quantities:  sum_i(w_ij · Q_i) ≤ B_j.
+    Minimiza la suma de costos de inventario sujeta a restricciones lineales sobre las
+    cantidades de pedido:  sum_i(w_ij · Q_i) ≤ B_j.
 
-    Convenience shortcuts
-    ---------------------
+    Atajos de uso frecuente
+    -----------------------
     budget / budget_unit_costs
-        Budget constraint on *average* inventory investment:
+        Restricción de presupuesto sobre la inversión *promedio* en inventario:
         sum(c_i · Q_i / 2) ≤ budget.
-        Pass ``budget_unit_costs`` = unit purchase costs c_i.
+        Indique ``budget_unit_costs`` = costos unitarios de compra c_i.
     space / space_per_unit
-        Space constraint on average inventory:
+        Restricción de espacio sobre el inventario promedio:
         sum(s_i · Q_i / 2) ≤ space.
 
-    Generic constraints
-    -------------------
-    constraints : list of dict, each with keys
-        ``name`` (str), ``weights`` (list of floats a_i),
-        ``bound`` (float B) — enforces sum(a_i · Q_i) ≤ B.
+    Restricciones genéricas
+    -----------------------
+    constraints : list of dict, cada uno con las claves
+        ``name`` (str), ``weights`` (lista de floats a_i),
+        ``bound`` (float B): impone sum(a_i · Q_i) ≤ B.
 
     Parameters
     ----------
@@ -924,7 +941,7 @@ def eoq_multi_constrained(
     if len(K) != n or len(h) != n:
         raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
-        names = [f"Item-{i+1}" for i in range(n)]
+        names = [f"Artículo-{i+1}" for i in range(n)]
 
     # Build constraint list
     all_constraints: list[dict] = []
@@ -966,8 +983,8 @@ def eoq_multi_constrained(
         items = []
         for i in range(n):
             tc_i = h[i] * Q_unc[i] / 2 + D[i] * K[i] / Q_unc[i]
-            items.append({"Name": names[i], "Q*": Q_unc[i], "Total cost": tc_i,
-                          "Holding cost": h[i] * Q_unc[i] / 2, "Ordering cost": D[i] * K[i] / Q_unc[i]})
+            items.append({"Artículo": names[i], "Q*": Q_unc[i], "Costo total": tc_i,
+                          "Costo de mantener": h[i] * Q_unc[i] / 2, "Costo de ordenar": D[i] * K[i] / Q_unc[i]})
         return ConstrainedMultiEOQResult(
             items=items, total_cost=tc_unc, unconstrained_total_cost=tc_unc,
             lagrange_multipliers={}, binding_constraints=[], params={"n_items": n})
@@ -1015,8 +1032,8 @@ def eoq_multi_constrained(
     items = []
     for i in range(n):
         tc_i = h[i] * Q_opt[i] / 2 + D[i] * K[i] / Q_opt[i]
-        items.append({"Name": names[i], "Q*": Q_opt[i], "Total cost": tc_i,
-                      "Holding cost": h[i] * Q_opt[i] / 2, "Ordering cost": D[i] * K[i] / Q_opt[i]})
+        items.append({"Artículo": names[i], "Q*": Q_opt[i], "Costo total": tc_i,
+                      "Costo de mantener": h[i] * Q_opt[i] / 2, "Costo de ordenar": D[i] * K[i] / Q_opt[i]})
 
     return ConstrainedMultiEOQResult(
         items=items,
@@ -1034,14 +1051,14 @@ def eoq_multi_constrained(
 
 @dataclass
 class LotSizingResult:
-    """Dynamic lot-sizing result.
+    """Resultado del dimensionado dinámico de lotes.
 
     Attributes
     ----------
     orders : list[dict]
-        Each dict: {period, order_qty, covers_periods}.
+        Cada diccionario: {period, order_qty, covers_periods}.
     total_cost : float
-        Total setup + holding cost over the horizon.
+        Costo total de preparación + mantener en el horizonte.
     total_setup_cost : float
     total_holding_cost : float
     n_orders : int
@@ -1059,17 +1076,17 @@ class LotSizingResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.orders)
+        return pd.DataFrame(self.orders).rename(columns=_COL_LOTES)
 
     def summary(self) -> str:
         lines = [
-            f"Method              : {self.method}",
-            f"Number of orders    : {self.n_orders}",
-            f"Total cost          : {self.total_cost:.6g}",
-            f"  Setup cost        : {self.total_setup_cost:.6g}",
-            f"  Holding cost      : {self.total_holding_cost:.6g}",
+            f"Método               : {self.method}",
+            f"Número de pedidos    : {self.n_orders}",
+            f"Costo total          : {self.total_cost:.6g}",
+            f"  Costo de preparación: {self.total_setup_cost:.6g}",
+            f"  Costo de mantener  : {self.total_holding_cost:.6g}",
             "",
-            f"{'Period':<8} {'Order qty':>10} {'Covers':>20}",
+            f"{'Periodo':<8} {'Cantidad':>10} {'Cubre':>20}",
             "-" * 42,
         ]
         for o in self.orders:
@@ -1086,19 +1103,19 @@ def lot_for_lot(
     setup_cost: float,
     holding_cost: float,
 ) -> LotSizingResult:
-    """Lot-for-Lot (L4L) dynamic lot-sizing heuristic.
+    """Heurística de dimensionado dinámico de lotes Lote por Lote (L4L).
 
-    Orders exactly the demand for each period — zero inventory carried forward.
-    Minimises holding cost at the expense of one setup per period with demand > 0.
+    Pide exactamente la demanda de cada periodo: no se arrastra inventario.
+    Minimiza el costo de mantener a costa de una preparación por cada periodo con demanda > 0.
 
     Parameters
     ----------
     demands : sequence of float
-        Demand d_t for periods t = 1, 2, …, T.
+        Demanda d_t de los periodos t = 1, 2, …, T.
     setup_cost : float
-        Fixed setup cost S per order.
+        Costo fijo de preparación S por pedido.
     holding_cost : float
-        Holding cost h per unit per period.
+        Costo de mantener h por unidad y periodo.
 
     Returns
     -------
@@ -1136,7 +1153,7 @@ def lot_for_lot(
         total_setup_cost=total_setup,
         total_holding_cost=0.0,
         n_orders=len(orders),
-        method="Lot-for-Lot",
+        method="Lote por lote",
         params={"setup_cost": setup_cost, "holding_cost": holding_cost},
     )
 
@@ -1146,19 +1163,19 @@ def silver_meal(
     setup_cost: float,
     holding_cost: float,
 ) -> LotSizingResult:
-    """Silver-Meal heuristic for dynamic lot-sizing.
+    """Heurística de Silver-Meal para el dimensionado dinámico de lotes.
 
-    Extends each order to cover additional periods as long as the average
-    cost per period (setup + holding) keeps decreasing.
+    Extiende cada pedido para cubrir periodos adicionales mientras el costo promedio
+    por periodo (preparación + mantener) siga disminuyendo.
 
     Parameters
     ----------
     demands : sequence of float
-        Demand d_t for periods t = 1, 2, …, T.
+        Demanda d_t de los periodos t = 1, 2, …, T.
     setup_cost : float
-        Fixed setup cost S per order.
+        Costo fijo de preparación S por pedido.
     holding_cost : float
-        Holding cost h per unit per period (charged for periods held).
+        Costo de mantener h por unidad y periodo (se carga por los periodos en inventario).
 
     Returns
     -------
@@ -1232,26 +1249,26 @@ def silver_meal(
 
 @dataclass
 class QuantityDiscountResult:
-    """EOQ with all-units quantity discounts result.
+    """Resultado del EOQ con descuentos por cantidad en todas las unidades.
 
     Attributes
     ----------
     optimal_qty : float
-        Optimal order quantity considering price breaks.
+        Cantidad óptima de pedido considerando los tramos de precio.
     unit_price : float
-        Unit price at optimal_qty.
+        Precio unitario en optimal_qty.
     total_cost : float
-        Minimum annual total cost (purchase + ordering + holding).
+        Costo total anual mínimo (compra + ordenar + mantener).
     purchase_cost : float
-        Annual purchase cost D * unit_price.
+        Costo anual de compra D * unit_price.
     ordering_cost_total : float
-        Annual ordering cost (D/Q) * K.
+        Costo anual de ordenar (D/Q) * K.
     holding_cost_total : float
-        Annual holding cost (Q/2) * h * unit_price.
+        Costo anual de mantener (Q/2) * h * unit_price.
     break_idx : int
-        Index of the selected price break.
+        Índice del tramo de precio seleccionado.
     candidates : list[dict]
-        All evaluated candidates (one per break).
+        Todos los candidatos evaluados (uno por tramo).
     params : dict
     """
 
@@ -1267,12 +1284,12 @@ class QuantityDiscountResult:
 
     def summary(self) -> str:
         return (
-            f"Optimal order qty  : {self.optimal_qty:.4g} units\n"
-            f"Unit price         : {self.unit_price:.4g}\n"
-            f"Total cost/year    : {self.total_cost:.6g}\n"
-            f"  Purchase cost    : {self.purchase_cost:.6g}\n"
-            f"  Ordering cost    : {self.ordering_cost_total:.6g}\n"
-            f"  Holding cost     : {self.holding_cost_total:.6g}"
+            f"Cantidad óptima    : {self.optimal_qty:.4g} unidades\n"
+            f"Precio unitario    : {self.unit_price:.4g}\n"
+            f"Costo total/año    : {self.total_cost:.6g}\n"
+            f"  Costo de compra  : {self.purchase_cost:.6g}\n"
+            f"  Costo de ordenar : {self.ordering_cost_total:.6g}\n"
+            f"  Costo de mantener: {self.holding_cost_total:.6g}"
         )
 
     def __str__(self) -> str:
@@ -1289,22 +1306,22 @@ def eoq_quantity_discount(
     holding_cost_rate: float,
     price_breaks: Sequence[tuple],
 ) -> QuantityDiscountResult:
-    """EOQ with all-units quantity discounts.
+    """EOQ con descuentos por cantidad en todas las unidades.
 
-    For each price break, computes the EOQ using h = holding_cost_rate × unit_price
-    and checks whether it falls within the valid range.  Returns the break with
-    minimum total annual cost (purchase + ordering + holding).
+    Para cada tramo de precio calcula el EOQ con h = holding_cost_rate × precio_unitario
+    y comprueba si cae dentro del rango válido. Devuelve el tramo de menor
+    costo anual total (compra + ordenar + mantener).
 
     Parameters
     ----------
     demand_rate : float
-        Annual demand D.
+        Demanda anual D.
     ordering_cost : float
-        Fixed ordering cost per order K.
+        Costo fijo de ordenar por pedido K.
     holding_cost_rate : float
-        Holding cost as fraction of unit price (e.g. 0.20 = 20% per year).
+        Costo de mantener como fracción del precio unitario (p. ej. 0.20 = 20 % anual).
     price_breaks : sequence of (min_qty, unit_price) tuples
-        Sorted ascending by min_qty.  Example: [(0, 10), (500, 9.5), (1000, 9)].
+        Ordenados ascendentemente por min_qty. Ejemplo: [(0, 10), (500, 9.5), (1000, 9)].
 
     Returns
     -------
@@ -1357,31 +1374,31 @@ def eoq_quantity_discount(
         hc = (q_adj / 2) * h
         tc = pc + oc + hc
         candidates.append({
-            "Break idx": idx,
-            "Min qty": min_q,
-            "Unit price": price,
+            "Índice de tramo": idx,
+            "Cantidad mín.": min_q,
+            "Precio unitario": price,
             "EOQ": q_eoq,
-            "Adj Q": q_adj,
-            "Purchase cost": pc,
-            "Ordering cost": oc,
-            "Holding cost": hc,
-            "Total cost": tc,
-            "Feasible": lo <= q_adj <= (upper_bounds[idx] + 1e-9),
+            "Q ajustada": q_adj,
+            "Costo de compra": pc,
+            "Costo de ordenar": oc,
+            "Costo de mantener": hc,
+            "Costo total": tc,
+            "Factible": lo <= q_adj <= (upper_bounds[idx] + 1e-9),
         })
-        if best is None or tc < best["Total cost"]:
+        if best is None or tc < best["Costo total"]:
             best = candidates[-1]
 
     if best is None:
         raise ValueError("No feasible price break found.")
 
     return QuantityDiscountResult(
-        optimal_qty=best["Adj Q"],
-        unit_price=best["Unit price"],
-        total_cost=best["Total cost"],
-        purchase_cost=best["Purchase cost"],
-        ordering_cost_total=best["Ordering cost"],
-        holding_cost_total=best["Holding cost"],
-        break_idx=best["Break idx"],
+        optimal_qty=best["Q ajustada"],
+        unit_price=best["Precio unitario"],
+        total_cost=best["Costo total"],
+        purchase_cost=best["Costo de compra"],
+        ordering_cost_total=best["Costo de ordenar"],
+        holding_cost_total=best["Costo de mantener"],
+        break_idx=best["Índice de tramo"],
         candidates=candidates,
         params={"demand_rate": D, "ordering_cost": K, "holding_cost_rate": Ih},
     )
@@ -1396,24 +1413,24 @@ def wagner_whitin(
     setup_cost: float,
     holding_cost: float,
 ) -> LotSizingResult:
-    """Wagner-Whitin optimal dynamic lot-sizing via dynamic programming.
+    """Dimensionado dinámico óptimo de lotes de Wagner-Whitin mediante programación dinámica.
 
-    Finds the exact minimum-cost ordering policy over a finite horizon,
-    unlike Silver-Meal (heuristic).  Time complexity O(n²).
+    Encuentra la política de pedidos de costo mínimo exacto en un horizonte finito,
+    a diferencia de Silver-Meal (heurística). Complejidad temporal O(n²).
 
     Parameters
     ----------
     demands : sequence of float
-        Demand d_t for periods t = 1, 2, …, T.
+        Demanda d_t de los periodos t = 1, 2, …, T.
     setup_cost : float
-        Fixed setup / ordering cost S per order.
+        Costo fijo de preparación u ordenar S por pedido.
     holding_cost : float
-        Holding cost h per unit per period.
+        Costo de mantener h por unidad y periodo.
 
     Returns
     -------
     LotSizingResult
-        ``method`` is ``'Wagner-Whitin'``.
+        ``method`` es ``'Wagner-Whitin'``.
 
 
     Raises
@@ -1485,22 +1502,22 @@ def wagner_whitin(
 
 @dataclass
 class RQPolicyResult:
-    """(r, Q) continuous review inventory policy result.
+    """Resultado de la política de inventario (r, Q) de revisión continua.
 
     Attributes
     ----------
     order_qty : float
-        EOQ-based order quantity Q*.
+        Cantidad de pedido Q* basada en el EOQ.
     reorder_point : float
-        Reorder point r = mean demand during LT + safety stock.
+        Punto de reorden r = demanda media durante el tiempo de entrega + stock de seguridad.
     safety_stock : float
-        Safety stock SS = z · σ_DLT.
+        Stock de seguridad SS = z · σ_DLT.
     service_level : float
-        Cycle service level P(no stockout per cycle).
+        Nivel de servicio por ciclo P(no hay faltante en el ciclo).
     avg_inventory : float
-        Average on-hand inventory ≈ Q*/2 + SS.
+        Inventario promedio disponible ≈ Q*/2 + SS.
     total_cost : float
-        Annual holding + ordering cost at (Q*, r).
+        Costo anual de mantener + ordenar en (Q*, r).
     """
 
     order_qty: float
@@ -1513,13 +1530,13 @@ class RQPolicyResult:
 
     def summary(self) -> str:
         return (
-            f"(r, Q) continuous review policy\n"
-            f"  Order quantity Q*   : {self.order_qty:.4g}\n"
-            f"  Reorder point r     : {self.reorder_point:.4g}\n"
-            f"  Safety stock SS     : {self.safety_stock:.4g}\n"
-            f"  Service level       : {self.service_level:.2%}\n"
-            f"  Avg inventory       : {self.avg_inventory:.4g}\n"
-            f"  Total cost          : {self.total_cost:.6g}"
+            f"Política (r, Q) de revisión continua\n"
+            f"  Cantidad de pedido Q*: {self.order_qty:.4g}\n"
+            f"  Punto de reorden r   : {self.reorder_point:.4g}\n"
+            f"  Stock de seguridad SS: {self.safety_stock:.4g}\n"
+            f"  Nivel de servicio    : {self.service_level:.2%}\n"
+            f"  Inventario promedio  : {self.avg_inventory:.4g}\n"
+            f"  Costo total          : {self.total_cost:.6g}"
         )
 
     def __str__(self) -> str:
@@ -1530,10 +1547,10 @@ class RQPolicyResult:
         return pd.DataFrame([{
             "Q*": self.order_qty,
             "r": self.reorder_point,
-            "Safety stock": self.safety_stock,
-            "Service level": self.service_level,
-            "Avg inventory": self.avg_inventory,
-            "Total cost": self.total_cost,
+            "Stock de seguridad": self.safety_stock,
+            "Nivel de servicio": self.service_level,
+            "Inventario promedio": self.avg_inventory,
+            "Costo total": self.total_cost,
         }])
 
 
@@ -1547,27 +1564,27 @@ def rq_policy(
     lead_time_std: float = 0.0,
     service_level: float = 0.95,
 ) -> RQPolicyResult:
-    """(r, Q) continuous-review inventory policy.
+    """Política de inventario (r, Q) de revisión continua.
 
-    Combines the EOQ as order quantity and a statistically-derived reorder
-    point.  The two decisions are determined independently.
+    Combina el EOQ como cantidad de pedido con un punto de reorden obtenido estadísticamente.
+    Ambas decisiones se determinan de forma independiente.
 
     Parameters
     ----------
     demand_rate : float
-        Mean demand per period D̄.
+        Demanda media por periodo D̄.
     ordering_cost : float
-        Fixed ordering cost K per order.
+        Costo fijo de ordenar K por pedido.
     holding_cost : float
-        Holding cost h per unit per period.
+        Costo de mantener h por unidad y periodo.
     lead_time : float
-        Mean replenishment lead time L̄.
+        Tiempo de entrega medio de reposición L̄.
     demand_std : float
-        Std dev of demand per period σ_D (default 0).
+        Desviación estándar de la demanda por periodo σ_D (por defecto 0).
     lead_time_std : float
-        Std dev of lead time σ_L (default 0).
+        Desviación estándar del tiempo de entrega σ_L (por defecto 0).
     service_level : float
-        Cycle service level ∈ (0, 1). Default 0.95.
+        Nivel de servicio por ciclo ∈ (0, 1). Por defecto 0.95.
 
     Returns
     -------
@@ -1631,22 +1648,22 @@ def rq_policy(
 
 @dataclass
 class RSPolicyResult:
-    """(R, S) periodic-review inventory policy result.
+    """Resultado de la política de inventario (R, S) de revisión periódica.
 
     Attributes
     ----------
     review_period : float
-        Review interval R.
+        Intervalo de revisión R.
     order_up_to : float
-        Order-up-to level S = mean demand over (R+L) + safety stock.
+        Nivel de reposición S = demanda media en (R+L) + stock de seguridad.
     safety_stock : float
-        Safety stock SS = z · σ_{R+L}.
+        Stock de seguridad SS = z · σ_{R+L}.
     service_level : float
-        Cycle service level.
+        Nivel de servicio por ciclo.
     avg_inventory : float
-        Average on-hand inventory ≈ D·R/2 + SS.
+        Inventario promedio disponible ≈ D·R/2 + SS.
     total_cost : float
-        Annual holding + ordering cost at (R, S).
+        Costo anual de mantener + ordenar en (R, S).
     """
 
     review_period: float
@@ -1659,13 +1676,13 @@ class RSPolicyResult:
 
     def summary(self) -> str:
         return (
-            f"(R, S) periodic review policy\n"
-            f"  Review period R     : {self.review_period:.4g}\n"
-            f"  Order-up-to S       : {self.order_up_to:.4g}\n"
-            f"  Safety stock SS     : {self.safety_stock:.4g}\n"
-            f"  Service level       : {self.service_level:.2%}\n"
-            f"  Avg inventory       : {self.avg_inventory:.4g}\n"
-            f"  Total cost          : {self.total_cost:.6g}"
+            f"Política (R, S) de revisión periódica\n"
+            f"  Periodo de revisión R: {self.review_period:.4g}\n"
+            f"  Nivel de reposición S: {self.order_up_to:.4g}\n"
+            f"  Stock de seguridad SS: {self.safety_stock:.4g}\n"
+            f"  Nivel de servicio    : {self.service_level:.2%}\n"
+            f"  Inventario promedio  : {self.avg_inventory:.4g}\n"
+            f"  Costo total          : {self.total_cost:.6g}"
         )
 
     def __str__(self) -> str:
@@ -1676,10 +1693,10 @@ class RSPolicyResult:
         return pd.DataFrame([{
             "R": self.review_period,
             "S": self.order_up_to,
-            "Safety stock": self.safety_stock,
-            "Service level": self.service_level,
-            "Avg inventory": self.avg_inventory,
-            "Total cost": self.total_cost,
+            "Stock de seguridad": self.safety_stock,
+            "Nivel de servicio": self.service_level,
+            "Inventario promedio": self.avg_inventory,
+            "Costo total": self.total_cost,
         }])
 
 
@@ -1694,29 +1711,29 @@ def rs_policy(
     lead_time_std: float = 0.0,
     service_level: float = 0.95,
 ) -> RSPolicyResult:
-    """(R, S) periodic-review inventory policy.
+    """Política de inventario (R, S) de revisión periódica.
 
-    The inventory position is checked every R periods and an order is
-    placed to bring it up to S.
+    La posición de inventario se revisa cada R periodos y se emite un pedido
+    para llevarla hasta S.
 
     Parameters
     ----------
     demand_rate : float
-        Mean demand per period D̄.
+        Demanda media por periodo D̄.
     ordering_cost : float
-        Fixed ordering cost K per order.
+        Costo fijo de ordenar K por pedido.
     holding_cost : float
-        Holding cost h per unit per period.
+        Costo de mantener h por unidad y periodo.
     lead_time : float
-        Mean replenishment lead time L̄.
+        Tiempo de entrega medio de reposición L̄.
     review_period : float
-        Review interval R (periods between inventory checks).
+        Intervalo de revisión R (periodos entre revisiones de inventario).
     demand_std : float
-        Std dev of demand per period σ_D (default 0).
+        Desviación estándar de la demanda por periodo σ_D (por defecto 0).
     lead_time_std : float
-        Std dev of lead time σ_L (default 0).
+        Desviación estándar del tiempo de entrega σ_L (por defecto 0).
     service_level : float
-        Cycle service level ∈ (0, 1). Default 0.95.
+        Nivel de servicio por ciclo ∈ (0, 1). Por defecto 0.95.
 
     Returns
     -------
@@ -1784,28 +1801,28 @@ def rs_policy(
 
 @dataclass
 class ExchangeCurveResult:
-    """Aggregate exchange-curve result for a family of items.
+    """Resultado agregado de la curva de intercambio para una familia de artículos.
 
     Attributes
     ----------
     n_orders_eoq : float
-        Total orders per year at the individual-EOQ point (k = 1).
+        Total de pedidos por año en el punto de EOQ individual (k = 1).
     investment_eoq : float
-        Total average inventory investment at the EOQ point.
+        Inversión promedio total en inventario en el punto EOQ.
     multiplier : float
-        Scaling factor k applied to all EOQ quantities (k = 1 → EOQ).
+        Factor de escala k aplicado a todas las cantidades EOQ (k = 1 → EOQ).
     n_orders_optimal : float
-        Total orders per year at the chosen policy point.
+        Total de pedidos por año en el punto de política elegido.
     investment_optimal : float
-        Total average inventory investment at the chosen policy point.
+        Inversión promedio total en inventario en el punto de política elegido.
     target : str
-        Description of the target used (``'eoq'``, ``'orders'``, or
+        Descripción del objetivo usado (``'eoq'``, ``'orders'`` o
         ``'investment'``).
     optimal_quantities : list[dict]
-        Per-item dicts with keys ``name``, ``Q_eoq``, ``Q_optimal``,
+        Diccionarios por artículo con las claves ``name``, ``Q_eoq``, ``Q_optimal``,
         ``n_orders``, ``investment``.
     curve_points : list[dict]
-        Points on the exchange hyperbola: ``[{'N': …, 'I': …}, …]``.
+        Puntos de la hipérbola de intercambio: ``[{'N': …, 'I': …}, …]``.
     """
 
     n_orders_eoq: float
@@ -1818,23 +1835,23 @@ class ExchangeCurveResult:
     curve_points: list
 
     def to_frame(self) -> pd.DataFrame:
-        """Per-item quantities DataFrame: name, Q_eoq, Q_optimal, n_orders, investment."""
+        """DataFrame de cantidades por artículo: artículo, Q_eoq, Q_óptima, n_pedidos, inversión."""
         import pandas as pd
-        return pd.DataFrame(self.optimal_quantities)
+        return pd.DataFrame(self.optimal_quantities).rename(columns=_COL_CANTIDADES)
 
     def curve_to_frame(self) -> pd.DataFrame:
-        """Exchange-curve hyperbola DataFrame: columns N (orders/yr) and I (investment)."""
+        """DataFrame de la hipérbola de intercambio: columnas N (pedidos/año) e I (inversión)."""
         import pandas as pd
-        return pd.DataFrame(self.curve_points)
+        return pd.DataFrame(self.curve_points).rename(columns=_COL_CURVA_CICLO)
 
     def summary(self) -> str:
         lines = [
-            f"Target                  : {self.target}",
-            f"Multiplier k            : {self.multiplier:.4f}",
-            f"N orders/yr  (EOQ)      : {self.n_orders_eoq:.4g}",
-            f"N orders/yr  (optimal)  : {self.n_orders_optimal:.4g}",
-            f"Investment   (EOQ)      : {self.investment_eoq:.4g}",
-            f"Investment   (optimal)  : {self.investment_optimal:.4g}",
+            f"Objetivo                : {self.target}",
+            f"Multiplicador k         : {self.multiplier:.4f}",
+            f"N pedidos/año (EOQ)     : {self.n_orders_eoq:.4g}",
+            f"N pedidos/año (óptimo)  : {self.n_orders_optimal:.4g}",
+            f"Inversión (EOQ)         : {self.investment_eoq:.4g}",
+            f"Inversión (óptimo)      : {self.investment_optimal:.4g}",
         ]
         return "\n".join(lines)
 
@@ -1849,38 +1866,38 @@ def exchange_curve(
     target_investment: float | None = None,
     n_curve_points: int = 50,
 ) -> ExchangeCurveResult:
-    """Aggregate exchange curve for a family of inventory items.
+    """Curva de intercambio agregada para una familia de artículos de inventario.
 
-    For a family of items each managed with an EOQ policy, varying a common
-    multiplier *k* on all order quantities traces a hyperbola in the
-    (N orders/year, average investment) plane:
+    Para una familia de artículos gestionados cada uno con política EOQ, variar un
+    multiplicador común *k* sobre todas las cantidades de pedido traza una hipérbola en el plano
+    (N pedidos/año, inversión promedio):
 
         N(k) = N* / k        I(k) = k · I*       →    N · I = N* · I*
 
-    The function computes the EOQ point (k=1) and, when a target is
-    supplied, solves for the k that meets it and re-scales all quantities.
+    La función calcula el punto EOQ (k=1) y, si se indica una meta, resuelve el k que la
+    cumple y reescala todas las cantidades.
 
     Parameters
     ----------
     items : list of dict
-        Each dict must contain:
+        Cada diccionario debe contener:
 
-        - ``demand`` (float) — annual demand Di.
-        - ``ordering_cost`` (float) — setup/ordering cost Ki.
-        - ``holding_cost`` (float) — holding cost per unit per year hi.
+        - ``demand`` (float) — demanda anual Di.
+        - ``ordering_cost`` (float) — costo de preparación u ordenar Ki.
+        - ``holding_cost`` (float) — costo de mantener por unidad y año hi.
 
-        Optional keys:
+        Claves opcionales:
 
-        - ``unit_value`` (float) — unit value vi for investment calculation
-          (default 1).
-        - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …).
+        - ``unit_value`` (float) — valor unitario vi para calcular la inversión
+          (por defecto 1).
+        - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …).
 
     target_orders : float, optional
-        Desired total orders per year.  Solves k = N* / target_orders.
+        Total de pedidos por año deseado. Resuelve k = N* / target_orders.
     target_investment : float, optional
-        Desired total average inventory investment.  Solves k = target / I*.
+        Inversión promedio total en inventario deseada. Resuelve k = target / I*.
     n_curve_points : int
-        Number of points on the plotted hyperbola (default 50).
+        Número de puntos de la hipérbola graficada (por defecto 50).
 
     Returns
     -------
@@ -1888,8 +1905,8 @@ def exchange_curve(
 
     Notes
     -----
-    Only one of *target_orders* or *target_investment* may be specified.
-    If neither is given the EOQ point (k = 1) is returned.
+    Solo se puede indicar uno de *target_orders* o *target_investment*.
+    Si no se da ninguno se devuelve el punto EOQ (k = 1).
 
     Raises
     ------
@@ -1910,7 +1927,7 @@ def exchange_curve(
     """
     if target_orders is not None and target_investment is not None:
         raise ValueError(
-            "Specify at most one of 'target_orders' or 'target_investment'."
+            "Indique como máximo uno de 'target_orders' o 'target_investment'."
         )
     if len(items) == 0:
         raise ValueError("'items' debe contener al menos un elemento.")
@@ -1933,11 +1950,11 @@ def exchange_curve(
     if target_orders is not None:
         to = as_positive(target_orders, "target_orders")
         k = N_star / to
-        target_label = f"orders={to:.4g}"
+        target_label = f"pedidos={to:.4g}"
     elif target_investment is not None:
         ti = as_positive(target_investment, "target_investment")
         k = ti / I_star
-        target_label = f"investment={ti:.4g}"
+        target_label = f"inversión={ti:.4g}"
     else:
         k = 1.0
         target_label = "eoq"
@@ -1987,26 +2004,26 @@ def exchange_curve(
 
 @dataclass
 class SafetyStockCurveResult:
-    """Safety-stock exchange curve result for a family of items.
+    """Resultado de la curva de intercambio de stock de seguridad para una familia de artículos.
 
-    Uses a **common z-value** policy across all items, which is the standard
-    aggregate approach: all items share the same cycle service level Φ(z).
+    Usa una política de **z común** para todos los artículos, que es el enfoque
+    agregado estándar: todos comparten el mismo nivel de servicio por ciclo Φ(z).
 
     Attributes
     ----------
     z : float
-        Common z-value (standard normal quantile) applied.
+        Valor z común (cuantil de la normal estándar) aplicado.
     service_level : float
-        Cycle service level = Φ(z).
+        Nivel de servicio por ciclo = Φ(z).
     ss_investment : float
-        Total safety-stock investment = z · Σ σᵢ_DLT · vᵢ.
+        Inversión total en stock de seguridad = z · Σ σᵢ_DLT · vᵢ.
     target : str
-        Description of the target used.
+        Descripción del objetivo usado.
     optimal_quantities : list[dict]
-        Per-item dicts: ``name``, ``sigma_dlt``, ``safety_stock``,
-        ``investment``, ``reorder_point`` (only when ``demand_rate`` supplied).
+        Diccionarios por artículo: ``name``, ``sigma_dlt``, ``safety_stock``,
+        ``investment``, ``reorder_point`` (solo si se indicó ``demand_rate``).
     curve_points : list[dict]
-        Points on the curve: ``[{'z': …, 'service_level': …,
+        Puntos de la curva: ``[{'z': …, 'service_level': …,
         'ss_investment': …}, …]``.
     """
 
@@ -2018,21 +2035,21 @@ class SafetyStockCurveResult:
     curve_points: list
 
     def to_frame(self) -> pd.DataFrame:
-        """Per-item safety-stock DataFrame."""
+        """DataFrame de stock de seguridad por artículo."""
         import pandas as pd
-        return pd.DataFrame(self.optimal_quantities)
+        return pd.DataFrame(self.optimal_quantities).rename(columns=_COL_CANTIDADES)
 
     def curve_to_frame(self) -> pd.DataFrame:
-        """Full exchange curve DataFrame: z, service_level, ss_investment."""
+        """DataFrame de la curva de intercambio completa: z, nivel_de_servicio, inversión_ss."""
         import pandas as pd
-        return pd.DataFrame(self.curve_points)
+        return pd.DataFrame(self.curve_points).rename(columns=_COL_CURVA_SEGURIDAD)
 
     def summary(self) -> str:
         lines = [
-            f"Target          : {self.target}",
+            f"Objetivo          : {self.target}",
             f"z               : {self.z:.4f}",
-            f"Service level   : {self.service_level:.4%}",
-            f"SS investment   : {self.ss_investment:.4g}",
+            f"Nivel de servicio : {self.service_level:.4%}",
+            f"Inversión en SS   : {self.ss_investment:.4g}",
         ]
         return "\n".join(lines)
 
@@ -2047,36 +2064,36 @@ def safety_stock_curve(
     target_ss_investment: float | None = None,
     n_curve_points: int = 60,
 ) -> SafetyStockCurveResult:
-    """Safety-stock exchange curve for a family of items (common-z policy).
+    """Curva de intercambio del stock de seguridad para una familia de artículos (política de z común).
 
-    With a **common z** all items share the same cycle service level Φ(z).
-    Varying z traces the exchange curve between aggregate SS investment and
-    service level:
+    Con un **z común** todos los artículos comparten el mismo nivel de servicio por ciclo Φ(z).
+    Variar z traza la curva de intercambio entre la inversión agregada en SS y
+    el nivel de servicio:
 
-        SS_investment(z) = z · Σ σᵢ_DLT · vᵢ
+        Inversión_SS(z) = z · Σ σᵢ_DLT · vᵢ
 
     Parameters
     ----------
     items : list of dict
-        Each dict must contain:
+        Cada diccionario debe contener:
 
-        - ``demand_std`` (float) — standard deviation of demand per unit time.
-        - ``lead_time`` (float) — replenishment lead time (same time unit).
+        - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo.
+        - ``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo).
 
-        Optional keys:
+        Claves opcionales:
 
-        - ``lead_time_std`` (float) — std dev of lead time (default 0).
-        - ``demand_rate`` (float) — mean demand per unit time; used to
-          compute the reorder point r = D·L + SS (default: omitted).
-        - ``unit_value`` (float) — unit value for investment (default 1).
-        - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …).
+        - ``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0).
+        - ``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para
+          calcular el punto de reorden r = D·L + SS (por defecto: se omite).
+        - ``unit_value`` (float) — valor unitario para la inversión (por defecto 1).
+        - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …).
 
     target_service_level : float, optional
-        Desired cycle service level ∈ (0, 1).  Solves z = Φ⁻¹(SL).
+        Nivel de servicio por ciclo deseado ∈ (0, 1). Resuelve z = Φ⁻¹(NS).
     target_ss_investment : float, optional
-        Desired total SS investment.  Solves z = target / (Σ σᵢ_DLT · vᵢ).
+        Inversión total en SS deseada. Resuelve z = objetivo / (Σ σᵢ_DLT · vᵢ).
     n_curve_points : int
-        Number of points on the plotted curve (default 60, z from −2 to 4).
+        Número de puntos de la curva graficada (por defecto 60, z de −2 a 4).
 
     Returns
     -------
@@ -2084,9 +2101,9 @@ def safety_stock_curve(
 
     Notes
     -----
-    Only one of *target_service_level* or *target_ss_investment* may be given.
-    If neither is supplied, z = 0 (50 % service level) is used as the
-    baseline; pass ``target_service_level=0.95`` for the typical default.
+    Solo se puede indicar uno de *target_service_level* o *target_ss_investment*.
+    Si no se da ninguno se usa z = 0 (nivel de servicio del 50 %) como línea base;
+    indique ``target_service_level=0.95`` para el valor típico.
 
     Raises
     ------
@@ -2108,7 +2125,7 @@ def safety_stock_curve(
     """
     if target_service_level is not None and target_ss_investment is not None:
         raise ValueError(
-            "Specify at most one of 'target_service_level' or 'target_ss_investment'."
+            "Indique como máximo uno de 'target_service_level' o 'target_ss_investment'."
         )
     if len(items) == 0:
         raise ValueError("'items' debe contener al menos un elemento.")
@@ -2143,7 +2160,7 @@ def safety_stock_curve(
         if not (0.0 < sl_val < 1.0):
             raise ValueError("'target_service_level' debe estar estrictamente entre 0 y 1.")
         z = _norm.inv_cdf(sl_val)
-        target_label = f"service_level={sl_val:.4%}"
+        target_label = f"nivel_de_servicio={sl_val:.4%}"
     elif target_ss_investment is not None:
         ti = as_positive(float(target_ss_investment), "target_ss_investment")
         if total_sigma_v == 0.0:
@@ -2151,10 +2168,10 @@ def safety_stock_curve(
                 "Todos los artículos tienen demand_std=0: el stock de seguridad es siempre 0."
             )
         z = ti / total_sigma_v
-        target_label = f"ss_investment={ti:.4g}"
+        target_label = f"inversión_ss={ti:.4g}"
     else:
         z = 0.0
-        target_label = "baseline (z=0)"
+        target_label = "base (z=0)"
 
     sl_result = _norm.cdf(z)
     ss_inv    = z * total_sigma_v
@@ -2203,20 +2220,20 @@ def safety_stock_curve(
 
 @dataclass
 class ABCResult:
-    """ABC Pareto classification result.
+    """Resultado de la clasificación ABC de Pareto.
 
     Attributes
     ----------
     items : list[dict]
-        Items sorted descending by annual value; each dict has keys
+        Artículos ordenados de mayor a menor valor anual; cada diccionario tiene las claves
         ``name``, ``demand``, ``unit_value``, ``annual_value``,
         ``cumulative_pct``, ``pct_value``, ``rank``, ``class``.
     class_summary : dict
         ``{A: {count, pct_items, pct_value}, B: …, C: …}``.
     total_value : float
-        Total annual inventory value.
+        Valor anual total del inventario.
     thresholds : dict
-        ``{a: float, b: float}`` used for classification.
+        ``{a: float, b: float}`` usados en la clasificación.
     """
 
     items: list
@@ -2226,12 +2243,12 @@ class ABCResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.items)
+        return pd.DataFrame(self.items).rename(columns=_COL_ARTICULOS)
 
     def summary(self) -> str:
         lines = [
-            f"Total annual value : {self.total_value:.6g}",
-            f"{'Class':<6} {'Items':>6}  {'%Items':>7}  {'%Value':>7}",
+            f"Valor anual total : {self.total_value:.6g}",
+            f"{'Clase':<6} {'Artíc.':>6}  {'%Artíc.':>7}  {'%Valor':>7}",
             "-" * 32,
         ]
         for cls in ["A", "B", "C"]:
@@ -2247,16 +2264,16 @@ class ABCResult:
 
 @dataclass
 class XYZResult:
-    """XYZ demand-variability classification result.
+    """Resultado de la clasificación XYZ por variabilidad de la demanda.
 
     Attributes
     ----------
     items : list[dict]
-        Each dict has keys ``name``, ``cv``, ``class``.
+        Cada diccionario tiene las claves ``name``, ``cv``, ``class``.
     class_summary : dict
         ``{X: {count, pct_items}, Y: …, Z: …}``.
     thresholds : dict
-        ``{x: float, y: float}`` CV boundaries.
+        ``{x: float, y: float}`` límites de CV.
     """
 
     items: list
@@ -2265,7 +2282,7 @@ class XYZResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.items)
+        return pd.DataFrame(self.items).rename(columns=_COL_ARTICULOS)
 
     def summary(self) -> str:
         t = self.thresholds
@@ -2275,7 +2292,7 @@ class XYZResult:
             "Z": f"CV > {t['y']:.2g}",
         }
         lines = [
-            f"{'Class':<6} {'Items':>6}  {'%Items':>7}  {'CV range'}",
+            f"{'Clase':<6} {'Artíc.':>6}  {'%Artíc.':>7}  {'Rango CV'}",
             "-" * 42,
         ]
         for cls in ["X", "Y", "Z"]:
@@ -2291,15 +2308,15 @@ class XYZResult:
 
 @dataclass
 class ABCXYZResult:
-    """Combined ABC-XYZ classification result.
+    """Resultado de la clasificación combinada ABC-XYZ.
 
     Attributes
     ----------
     items : list[dict]
-        Each dict has keys ``name``, ``annual_value``, ``cv``,
+        Cada diccionario tiene las claves ``name``, ``annual_value``, ``cv``,
         ``abc_class``, ``xyz_class``, ``combined_class``.
     matrix : dict
-        ``{(abc, xyz): count}`` for all 9 cells.
+        ``{(abc, xyz): conteo}`` para las 9 celdas.
     """
 
     items: list
@@ -2307,10 +2324,10 @@ class ABCXYZResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.items)
+        return pd.DataFrame(self.items).rename(columns=_COL_ARTICULOS)
 
     def matrix_frame(self) -> pd.DataFrame:
-        """Pivot table ABC (rows) × XYZ (columns) with item counts."""
+        """Tabla dinámica ABC (filas) × XYZ (columnas) con el conteo de artículos."""
         import pandas as pd
         data = {
             xyz: {abc: self.matrix.get((abc, xyz), 0) for abc in ["A", "B", "C"]}
@@ -2362,25 +2379,25 @@ def abc_analysis(
     a_threshold: float = 0.80,
     b_threshold: float = 0.95,
 ) -> ABCResult:
-    """ABC Pareto classification of inventory items by annual value.
+    """Clasificación ABC de Pareto de artículos de inventario por valor anual.
 
-    Items are sorted descending by annual value (demand × unit_value).
-    Classification follows cumulative percentage of total value:
+    Los artículos se ordenan de mayor a menor valor anual (demanda × valor_unitario).
+    La clasificación sigue el porcentaje acumulado del valor total:
 
-    - **A**: items whose cumulative value has not yet exceeded
-      *a_threshold* (typically top ~80% of value, ~20% of items).
-    - **B**: next band up to *b_threshold* (~15% of value).
-    - **C**: remainder (~5% of value, ~50% of items).
+    - **A**: artículos cuyo valor acumulado aún no ha superado
+      *a_threshold* (típicamente ~80 % del valor, ~20 % de los artículos).
+    - **B**: la siguiente banda hasta *b_threshold* (~15 % del valor).
+    - **C**: el resto (~5 % del valor, ~50 % de los artículos).
 
     Parameters
     ----------
     items : list of dict
-        Each dict must have ``'demand'`` (annual demand) and
-        ``'unit_value'``.  Optional ``'name'`` key.
+        Cada diccionario debe tener ``'demand'`` (demanda anual) y
+        ``'unit_value'``. Clave opcional ``'name'``.
     a_threshold : float
-        Cumulative value fraction that ends class A (default 0.80).
+        Fracción de valor acumulado que cierra la clase A (por defecto 0.80).
     b_threshold : float
-        Cumulative value fraction that ends class B (default 0.95).
+        Fracción de valor acumulado que cierra la clase B (por defecto 0.95).
 
     Returns
     -------
@@ -2409,7 +2426,7 @@ def abc_analysis(
 
     enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
-        nm  = it.get("name", f"Item{i + 1}")
+        nm  = it.get("name", f"Artículo{i + 1}")
         D   = as_nonneg(_clave(it, i, "demand"), f"items[{i}]['demand']")
         v   = as_positive(_clave(it, i, "unit_value"), f"items[{i}]['unit_value']")
         enriched.append({"name": str(nm), "demand": D, "unit_value": v,
@@ -2464,25 +2481,25 @@ def xyz_analysis(
     x_threshold: float = 0.5,
     y_threshold: float = 1.0,
 ) -> XYZResult:
-    """XYZ classification of inventory items by demand variability (CV).
+    """Clasificación XYZ de artículos de inventario por variabilidad de la demanda (CV).
 
-    - **X**: CV ≤ *x_threshold* — stable, predictable demand.
-    - **Y**: *x_threshold* < CV ≤ *y_threshold* — moderate variability.
-    - **Z**: CV > *y_threshold* — erratic, hard to forecast.
+    - **X**: CV ≤ *x_threshold* — demanda estable y predecible.
+    - **Y**: *x_threshold* < CV ≤ *y_threshold* — variabilidad moderada.
+    - **Z**: CV > *y_threshold* — errática, difícil de pronosticar.
 
     Parameters
     ----------
     items : list of dict
-        Each dict must supply the coefficient of variation in one of two ways:
+        Cada diccionario debe aportar el coeficiente de variación de una de dos formas:
 
-        - ``'cv'`` directly, **or**
-        - ``'demand_std'`` **+** (``'demand_mean'`` or ``'demand_rate'``).
+        - ``'cv'`` directamente, **o**
+        - ``'demand_std'`` **+** (``'demand_mean'`` o ``'demand_rate'``).
 
-        Optional ``'name'`` key.
+        Clave opcional ``'name'``.
     x_threshold : float
-        Upper CV boundary for class X (default 0.5).
+        Límite superior de CV de la clase X (por defecto 0.5).
     y_threshold : float
-        Upper CV boundary for class Y (default 1.0).
+        Límite superior de CV de la clase Y (por defecto 1.0).
 
     Returns
     -------
@@ -2509,7 +2526,7 @@ def xyz_analysis(
 
     enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
-        nm = it.get("name", f"Item{i + 1}")
+        nm = it.get("name", f"Artículo{i + 1}")
         if "cv" in it:
             cv = as_nonneg(it["cv"], f"items[{i}]['cv']")
         else:
@@ -2555,20 +2572,20 @@ def abc_xyz(
     x_threshold: float = 0.5,
     y_threshold: float = 1.0,
 ) -> ABCXYZResult:
-    """Combined ABC-XYZ classification.
+    """Clasificación combinada ABC-XYZ.
 
-    Each item requires fields for both ABC (``demand``, ``unit_value``) and
-    XYZ (``cv`` or ``demand_std`` + ``demand_mean``/``demand_rate``).
+    Cada artículo requiere los campos de ABC (``demand``, ``unit_value``) y
+    de XYZ (``cv`` o ``demand_std`` + ``demand_mean``/``demand_rate``).
 
     Parameters
     ----------
     items : list of dict
-        Must supply fields required by both :func:`abc_analysis` and
-        :func:`xyz_analysis`.  ``name`` is optional.
+        Debe aportar los campos que exigen :func:`abc_analysis` y
+        :func:`xyz_analysis`. ``name`` es opcional.
     a_threshold, b_threshold : float
-        ABC thresholds (see :func:`abc_analysis`).
+        Umbrales ABC (ver :func:`abc_analysis`).
     x_threshold, y_threshold : float
-        XYZ thresholds (see :func:`xyz_analysis`).
+        Umbrales XYZ (ver :func:`xyz_analysis`).
 
     Returns
     -------
@@ -2620,22 +2637,22 @@ def abc_xyz(
 
 @dataclass
 class MRPResult:
-    """Single-level MRP result.
+    """Resultado del MRP de un nivel.
 
     Attributes
     ----------
     item_name : str
     periods : list
-        Period labels (1, 2, … or user-supplied).
+        Etiquetas de periodo (1, 2, … o las que indique la persona usuaria).
     gross_requirements : list[float]
     scheduled_receipts : list[float]
     projected_on_hand : list[float]
-        Ending on-hand inventory after all transactions each period.
+        Inventario disponible al final de cada periodo tras todas las transacciones.
     net_requirements : list[float]
     planned_receipts : list[float]
-        Planned order receipts arriving this period.
+        Recepciones planificadas de órdenes que llegan en el periodo.
     planned_releases : list[float]
-        Planned order releases (issued *lead_time* periods before receipt).
+        Liberaciones planificadas de órdenes (emitidas *lead_time* periodos antes de la recepción).
     past_due_releases : float
         Cantidad total de órdenes planificadas cuya liberación debió ocurrir antes del
         periodo 1 (el lead time no cabe en el horizonte); no aparece en ``planned_releases``.
@@ -2654,18 +2671,18 @@ class MRPResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame({
-            "Period":          self.periods,
-            "Gross_Req":       self.gross_requirements,
-            "Sched_Receipt":   self.scheduled_receipts,
-            "Proj_On_Hand":    self.projected_on_hand,
-            "Net_Req":         self.net_requirements,
-            "Planned_Receipt": self.planned_receipts,
-            "Planned_Release": self.planned_releases,
+            "Periodo":         self.periods,
+            "Req_bruto":       self.gross_requirements,
+            "Recep_prog":      self.scheduled_receipts,
+            "Exist_proy":      self.projected_on_hand,
+            "Req_neto":        self.net_requirements,
+            "Recep_plan":      self.planned_receipts,
+            "Lib_plan":        self.planned_releases,
         })
 
     def summary(self) -> str:
-        hdr = f"{'Period':>8} {'GR':>8} {'SR':>8} {'OH':>8} {'NR':>8} {'PR':>8} {'PO':>8}"
-        lines = [f"Item: {self.item_name}", hdr, "-" * len(hdr)]
+        hdr = f"{'Periodo':>8} {'RB':>8} {'RP':>8} {'EP':>8} {'RN':>8} {'RPl':>8} {'LPl':>8}"
+        lines = [f"Artículo: {self.item_name}", hdr, "-" * len(hdr)]
         for i, p in enumerate(self.periods):
             lines.append(
                 f"{p!s:>8} {self.gross_requirements[i]:>8.2f}"
@@ -2689,33 +2706,33 @@ def mrp(
     lead_time: int = 1,
     lot_size: float | str = "LFL",
     safety_stock: float = 0.0,
-    item_name: str = "Item",
+    item_name: str = "Artículo",
     periods: Sequence | None = None,
 ) -> MRPResult:
-    """Single-level Material Requirements Planning (MRP).
+    """Planeación de requerimientos de materiales (MRP) de un nivel.
 
-    Computes the standard MRP table: gross requirements → net requirements →
-    planned receipts → planned order releases.
+    Calcula la tabla MRP estándar: requerimientos brutos → requerimientos netos →
+    recepciones planificadas → liberaciones planificadas de órdenes.
 
     Parameters
     ----------
     gross_requirements : sequence of float
-        Demand for each period (length T).
+        Demanda de cada periodo (longitud T).
     initial_on_hand : float
-        On-hand inventory at the start of period 1 (default 0).
+        Inventario disponible al inicio del periodo 1 (por defecto 0).
     scheduled_receipts : sequence of float, optional
-        Already-ordered receipts arriving each period (length T, default all 0).
+        Recepciones ya ordenadas que llegan en cada periodo (longitud T, por defecto todas 0).
     lead_time : int
-        Replenishment lead time in periods (default 1).
+        Tiempo de entrega de reposición en periodos (por defecto 1).
     lot_size : float or ``'LFL'``
-        Order policy: ``'LFL'`` (lot-for-lot) places the exact net requirement;
-        a positive float rounds up to the nearest multiple of that quantity.
+        Política de pedido: ``'LFL'`` (lote por lote) pide exactamente el requerimiento neto;
+        un número positivo redondea hacia arriba al múltiplo más cercano de esa cantidad.
     safety_stock : float
-        Minimum desired ending on-hand each period (default 0).
+        Inventario final mínimo deseado en cada periodo (por defecto 0).
     item_name : str
-        Label for the item (default ``'Item'``).
+        Etiqueta del artículo (por defecto ``'Artículo'``).
     periods : sequence, optional
-        Period labels (default 1, 2, …, T).
+        Etiquetas de periodo (por defecto 1, 2, …, T).
 
     Returns
     -------

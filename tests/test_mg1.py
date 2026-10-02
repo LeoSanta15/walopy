@@ -60,7 +60,7 @@ def test_mg1_to_frame():
     import pandas as pd
     df = wl.mg1(2.0, 5.0, 1.0).to_frame()
     assert isinstance(df, pd.DataFrame)
-    assert "Lq (queue)" in df.columns
+    assert "Lq (en cola)" in df.columns
 
 
 # ─── CV² helpers ─────────────────────────────────────────────────────────────
