@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "walopy"
-version = "0.3.0"
+dynamic = ["version"]
 description = "Herramientas de investigación de operaciones: colas, inventarios, scheduling, CPM/PERT, confiabilidad, OEE, cuellos de botella y árboles de KPI"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -41,6 +41,9 @@ docs    = ["sphinx>=7", "sphinx-rtd-theme>=2", "myst-parser>=2"]
 Homepage  = "https://github.com/LeoSanta15/walopy"
 Issues    = "https://github.com/LeoSanta15/walopy/issues"
 Changelog = "https://github.com/LeoSanta15/walopy/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = {attr = "walopy.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
