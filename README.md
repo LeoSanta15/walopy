@@ -29,15 +29,16 @@ pip install walopy
 12. [Curvas de intercambio](#12-curvas-de-intercambio)
 13. [Programación de producción (scheduling)](#13-programación-de-producción-scheduling)
 14. [Confiabilidad](#14-confiabilidad--reliability)
-15. [Árboles de KPI](#15-árboles-de-kpi)
-16. [Solvers y optimización](#16-solvers-y-optimización)
-17. [Análisis de sensibilidad](#17-análisis-de-sensibilidad)
-18. [Escenarios en lote (batch_model)](#18-escenarios-en-lote-batch_model)
-19. [Comparar múltiples resultados](#19-comparar-múltiples-resultados)
-20. [Gráficas](#20-gráficas)
-21. [CLI](#21-cli)
-22. [Referencia de módulos](#22-referencia-de-módulos)
-23. [Requisitos](#23-requisitos)
+15. [Proyectos: CPM y PERT](#15-proyectos-cpm-y-pert--project)
+16. [Árboles de KPI](#16-árboles-de-kpi)
+17. [Solvers y optimización](#17-solvers-y-optimización)
+18. [Análisis de sensibilidad](#18-análisis-de-sensibilidad)
+19. [Escenarios en lote (batch_model)](#19-escenarios-en-lote-batch_model)
+20. [Comparar múltiples resultados](#20-comparar-múltiples-resultados)
+21. [Gráficas](#21-gráficas)
+22. [CLI](#22-cli)
+23. [Referencia de módulos](#23-referencia-de-módulos)
+24. [Requisitos](#24-requisitos)
 
 ---
 
@@ -864,6 +865,78 @@ df = r.to_frame()       # todos los candidatos evaluados
 
 ---
 
+---
+
+### ABC, XYZ y ABC-XYZ — clasificación de artículos
+
+`abc_analysis` clasifica por **valor anual** (Pareto): un artículo es A mientras el acumulado *previo* a él sea
+menor que `a_threshold` (80 %), B mientras sea menor que `b_threshold` (95 %) y C en el resto. Los artículos
+sin demanda quedan en C. `xyz_analysis` clasifica por **variabilidad** (coeficiente de variación): X si
+CV ≤ `x_threshold` (0.5), Y hasta `y_threshold` (1.0) y Z por encima. `abc_xyz` combina ambas y devuelve la
+matriz 3×3.
+
+```python
+items = [
+    {"name": "A", "demand": 500, "unit_value": 10.0, "demand_std": 120},
+    {"name": "B", "demand": 300, "unit_value": 10.0, "demand_std": 60},
+    {"name": "C", "demand": 100, "unit_value": 10.0, "demand_std": 150},
+    {"name": "D", "demand": 700, "unit_value": 1.0,  "demand_std": 300},
+    {"name": "E", "demand": 300, "unit_value": 1.0,  "demand_std": 10},
+]
+
+abc = wl.abc_analysis(items)
+print(abc)                       # resumen por clase: A = 2 artículos (80 % del valor)
+print(abc.to_frame()[["name", "annual_value", "cumulative_pct", "class"]])
+
+# XYZ: cada artículo aporta 'cv' directamente o 'demand_std' + 'demand_mean' (o 'demand_rate')
+xyz = wl.xyz_analysis([
+    {"name": i["name"], "demand_std": i["demand_std"], "demand_mean": i["demand"]} for i in items
+])
+print(xyz.to_frame())            # columnas: name, cv, class
+
+# ABC-XYZ: matriz de conteos (filas ABC, columnas XYZ)
+combo = wl.abc_xyz([{**i, "cv": i["demand_std"] / i["demand"]} for i in items])
+print(combo.matrix_frame())
+print(combo.items[0]["combined_class"])   # 'AX'
+```
+
+| Parámetro | Descripción |
+|---|---|
+| `items` | Lista de diccionarios. ABC: `demand` (≥ 0) y `unit_value` (> 0). XYZ: `cv` o `demand_std` + `demand_mean`/`demand_rate` |
+| `a_threshold`, `b_threshold` | Límites acumulados de las clases A y B (0 < a < b < 1) |
+| `x_threshold`, `y_threshold` | Límites de CV de las clases X e Y |
+
+Errores: lista vacía, elementos que no son diccionarios, claves faltantes y valores no finitos lanzan `ValueError`/`TypeError`
+con el elemento y la clave afectados; si todas las demandas son 0 no hay nada que clasificar y se lanza `ValueError`.
+
+---
+
+### MRP de un nivel — `mrp`
+
+Plan de requerimientos de materiales para un artículo: necesidades netas, órdenes planificadas (recepción y
+liberación) y existencias proyectadas. Admite lote por lote (`"LFL"`) o lote fijo, tiempo de entrega,
+stock de seguridad y recepciones programadas.
+
+```python
+r = wl.mrp(
+    gross_requirements=[0, 50, 0, 30, 60, 20],
+    initial_on_hand=40,
+    scheduled_receipts=[0, 0, 25, 0, 0, 0],
+    lead_time=1,
+    lot_size=40,          # "LFL" para lote por lote
+    safety_stock=10,
+    item_name="Eje",
+)
+print(r)                      # tabla por periodo: GR, SR, OH, NR, PR, PO
+print(r.to_frame())           # el mismo plan como DataFrame
+print(r.past_due_releases)    # 0.0
+```
+
+Si el `lead_time` es mayor que el periodo en que se necesita la orden, la liberación cae antes del periodo 1:
+`mrp` emite un `UserWarning` y acumula esa cantidad en `past_due_releases` (no aparece en `planned_releases`).
+
+---
+
 ## 8. Análisis de operaciones
 
 ### `oee(availability, performance, quality)` — OEE
@@ -1020,281 +1093,6 @@ print(r.bep_revenue)              # 125 000 — ingresos en el BEP
 print(r.contribution_margin_ratio) # 0.40 — margen de contribución
 print(r.margin_of_safety_units)   # 75 000 — margen de seguridad en ingresos
 print(r.margin_of_safety_pct)     # 0.375 — porcentaje del margen de seguridad
-```
-
----
-
-## 15. Árboles de KPI
-
-Los árboles de KPI crean jerarquías interactivas visualizadas como **treemap** o **sunburst** con Plotly.
-
-### `oee_kpi_tree(availability, performance, quality)`
-
-```python
-tree = wl.oee_kpi_tree(0.90, 0.80, 0.95)
-tree.plot()                     # treemap (por defecto)
-tree.plot(kind="sunburst")      # diagrama radial
-```
-
-### `throughput_kpi_tree(actual_throughput, capacity, defect_rate)`
-
-```python
-tree = wl.throughput_kpi_tree(
-    actual_throughput=750,
-    capacity=1000,
-    defect_rate=0.05,
-)
-tree.plot()
-```
-
-### `roi_kpi_tree(revenue, fixed_cost, variable_cost_per_unit, units_sold, investment)`
-
-```python
-tree = wl.roi_kpi_tree(
-    revenue=50_000,
-    fixed_cost=10_000,
-    variable_cost_per_unit=8,
-    units_sold=2_000,
-    investment=20_000,
-)
-print(tree.value)   # ROI = 0.2 (20%)
-tree.plot()
-```
-
-### `KPINode` — árbol personalizado
-
-```python
-rev = wl.KPINode("Revenue", value=200_000, unit="€", children=[
-    wl.KPINode("Product A", value=120_000, unit="€"),
-    wl.KPINode("Product B", value=80_000, unit="€"),
-])
-cost = wl.KPINode("Operating costs", value=100_000, unit="€")
-root = wl.KPINode("EBITDA", value=100_000, unit="€", formula="Revenue − Operating costs",
-                  children=[rev, cost])
-
-from walopy.plotting import plot_kpi_tree
-fig = plot_kpi_tree(root, kind="treemap")
-fig.show()
-```
-
----
-
-## 16. Solvers y optimización
-
-### `solve_lam(target_metric, target_value, *, mu, model)` — Máxima tasa de llegada
-
-Encuentra la mayor λ tal que una métrica no supere el objetivo.
-
-```python
-r = wl.solve_lam("Wq", 0.5, mu=5.0, model="mm1")
-print(r.value)          # λ máxima ≈ 3.33
-print(r.achieved_value) # Wq ≈ 0.5
-print(r.model_result)   # QueueResult completo en la solución
-```
-
-### `solve_mu(target_metric, target_value, *, lam, model)` — Mínima tasa de servicio
-
-```python
-r = wl.solve_mu("Wq", 0.3, lam=3.0, model="mm1")
-print(r.value)   # μ mínima necesaria ≈ 5.0
-```
-
-### `solve_servers(target_metric, target_value, *, lam, mu)` — Mínimo número de servidores
-
-```python
-r = wl.solve_servers("Wq", 0.1, lam=8.0, mu=5.0)
-print(r.value)         # c mínimo = 3
-print(r.model_result)  # QueueResult para M/M/3
-```
-
-### `optimize_servers(lam, mu, cost_per_server, cost_per_wait)` — Optimización de costo total
-
-Minimiza cost_per_server × c + cost_per_wait × λ × Wq evaluando todos los c viables.
-
-```python
-r = wl.optimize_servers(
-    lam=6.0,
-    mu=5.0,
-    cost_per_server=10.0,   # costo fijo por servidor por unidad de tiempo
-    cost_per_wait=5.0,      # costo por unidad de tiempo de espera de cada cliente
-)
-print(r.optimal_servers)   # c óptimo
-print(r.min_cost)          # costo mínimo
-
-r.plot()   # gráfica de costo vs número de servidores
-```
-
----
-
-## 17. Análisis de sensibilidad
-
-### `sensitivity(model_fn, param, values, **fixed_kwargs)` — Barrido paramétrico
-
-Evalúa un modelo sobre un rango de valores de un parámetro.
-
-```python
-import numpy as np
-
-df = wl.sensitivity(
-    wl.mm1,
-    param="lam",
-    values=np.linspace(0.5, 4.5, 20),
-    mu=5.0,       # parámetros fijos
-)
-print(df.columns.tolist())  # ['lam', 'rho', 'L', 'Lq', 'W', 'Wq', ...]
-
-# Barrido sobre μ
-df2 = wl.sensitivity(wl.mm1, "mu", np.linspace(4.0, 10.0, 15), lam=3.0)
-
-# Barrido sobre número de servidores en M/M/c
-df3 = wl.sensitivity(wl.mmc, "c", range(1, 6), lam=8.0, mu=5.0)
-
-# Visualizar
-from walopy.plotting import plot_sensitivity
-fig = plot_sensitivity(df, "lam", metrics=["Wq", "Lq"])
-fig.show()
-```
-
----
-
-## 18. Escenarios en lote (batch_model)
-
-### `batch_model(model_fn, df, **fixed_kwargs)` — Aplicar modelo a un DataFrame
-
-Aplica cualquier función de walopy a cada fila de un DataFrame de escenarios.
-
-```python
-import pandas as pd
-
-# Varios escenarios con distintas tasas de llegada
-escenarios = pd.DataFrame({
-    "lam": [1.0, 2.0, 3.0, 4.0]
-})
-resultado = wl.batch_model(wl.mm1, escenarios, mu=5.0)
-print(resultado[["lam", "rho", "Wq", "L"]])
-
-# Escenarios mixtos (lambda y mu variables)
-escenarios2 = pd.DataFrame({
-    "lam": [2.0, 3.0, 4.0],
-    "mu":  [5.0, 6.0, 7.0],
-})
-resultado2 = wl.batch_model(wl.mm1, escenarios2)
-
-# Con número de servidores variable (columna int)
-escenarios3 = pd.DataFrame({
-    "c": [1, 2, 3, 4],
-})
-resultado3 = wl.batch_model(wl.mmc, escenarios3, lam=8.0, mu=5.0)
-
-# Las filas con error quedan marcadas en "_error" (la columna solo existe si alguna fila falla;
-# aquí c=1 es inestable porque λ=8 > μ=5)
-print(resultado3[resultado3["_error"].notna()])  # filas fallidas
-
-# Para que la primera excepción se propague en lugar de recogerse:
-# wl.batch_model(wl.mmc, escenarios3, errors="raise", lam=8.0, mu=5.0)
-```
-
----
-
-## 19. Comparar múltiples resultados
-
-### `compare(*results, labels)` — DataFrame comparativo
-
-Construye un DataFrame con una fila por resultado para facilitar la comparación.
-
-```python
-df = wl.compare(
-    wl.mm1(3.0, 5.0),
-    wl.mmc(3.0, 5.0, 2),
-    wl.md1(3.0, 5.0),
-    labels=["M/M/1", "M/M/2", "M/D/1"],
-)
-print(df[["label", "ρ (utilization)", "Wq (wait time)", "L (system)"]])
-#    label  ρ (utilization)  Wq (wait time)  L (system)
-# 0  M/M/1          0.6         0.3000         1.50
-# 1  M/M/2          0.3         0.0302         1.02
-# 2  M/D/1          0.6         0.1500         1.05
-
-# Sin etiquetas → scenario_1, scenario_2, ...
-df2 = wl.compare(wl.mm1(1, 5), wl.mm1(2, 5), wl.mm1(3, 5))
-```
-
----
-
-## 20. Gráficas
-
-Todos los resultados exponen `.plot()` que devuelve una figura de Matplotlib o Plotly. También se pueden llamar directamente desde `walopy.plotting`.
-
-| Función `.plot()` | Tipo | Descripción |
-|---|---|---|
-| `QueueResult.plot()` | Matplotlib | Curvas Wq y Lq vs ρ con punto operativo |
-| `OEEResult.plot()` | Matplotlib | Barras horizontales OEE con referencia 85% |
-| `BottleneckResult.plot()` | Matplotlib | Utilización por estación, cuello de botella en rojo |
-| `EOQResult.plot()` | Matplotlib | Curvas de costo de mantener, ordenar y total |
-| `LineBalanceResult.plot()` | Plotly | Cycle time vs takt por estación |
-| `BreakEvenResult.plot()` | Plotly | Líneas ingreso/costo con BEP y zona de beneficio |
-| `SimulationResult.plot()` | Plotly | Histograma de Wq + CDF empírica con percentiles |
-| `OptimizeResult.plot()` | Plotly | Costo por servidor, costo de espera y total vs c |
-| `KPINode.plot(kind=)` | Plotly | Treemap o sunburst interactivo |
-
-```python
-# Guardar como HTML interactivo (Plotly)
-fig = r.plot()
-fig.write_html("resultado.html")
-
-# Guardar como imagen (Matplotlib)
-fig = wl.oee(0.9, 0.8, 0.95).plot()
-fig.savefig("oee.png", dpi=150)
-```
-
-Para la curva de sensibilidad:
-```python
-from walopy.plotting import plot_sensitivity
-df = wl.sensitivity(wl.mm1, "lam", np.linspace(0.5, 4.5, 20), mu=5.0)
-fig = plot_sensitivity(df, "lam", metrics=["Wq", "Lq", "L"])
-fig.show()
-```
-
----
-
-## 21. CLI
-
-walopy incluye una interfaz de línea de comandos para uso rápido sin escribir código.
-
-```bash
-# M/M/1
-python -m walopy mm1 --lam 3 --mu 5
-
-# M/M/c
-python -m walopy mmc --lam 8 --mu 5 --c 2
-
-# M/D/1
-python -m walopy md1 --lam 3 --mu 5
-
-# G/G/1 (Kingman)
-python -m walopy gg1 --lam 3 --mu 5 --ca2 1.2 --cs2 0.8
-
-# Ley de Little (resolver W)
-python -m walopy littles --L 2.5 --lam 5.0
-
-# EOQ
-python -m walopy eoq --demand 1000 --ordering 50 --holding 2
-
-# Versión
-python -m walopy --version
-```
-
-Ejemplo de salida:
-```
-Model : M/M/1
-λ     : 3.0   (arrival rate)
-μ     : 5.0   (service rate per server)
-ρ     : 0.6   (utilization)
-L     : 1.5   (avg units in system)
-Lq    : 0.9   (avg units in queue)
-W     : 0.5   (avg time in system)
-Wq    : 0.3   (avg wait time in queue)
-  P0      : 0.4
 ```
 
 ---
@@ -1515,6 +1313,24 @@ df = r.to_frame()
 
 ---
 
+### Flow-shop de m máquinas — `neh_flowshop`
+
+Heurística de **Nawaz-Enscore-Ham** para el flow-shop de permutación con cualquier número de máquinas:
+ordena los trabajos por tiempo total decreciente e inserta cada uno en la mejor posición (aceleración de
+Taillard: O(n²·m)). Es una heurística: en casos pequeños el makespan queda típicamente a pocos puntos
+porcentuales del óptimo.
+
+```python
+# filas = trabajos, columnas = máquinas
+tiempos = [[5, 9, 8], [9, 3, 10], [9, 4, 5], [4, 8, 8]]
+r = wl.neh_flowshop(tiempos, names=["P1", "P2", "P3", "P4"])
+print(r)               # secuencia y makespan
+print(r.to_frame())    # Gantt: columnas M1_start, M1_end, M2_start, ...
+print(r.sequence, r.makespan)
+```
+
+---
+
 ## 14. Confiabilidad — `reliability`
 
 Modelos de confiabilidad con distribución exponencial (tasa de falla constante).
@@ -1591,16 +1407,358 @@ r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
 
 ---
 
-## 22. Referencia de módulos
+### Distribución de Weibull — `weibull_analysis`
+
+Ajusta una Weibull de dos parámetros (forma β, escala η) a tiempos de falla completos por **máxima
+verosimilitud** (`method="MLE"`, bisección sobre la ecuación de verosimilitud) o por **regresión de rangos**
+(`method="RRY"`, rangos medianos de Benard). β < 1 indica mortalidad infantil, β ≈ 1 fallas aleatorias y
+β > 1 desgaste.
+
+```python
+tiempos = [12.5, 18.3, 24.1, 31.7, 38.2, 45.9, 52.4, 61.0, 70.8, 85.3]
+w = wl.weibull_analysis(tiempos)
+print(w)                       # β ≈ 2.10, η ≈ 49.86, MTTF ≈ 44.16
+print(w.R(30), w.F(30))        # confiabilidad y probabilidad de falla a t = 30
+print(w.h(30))                 # tasa de falla instantánea
+print(w.b10, w.b50, w.b_life(5))   # vidas B10, B50 y B5
+print(w.to_frame())
+
+w_rry = wl.weibull_analysis(tiempos, method="RRY")
+```
+
+Se necesitan al menos 2 tiempos finitos y positivos; si todos son iguales la forma no es estimable
+(`ValueError`) y, si casi no hay dispersión, se avisa (`UserWarning`) de que β alcanzó la cota superior de 100.
+
+---
+
+## 15. Proyectos: CPM y PERT — `project`
+
+Programación de proyectos sobre una red de actividades. Cada actividad es un diccionario con `name`,
+`predecessors` (lista de nombres, puede omitirse) y su duración. Los nombres deben ser únicos; los
+ciclos y los predecesores desconocidos lanzan `ValueError`.
+
+### CPM — duraciones determinísticas
+
+Paso hacia adelante (ES, EF) y hacia atrás (LS, LF); holgura total TF = LS − ES, holgura libre FF y ruta crítica (TF = 0).
+
+```python
+acts = [
+    {"name": "A", "duration": 3, "predecessors": []},
+    {"name": "B", "duration": 4, "predecessors": ["A"]},
+    {"name": "C", "duration": 2, "predecessors": ["A"]},
+    {"name": "D", "duration": 1, "predecessors": ["B", "C"]},
+]
+r = wl.cpm(acts)
+print(r)                    # duración 8, ruta crítica A → B → D
+print(r.to_frame())         # ES, EF, LS, LF, TF, FF y si es crítica
+print(r.critical_path)      # ['A', 'B', 'D']
+```
+
+### PERT — tres estimaciones por actividad
+
+Duración esperada tₑ = (a + 4m + b)/6 y varianza ((b − a)/6)²; la varianza del proyecto es la suma de las
+de la ruta crítica. `probability(T)` da P(duración ≤ T) con aproximación normal.
+
+```python
+acts = [
+    {"name": "A", "optimistic": 1, "most_likely": 3, "pessimistic": 5, "predecessors": []},
+    {"name": "B", "optimistic": 2, "most_likely": 4, "pessimistic": 9, "predecessors": ["A"]},
+]
+p = wl.pert(acts)
+print(p)                    # duración esperada 7.5, σ ≈ 1.34
+print(p.probability(9.0))   # ≈ 0.868: probabilidad de terminar en 9 unidades o menos
+```
+
+`probability` solo está disponible en resultados PERT con varianza distinta de cero.
+
+---
+
+## 16. Árboles de KPI
+
+Los árboles de KPI crean jerarquías interactivas visualizadas como **treemap** o **sunburst** con Plotly.
+
+### `oee_kpi_tree(availability, performance, quality)`
+
+```python
+tree = wl.oee_kpi_tree(0.90, 0.80, 0.95)
+tree.plot()                     # treemap (por defecto)
+tree.plot(kind="sunburst")      # diagrama radial
+```
+
+### `throughput_kpi_tree(actual_throughput, capacity, defect_rate)`
+
+```python
+tree = wl.throughput_kpi_tree(
+    actual_throughput=750,
+    capacity=1000,
+    defect_rate=0.05,
+)
+tree.plot()
+```
+
+### `roi_kpi_tree(revenue, fixed_cost, variable_cost_per_unit, units_sold, investment)`
+
+```python
+tree = wl.roi_kpi_tree(
+    revenue=50_000,
+    fixed_cost=10_000,
+    variable_cost_per_unit=8,
+    units_sold=2_000,
+    investment=20_000,
+)
+print(tree.value)   # ROI = 0.2 (20%)
+tree.plot()
+```
+
+### `KPINode` — árbol personalizado
+
+```python
+rev = wl.KPINode("Revenue", value=200_000, unit="€", children=[
+    wl.KPINode("Product A", value=120_000, unit="€"),
+    wl.KPINode("Product B", value=80_000, unit="€"),
+])
+cost = wl.KPINode("Operating costs", value=100_000, unit="€")
+root = wl.KPINode("EBITDA", value=100_000, unit="€", formula="Revenue − Operating costs",
+                  children=[rev, cost])
+
+from walopy.plotting import plot_kpi_tree
+fig = plot_kpi_tree(root, kind="treemap")
+fig.show()
+```
+
+---
+
+## 17. Solvers y optimización
+
+### `solve_lam(target_metric, target_value, *, mu, model)` — Máxima tasa de llegada
+
+Encuentra la mayor λ tal que una métrica no supere el objetivo.
+
+```python
+r = wl.solve_lam("Wq", 0.5, mu=5.0, model="mm1")
+print(r.value)          # λ máxima ≈ 3.33
+print(r.achieved_value) # Wq ≈ 0.5
+print(r.model_result)   # QueueResult completo en la solución
+```
+
+### `solve_mu(target_metric, target_value, *, lam, model)` — Mínima tasa de servicio
+
+```python
+r = wl.solve_mu("Wq", 0.3, lam=3.0, model="mm1")
+print(r.value)   # μ mínima necesaria ≈ 5.0
+```
+
+### `solve_servers(target_metric, target_value, *, lam, mu)` — Mínimo número de servidores
+
+```python
+r = wl.solve_servers("Wq", 0.1, lam=8.0, mu=5.0)
+print(r.value)         # c mínimo = 3
+print(r.model_result)  # QueueResult para M/M/3
+```
+
+### `optimize_servers(lam, mu, cost_per_server, cost_per_wait)` — Optimización de costo total
+
+Minimiza cost_per_server × c + cost_per_wait × λ × Wq evaluando todos los c viables.
+
+```python
+r = wl.optimize_servers(
+    lam=6.0,
+    mu=5.0,
+    cost_per_server=10.0,   # costo fijo por servidor por unidad de tiempo
+    cost_per_wait=5.0,      # costo por unidad de tiempo de espera de cada cliente
+)
+print(r.optimal_servers)   # c óptimo
+print(r.min_cost)          # costo mínimo
+
+r.plot()   # gráfica de costo vs número de servidores
+```
+
+---
+
+## 18. Análisis de sensibilidad
+
+### `sensitivity(model_fn, param, values, **fixed_kwargs)` — Barrido paramétrico
+
+Evalúa un modelo sobre un rango de valores de un parámetro.
+
+```python
+import numpy as np
+
+df = wl.sensitivity(
+    wl.mm1,
+    param="lam",
+    values=np.linspace(0.5, 4.5, 20),
+    mu=5.0,       # parámetros fijos
+)
+print(df.columns.tolist())  # ['lam', 'rho', 'L', 'Lq', 'W', 'Wq', ...]
+
+# Barrido sobre μ
+df2 = wl.sensitivity(wl.mm1, "mu", np.linspace(4.0, 10.0, 15), lam=3.0)
+
+# Barrido sobre número de servidores en M/M/c
+df3 = wl.sensitivity(wl.mmc, "c", range(1, 6), lam=8.0, mu=5.0)
+
+# Visualizar
+from walopy.plotting import plot_sensitivity
+fig = plot_sensitivity(df, "lam", metrics=["Wq", "Lq"])
+fig.show()
+```
+
+---
+
+## 19. Escenarios en lote (batch_model)
+
+### `batch_model(model_fn, df, **fixed_kwargs)` — Aplicar modelo a un DataFrame
+
+Aplica cualquier función de walopy a cada fila de un DataFrame de escenarios.
+
+```python
+import pandas as pd
+
+# Varios escenarios con distintas tasas de llegada
+escenarios = pd.DataFrame({
+    "lam": [1.0, 2.0, 3.0, 4.0]
+})
+resultado = wl.batch_model(wl.mm1, escenarios, mu=5.0)
+print(resultado[["lam", "rho", "Wq", "L"]])
+
+# Escenarios mixtos (lambda y mu variables)
+escenarios2 = pd.DataFrame({
+    "lam": [2.0, 3.0, 4.0],
+    "mu":  [5.0, 6.0, 7.0],
+})
+resultado2 = wl.batch_model(wl.mm1, escenarios2)
+
+# Con número de servidores variable (columna int)
+escenarios3 = pd.DataFrame({
+    "c": [1, 2, 3, 4],
+})
+resultado3 = wl.batch_model(wl.mmc, escenarios3, lam=8.0, mu=5.0)
+
+# Las filas con error quedan marcadas en "_error" (la columna solo existe si alguna fila falla;
+# aquí c=1 es inestable porque λ=8 > μ=5)
+print(resultado3[resultado3["_error"].notna()])  # filas fallidas
+
+# Para que la primera excepción se propague en lugar de recogerse:
+# wl.batch_model(wl.mmc, escenarios3, errors="raise", lam=8.0, mu=5.0)
+```
+
+---
+
+## 20. Comparar múltiples resultados
+
+### `compare(*results, labels)` — DataFrame comparativo
+
+Construye un DataFrame con una fila por resultado para facilitar la comparación.
+
+```python
+df = wl.compare(
+    wl.mm1(3.0, 5.0),
+    wl.mmc(3.0, 5.0, 2),
+    wl.md1(3.0, 5.0),
+    labels=["M/M/1", "M/M/2", "M/D/1"],
+)
+print(df[["label", "ρ (utilization)", "Wq (wait time)", "L (system)"]])
+#    label  ρ (utilization)  Wq (wait time)  L (system)
+# 0  M/M/1          0.6         0.3000         1.50
+# 1  M/M/2          0.3         0.0302         1.02
+# 2  M/D/1          0.6         0.1500         1.05
+
+# Sin etiquetas → scenario_1, scenario_2, ...
+df2 = wl.compare(wl.mm1(1, 5), wl.mm1(2, 5), wl.mm1(3, 5))
+```
+
+---
+
+## 21. Gráficas
+
+Todos los resultados exponen `.plot()` que devuelve una figura de Matplotlib o Plotly. También se pueden llamar directamente desde `walopy.plotting`.
+
+| Función `.plot()` | Tipo | Descripción |
+|---|---|---|
+| `QueueResult.plot()` | Matplotlib | Curvas Wq y Lq vs ρ con punto operativo |
+| `OEEResult.plot()` | Matplotlib | Barras horizontales OEE con referencia 85% |
+| `BottleneckResult.plot()` | Matplotlib | Utilización por estación, cuello de botella en rojo |
+| `EOQResult.plot()` | Matplotlib | Curvas de costo de mantener, ordenar y total |
+| `LineBalanceResult.plot()` | Plotly | Cycle time vs takt por estación |
+| `BreakEvenResult.plot()` | Plotly | Líneas ingreso/costo con BEP y zona de beneficio |
+| `SimulationResult.plot()` | Plotly | Histograma de Wq + CDF empírica con percentiles |
+| `OptimizeResult.plot()` | Plotly | Costo por servidor, costo de espera y total vs c |
+| `KPINode.plot(kind=)` | Plotly | Treemap o sunburst interactivo |
+
+```python
+# Guardar como HTML interactivo (Plotly)
+fig = r.plot()
+fig.write_html("resultado.html")
+
+# Guardar como imagen (Matplotlib)
+fig = wl.oee(0.9, 0.8, 0.95).plot()
+fig.savefig("oee.png", dpi=150)
+```
+
+Para la curva de sensibilidad:
+```python
+from walopy.plotting import plot_sensitivity
+df = wl.sensitivity(wl.mm1, "lam", np.linspace(0.5, 4.5, 20), mu=5.0)
+fig = plot_sensitivity(df, "lam", metrics=["Wq", "Lq", "L"])
+fig.show()
+```
+
+---
+
+## 22. CLI
+
+walopy incluye una interfaz de línea de comandos para uso rápido sin escribir código.
+
+```bash
+# M/M/1
+python -m walopy mm1 --lam 3 --mu 5
+
+# M/M/c
+python -m walopy mmc --lam 8 --mu 5 --c 2
+
+# M/D/1
+python -m walopy md1 --lam 3 --mu 5
+
+# G/G/1 (Kingman)
+python -m walopy gg1 --lam 3 --mu 5 --ca2 1.2 --cs2 0.8
+
+# Ley de Little (resolver W)
+python -m walopy littles --L 2.5 --lam 5.0
+
+# EOQ
+python -m walopy eoq --demand 1000 --ordering 50 --holding 2
+
+# Versión
+python -m walopy --version
+```
+
+Ejemplo de salida:
+```
+Model : M/M/1
+λ     : 3.0   (arrival rate)
+μ     : 5.0   (service rate per server)
+ρ     : 0.6   (utilization)
+L     : 1.5   (avg units in system)
+Lq    : 0.9   (avg units in queue)
+W     : 0.5   (avg time in system)
+Wq    : 0.3   (avg wait time in queue)
+  P0      : 0.4
+```
+
+---
+
+## 23. Referencia de módulos
 
 | Módulo | Funciones y clases principales |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
 | `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
-| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult` |
-| `scheduling` | `schedule_single`, `johnson_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult` |
-| `reliability` | `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `ReliabilityResult` |
+| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
+| `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |
+| `project` | `cpm`, `pert`, `ProjectResult`, `ActivityResult` |
+| `reliability` | `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `weibull_analysis`, `ReliabilityResult`, `WeibullResult` |
 | `network` | `jackson_network`, `JacksonResult`, `StationMetrics` |
 | `operations` | `oee`, `utilization_efficiency`, `unit_cost`, `OEEResult`, `UtilizationResult`, `UnitCostResult` |
 | `bottleneck` | `bottleneck_analysis`, `BottleneckResult`, `StationResult` |
@@ -1610,7 +1768,7 @@ r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
 
 ---
 
-## 23. Requisitos
+## 24. Requisitos
 
 ```
 Python ≥ 3.9
