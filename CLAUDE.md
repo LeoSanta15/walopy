@@ -43,7 +43,7 @@ python -m pytest --cov=walopy --cov-report=term-missing -q
 python -m sphinx -b html -W docs/source docs/build
 
 # Referencias obsoletas
-grep -rn "PLACEHOLDER\|TU_USUARIO\|cost_kpi_tree" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --exclude=CLAUDE.md --exclude-dir=.git --exclude-dir=auditoria --exclude-dir=referencia || echo OK
+grep -rn "PLACEHOLDER\|TU_USUARIO\|cost_kpi_tree" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --exclude=CLAUDE.md --exclude-dir=.git --exclude-dir=.github --exclude-dir=auditoria --exclude-dir=referencia || echo OK
 ```
 Instalación de desarrollo: `pip install -e ".[dev,release,docs]"`.
 
