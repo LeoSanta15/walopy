@@ -2,6 +2,26 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [Sin publicar]
+
+### Cambiado
+- **La versión tiene una sola fuente de verdad: el literal `__version__` de `src/walopy/__init__.py`**; `pyproject.toml` la lee con
+  `[tool.setuptools.dynamic]`. Antes `__init__.py` la leía de `importlib.metadata`, que se congela al instalar: tras subir la versión,
+  `walopy.__version__` mostraba la anterior hasta reinstalar.
+- La publicación (`publish.yml`) comprueba que el wheel construido tiene la versión del tag (`scripts/comprobar_version_release.py`) y usa el mismo
+  comando de `ruff` que el CI.
+
+### Corregido
+- La nota de `[0.3.0]` decía que las versiones `0.2.4` y `0.2.6` se publicaron sin tag. Comprobado en PyPI (2026-10-02): `0.2.6` sí está publicada y le falta el tag; `0.2.4` **no existe** en PyPI (su publicación falló y se saltó a `0.2.5`).
+
+### Añadido
+- `Makefile` (`make check-fast`, `make check`, `make release-check TAG=vX.Y.Z`, …), `AGENTS.md`, `.claude/` (permisos y hooks `SessionStart` y `Stop` para agentes), `.github/CODEOWNERS`, `scripts/notas_release.py` (`make notas-release VERSION=X.Y.Z` imprime el cuerpo del release desde este archivo).
+- `scripts/verificar_mutaciones.py`: mutación de una línea; cada test de regresión debe fallar si el bug vuelve (17 mutantes).
+- `docs/retrospectiva/`: lecciones, catálogo de bugs, scorecard, playbook, reglas de `CLAUDE.md` y resumen ejecutivo.
+- Los tests de `rcParams` cubren las 19 gráficas (15 con `.plot()` y 4 de llamada directa; antes solo 2).
+
+---
+
 ## [0.3.0] — 2026-10-02
 
 Versión de endurecimiento tras la auditoría de madurez (`docs/auditoria/`). Cierra los hallazgos K-01…K-07,
