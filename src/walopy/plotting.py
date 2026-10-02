@@ -497,9 +497,14 @@ def plot_break_even(
 
     p   = result.params
     fc  = p["fixed_cost"]
-    ppu = p["price_per_unit"]
-    vcu = p["variable_cost_per_unit"]
-    bep = result.bep_units
+    # break_even_sales() trabaja en ventas (no en unidades): precio 1 y costo variable = razón de costo variable.
+    en_ventas = "price_per_unit" not in p
+    if en_ventas:
+        ppu, vcu, bep = 1.0, p["variable_cost_ratio"], result.bep_revenue
+        actual = p.get("actual_revenue")
+    else:
+        ppu, vcu, bep = p["price_per_unit"], p["variable_cost_per_unit"], result.bep_units
+        actual = p.get("actual_units")
 
     units = np.linspace(0, bep * unit_range_factor, 300)
     rev   = ppu * units
@@ -513,7 +518,7 @@ def plot_break_even(
     fig.add_trace(go.Scatter(
         x=[bep], y=[result.bep_revenue],
         mode="markers+text",
-        text=[f"BEP ({bep:.0f} units)"],
+        text=[f"BEP ({bep:.0f} {'ventas' if en_ventas else 'units'})"],
         textposition="top right",
         marker=dict(color=ORANGE, size=12, symbol="star"),
         name="Break-even",
@@ -528,14 +533,13 @@ def plot_break_even(
         line=dict(color="rgba(0,0,0,0)"), name="Profit zone",
     ))
 
-    if "actual_units" in p:
-        au  = p["actual_units"]
-        fig.add_vline(x=au, line=dict(color=BLUE, width=1.5, dash="dot"),
-                      annotation_text=f"Actual ({au:.0f})", annotation_position="top left")
+    if actual is not None:
+        fig.add_vline(x=actual, line=dict(color=BLUE, width=1.5, dash="dot"),
+                      annotation_text=f"Actual ({actual:.0f})", annotation_position="top left")
 
     fig.update_layout(
         title=dict(text=title or "Break-Even Analysis", font=dict(size=16)),
-        xaxis_title="Units",
+        xaxis_title="Ventas" if en_ventas else "Units",
         yaxis_title="Amount",
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
