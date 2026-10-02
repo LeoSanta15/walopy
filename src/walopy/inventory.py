@@ -6,7 +6,7 @@ import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from statistics import NormalDist
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ._utils import as_float_list, as_fraction, as_nonneg, as_positive
 
@@ -1755,7 +1755,7 @@ def exchange_curve(
     if len(items) == 0:
         raise ValueError("'items' must contain at least one item.")
 
-    parsed = []
+    parsed: list[dict[str, Any]] = []
     for idx, it in enumerate(items):
         D  = as_positive(float(it["demand"]),        f"items[{idx}]['demand']")
         K  = as_positive(float(it["ordering_cost"]), f"items[{idx}]['ordering_cost']")
@@ -1937,7 +1937,7 @@ def safety_stock_curve(
 
     _norm = NormalDist()
 
-    parsed = []
+    parsed: list[dict[str, Any]] = []
     for idx, it in enumerate(items):
         sd   = as_nonneg(float(it["demand_std"]),  f"items[{idx}]['demand_std']")
         L    = as_positive(float(it["lead_time"]), f"items[{idx}]['lead_time']")
@@ -2212,7 +2212,7 @@ def abc_analysis(
     if not (0.0 < a_threshold < b_threshold < 1.0):
         raise ValueError("Debe cumplirse 0 < a_threshold < b_threshold < 1.")
 
-    enriched = []
+    enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
         nm  = it.get("name", f"Item{i + 1}")
         D   = as_nonneg(_clave(it, i, "demand"), f"items[{i}]['demand']")
@@ -2297,7 +2297,7 @@ def xyz_analysis(
     if not (0.0 <= x_threshold < y_threshold):
         raise ValueError("Debe cumplirse 0 ≤ x_threshold < y_threshold.")
 
-    enriched = []
+    enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
         nm = it.get("name", f"Item{i + 1}")
         if "cv" in it:

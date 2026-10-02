@@ -4,9 +4,23 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, TypedDict
 
 from ._utils import as_float_list, as_positive
+
+
+class _Trabajo(TypedDict):
+    name: str
+    p: float
+    d: Optional[float]
+    w: float
+
+
+class _TrabajoJohnson(TypedDict):
+    name: str
+    a: float
+    b: float
+
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -191,9 +205,12 @@ def schedule_single(
     for i, w in enumerate(weights):
         as_positive(w, f"weights[{i}]")
 
-    jobs = [{"name": str(names[i]), "p": float(processing_times[i]),
-             "d": float(dd[i]) if dd[i] is not None else None,
-             "w": float(weights[i])} for i in range(n)]
+    jobs: list[_Trabajo] = []
+    for i in range(n):
+        d_i = dd[i]
+        jobs.append({"name": str(names[i]), "p": float(processing_times[i]),
+                     "d": float(d_i) if d_i is not None else None,
+                     "w": float(weights[i])})
 
     if rule_up == "SPT":
         jobs_sorted = sorted(jobs, key=lambda j: j["p"])
@@ -290,8 +307,9 @@ def johnson_flowshop(
         as_positive(a, f"m1_times[{i}]")
         as_positive(b, f"m2_times[{i}]")
 
-    jobs = [{"name": str(names[i]), "a": float(m1_times[i]), "b": float(m2_times[i])}
-            for i in range(n)]
+    jobs: list[_TrabajoJohnson] = [
+        {"name": str(names[i]), "a": float(m1_times[i]), "b": float(m2_times[i])} for i in range(n)
+    ]
 
     # Johnson's rule: jobs where min(a,b)=a → sorted ascending by a (go first)
     #                  jobs where min(a,b)=b → sorted descending by b (go last)

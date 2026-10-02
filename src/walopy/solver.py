@@ -390,7 +390,7 @@ def optimize_servers(
     cost_per_wait   = as_positive(cost_per_wait, "cost_per_wait")
 
     c_min = int(np.ceil(lam / mu)) + 1
-    rows  = []
+    rows: list[dict[str, Any]] = []
 
     for c in range(c_min, c_max + 1):
         r          = mmc(lam, mu, c)
@@ -461,7 +461,7 @@ def sensitivity(
     >>> import numpy as np
     >>> df = sensitivity(mm1, "lam", np.linspace(0.5, 4.5, 20), mu=5.0)
     """
-    rows = []
+    rows: list[dict[str, Any]] = []
     for v in values:
         try:
             result = model_fn(**{param: v, **fixed_kwargs})
@@ -594,7 +594,7 @@ def compare(
     >>> from walopy import mm1, mmc, compare
     >>> compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
     """
-    rows = []
+    rows: list[dict[str, Any]] = []
     for i, r in enumerate(results):
         label = labels[i] if (labels and i < len(labels)) else f"scenario_{i + 1}"
         if hasattr(r, "to_frame"):
