@@ -48,7 +48,7 @@ def test_cada_entrada_tiene_prueba_o_evidencia_y_version_de_referencia(entrada):
 
 @pytest.mark.parametrize("ident", [e["id"] for e in MANIFIESTO])
 def test_cada_bug_tiene_ficha_en_el_catalogo(ident):
-    assert re.search(rf"\b{ident}\b", CATALOGO), f"{ident} no aparece en docs/referencia/BUG_CATALOG.md"
+    assert re.search(rf"(?m)^\| \*\*{ident}\*\* \|", CATALOGO), f"{ident} no tiene su fila de ficha en docs/referencia/BUG_CATALOG.md"
 
 
 @pytest.mark.parametrize(("ident", "selector"), list(_selectores()), ids=lambda v: v if isinstance(v, str) else None)

@@ -146,3 +146,15 @@ def test_no_unit_value_defaults():
     r = wl.exchange_curve(items_no_v)
     assert r.n_orders_eoq > 0
     assert r.investment_eoq > 0
+
+
+# ─── Regresión (corrección de v0.2.7): lista vacía y números escritos como texto ─────────────────────────────
+def test_items_vacios_dan_value_error():
+    with pytest.raises(ValueError, match="items"):
+        wl.exchange_curve([], target_orders=5.0)
+
+
+def test_acepta_numeros_escritos_como_texto():
+    como_texto = [{"name": "A", "demand": "1000", "ordering_cost": "50", "holding_cost": "2", "unit_value": "10"}]
+    como_numero = [{"name": "A", "demand": 1000, "ordering_cost": 50, "holding_cost": 2, "unit_value": 10}]
+    assert wl.exchange_curve(como_texto).n_orders_eoq == pytest.approx(wl.exchange_curve(como_numero).n_orders_eoq)

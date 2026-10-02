@@ -76,9 +76,31 @@ def test_plot_acepta_titulo_personalizado():
     assert fig.layout.title.text == "Mi título"
 
 
-def test_plot_no_modifica_rcparams():
+@pytest.mark.parametrize("nombre", sorted(RESULTADOS))
+def test_plot_no_modifica_rcparams(nombre):
+    """Ninguna gráfica deja cambiado el estado global de matplotlib (C-07), ni las de plotly ni las de pyplot."""
     antes = dict(plt.rcParams)
-    wl.eoq(1000.0, 50.0, 2.0).plot()
-    wl.mm1(2.0, 3.0).plot()
+    RESULTADOS[nombre]().plot()
+    plt.close("all")
+    assert dict(plt.rcParams) == antes
+
+
+# Gráficas que no cuelgan de un resultado con `.plot()` y se llaman directamente.
+DIRECTAS = {
+    "sensitivity": lambda: plotting.plot_sensitivity(
+        wl.sensitivity(wl.mm1, "lam", np.linspace(0.5, 2.5, 6), mu=3.0), "lam", metrics=["Wq", "Lq"]
+    ),
+    "queue_distribution": lambda: plotting.plot_queue_distribution(
+        wl.queue_length_pmf(2.0, 3.0, n_max=10), wl.sojourn_cdf(2.0, 3.0, n_points=20)
+    ),
+    "queue_metrics": lambda: plotting.plot_queue_metrics(wl.mm1(2.0, 3.0)),
+    "queue_sensitivity": lambda: plotting.plot_queue_sensitivity(wl.mm1(2.0, 3.0)),
+}
+
+
+@pytest.mark.parametrize("nombre", sorted(DIRECTAS))
+def test_plot_directa_no_modifica_rcparams(nombre):
+    antes = dict(plt.rcParams)
+    assert _es_figura(DIRECTAS[nombre]())
     plt.close("all")
     assert dict(plt.rcParams) == antes
