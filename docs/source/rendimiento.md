@@ -5,17 +5,17 @@ mediana de 3 ejecuciones).
 
 | Operación | Mediana de 3 ejecuciones (s) |
 |---|---|
-| neh_flowshop n=100, m=10 | 0.031 |
-| neh_flowshop n=200, m=10 | 0.119 |
-| wagner_whitin n=1000 | 0.063 |
-| wagner_whitin n=2000 | 0.228 |
+| neh_flowshop n=100, m=10 | 0.034 |
+| neh_flowshop n=200, m=10 | 0.146 |
+| wagner_whitin n=1000 | 0.055 |
+| wagner_whitin n=2000 | 0.226 |
 | mmc c=1000 (ρ=0.95) | 0.000 |
-| monte_carlo_gg1 n=1e6 | 0.555 |
+| monte_carlo_gg1 n=1e6 | 0.561 |
 | abc_xyz n=2000 | 0.011 |
 | cpm n=1000 | 0.007 |
-| weibull_analysis n=5000 (MLE) | 0.140 |
+| weibull_analysis n=5000 (MLE) | 0.151 |
 
-Entorno de referencia: Python 3.11.15, x86_64, walopy 0.2.8.
+Entorno de referencia: Python 3.11.15, x86_64, walopy 0.3.0.
 
 ## Complejidad
 
