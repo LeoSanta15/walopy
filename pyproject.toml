@@ -51,6 +51,11 @@ walopy = ["py.typed"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts   = "-q"
+filterwarnings = [
+    "error",
+    # matplotlib 3.5 con pyparsing >= 3.1 en Python 3.9: aviso de terceros ajeno a walopy
+    "ignore:.*deprecated - use.*:DeprecationWarning",
+]
 
 [tool.mypy]
 ignore_missing_imports = true

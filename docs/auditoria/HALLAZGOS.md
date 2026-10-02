@@ -61,8 +61,8 @@ Clases del catálogo **sin reproducción**: C-03 (no hay dependencias opcionales
 ### K-02 · Otras entradas aceptadas en silencio
 - **Archivo:línea:** `queuing.py` (`cv2_uniform`), `advanced.py` (`break_even_multi`), `queuing.py` (`queue_length_pmf`), `inventory.py:~925` (`eoq_multi_constrained`), `kpi.py` (`roi_kpi_tree`).
 - **Clase:** C-01. **Severidad:** Media.
-- **Evidencia:** `cv2_uniform(nan, 3.0)` → `nan`; `break_even_multi(1000,[10,20],[4,8],[nan,1.0]).bep_units_total` → `nan`; `break_even_multi(..., sales_mix=[0.9,0.9])` acepta una mezcla que no suma 1; `queue_length_pmf(2.0, 3.0, n_max=-1.0)` → DataFrame vacío; `eoq_multi_constrained(..., budget=nan)` devuelve un coste; `roi_kpi_tree(revenue=-1.0)` e `investment=-1.0` aceptados.
-- **Corrección propuesta:** validar con `_utils` y comprobar `sum(sales_mix) ≈ 1`; `n_max` con `as_int_positive`.
+- **Evidencia:** `cv2_uniform(nan, 3.0)` → `nan`; `break_even_multi(1000,[10,20],[4,8],[nan,1.0]).bep_units_total` → `nan`; `queue_length_pmf(2.0, 3.0, n_max=-1.0)` → DataFrame vacío; `eoq_multi_constrained(..., budget=nan)` devuelve un coste; `roi_kpi_tree(revenue=-1.0)` e `investment=-1.0` aceptados.
+- **Corrección propuesta:** validar con `_utils`; `n_max` entero ≥ 0. (Corrección de la auditoría: `sales_mix` son pesos relativos que se normalizan por diseño; no debe sumar 1.)
 - **Test:** parametrizados análogos a K-01.
 
 ### K-03 · `items` malformado en ABC/XYZ → errores opacos

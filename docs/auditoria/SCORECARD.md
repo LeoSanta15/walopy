@@ -38,3 +38,21 @@
 | `sphinx -W` | sin warnings | OK (pero cubre 4/15 módulos) |
 | Versión: metadata == `__version__` | iguales | OK (sin test que lo proteja) |
 | CI cubre todas las versiones de `classifiers` | 3.9–3.13 | **No** (3.9, 3.11, 3.13) |
+
+## Seguimiento por fase
+
+### Fase 0 y Fase 1 — cerradas el 2026-10-02
+
+| Medida | Antes | Después |
+|---|---|---|
+| Tests | 357 | **637** (0 fallos); idéntico resultado en Python 3.9, 3.11 y 3.9 con dependencias mínimas (numpy 1.22, pandas 1.4, matplotlib 3.5, plotly 5.0) |
+| Warnings | `-W error` pasaba | `filterwarnings = error` en `pyproject.toml` (solo se ignora un aviso de terceros) |
+| Cobertura global | 80 % | **91 %** (`fail_under = 85` activo); `plotting.py` 0 % → 99 %; `__main__.py` 62 % → 98 % |
+| Módulo público con menor cobertura | 0 % (`plotting.py`) | 81 % (`bottleneck.py`) |
+| ruff (F,E9,B,I,S) | 82 errores | 43 (todos `F821` de anotaciones: tarea 2.1) |
+| mypy | 78 errores | 78 (tarea 2.1/2.2) |
+| Contrato de entradas (67 funciones) | 30 excepciones inesperadas, 2 bloqueos, 26 entradas basura aceptadas | **0** (test permanente `tests/test_contrato_entradas.py`) |
+| Hallazgos cerrados | — | K-01…K-07, K-13 (fallback), N-01, N-04…N-07, N-08, N-09, N-10 parcial |
+| Hallazgos no abordados a propósito | — | K-08 (magnitudes extremas 1e308/1e-320: se aceptan sin `ValueError`; impacto bajo, fuera del contrato) |
+
+Notas de ejecución: `eoq_multi_constrained` ya no se cuelga con presupuesto ≤ 0; `mmc` es estable hasta `MAX_SERVIDORES = 10⁶`; las cotas de tamaño están en `_utils.py`.
