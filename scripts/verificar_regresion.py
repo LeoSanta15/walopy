@@ -54,7 +54,22 @@ def copiar_tests_sin_match(destino: Path) -> Path:
     return nuevo
 
 
-def ejecutar(selector: str, src_ref: Path, segundos: int, tests: Path) -> tuple[str, list[str], int]:
+def _limitar_memoria(megabytes: int):
+    """Devuelve una función para ``preexec_fn`` que limita el espacio de direcciones del proceso hijo.
+
+    El código antiguo no tiene cotas de tamaño (ese es el bug): sin límite, ``monte_carlo_gg1(n=10**9)`` llega a
+    7,7 GB y el sistema operativo mata el runner del CI. Con el límite falla con ``MemoryError`` (cuenta como detección).
+    """
+    def aplicar() -> None:
+        import resource  # solo POSIX; se importa en el hijo
+
+        limite = megabytes * 1024 * 1024
+        resource.setrlimit(resource.RLIMIT_AS, (limite, limite))
+
+    return aplicar
+
+
+def ejecutar(selector: str, src_ref: Path, segundos: int, tests: Path, memoria_mb: int) -> tuple[str, list[str], int]:
     """Ejecuta ``selector`` contra ``src_ref``; devuelve (estado, tests que PASAN, tests que fallan).
 
     Requiere ``pytest-timeout`` (extra ``dev``): un test que no termina en 20 s falla, que cuenta como detección.
@@ -66,7 +81,8 @@ def ejecutar(selector: str, src_ref: Path, segundos: int, tests: Path) -> tuple[
                                               for a in shlex.split(selector)], "-o", "addopts=", "-o", "filterwarnings=",
              "-p", "no:cacheprovider", "-q", "-rA", "--no-header", "--tb=no", "--timeout=20"]
     try:
-        r = subprocess.run(orden, cwd=RAIZ, env=env, capture_output=True, text=True, timeout=segundos, check=False)  # noqa: S603
+        r = subprocess.run(orden, cwd=RAIZ, env=env, capture_output=True, text=True, timeout=segundos, check=False,  # noqa: S603
+                           preexec_fn=_limitar_memoria(memoria_mb) if memoria_mb and os.name == "posix" else None)
     except subprocess.TimeoutExpired:
         return "COLGADO", [], 0
     if r.returncode == 5:
@@ -87,6 +103,8 @@ def main() -> int:
     ap.add_argument("--guardas", nargs="*", default=[],
                     help="fragmentos de nodeid de tests que PUEDEN pasar en la referencia (guardas de comportamiento)")
     ap.add_argument("--segundos", type=int, default=60, help="tiempo máximo por selector")
+    ap.add_argument("--memoria-mb", type=int, default=4096,
+                    help="límite de memoria virtual por selector (0 = sin límite); protege el runner del código sin cotas")
     args = ap.parse_args()
 
     # (id, ref, selector, guardas)
@@ -109,7 +127,7 @@ def main() -> int:
                 if ref not in arboles:
                     arboles[ref] = raiz_tmp / f"ref{len(arboles)}"
                     _git("worktree", "add", "--detach", str(arboles[ref]), ref)
-                estado, pasan, fallan = ejecutar(sel, arboles[ref] / "src", args.segundos, tests)
+                estado, pasan, fallan = ejecutar(sel, arboles[ref] / "src", args.segundos, tests, args.memoria_mb)
                 etiqueta = f"{ident} " if ident else ""
                 if estado == "SIN_TESTS":
                     print(f"[MAL] {etiqueta}SIN_TESTS  {sel}")
