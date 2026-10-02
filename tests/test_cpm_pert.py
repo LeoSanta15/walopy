@@ -1,7 +1,10 @@
 """Tests for CPM and PERT project scheduling."""
 from __future__ import annotations
+
 import math
+
 import pytest
+
 import walopy as wl
 
 # Classic 6-activity network
@@ -163,3 +166,14 @@ def test_pert_probability_increases_with_target():
 def test_pert_invalid_estimates_raises():
     with pytest.raises(ValueError):
         wl.pert([{"name": "A", "optimistic": 5, "most_likely": 3, "pessimistic": 7, "predecessors": []}])
+
+
+def test_holguras_sin_cero_negativo():
+    # Con duraciones PERT fraccionarias la resta LS - ES puede dar -1e-16: debe mostrarse como 0.0
+    acts = [
+        {"name": "A", "optimistic": 3, "most_likely": 5, "pessimistic": 9, "predecessors": []},
+        {"name": "B", "optimistic": 2, "most_likely": 4, "pessimistic": 8, "predecessors": ["A"]},
+        {"name": "C", "optimistic": 4, "most_likely": 6, "pessimistic": 10, "predecessors": ["B"]},
+    ]
+    for a in wl.pert(acts).activities:
+        assert math.copysign(1.0, a.total_float) > 0 and math.copysign(1.0, a.free_float) > 0

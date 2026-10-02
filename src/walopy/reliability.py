@@ -2,10 +2,22 @@
 from __future__ import annotations
 
 import math
+import warnings
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import TYPE_CHECKING
 
-from ._utils import as_positive, as_nonneg
+from ._utils import as_float_list, as_int_positive, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import pandas as pd
+
+
+def _validar_t_mttr(t: float | None, mttr: float | None) -> tuple:
+    """Valida los argumentos opcionales t (tiempo de evaluación) y mttr (tiempo medio de reparación)."""
+    t_v = None if t is None else as_nonneg(t, "t")
+    mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")
+    return t_v, mttr_v
 
 
 def _mtbf_numeric(R_func, lam_min: float) -> float:
@@ -75,7 +87,7 @@ class ReliabilityResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         row: dict = {
             "Topology": self.topology,
@@ -111,7 +123,7 @@ def _r_system(topology: str, lams: list, k, t: float) -> float:
             c = math.comb(n, j)
             total += c * (R_i ** j) * (F_i ** (n - j))
         return total
-    raise ValueError(f"Unknown topology: {topology!r}")
+    raise ValueError(f"Topología desconocida: {topology!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -138,8 +150,22 @@ def mtbf_analysis(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mtbf_analysis(failure_rate=0.01, mttr=2.0, t=10.0)
+    >>> round(r.mtbf, 4)
+    100.0
     """
     lam = as_positive(failure_rate, "failure_rate")
+    t, mttr = _validar_t_mttr(t, mttr)
     mtbf_val = 1.0 / lam
     avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None
     R_t = math.exp(-lam * t) if t is not None else None
@@ -177,8 +203,23 @@ def series_system(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``failure_rates`` está vacío.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = series_system(failure_rates=[0.01, 0.02], t=10.0)
+    >>> round(r.mtbf, 4)
+    33.3333
     """
-    lams = [as_positive(l, f"failure_rates[{i}]") for i, l in enumerate(failure_rates)]
+    lams = as_float_list(failure_rates, "failure_rates")
+    t, mttr = _validar_t_mttr(t, mttr)
     lam_sys = sum(lams)
     mtbf_val = 1.0 / lam_sys
     avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None
@@ -219,8 +260,23 @@ def parallel_system(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``failure_rates`` está vacío.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = parallel_system(failure_rates=[0.01, 0.02], t=10.0)
+    >>> round(r.mtbf, 4)
+    116.6667
     """
-    lams = [as_positive(l, f"failure_rates[{i}]") for i, l in enumerate(failure_rates)]
+    lams = as_float_list(failure_rates, "failure_rates")
+    t, mttr = _validar_t_mttr(t, mttr)
 
     def R_func(tt: float) -> float:
         return _r_system("parallel", lams, None, tt)
@@ -274,10 +330,27 @@ def koon_system(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se cumple 1 ≤ k ≤ n.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = koon_system(n=3, k=2, failure_rate=0.01, t=10.0)
+    >>> round(r.mtbf, 4)
+    83.3333
     """
-    if not (1 <= k <= n):
-        raise ValueError("Must have 1 ≤ k ≤ n.")
+    n = as_int_positive(n, "n")
+    k = as_int_positive(k, "k")
+    if k > n:
+        raise ValueError(f"Debe cumplirse 1 ≤ k ≤ n (k={k}, n={n}).")
     lam = as_positive(failure_rate, "failure_rate")
+    t, mttr = _validar_t_mttr(t, mttr)
     lams = [lam] * n
 
     # Exact MTBF for k-of-n identical exponential:  (1/λ) * Σ_{j=k}^{n} 1/j
@@ -357,7 +430,7 @@ class WeibullResult:
         """
         p = pct / 100.0
         if not (0.0 < p < 1.0):
-            raise ValueError("'pct' must be strictly between 0 and 100.")
+            raise ValueError("'pct' debe estar estrictamente entre 0 y 100.")
         return self.scale * (-math.log(1.0 - p)) ** (1.0 / self.shape)
 
     def summary(self) -> str:
@@ -373,7 +446,7 @@ class WeibullResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "shape_beta": self.shape,
@@ -407,8 +480,18 @@ def _weibull_mle_beta(failure_times: list) -> float:
 
     lo, hi = 1e-4, 100.0
     if g(lo) <= 0.0:
+        warnings.warn(
+            f"La forma β estimada es menor o igual que la cota inferior {lo:g}; el resultado es el límite del intervalo "
+            "de búsqueda, no un máximo de verosimilitud exacto.",
+            UserWarning, stacklevel=3,
+        )
         return lo
     if g(hi) >= 0.0:
+        warnings.warn(
+            f"Los tiempos de falla casi no tienen dispersión: la forma β supera la cota {hi:g}; "
+            "el resultado es el límite del intervalo de búsqueda, no el estimador exacto.",
+            UserWarning, stacklevel=3,
+        )
         return hi
     for _ in range(120):
         mid = (lo + hi) / 2.0
@@ -460,25 +543,33 @@ def weibull_analysis(
     -------
     WeibullResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si hay menos de 2 tiempos de falla, todos son iguales o ``method`` no es ``'MLE'`` ni ``'RRY'``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> import math
     >>> # Generate Weibull(β=2, η=100) data via inverse CDF
     >>> times = [100 * (-math.log(1 - p)) ** 0.5 for p in [.1,.2,.3,.4,.5,.6,.7,.8,.9]]
     >>> r = weibull_analysis(times)
-    >>> 1.5 < r.shape < 2.5
+    >>> 2.0 < r.shape < 3.0  # cuantiles equiespaciados: menos dispersión que una muestra aleatoria
     True
     """
-    t_list = [float(t) for t in failure_times]
-    if len(t_list) < 2:
-        raise ValueError("At least 2 failure times are required.")
-    for i, t in enumerate(t_list):
-        if t <= 0.0:
-            raise ValueError(f"failure_times[{i}] must be > 0, got {t}.")
+    t_list = as_float_list(failure_times, "failure_times", min_len=2)
+    if max(t_list) == min(t_list):
+        raise ValueError(
+            "Todos los tiempos de falla son iguales: la dispersión es nula y la forma β no es estimable."
+        )
 
     m = method.upper()
     if m not in ("MLE", "RRY"):
-        raise ValueError("'method' must be 'MLE' or 'RRY'.")
+        raise ValueError("'method' debe ser 'MLE' o 'RRY'.")
 
     if m == "MLE":
         beta  = _weibull_mle_beta(t_list)

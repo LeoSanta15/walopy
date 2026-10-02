@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import math
+
 import pytest
 
 import walopy as wl
-
 
 # ─── EBQ ──────────────────────────────────────────────────────────────────────
 
@@ -180,7 +180,6 @@ def test_lot_for_lot_total_cost():
 
 
 def test_lot_for_lot_to_frame():
-    import pandas as pd
     r = wl.lot_for_lot([100, 80, 120], 200, 1)
     df = r.to_frame()
     assert "order_qty" in df.columns
@@ -226,7 +225,6 @@ def test_eoq_quantity_discount_selects_min_cost():
 
 
 def test_eoq_quantity_discount_to_frame():
-    import pandas as pd
     r = wl.eoq_quantity_discount(1000, 50, 0.2, [(0, 10.0), (500, 9.5)])
     df = r.to_frame()
     assert "Total cost" in df.columns
@@ -264,14 +262,13 @@ def test_break_even_multi_wacm():
 
 
 def test_break_even_multi_to_frame():
-    import pandas as pd
     r = wl.break_even_multi(100_000, [50, 80], [30, 50], [1, 1])
     df = r.to_frame()
     assert "BEP units" in df.columns
 
 
 def test_break_even_multi_negative_cm_raises():
-    with pytest.raises(ValueError, match="contribution margin"):
+    with pytest.raises(ValueError, match="margen de contribución"):
         wl.break_even_multi(100_000, [20, 80], [25, 50], [1, 1])
 
 

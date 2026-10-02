@@ -1,9 +1,19 @@
-Operaciones (OEE, Utilización, Costo)
-======================================
+Operaciones (operations)
+========================
+
+Módulo ``walopy.operations``. Todos los símbolos se importan también desde ``walopy``.
+
+Funciones
+---------
 
 .. autofunction:: walopy.oee
+
 .. autofunction:: walopy.utilization_efficiency
+
 .. autofunction:: walopy.unit_cost
+
+Clases de resultado
+-------------------
 
 .. autoclass:: walopy.OEEResult
    :members:
@@ -13,3 +23,4 @@ Operaciones (OEE, Utilización, Costo)
 
 .. autoclass:: walopy.UnitCostResult
    :members:
+

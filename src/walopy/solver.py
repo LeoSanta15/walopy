@@ -1,13 +1,17 @@
 """Solvers: find optimal parameters or user-defined targets for queuing / operations models."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg
+from ._utils import as_positive
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 
 # ---------------------------------------------------------------------------
@@ -19,8 +23,8 @@ def _bisect(f: Callable[[float], float], a: float, b: float,
     fa, fb = f(a), f(b)
     if fa * fb > 0:
         raise ValueError(
-            f"Root not bracketed: f({a:.6g})={fa:.4g}, f({b:.6g})={fb:.4g}. "
-            "Target may be outside the feasible range."
+            f"La raíz no está acotada: f({a:.6g})={fa:.4g}, f({b:.6g})={fb:.4g}. "
+            "El objetivo puede estar fuera del rango factible."
         )
     for _ in range(max_iter):
         mid = 0.5 * (a + b)
@@ -38,7 +42,7 @@ def _get_metric(result: Any, metric: str) -> float:
     """Extract a named metric from any result dataclass."""
     if not hasattr(result, metric):
         valid = [k for k in vars(result) if not k.startswith("_")]
-        raise ValueError(f"Unknown metric '{metric}'. Valid options: {valid}")
+        raise ValueError(f"Métrica desconocida '{metric}'. Opciones válidas: {valid}")
     return float(getattr(result, metric))
 
 
@@ -109,7 +113,7 @@ class OptimizeResult:
 
     optimal_servers: int
     min_cost: float
-    cost_breakdown: "pd.DataFrame"
+    cost_breakdown: pd.DataFrame
     model_result: Any
     params: dict = field(default_factory=dict)
 
@@ -122,7 +126,7 @@ class OptimizeResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_optimize_servers
         return plot_optimize_servers(self, **kwargs)
 
@@ -161,8 +165,22 @@ def solve_lam(
     Returns
     -------
     SolverResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si la métrica o el modelo son desconocidos, o si el objetivo es infactible para el modelo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = solve_lam(target_metric='Wq', target_value=0.5, mu=5.0)
+    >>> round(r.value, 4)
+    3.5714
     """
-    from .queuing import mm1, mmc, md1, kingman
+    from .queuing import kingman, md1, mm1, mmc
 
     mu = as_positive(mu, "mu")
     target_value = as_positive(target_value, "target_value")
@@ -174,7 +192,7 @@ def solve_lam(
         "gg1":  lambda lam: kingman(lam, mu, ca2, cs2),
     }
     if model not in _models:
-        raise ValueError(f"Unknown model '{model}'. Choose from {list(_models)}.")
+        raise ValueError(f"Modelo desconocido '{model}'. Elija entre {list(_models)}.")
 
     fn = _models[model]
 
@@ -190,8 +208,8 @@ def solve_lam(
     # Check feasibility: even at lam_min the metric might exceed target
     if residual(lam_min) > 0:
         raise ValueError(
-            f"{target_metric} exceeds {target_value} even at very low λ. "
-            "Target may be infeasible for this model / μ."
+            f"{target_metric} supera {target_value} incluso con λ muy baja. "
+            "El objetivo puede ser infactible para este modelo / μ."
         )
 
     lam_sol = _bisect(residual, lam_min, lam_max)
@@ -240,8 +258,22 @@ def solve_mu(
     Returns
     -------
     SolverResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si la métrica o el modelo son desconocidos, o si el objetivo es infactible para el modelo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = solve_mu(target_metric='Wq', target_value=0.5, lam=2.0)
+    >>> round(r.value, 4)
+    3.2361
     """
-    from .queuing import mm1, mmc, md1, kingman
+    from .queuing import kingman, md1, mm1, mmc
 
     lam = as_positive(lam, "lam")
     target_value = as_positive(target_value, "target_value")
@@ -253,7 +285,7 @@ def solve_mu(
         "gg1": lambda mu: kingman(lam, mu, ca2, cs2),
     }
     if model not in _models:
-        raise ValueError(f"Unknown model '{model}'. Choose from {list(_models)}.")
+        raise ValueError(f"Modelo desconocido '{model}'. Elija entre {list(_models)}.")
 
     fn = _models[model]
 
@@ -269,8 +301,8 @@ def solve_mu(
     # Ensure the bracket is valid
     if residual(mu_max) > 0:
         raise ValueError(
-            f"{target_metric} still exceeds {target_value} at μ = {mu_max:.4g}. "
-            "Target may be numerically infeasible."
+            f"{target_metric} sigue superando {target_value} con μ = {mu_max:.4g}. "
+            "El objetivo puede ser numéricamente infactible."
         )
 
     mu_sol  = _bisect(residual, mu_min, mu_max)
@@ -316,6 +348,20 @@ def solve_servers(
     Returns
     -------
     SolverResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el objetivo no se alcanza con ``c_max`` servidores.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = solve_servers(target_metric='Wq', target_value=0.5, lam=4.0, mu=3.0)
+    >>> round(r.value, 4)
+    3.0
     """
     from .queuing import mmc
 
@@ -340,8 +386,8 @@ def solve_servers(
             )
 
     raise ValueError(
-        f"Could not meet {target_metric} ≤ {target_value} with up to {c_max} servers. "
-        "Consider increasing μ or relaxing the target."
+        f"No se pudo cumplir {target_metric} ≤ {target_value} con hasta {c_max} servidores. "
+        "Considere aumentar μ o relajar el objetivo."
     )
 
 
@@ -377,6 +423,19 @@ def optimize_servers(
     Returns
     -------
     OptimizeResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = optimize_servers(lam=4.0, mu=3.0, cost_per_server=10.0, cost_per_wait=5.0)
+    >>> round(r.min_cost, 4)
+    30.7232
     """
     from .queuing import mmc
 
@@ -386,7 +445,7 @@ def optimize_servers(
     cost_per_wait   = as_positive(cost_per_wait, "cost_per_wait")
 
     c_min = int(np.ceil(lam / mu)) + 1
-    rows  = []
+    rows: list[dict[str, Any]] = []
 
     for c in range(c_min, c_max + 1):
         r          = mmc(lam, mu, c)
@@ -450,6 +509,15 @@ def sensitivity(
     pd.DataFrame
         One row per value with the swept parameter and all result fields.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``param`` no es un parámetro de ``model_fn`` o ``values`` está vacío.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> from walopy import mm1
@@ -457,7 +525,7 @@ def sensitivity(
     >>> import numpy as np
     >>> df = sensitivity(mm1, "lam", np.linspace(0.5, 4.5, 20), mu=5.0)
     """
-    rows = []
+    rows: list[dict[str, Any]] = []
     for v in values:
         try:
             result = model_fn(**{param: v, **fixed_kwargs})
@@ -480,7 +548,9 @@ def sensitivity(
 
 def batch_model(
     model_fn: Callable[..., Any],
-    df: "pd.DataFrame",
+    df: pd.DataFrame,
+    *,
+    errors: str = "collect",
     **fixed_kwargs: Any,
 ) -> pd.DataFrame:
     """Apply a walopy model to every row of a DataFrame.
@@ -498,6 +568,9 @@ def batch_model(
     df : pd.DataFrame
         One row per scenario.  Column names must match parameter names of
         *model_fn*.
+    errors : {'collect', 'raise'}
+        ``'collect'`` (por defecto): una fila que falla no detiene el lote; su mensaje queda en la
+        columna ``_error``. ``'raise'``: la primera excepción se propaga.
     **fixed_kwargs
         Additional parameters shared across all rows (e.g. ``mu=5.0``).
         A column in *df* with the same name takes precedence.
@@ -511,14 +584,26 @@ def batch_model(
         added; it contains the error message for failed rows and ``None``
         for successful ones.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``errors`` no es ``'collect'`` ni ``'raise'``; con ``errors='raise'``, la excepción de la primera fila que falle.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> import pandas as pd
     >>> from walopy import mm1
     >>> from walopy.solver import batch_model
     >>> scenarios = pd.DataFrame({"lam": [1.0, 2.0, 3.0, 4.0], "mu": [5.0, 5.0, 5.0, 5.0]})
-    >>> batch_model(mm1, scenarios)
+    >>> batch_model(mm1, scenarios)["rho"].round(2).tolist()
+    [0.2, 0.4, 0.6, 0.8]
     """
+    if errors not in ("collect", "raise"):
+        raise ValueError("'errors' debe ser 'collect' o 'raise'.")
     rows: list[dict] = []
     has_errors = False
 
@@ -550,6 +635,8 @@ def batch_model(
             elif isinstance(result, (int, float, np.floating)):
                 row["value"] = float(result)
         except Exception as exc:
+            if errors == "raise":
+                raise
             row = row_series.to_dict()
             row["_error"] = str(exc)
             has_errors = True
@@ -585,12 +672,23 @@ def compare(
     pd.DataFrame
         One row per result with a ``label`` column prepended.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se recibe ningún resultado.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> from walopy import mm1, mmc, compare
-    >>> compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
+    >>> tabla = compare(mm1(2, 5), mmc(2, 5, 2), labels=["M/M/1", "M/M/2"])
+    >>> tabla["c (servers)"].tolist()
+    [1, 2]
     """
-    rows = []
+    rows: list[dict[str, Any]] = []
     for i, r in enumerate(results):
         label = labels[i] if (labels and i < len(labels)) else f"scenario_{i + 1}"
         if hasattr(r, "to_frame"):

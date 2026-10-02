@@ -3,8 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from walopy import eoq, reorder_point, newsvendor
-
+from walopy import eoq, newsvendor, reorder_point
 
 # --- EOQ ---
 
@@ -61,7 +60,6 @@ def test_rop_higher_service_higher_ss():
 
 
 def test_rop_to_frame():
-    import pandas as pd
     df = reorder_point(50, 2, demand_std=5, service_level=0.95).to_frame()
     assert "Reorder point" in df.columns
 

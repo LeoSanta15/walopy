@@ -1,33 +1,90 @@
 # CLAUDE.md — walopy
 
-## Overview
-Python library for queuing theory, operations analysis, OEE, bottleneck analysis and KPI trees.
+## Descripción
+Librería Python de investigación de operaciones: colas, inventarios, scheduling, proyectos (CPM/PERT),
+confiabilidad, OEE, cuellos de botella, break-even y árboles de KPI. Usuarios: ingenieros industriales y
+analistas de operaciones. Sin `scipy`: solo numpy, pandas, matplotlib y plotly.
 
-## Structure
-- `src/walopy/queuing.py`   — M/M/1, M/M/c, M/D/1, G/G/1 (Kingman), Little's Law
-- `src/walopy/operations.py` — OEE, utilization_efficiency, unit_cost
-- `src/walopy/bottleneck.py` — bottleneck_analysis
-- `src/walopy/kpi.py`        — KPINode, oee_kpi_tree, throughput_kpi_tree, cost_kpi_tree
-- `src/walopy/plotting.py`   — all plot functions (matplotlib, lazy import)
-- `src/walopy/_utils.py`     — shared validators
+## Mapa del código (`src/walopy/`)
+- `queuing.py`     — M/M/1, M/M/c, M/D/1, M/G/1, G/G/1 (Kingman), ley de Little, helpers `cv2_*`
+- `advanced.py`    — M/M/1/K, M/M/c/K, Erlang-B, colas con prioridad, Monte Carlo G/G/1, takt, balance de línea, break-even, PMF/CDF
+- `network.py`     — redes de Jackson
+- `fitting.py`     — ajuste de parámetros de cola desde datos (`fit_from_data`)
+- `solver.py`      — `solve_lam`, `solve_mu`, `solve_servers`, `optimize_servers`, `sensitivity`, `batch_model`, `compare`
+- `inventory.py`   — EOQ/EBQ, multi-artículo, lotes, (r,Q), (R,S), Wagner-Whitin, newsvendor, curvas de intercambio, ABC/XYZ, MRP
+- `scheduling.py`  — secuenciación de una máquina, Johnson y NEH (flow-shop)
+- `project.py`     — CPM y PERT
+- `reliability.py` — MTBF, sistemas serie/paralelo/k-de-n, Weibull
+- `operations.py`  — OEE, utilización/eficiencia, costo unitario
+- `bottleneck.py`  — análisis de cuello de botella
+- `kpi.py`         — `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `roi_kpi_tree`
+- `plotting.py`    — todas las gráficas (matplotlib y plotly, importación perezosa)
+- `__main__.py`    — CLI (`python -m walopy`)
+- `_utils.py`      — validadores compartidos (única capa de ingesta numérica) y cotas de tamaño
 
-## Rules
-- Python ≥ 3.9, `from __future__ import annotations` in every file.
-- All public functions have NumPy-style docstrings and type hints.
-- Internal imports are relative (`from .module import X`).
-- `__version__` in `__init__.py` must match `version` in `pyproject.toml`.
-- Validate only at system boundaries (`_utils.py` helpers).
-- Calculation functions never import matplotlib; plotting functions do it lazily.
+Otras carpetas: `tests/` (pytest; incluye doctests de `src/` y los ejemplos del README), `examples/` (scripts ejecutables), `benchmarks/` (rendimiento), `scripts/` (utilidades de CI), `docs/` (Sphinx, `auditoria/` y `referencia/`).
 
-## Tests
+## Comandos estándar
 ```bash
-pytest --cov=walopy
-```
+# Tests
+python -m pytest tests/ -q
 
-## Release checklist
-- [ ] Bump version in `pyproject.toml` and `src/walopy/__init__.py`
-- [ ] Add entry in `CHANGELOG.md`
-- [ ] `pytest` passes
-- [ ] `ruff check src/` clean
-- [ ] `mypy src/walopy` clean
-- [ ] Push to `main`, create GitHub release with tag `vX.Y.Z`
+# Linter (bugs reales, no solo estilo; reglas F, E9, B, I, S definidas en pyproject.toml)
+python -m ruff check src/ tests/ benchmarks/ scripts/ examples/
+
+# Tipos
+python -m mypy src/walopy --ignore-missing-imports
+
+# Build y verificación del paquete
+python -m build && python -m twine check dist/*
+
+# Cobertura
+python -m pytest --cov=walopy --cov-report=term-missing -q
+
+# Documentación (warnings como errores)
+python -m sphinx -b html -W docs/source docs/build
+
+# Referencias obsoletas
+grep -rn "PLACEHOLDER\|TU_USUARIO\|cost_kpi_tree" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --exclude=CLAUDE.md --exclude-dir=.git --exclude-dir=.github --exclude-dir=auditoria --exclude-dir=referencia || echo OK
+```
+Instalación de desarrollo: `pip install -e ".[dev,release,docs]"`.
+
+## Definición de "terminado"
+Una tarea está terminada solo cuando:
+1. `pytest -q` → 0 fallos, 0 errores.
+2. `ruff check src/ tests/` → `All checks passed!`
+3. `mypy src/walopy --ignore-missing-imports` → `Success: no issues found`
+4. `python -m build` + `twine check` → correctos.
+5. Cobertura global ≥ 85 %; ningún módulo público < 70 %.
+6. Sin referencias obsoletas (comando de arriba).
+7. `CHANGELOG.md` actualizado con la versión nueva.
+8. `CLAUDE.md`, README y la referencia Sphinx actualizados si se añadió o cambió funcionalidad.
+
+## Reglas de trabajo (no negociables)
+- **R-01 Cambios quirúrgicos.** No reescribas módulos para añadir una función; sigue el patrón de los módulos vecinos.
+- **R-02 Validar contra referencia independiente.** Todo resultado numérico se contrasta con una fuente externa (publicación, cálculo manual, otra librería, fuerza bruta, simulación con ≥ 20 semillas). Nunca contra el propio código.
+- **R-03 Español en lo que ve el usuario.** Docstrings, mensajes de `ValueError`/`TypeError`/`UserWarning`, columnas de DataFrame, textos de gráficas, README, CHANGELOG y commits van en español. Identificadores en inglés (snake_case; clases en PascalCase).
+- **R-04 Avances incrementales.** Cada versión: construir, probar (suite + wheel en venv limpio), commit, tag `vX.Y.Z`.
+- **R-05 Una sola fuente de verdad para la versión:** `pyproject.toml`. `__init__.py` la lee con `importlib.metadata`. No hay que tocar `__init__.py` al subir versión.
+- **R-06 Dependencias opcionales con mensaje orientativo** (`try/except ImportError` con `pip install walopy[extra]`).
+- **R-07 No contaminar estado global.** Gráficas dentro de `plt.rc_context`; warnings temporales con `warnings.catch_warnings()`.
+- **R-08 Validación de entrada centralizada.** Todo argumento numérico de usuario pasa por `_utils.py` (finito, positivo, entero, etc.). NaN/inf se rechazan **antes** de comparar: `x <= 0` es `False` para NaN.
+- **R-09 Checklist de renombre.** Si se renombra un símbolo o módulo: `grep -rn "nombre_viejo" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --include="*.rst"` y actualizar todo, incluido este archivo.
+- **R-10 No repetir bugs del catálogo.** Antes de validar entradas, tratar casos borde o importar opcionales, leer `docs/referencia/BUG_CATALOG.md` y `docs/auditoria/CATALOG_UPDATES.md`.
+- **R-11 Tests de casos borde obligatorios** para toda función pública nueva: entrada vacía, NaN/inf, n mínimo, parámetros opcionales ausentes, caso degenerado (std = 0, todos iguales).
+- **R-12 CI en versión mínima.** Antes de abrir un PR, los tests deben pasar en Python 3.9 (`uv venv --python 3.9`).
+- **R-13 Todo símbolo nuevo de `__all__`** se documenta (README y Sphinx) y entra en el test de contrato de entradas.
+- **R-14 Toda complejidad anunciada** en un docstring o CHANGELOG tiene un benchmark que la respalda.
+- **R-15 Los ejemplos de README y docs son tests** (`tests/test_readme.py`).
+
+## Política de no repetición
+Si reaparece un bug del catálogo: identificar por qué la solución anterior no bastó, añadir test de regresión, actualizar el catálogo y reforzar la regla correspondiente aquí.
+
+## Checklist de release
+- [ ] Subir la versión **solo** en `pyproject.toml`
+- [ ] Entrada en `CHANGELOG.md` (con "Cambios que rompen compatibilidad" si aplica)
+- [ ] Batería completa de la "definición de terminado" en verde
+- [ ] Wheel instalado en venv limpio (Python 3.9 y la más reciente) y ejemplos ejecutados
+- [ ] PR a `main`, CI en verde, merge
+- [ ] Crear el release de GitHub con tag `vX.Y.Z` (dispara la publicación a PyPI)
+- [ ] Verificar `pip install walopy==X.Y.Z` en un venv limpio

@@ -1,6 +1,8 @@
 """Tests for ABC, XYZ, and ABC-XYZ classification."""
 from __future__ import annotations
+
 import pytest
+
 import walopy as wl
 
 # 5 items: annual values 500, 300, 100, 70, 30 → total 1000
@@ -174,6 +176,5 @@ def test_abcxyz_matrix_sums_to_n():
 
 
 def test_abcxyz_matrix_frame_shape():
-    import pandas as pd
     df = wl.abc_xyz(COMBO_ITEMS).matrix_frame()
     assert df.shape == (3, 3)  # 3 ABC rows × 3 XYZ columns

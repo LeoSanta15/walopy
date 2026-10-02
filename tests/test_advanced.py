@@ -5,16 +5,15 @@ import numpy as np
 import pytest
 
 from walopy import (
+    break_even,
     erlang_b,
+    line_balance,
     mm1k,
     monte_carlo_gg1,
-    takt_time,
-    line_balance,
-    break_even,
     queue_length_pmf,
     sojourn_cdf,
+    takt_time,
 )
-
 
 # --- Erlang B ---
 
@@ -84,7 +83,7 @@ def test_monte_carlo_percentiles_ordered():
 
 
 def test_monte_carlo_unstable_raises():
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         monte_carlo_gg1(lam=6.0, mu=5.0, ca2=1.0, cs2=1.0)
 
 
@@ -131,7 +130,7 @@ def test_break_even_margin_of_safety():
 
 
 def test_break_even_negative_cm_raises():
-    with pytest.raises(ValueError, match="contribution margin"):
+    with pytest.raises(ValueError, match="margen de contribución"):
         break_even(fixed_cost=1000, price_per_unit=5, variable_cost_per_unit=10)
 
 
@@ -156,13 +155,11 @@ def test_sojourn_cdf_bounds():
 # --- Robustness ---
 
 def test_erlang_b_numpy_int():
-    import numpy as np
     b = erlang_b(lam=2.0, mu=1.0, c=np.int64(3))
     assert 0.0 < b < 1.0
 
 
 def test_mm1k_numpy_int():
-    import numpy as np
     r = mm1k(lam=5.0, mu=3.0, K=np.int64(10))
     assert 0 < r.L < 10
 

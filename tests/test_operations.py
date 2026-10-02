@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from walopy import oee, utilization_efficiency, unit_cost
+from walopy import oee, unit_cost, utilization_efficiency
 
 
 def test_oee_direct():

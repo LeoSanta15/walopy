@@ -2,12 +2,20 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import pytest
 
-import pandas as pd
-
-from walopy import mm1, mmc, kingman
-from walopy import solve_lam, solve_mu, solve_servers, optimize_servers, sensitivity, batch_model
+from walopy import (
+    batch_model,
+    kingman,
+    mm1,
+    mmc,
+    optimize_servers,
+    sensitivity,
+    solve_lam,
+    solve_mu,
+    solve_servers,
+)
 
 
 def test_solve_lam_wq():
@@ -135,4 +143,20 @@ def test_batch_model_mmc():
 def test_batch_model_no_error_column_when_all_pass():
     scenarios = pd.DataFrame({"lam": [1.0, 2.0], "mu": [5.0, 5.0]})
     result = batch_model(mm1, scenarios)
+    assert "_error" not in result.columns
+
+
+def test_batch_model_errors_raise_propaga_la_excepcion():
+    scenarios = pd.DataFrame({"lam": [1.0, 6.0], "mu": [5.0, 5.0]})
+    with pytest.raises(ValueError, match="inestable"):
+        batch_model(mm1, scenarios, errors="raise")
+
+
+def test_batch_model_errors_invalido():
+    with pytest.raises(ValueError, match="errors"):
+        batch_model(mm1, pd.DataFrame({"lam": [1.0], "mu": [5.0]}), errors="ignorar")
+
+
+def test_batch_model_sin_errores_no_agrega_columna_error():
+    result = batch_model(mm1, pd.DataFrame({"lam": [1.0, 2.0], "mu": [5.0, 5.0]}))
     assert "_error" not in result.columns

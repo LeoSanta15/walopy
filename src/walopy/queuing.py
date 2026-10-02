@@ -3,10 +3,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-import numpy as np
+from ._utils import MAX_SERVIDORES, as_finite_scalar, as_int_positive, as_nonneg, as_positive
 
-from ._utils import as_positive, as_nonneg, as_fraction, as_int_positive
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import pandas as pd
 
 
 @dataclass
@@ -48,7 +51,7 @@ class QueueResult:
     Wq: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Export key KPIs as a one-row DataFrame."""
         import pandas as pd
 
@@ -84,7 +87,7 @@ class QueueResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_queue_sensitivity
         return plot_queue_sensitivity(self, **kwargs)
 
@@ -128,7 +131,7 @@ def littles_law(
     provided = {k: v for k, v in {"L": L, "lam": lam, "W": W}.items() if v is not None}
     missing = [k for k, v in {"L": L, "lam": lam, "W": W}.items() if v is None]
     if len(missing) != 1:
-        raise ValueError("Exactly one of L, lam, W must be None.")
+        raise ValueError("Exactamente una de L, lam, W debe ser None.")
     for k, v in provided.items():
         as_positive(v, k)
     if missing[0] == "L":
@@ -155,12 +158,26 @@ def mm1(lam: float, mu: float) -> QueueResult:
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mm1(lam=2.0, mu=3.0)
+    >>> round(r.L, 4)
+    2.0
     """
     lam = as_positive(lam, "lam")
     mu = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < μ.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1. Se requiere λ < μ.")
     Lq = rho**2 / (1 - rho)
     L  = rho / (1 - rho)
     Wq = Lq / lam
@@ -191,21 +208,41 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``c`` supera 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mmc(lam=2.0, mu=3.0, c=2)
+    >>> round(r.L, 4)
+    0.75
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    c   = as_int_positive(c, "c")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     rho = lam / (c * mu)
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < c·μ.")
-    a = lam / mu  # offered load
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1. Se requiere λ < c·μ.")
+    a = lam / mu  # carga ofrecida
 
-    # Erlang-C formula for P0
-    sum_terms = sum((a**n) / math.factorial(n) for n in range(c))
-    last_term = (a**c) / (math.factorial(c) * (1 - rho))
-    P0 = 1.0 / (sum_terms + last_term)
-
-    Pq = (a**c / (math.factorial(c) * (1 - rho))) * P0  # P(wait) = Erlang-C
+    # Erlang-B por recurrencia (estable para c grande) y de ahí Erlang-C y P0.
+    # Las fórmulas directas a**n / n! desbordan float a partir de c ≈ 140.
+    B = 1.0
+    for k in range(1, c + 1):
+        B = a * B / (k + a * B)
+    Pq = B / (1.0 - rho * (1.0 - B))  # P(espera) = Erlang-C
+    if B > 0.0:
+        log_Z = c * math.log(a) - math.lgamma(c + 1)  # ln(a^c / c!)
+        P0 = math.exp(math.log(B) - log_Z - math.log((1.0 - B) + B / (1.0 - rho)))
+    else:  # B subdesbordado: la cola de Poisson es despreciable y P0 ≈ e^{-a}
+        P0 = math.exp(-a)
     Lq = Pq * rho / (1 - rho)
     Wq = Lq / lam
     W  = Wq + 1 / mu
@@ -237,12 +274,26 @@ def md1(lam: float, mu: float) -> QueueResult:
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = md1(lam=2.0, mu=3.0)
+    >>> round(r.L, 4)
+    1.3333
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     Lq = rho**2 / (2 * (1 - rho))
     L  = rho + Lq
     Wq = Lq / lam
@@ -283,6 +334,20 @@ def kingman(
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = kingman(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0)
+    >>> round(r.L, 4)
+    2.0
     """
     lam  = as_positive(lam, "lam")
     mu   = as_positive(mu, "mu")
@@ -290,7 +355,7 @@ def kingman(
     cs2  = as_nonneg(cs2, "cs2")
     rho  = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     Wq = (rho / (1 - rho)) * ((ca2 + cs2) / 2) * (1 / mu)
     Lq = lam * Wq
     W  = Wq + 1 / mu
@@ -331,13 +396,27 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
     -----
     P-K formula:  Wq = λ · E[S²] / (2 · (1 − ρ))
     where  E[S²] = (1 + cs²) / μ².
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mg1(lam=2.0, mu=3.0, cs2=1.0)
+    >>> round(r.L, 4)
+    2.0
     """
     lam  = as_positive(lam, "lam")
     mu   = as_positive(mu, "mu")
     cs2  = as_nonneg(cs2, "cs2")
     rho  = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     ES2  = (1.0 + cs2) / mu**2          # E[S²]
     Wq   = lam * ES2 / (2.0 * (1.0 - rho))
     Lq   = lam * Wq
@@ -362,10 +441,29 @@ def cv2_triangular(a: float, m: float, b: float) -> float:
     a : float  Lower bound.
     m : float  Mode (peak).
     b : float  Upper bound.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se cumple a ≤ m ≤ b o la media de la distribución es 0.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_triangular(a=1.0, m=2.0, b=3.0)
+    >>> round(r, 4)
+    0.0417
     """
+    a = as_finite_scalar(a, "a")
+    m = as_finite_scalar(m, "m")
+    b = as_finite_scalar(b, "b")
     if not (a <= m <= b):
-        raise ValueError("Triangular requires a ≤ m ≤ b.")
+        raise ValueError("La triangular requiere a ≤ m ≤ b.")
     mean = (a + m + b) / 3.0
+    if mean == 0.0:
+        raise ValueError("La media de la distribución es 0: CV² no está definido.")
     var  = (a**2 + m**2 + b**2 - a*m - a*b - m*b) / 18.0
     return var / mean**2
 
@@ -377,10 +475,28 @@ def cv2_uniform(a: float, b: float) -> float:
     ----------
     a : float  Lower bound.
     b : float  Upper bound (> a).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si b ≤ a o la media de la distribución es 0.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_uniform(a=1.0, b=3.0)
+    >>> round(r, 4)
+    0.0833
     """
+    a = as_finite_scalar(a, "a")
+    b = as_finite_scalar(b, "b")
     if b <= a:
-        raise ValueError("Uniform requires b > a.")
+        raise ValueError("La uniforme requiere b > a.")
     mean = (a + b) / 2.0
+    if mean == 0.0:
+        raise ValueError("La media de la distribución es 0: CV² no está definido.")
     var  = (b - a)**2 / 12.0
     return var / mean**2
 
@@ -392,6 +508,19 @@ def cv2_normal(mean: float, std: float) -> float:
     ----------
     mean : float  Mean (> 0 for service/inter-arrival times).
     std  : float  Standard deviation (≥ 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_normal(mean=5.0, std=1.0)
+    >>> round(r, 4)
+    0.04
     """
     as_positive(mean, "mean")
     as_nonneg(std, "std")
@@ -404,10 +533,22 @@ def cv2_erlang(k: int) -> float:
     Parameters
     ----------
     k : int  Shape parameter (≥ 1).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``k`` no es un entero ≥ 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_erlang(k=3)
+    >>> round(r, 4)
+    0.3333
     """
-    k = int(k)
-    if k < 1:
-        raise ValueError("Erlang-k requires k ≥ 1.")
+    k = as_int_positive(k, "k")
     return 1.0 / k
 
 
@@ -417,6 +558,19 @@ def cv2_gamma(shape: float) -> float:
     Parameters
     ----------
     shape : float  Shape parameter α (> 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_gamma(shape=2.0)
+    >>> round(r, 4)
+    0.5
     """
     as_positive(shape, "shape")
     return 1.0 / shape
@@ -429,6 +583,19 @@ def cv2_lognormal(mean: float, std: float) -> float:
     ----------
     mean : float  Mean of the lognormal variable (> 0).
     std  : float  Standard deviation of the lognormal variable (> 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_lognormal(mean=5.0, std=1.0)
+    >>> round(r, 4)
+    0.04
     """
     as_positive(mean, "mean")
     as_positive(std, "std")
@@ -443,6 +610,19 @@ def cv2_weibull(shape: float) -> float:
     Parameters
     ----------
     shape : float  Shape parameter k (> 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_weibull(shape=1.5)
+    >>> round(r, 4)
+    0.461
     """
     as_positive(shape, "shape")
     return math.gamma(1.0 + 2.0 / shape) / math.gamma(1.0 + 1.0 / shape) ** 2 - 1.0

@@ -1,10 +1,13 @@
 """Parameter estimation from observed arrival / service time data."""
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @dataclass
@@ -77,7 +80,7 @@ class FitResult:
             out["cs2"] = self.cs2
         return out
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "λ": self.lam,
@@ -97,9 +100,9 @@ def _fit_times(times: np.ndarray, name: str) -> tuple[float, float, float, float
     """Return (rate, cv2, mean, std) from a 1D array of positive durations."""
     arr = np.asarray(times, dtype=float).ravel()
     if arr.size < 2:
-        raise ValueError(f"'{name}' must contain at least 2 observations.")
+        raise ValueError(f"'{name}' debe contener al menos 2 observaciones.")
     if np.any(arr <= 0) or not np.all(np.isfinite(arr)):
-        raise ValueError(f"All values in '{name}' must be finite and strictly positive.")
+        raise ValueError(f"Todos los valores de '{name}' deben ser finitos y estrictamente positivos.")
     mean = float(np.mean(arr))
     std  = float(np.std(arr, ddof=1))
     rate = 1.0 / mean
@@ -108,10 +111,10 @@ def _fit_times(times: np.ndarray, name: str) -> tuple[float, float, float, float
 
 
 def fit_from_data(
-    inter_arrivals: "np.ndarray | None" = None,
-    service_times: "np.ndarray | None" = None,
+    inter_arrivals: np.ndarray | None = None,
+    service_times: np.ndarray | None = None,
     *,
-    arrival_timestamps: "np.ndarray | None" = None,
+    arrival_timestamps: np.ndarray | None = None,
 ) -> FitResult:
     """Estimate queuing model parameters from observed data.
 
@@ -133,6 +136,15 @@ def fit_from_data(
     FitResult
         Estimated λ, μ, ca², cs² and sample statistics.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se indica ninguna muestra, si se indican ``inter_arrivals`` y ``arrival_timestamps`` a la vez, o si hay menos de 2 observaciones.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> import numpy as np
@@ -140,22 +152,23 @@ def fit_from_data(
     >>> ia  = rng.exponential(scale=0.2, size=1000)   # true λ = 5
     >>> svc = rng.exponential(scale=0.1, size=1000)   # true μ = 10
     >>> fit = fit_from_data(ia, svc)
-    >>> round(fit.lam, 1), round(fit.mu, 1)  # ≈ (5.0, 10.0)
+    >>> round(fit.lam, 1), round(fit.mu, 1)  # cercano a los valores verdaderos (5.0, 10.0)
+    (4.9, 9.8)
     """
     if inter_arrivals is not None and arrival_timestamps is not None:
-        raise ValueError("Pass either 'inter_arrivals' or 'arrival_timestamps', not both.")
+        raise ValueError("Indique 'inter_arrivals' o 'arrival_timestamps', no ambos.")
 
     if arrival_timestamps is not None:
         ts = np.asarray(arrival_timestamps, dtype=float).ravel()
         if ts.size < 2:
-            raise ValueError("'arrival_timestamps' must contain at least 2 timestamps.")
+            raise ValueError("'arrival_timestamps' debe contener al menos 2 marcas de tiempo.")
         if not np.all(np.isfinite(ts)):
-            raise ValueError("'arrival_timestamps' must be finite.")
+            raise ValueError("'arrival_timestamps' debe ser finito.")
         inter_arrivals = np.diff(ts)
 
     if inter_arrivals is None and service_times is None:
         raise ValueError(
-            "Provide at least one of 'inter_arrivals', 'arrival_timestamps', or 'service_times'."
+            "Indique al menos uno de 'inter_arrivals', 'arrival_timestamps' o 'service_times'."
         )
 
     lam = mu = ca2 = cs2 = None

@@ -2,11 +2,17 @@
 from __future__ import annotations
 
 import math
+import warnings
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from statistics import NormalDist
-from typing import Sequence
+from typing import TYPE_CHECKING, Any
 
-from ._utils import as_positive, as_nonneg, as_fraction
+from ._utils import as_float_list, as_fraction, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import pandas as pd
 
 
 # ---------------------------------------------------------------------------
@@ -55,7 +61,7 @@ class EOQResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "EOQ": self.eoq,
@@ -66,7 +72,7 @@ class EOQResult:
             "Cycle time": self.cycle_time,
         }])
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_eoq
         return plot_eoq(self, **kwargs)
 
@@ -92,6 +98,14 @@ def eoq(
     Returns
     -------
     EOQResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -166,7 +180,7 @@ class ReorderResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Reorder point": self.reorder_point,
@@ -211,6 +225,15 @@ def reorder_point(
     -------
     ReorderResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = reorder_point(demand_rate=50, lead_time=2, demand_std=10, service_level=0.95)
@@ -223,7 +246,7 @@ def reorder_point(
     sl  = as_nonneg(lead_time_std, "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc == 0.0 or svc == 1.0:
-        raise ValueError("'service_level' must be strictly between 0 and 1.")
+        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
 
     mean_dlt = D * LT
     var_dlt  = LT * sd**2 + D**2 * sl**2
@@ -299,7 +322,7 @@ class NewsvendorResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Q*": self.optimal_qty,
@@ -344,11 +367,20 @@ def newsvendor(
     -------
     NewsvendorResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``cost`` no es menor que ``price`` o ``salvage`` no es menor que ``cost``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = newsvendor(demand_mean=100, demand_std=20, price=10, cost=6, salvage=2)
-    >>> 100 < r.optimal_qty < 130
-    True
+    >>> round(r.optimal_qty, 2)  # razón crítica 0.5 → cuantil de la mediana
+    100.0
     """
     mu  = as_positive(demand_mean, "demand_mean")
     sig = as_nonneg(demand_std, "demand_std")
@@ -357,9 +389,9 @@ def newsvendor(
     s   = as_nonneg(salvage, "salvage")
 
     if c >= p:
-        raise ValueError("'cost' must be less than 'price' (otherwise Cu ≤ 0).")
+        raise ValueError("'cost' debe ser menor que 'price' (de lo contrario Cu ≤ 0).")
     if s >= c:
-        raise ValueError("'salvage' must be less than 'cost' (otherwise Co ≤ 0).")
+        raise ValueError("'salvage' debe ser menor que 'cost' (de lo contrario Co ≤ 0).")
 
     Cu = p - c          # underage cost (opportunity loss)
     Co = c - s          # overage cost  (holding/disposal loss)
@@ -378,9 +410,6 @@ def newsvendor(
         exp_leftover = max(Q - mu, 0.0)
         exp_stockout = max(mu - Q, 0.0)
     else:
-        z = (Q - mu) / sig
-        phi_z  = nd.pdf(Q)        # = NormalDist().pdf(z) / sig
-        Phi_z  = nd.cdf(Q)
         # Standard normal loss function: L(z) = phi(z) - z*(1-Phi(z))
         # E[max(D-Q,0)] = sig * L(z) using standard normal N(0,1)
         from statistics import NormalDist as _ND
@@ -466,7 +495,7 @@ class EBQResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "EBQ": self.ebq,
@@ -505,6 +534,15 @@ def ebq(
     -------
     EBQResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``production_rate`` no supera a ``demand_rate``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = ebq(demand_rate=1000, setup_cost=50, holding_cost=2, production_rate=4000)
@@ -516,7 +554,7 @@ def ebq(
     h = as_positive(holding_cost, "holding_cost")
     P = as_positive(production_rate, "production_rate")
     if D >= P:
-        raise ValueError(f"production_rate ({P}) must exceed demand_rate ({D}).")
+        raise ValueError(f"production_rate ({P}) debe superar a demand_rate ({D}).")
 
     fraction = 1.0 - D / P
     q   = math.sqrt(2 * D * S / (h * fraction))
@@ -563,12 +601,11 @@ class MultiItemResult:
     total_cost: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
     def summary(self) -> str:
-        import pandas as pd
         df = self.to_frame()
         lines = [df.to_string(index=False), f"\nTotal cost: {self.total_cost:.6g}"]
         return "\n".join(lines)
@@ -603,6 +640,15 @@ def eoq_multi(
     -------
     MultiItemResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = eoq_multi([1000, 500], [50, 30], [2, 1])
@@ -614,7 +660,7 @@ def eoq_multi(
     holding_costs  = list(holding_costs)
     n = len(demand_rates)
     if len(ordering_costs) != n or len(holding_costs) != n:
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
         names = [f"Item-{i+1}" for i in range(n)]
 
@@ -659,6 +705,15 @@ def ebq_multi(
     -------
     MultiItemResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = ebq_multi([1000, 500], [50, 30], [2, 1], [4000, 2000])
@@ -671,7 +726,7 @@ def ebq_multi(
     production_rates = list(production_rates)
     n = len(demand_rates)
     if not (len(setup_costs) == len(holding_costs) == len(production_rates) == n):
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
         names = [f"Item-{i+1}" for i in range(n)]
 
@@ -728,8 +783,12 @@ def _eoq_lagrangian_bisect(
 
     # Find upper bound for λ
     hi = 1.0
-    while total(hi) > bound:
+    for _ in range(200):
+        if total(hi) <= bound:
+            break
         hi *= 2.0
+    else:
+        raise ValueError("La restricción no se puede satisfacer con ninguna cantidad de pedido positiva.")
 
     lo = 0.0
     for _ in range(120):
@@ -771,7 +830,7 @@ class ConstrainedMultiEOQResult:
     binding_constraints: list
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
@@ -839,6 +898,16 @@ def eoq_multi_constrained(
     -------
     ConstrainedMultiEOQResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+        Si ``budget``/``space`` no son positivos o falta la lista de costos/espacios asociada.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = eoq_multi_constrained(
@@ -848,12 +917,12 @@ def eoq_multi_constrained(
     >>> r.total_cost > 0
     True
     """
-    D = [as_positive(d, f"demand_rates[{i}]") for i, d in enumerate(demand_rates)]
-    K = [as_positive(k, f"ordering_costs[{i}]") for i, k in enumerate(ordering_costs)]
-    h = [as_positive(hi, f"holding_costs[{i}]") for i, hi in enumerate(holding_costs)]
+    D = as_float_list(demand_rates, "demand_rates")
+    K = as_float_list(ordering_costs, "ordering_costs")
+    h = as_float_list(holding_costs, "holding_costs")
     n = len(D)
     if len(K) != n or len(h) != n:
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
         names = [f"Item-{i+1}" for i in range(n)]
 
@@ -861,23 +930,32 @@ def eoq_multi_constrained(
     all_constraints: list[dict] = []
     if budget is not None:
         if budget_unit_costs is None:
-            raise ValueError("'budget_unit_costs' required when 'budget' is specified.")
-        bc = list(budget_unit_costs)
+            raise ValueError("'budget_unit_costs' es obligatorio cuando se indica 'budget'.")
+        bc = as_float_list(budget_unit_costs, "budget_unit_costs", kind="nonneg")
         if len(bc) != n:
-            raise ValueError("'budget_unit_costs' must have same length as demand_rates.")
-        all_constraints.append({"name": "budget", "weights": [c / 2 for c in bc], "bound": float(budget)})
+            raise ValueError("'budget_unit_costs' debe tener la misma longitud que demand_rates.")
+        all_constraints.append(
+            {"name": "budget", "weights": [c / 2 for c in bc], "bound": as_positive(budget, "budget")}
+        )
     if space is not None:
         if space_per_unit is None:
-            raise ValueError("'space_per_unit' required when 'space' is specified.")
-        sw = list(space_per_unit)
+            raise ValueError("'space_per_unit' es obligatorio cuando se indica 'space'.")
+        sw = as_float_list(space_per_unit, "space_per_unit", kind="nonneg")
         if len(sw) != n:
-            raise ValueError("'space_per_unit' must have same length as demand_rates.")
-        all_constraints.append({"name": "space", "weights": [s / 2 for s in sw], "bound": float(space)})
+            raise ValueError("'space_per_unit' debe tener la misma longitud que demand_rates.")
+        all_constraints.append(
+            {"name": "space", "weights": [s / 2 for s in sw], "bound": as_positive(space, "space")}
+        )
     if constraints:
-        for c in constraints:
-            if len(c["weights"]) != n:
-                raise ValueError(f"Constraint '{c['name']}' weights length mismatch.")
-            all_constraints.append(c)
+        for j, c in enumerate(constraints):
+            if not isinstance(c, dict) or not {"name", "weights", "bound"} <= set(c):
+                raise ValueError(f"constraints[{j}] debe ser un diccionario con 'name', 'weights' y 'bound'.")
+            w = as_float_list(c["weights"], f"constraints[{j}]['weights']", kind="nonneg")
+            if len(w) != n:
+                raise ValueError(f"La restricción '{c['name']}': 'weights' tiene una longitud distinta a demand_rates.")
+            all_constraints.append(
+                {"name": c["name"], "weights": w, "bound": as_positive(c["bound"], f"constraints[{j}]['bound']")}
+            )
 
     # Unconstrained solution
     Q_unc = [math.sqrt(2 * D[i] * K[i] / h[i]) for i in range(n)]
@@ -979,7 +1057,7 @@ class LotSizingResult:
     method: str
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.orders)
 
@@ -1026,13 +1104,22 @@ def lot_for_lot(
     -------
     LotSizingResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = lot_for_lot([100, 80, 120, 60], setup_cost=200, holding_cost=1)
     >>> r.total_holding_cost
     0.0
     """
-    demands    = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    demands    = as_float_list(demands, "demands", kind="nonneg")
     setup_cost = as_positive(setup_cost, "setup_cost")
     holding_cost = as_positive(holding_cost, "holding_cost")
 
@@ -1077,13 +1164,22 @@ def silver_meal(
     -------
     LotSizingResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = silver_meal([100, 80, 120, 60], setup_cost=200, holding_cost=1)
     >>> r.total_cost <= lot_for_lot([100, 80, 120, 60], 200, 1).total_cost
     True
     """
-    demands    = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    demands    = as_float_list(demands, "demands", kind="nonneg")
     setup_cost = as_positive(setup_cost, "setup_cost")
     holding_cost = as_positive(holding_cost, "holding_cost")
     T = len(demands)
@@ -1182,7 +1278,7 @@ class QuantityDiscountResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.candidates)
 
@@ -1214,6 +1310,15 @@ def eoq_quantity_discount(
     -------
     QuantityDiscountResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``price_breaks`` está vacío o mal formado.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = eoq_quantity_discount(
@@ -1229,7 +1334,7 @@ def eoq_quantity_discount(
 
     breaks = list(price_breaks)
     if len(breaks) < 1:
-        raise ValueError("price_breaks must contain at least one entry.")
+        raise ValueError("price_breaks debe contener al menos una entrada.")
 
     # Sort by min_qty
     breaks.sort(key=lambda x: x[0])
@@ -1310,13 +1415,22 @@ def wagner_whitin(
     LotSizingResult
         ``method`` is ``'Wagner-Whitin'``.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = wagner_whitin([100, 80, 120, 60], setup_cost=200, holding_cost=1)
-    >>> r.total_cost <= wagner_whitin.__doc__ and True  # optimal ≤ Silver-Meal
+    >>> r.total_cost <= silver_meal([100, 80, 120, 60], setup_cost=200, holding_cost=1).total_cost
     True
     """
-    demands_v = [as_nonneg(d, f"demands[{i}]") for i, d in enumerate(demands)]
+    demands_v = as_float_list(demands, "demands", kind="nonneg")
     K = as_positive(setup_cost, "setup_cost")
     h = as_positive(holding_cost, "holding_cost")
     n = len(demands_v)
@@ -1326,11 +1440,14 @@ def wagner_whitin(
     dp[0] = 0.0
     last = [-1] * (n + 1)  # last[j] = period i where order was placed
 
-    for j in range(1, n + 1):
-        for i in range(1, j + 1):
-            # Order at start of period i to cover demands i..j (1-indexed)
-            hold = h * sum((k - i) * demands_v[k - 1] for k in range(i, j + 1))
-            cost = dp[i - 1] + K + hold
+    # Recursión hacia adelante: el costo de mantener se acumula de forma incremental
+    # (O(n²) en total; antes se recalculaba la suma completa para cada par (i, j): O(n³)).
+    for i in range(1, n + 1):
+        acum = 0.0  # Σ_{k=i..j} (k - i) · d_k
+        for j in range(i, n + 1):
+            acum += (j - i) * demands_v[j - 1]
+            # Pedido al inicio del periodo i que cubre las demandas i..j (índices desde 1)
+            cost = dp[i - 1] + K + h * acum
             if cost < dp[j]:
                 dp[j] = cost
                 last[j] = i
@@ -1408,7 +1525,7 @@ class RQPolicyResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Q*": self.order_qty,
@@ -1455,6 +1572,26 @@ def rq_policy(
     Returns
     -------
     RQPolicyResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = rq_policy(
+    ...     demand_rate=100.0,
+    ...     ordering_cost=50.0,
+    ...     holding_cost=2.0,
+    ...     lead_time=2.0,
+    ...     demand_std=5.0,
+    ... )
+    >>> round(r.order_qty, 4)
+    70.7107
     """
     from statistics import NormalDist
     D   = as_positive(demand_rate,  "demand_rate")
@@ -1465,7 +1602,7 @@ def rq_policy(
     sl  = as_nonneg(lead_time_std,   "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc <= 0.0 or svc >= 1.0:
-        raise ValueError("'service_level' must be strictly between 0 and 1.")
+        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
 
     Q   = math.sqrt(2 * D * K / h)
     mean_dlt = D * LT
@@ -1534,7 +1671,7 @@ class RSPolicyResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "R": self.review_period,
@@ -1584,6 +1721,27 @@ def rs_policy(
     Returns
     -------
     RSPolicyResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = rs_policy(
+    ...     demand_rate=100.0,
+    ...     ordering_cost=50.0,
+    ...     holding_cost=2.0,
+    ...     lead_time=2.0,
+    ...     review_period=1.0,
+    ...     demand_std=5.0,
+    ... )
+    >>> round(r.total_cost, 4)
+    178.4897
     """
     from statistics import NormalDist
     D   = as_positive(demand_rate,   "demand_rate")
@@ -1595,7 +1753,7 @@ def rs_policy(
     sl  = as_nonneg(lead_time_std,   "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc <= 0.0 or svc >= 1.0:
-        raise ValueError("'service_level' must be strictly between 0 and 1.")
+        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
 
     # Exposure period = R + L
     RL = R + LT
@@ -1659,12 +1817,12 @@ class ExchangeCurveResult:
     optimal_quantities: list
     curve_points: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Per-item quantities DataFrame: name, Q_eoq, Q_optimal, n_orders, investment."""
         import pandas as pd
         return pd.DataFrame(self.optimal_quantities)
 
-    def curve_to_frame(self) -> "pd.DataFrame":
+    def curve_to_frame(self) -> pd.DataFrame:
         """Exchange-curve hyperbola DataFrame: columns N (orders/yr) and I (investment)."""
         import pandas as pd
         return pd.DataFrame(self.curve_points)
@@ -1732,15 +1890,32 @@ def exchange_curve(
     -----
     Only one of *target_orders* or *target_investment* may be specified.
     If neither is given the EOQ point (k = 1) is returned.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = exchange_curve(
+    ...     items=[{'name': 'A', 'demand': 1000, 'ordering_cost': 50, 'holding_cost': 2, 'unit_value': 10}, {'name': 'B', 'demand': 500, 'ordering_cost': 30, 'holding_cost': 1, 'unit_value': 5}],
+    ...     target_orders=10.0,
+    ... )
+    >>> round(r.n_orders_eoq, 4)
+    7.3589
     """
     if target_orders is not None and target_investment is not None:
         raise ValueError(
             "Specify at most one of 'target_orders' or 'target_investment'."
         )
     if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
+        raise ValueError("'items' debe contener al menos un elemento.")
 
-    parsed = []
+    parsed: list[dict[str, Any]] = []
     for idx, it in enumerate(items):
         D  = as_positive(float(it["demand"]),        f"items[{idx}]['demand']")
         K  = as_positive(float(it["ordering_cost"]), f"items[{idx}]['ordering_cost']")
@@ -1748,7 +1923,7 @@ def exchange_curve(
         v  = float(it.get("unit_value", 1.0))
         nm = str(it.get("name", f"I{idx + 1}"))
         if v <= 0:
-            raise ValueError(f"items[{idx}]['unit_value'] must be > 0.")
+            raise ValueError(f"items[{idx}]['unit_value'] debe ser > 0.")
         Q_eoq = math.sqrt(2 * D * K / h)
         parsed.append({"name": nm, "D": D, "K": K, "h": h, "v": v, "Q_eoq": Q_eoq})
 
@@ -1842,12 +2017,12 @@ class SafetyStockCurveResult:
     optimal_quantities: list
     curve_points: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Per-item safety-stock DataFrame."""
         import pandas as pd
         return pd.DataFrame(self.optimal_quantities)
 
-    def curve_to_frame(self) -> "pd.DataFrame":
+    def curve_to_frame(self) -> pd.DataFrame:
         """Full exchange curve DataFrame: z, service_level, ss_investment."""
         import pandas as pd
         return pd.DataFrame(self.curve_points)
@@ -1912,17 +2087,35 @@ def safety_stock_curve(
     Only one of *target_service_level* or *target_ss_investment* may be given.
     If neither is supplied, z = 0 (50 % service level) is used as the
     baseline; pass ``target_service_level=0.95`` for the typical default.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si ``target_service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = safety_stock_curve(
+    ...     items=[{'name': 'A', 'demand_rate': 100, 'demand_std': 10, 'lead_time': 2, 'unit_value': 10}, {'name': 'B', 'demand_rate': 50, 'demand_std': 5, 'lead_time': 1, 'unit_value': 5}],
+    ...     target_service_level=0.95,
+    ... )
+    >>> round(r.z, 4)
+    1.6449
     """
     if target_service_level is not None and target_ss_investment is not None:
         raise ValueError(
             "Specify at most one of 'target_service_level' or 'target_ss_investment'."
         )
     if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
+        raise ValueError("'items' debe contener al menos un elemento.")
 
     _norm = NormalDist()
 
-    parsed = []
+    parsed: list[dict[str, Any]] = []
     for idx, it in enumerate(items):
         sd   = as_nonneg(float(it["demand_std"]),  f"items[{idx}]['demand_std']")
         L    = as_positive(float(it["lead_time"]), f"items[{idx}]['lead_time']")
@@ -1932,9 +2125,9 @@ def safety_stock_curve(
         D    = it.get("demand_rate")
         D    = float(D) if D is not None else None
         if v <= 0:
-            raise ValueError(f"items[{idx}]['unit_value'] must be > 0.")
+            raise ValueError(f"items[{idx}]['unit_value'] debe ser > 0.")
         if sl < 0:
-            raise ValueError(f"items[{idx}]['lead_time_std'] must be ≥ 0.")
+            raise ValueError(f"items[{idx}]['lead_time_std'] debe ser ≥ 0.")
         # σ_DLT = √(L·σ_D² + D²·σ_L²)  — reduces to σ_D·√L when σ_L=0
         if D is not None and sl > 0:
             sigma_dlt = math.sqrt(L * sd**2 + D**2 * sl**2)
@@ -1948,14 +2141,14 @@ def safety_stock_curve(
     if target_service_level is not None:
         sl_val = float(target_service_level)
         if not (0.0 < sl_val < 1.0):
-            raise ValueError("'target_service_level' must be strictly between 0 and 1.")
+            raise ValueError("'target_service_level' debe estar estrictamente entre 0 y 1.")
         z = _norm.inv_cdf(sl_val)
         target_label = f"service_level={sl_val:.4%}"
     elif target_ss_investment is not None:
         ti = as_positive(float(target_ss_investment), "target_ss_investment")
         if total_sigma_v == 0.0:
             raise ValueError(
-                "All items have demand_std=0 — safety stock is always 0."
+                "Todos los artículos tienen demand_std=0: el stock de seguridad es siempre 0."
             )
         z = ti / total_sigma_v
         target_label = f"ss_investment={ti:.4g}"
@@ -2031,7 +2224,7 @@ class ABCResult:
     total_value: float
     thresholds: dict
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
@@ -2070,7 +2263,7 @@ class XYZResult:
     class_summary: dict
     thresholds: dict
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
@@ -2081,7 +2274,6 @@ class XYZResult:
             "Y": f"{t['x']:.2g} < CV ≤ {t['y']:.2g}",
             "Z": f"CV > {t['y']:.2g}",
         }
-        n_total = sum(s["count"] for s in self.class_summary.values())
         lines = [
             f"{'Class':<6} {'Items':>6}  {'%Items':>7}  {'CV range'}",
             "-" * 42,
@@ -2113,11 +2305,11 @@ class ABCXYZResult:
     items: list
     matrix: dict
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
-    def matrix_frame(self) -> "pd.DataFrame":
+    def matrix_frame(self) -> pd.DataFrame:
         """Pivot table ABC (rows) × XYZ (columns) with item counts."""
         import pandas as pd
         data = {
@@ -2142,6 +2334,26 @@ class ABCXYZResult:
 
     def __str__(self) -> str:
         return self.summary()
+
+
+def _leer_items(items, nombre: str = "items") -> list:
+    """Valida que ``items`` sea una lista no vacía de diccionarios."""
+    if isinstance(items, (str, bytes, dict)) or not hasattr(items, "__iter__"):
+        raise TypeError(f"'{nombre}' debe ser una lista de diccionarios, se recibió {type(items).__name__!r}.")
+    items = list(items)
+    if not items:
+        raise ValueError(f"'{nombre}' debe contener al menos un elemento.")
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            raise TypeError(f"{nombre}[{i}] debe ser un diccionario, se recibió {type(it).__name__!r}.")
+    return items
+
+
+def _clave(it: dict, i: int, clave: str, nombre: str = "items"):
+    """Devuelve ``it[clave]`` o lanza un ValueError que indica el elemento y la clave que faltan."""
+    if clave not in it:
+        raise ValueError(f"{nombre}[{i}]: falta la clave '{clave}'.")
+    return it[clave]
 
 
 def abc_analysis(
@@ -2173,23 +2385,41 @@ def abc_analysis(
     Returns
     -------
     ABCResult
-    """
-    if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
-    if not (0.0 < a_threshold < b_threshold < 1.0):
-        raise ValueError("Must have 0 < a_threshold < b_threshold < 1.")
 
-    enriched = []
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si los umbrales no cumplen 0 < a < b < 1 o el valor anual total es cero.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = abc_analysis(
+    ...     items=[{'name': 'A', 'demand': 50, 'unit_value': 10, 'cv': 0.2}, {'name': 'B', 'demand': 30, 'unit_value': 10, 'cv': 0.7}, {'name': 'C', 'demand': 100, 'unit_value': 1, 'cv': 1.5}],
+    ... )
+    >>> round(r.total_value, 4)
+    900.0
+    """
+    items = _leer_items(items)
+    if not (0.0 < a_threshold < b_threshold < 1.0):
+        raise ValueError("Debe cumplirse 0 < a_threshold < b_threshold < 1.")
+
+    enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
         nm  = it.get("name", f"Item{i + 1}")
-        D   = as_positive(float(it["demand"]),     f"items[{i}]['demand']")
-        v   = as_positive(float(it["unit_value"]), f"items[{i}]['unit_value']")
+        D   = as_nonneg(_clave(it, i, "demand"), f"items[{i}]['demand']")
+        v   = as_positive(_clave(it, i, "unit_value"), f"items[{i}]['unit_value']")
         enriched.append({"name": str(nm), "demand": D, "unit_value": v,
-                         "annual_value": D * v})
+                         "annual_value": D * v, "index": i})
 
     enriched.sort(key=lambda x: -x["annual_value"])
     n           = len(enriched)
     total_value = sum(e["annual_value"] for e in enriched)
+    if total_value <= 0.0:
+        raise ValueError("El valor anual total es cero (todas las demandas son 0): no hay nada que clasificar.")
 
     cum = 0.0
     class_agg: dict = {"A": {"count": 0, "value": 0.0},
@@ -2257,27 +2487,41 @@ def xyz_analysis(
     Returns
     -------
     XYZResult
-    """
-    if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
-    if not (0.0 <= x_threshold < y_threshold):
-        raise ValueError("Must have 0 ≤ x_threshold < y_threshold.")
 
-    enriched = []
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si los umbrales no cumplen 0 ≤ x < y o falta el CV (o la desviación y la media).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = xyz_analysis([{"name": "a", "cv": 0.2}, {"name": "b", "cv": 0.7}, {"name": "c", "cv": 1.5}])
+    >>> [e["class"] for e in r.items]
+    ['X', 'Y', 'Z']
+    """
+    items = _leer_items(items)
+    if not (0.0 <= x_threshold < y_threshold):
+        raise ValueError("Debe cumplirse 0 ≤ x_threshold < y_threshold.")
+
+    enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
         nm = it.get("name", f"Item{i + 1}")
         if "cv" in it:
-            cv = float(it["cv"])
+            cv = as_nonneg(it["cv"], f"items[{i}]['cv']")
         else:
-            std  = float(it["demand_std"])
-            mean = float(it.get("demand_mean", it.get("demand_rate", 0.0)))
-            if mean <= 0:
-                raise ValueError(
-                    f"items[{i}]: 'demand_mean' (or 'demand_rate') must be > 0 when 'cv' is not provided."
-                )
+            std  = as_nonneg(_clave(it, i, "demand_std"), f"items[{i}]['demand_std']")
+            if "demand_mean" in it:
+                mean = it["demand_mean"]
+            elif "demand_rate" in it:
+                mean = it["demand_rate"]
+            else:
+                raise ValueError(f"items[{i}]: falta 'cv' o ('demand_std' y 'demand_mean'/'demand_rate').")
+            mean = as_positive(mean, f"items[{i}]['demand_mean']")
             cv = std / mean
-        if cv < 0:
-            raise ValueError(f"items[{i}]: CV must be ≥ 0, got {cv}.")
         if cv <= x_threshold:
             cls = "X"
         elif cv <= y_threshold:
@@ -2329,18 +2573,31 @@ def abc_xyz(
     Returns
     -------
     ABCXYZResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si algún umbral es inválido.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = abc_xyz([{"name": "a", "demand": 100, "unit_value": 10, "cv": 0.2},
+    ...             {"name": "b", "demand": 5, "unit_value": 1, "cv": 1.5}])
+    >>> [e["combined_class"] for e in r.items]
+    ['AX', 'CZ']
     """
     abc_r = abc_analysis(items, a_threshold=a_threshold, b_threshold=b_threshold)
     xyz_r = xyz_analysis(items, x_threshold=x_threshold, y_threshold=y_threshold)
-
-    abc_map = {e["name"]: e for e in abc_r.items}
-    xyz_map = {e["name"]: e for e in xyz_r.items}
 
     combined = []
     matrix: dict = {}
     for e_abc in abc_r.items:
         nm      = e_abc["name"]
-        e_xyz   = xyz_map[nm]
+        e_xyz   = xyz_r.items[e_abc["index"]]
         abc_cls = e_abc["class"]
         xyz_cls = e_xyz["class"]
         key     = (abc_cls, xyz_cls)
@@ -2379,6 +2636,9 @@ class MRPResult:
         Planned order receipts arriving this period.
     planned_releases : list[float]
         Planned order releases (issued *lead_time* periods before receipt).
+    past_due_releases : float
+        Cantidad total de órdenes planificadas cuya liberación debió ocurrir antes del
+        periodo 1 (el lead time no cabe en el horizonte); no aparece en ``planned_releases``.
     """
 
     item_name: str
@@ -2389,8 +2649,9 @@ class MRPResult:
     net_requirements: list
     planned_receipts: list
     planned_releases: list
+    past_due_releases: float = 0.0
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame({
             "Period":          self.periods,
@@ -2407,7 +2668,7 @@ class MRPResult:
         lines = [f"Item: {self.item_name}", hdr, "-" * len(hdr)]
         for i, p in enumerate(self.periods):
             lines.append(
-                f"{str(p):>8} {self.gross_requirements[i]:>8.2f}"
+                f"{p!s:>8} {self.gross_requirements[i]:>8.2f}"
                 f" {self.scheduled_receipts[i]:>8.2f}"
                 f" {self.projected_on_hand[i]:>8.2f}"
                 f" {self.net_requirements[i]:>8.2f}"
@@ -2459,30 +2720,44 @@ def mrp(
     Returns
     -------
     MRPResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``gross_requirements`` está vacío, ``lead_time`` no es un entero ≥ 0, ``lot_size`` no es ``'LFL'`` ni positivo, o las longitudes no coinciden.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mrp([0, 50, 0, 30, 60, 20], initial_on_hand=40, lead_time=1, lot_size=40, safety_stock=10)
+    >>> r.planned_receipts
+    [0.0, 40.0, 0.0, 40.0, 40.0, 40.0]
     """
-    GR  = [as_nonneg(float(g), f"gross_requirements[{i}]")
-           for i, g in enumerate(gross_requirements)]
+    GR  = as_float_list(gross_requirements, "gross_requirements", kind="nonneg")
     T   = len(GR)
-    if T == 0:
-        raise ValueError("'gross_requirements' must not be empty.")
 
     SR  = [0.0] * T
     if scheduled_receipts is not None:
-        sr_list = list(scheduled_receipts)
-        if len(sr_list) != T:
-            raise ValueError("'scheduled_receipts' must have the same length as 'gross_requirements'.")
-        SR = [as_nonneg(float(s), f"scheduled_receipts[{i}]") for i, s in enumerate(sr_list)]
+        SR = as_float_list(scheduled_receipts, "scheduled_receipts", kind="nonneg", min_len=0)
+        if len(SR) != T:
+            raise ValueError("'scheduled_receipts' debe tener la misma longitud que 'gross_requirements'.")
 
-    if not isinstance(lead_time, int) or lead_time < 0:
-        raise ValueError("'lead_time' must be a non-negative integer.")
+    if isinstance(lead_time, bool) or not isinstance(lead_time, int) or lead_time < 0:
+        raise ValueError("'lead_time' debe ser un entero no negativo.")
 
-    SS = as_nonneg(float(safety_stock), "safety_stock")
+    SS = as_nonneg(safety_stock, "safety_stock")
+    initial_on_hand = as_nonneg(initial_on_hand, "initial_on_hand")
     if isinstance(lot_size, str):
         if lot_size.upper() != "LFL":
-            raise ValueError("'lot_size' must be 'LFL' or a positive float.")
+            raise ValueError("'lot_size' debe ser 'LFL' o un número positivo.")
         lot_q: float | None = None
     else:
-        lot_q = as_positive(float(lot_size), "lot_size")
+        lot_q = as_positive(lot_size, "lot_size")
+
+    if periods is not None and len(list(periods)) != T:
+        raise ValueError("'periods' debe tener la misma longitud que 'gross_requirements'.")
 
     pds = list(periods) if periods is not None else list(range(1, T + 1))
 
@@ -2505,11 +2780,20 @@ def mrp(
 
     # Planned releases: release at period (t - lead_time) for receipt at t
     POR: list = [0.0] * T
+    past_due = 0.0
     for t in range(T):
         if PR_out[t] > 0.0:
             rel = t - lead_time
-            if 0 <= rel < T:
+            if rel < 0:
+                past_due += PR_out[t]
+            else:
                 POR[rel] += PR_out[t]
+    if past_due > 0.0:
+        warnings.warn(
+            f"{past_due:g} unidades planificadas debieron liberarse antes del periodo 1 "
+            f"(lead_time={lead_time} no cabe en el horizonte); consulte 'past_due_releases'.",
+            UserWarning, stacklevel=2,
+        )
 
     return MRPResult(
         item_name=item_name,
@@ -2520,4 +2804,5 @@ def mrp(
         net_requirements=NR_out,
         planned_receipts=PR_out,
         planned_releases=POR,
+        past_due_releases=past_due,
     )

@@ -1,13 +1,17 @@
 """Bottleneck analysis for multi-station production / service systems."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg, as_nonempty
+from ._utils import as_nonempty, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
 
 
 @dataclass
@@ -80,7 +84,7 @@ class BottleneckResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_bottleneck
         return plot_bottleneck(self, **kwargs)
 
@@ -112,6 +116,20 @@ def bottleneck_analysis(
     Returns
     -------
     BottleneckResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = bottleneck_analysis(station_names=['a', 'b'], capacities=[5.0, 3.0], demand_rate=2.0)
+    >>> round(r.system_throughput, 4)
+    3.0
     """
     station_names  = list(station_names)
     as_nonempty(station_names, "station_names")
@@ -120,12 +138,12 @@ def bottleneck_analysis(
     n              = len(station_names)
 
     if len(capacities) != n:
-        raise ValueError("'station_names' and 'capacities' must have the same length.")
+        raise ValueError("'station_names' y 'capacities' deben tener la misma longitud.")
 
     if routing_fractions is None:
         routing_fractions = [1.0] * n
     elif len(routing_fractions) != n:
-        raise ValueError("'routing_fractions' must match the number of stations.")
+        raise ValueError("'routing_fractions' debe tener un valor por estación.")
     routing_fractions = [as_nonneg(f, f"routing_fractions[{i}]") for i, f in enumerate(routing_fractions)]
 
     demand_rates = [demand_rate * rf for rf in routing_fractions]

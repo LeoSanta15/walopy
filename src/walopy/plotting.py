@@ -5,14 +5,16 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
+    import pandas as pd
     import plotly.graph_objects as go
-    from .queuing import QueueResult
-    from .operations import OEEResult
+
+    from .advanced import BreakEvenResult, LineBalanceResult, SimulationResult
     from .bottleneck import BottleneckResult
-    from .kpi import KPINode
-    from .solver import OptimizeResult
-    from .advanced import SimulationResult, LineBalanceResult, BreakEvenResult
     from .inventory import EOQResult
+    from .kpi import KPINode
+    from .operations import OEEResult
+    from .queuing import QueueResult
+    from .solver import OptimizeResult
 
 # Brand-neutral palette
 BLUE   = "#1f4e9c"
@@ -29,11 +31,11 @@ PURPLE = "#7b2d8b"
 # ---------------------------------------------------------------------------
 
 def plot_queue_sensitivity(
-    result: "QueueResult",
+    result: QueueResult,
     *,
     title: str | None = None,
     figsize: tuple | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Plot Wq and Lq as a function of utilization ρ around the operating point."""
     import matplotlib.pyplot as plt
     import numpy as np
@@ -73,11 +75,11 @@ def plot_queue_sensitivity(
 # ---------------------------------------------------------------------------
 
 def plot_queue_metrics(
-    result: "QueueResult",
+    result: QueueResult,
     *,
     title: str | None = None,
     figsize: tuple | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Bar chart of the main queuing KPIs."""
     import matplotlib.pyplot as plt
 
@@ -106,14 +108,13 @@ def plot_queue_metrics(
 # ---------------------------------------------------------------------------
 
 def plot_oee(
-    result: "OEEResult",
+    result: OEEResult,
     *,
     title: str | None = None,
     figsize: tuple | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Horizontal bar chart showing OEE decomposition."""
     import matplotlib.pyplot as plt
-    import numpy as np
 
     labels = ["Availability", "Performance", "Quality", "OEE"]
     values = [
@@ -147,11 +148,11 @@ def plot_oee(
 # ---------------------------------------------------------------------------
 
 def plot_bottleneck(
-    result: "BottleneckResult",
+    result: BottleneckResult,
     *,
     title: str | None = None,
     figsize: tuple | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Bar chart of station utilizations with bottleneck highlighted."""
     import matplotlib.pyplot as plt
 
@@ -182,11 +183,11 @@ def plot_bottleneck(
 # ---------------------------------------------------------------------------
 
 def plot_kpi_tree(
-    root: "KPINode",
+    root: KPINode,
     *,
     title: str | None = None,
     kind: str = "treemap",
-) -> "go.Figure":
+) -> go.Figure:
     """Interactive KPI tree using Plotly.
 
     Parameters
@@ -212,7 +213,7 @@ def plot_kpi_tree(
     values: list[float]   = []
     hover: list[str]      = []
 
-    def _collect(node: "KPINode", parent_id: str = "") -> None:
+    def _collect(node: KPINode, parent_id: str = "") -> None:
         node_id = f"{parent_id}/{node.name}" if parent_id else node.name
         ids.append(node_id)
         labels.append(node.name)
@@ -277,12 +278,12 @@ def plot_kpi_tree(
 # ---------------------------------------------------------------------------
 
 def plot_sensitivity(
-    df: "pd.DataFrame",
+    df: pd.DataFrame,
     param: str,
     metrics: list[str] | None = None,
     *,
     title: str | None = None,
-) -> "go.Figure":
+) -> go.Figure:
     """Line chart of KPI metrics swept over one parameter.
 
     Parameters
@@ -329,10 +330,10 @@ def plot_sensitivity(
 # ---------------------------------------------------------------------------
 
 def plot_optimize_servers(
-    result: "OptimizeResult",
+    result: OptimizeResult,
     *,
     title: str | None = None,
-) -> "go.Figure":
+) -> go.Figure:
     """Bar + line chart showing cost breakdown per number of servers."""
     import plotly.graph_objects as go
 
@@ -376,11 +377,11 @@ def plot_optimize_servers(
 # ---------------------------------------------------------------------------
 
 def plot_simulation(
-    result: "SimulationResult",
+    result: SimulationResult,
     *,
     title: str | None = None,
     n_bins: int = 60,
-) -> "go.Figure":
+) -> go.Figure:
     """Histogram of simulated waiting times with percentile annotations."""
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
@@ -437,10 +438,10 @@ def plot_simulation(
 # ---------------------------------------------------------------------------
 
 def plot_line_balance(
-    result: "LineBalanceResult",
+    result: LineBalanceResult,
     *,
     title: str | None = None,
-) -> "go.Figure":
+) -> go.Figure:
     """Bar chart of cycle times per station with takt time reference line."""
     import plotly.graph_objects as go
 
@@ -486,20 +487,25 @@ def plot_line_balance(
 # ---------------------------------------------------------------------------
 
 def plot_break_even(
-    result: "BreakEvenResult",
+    result: BreakEvenResult,
     *,
     title: str | None = None,
     unit_range_factor: float = 2.0,
-) -> "go.Figure":
+) -> go.Figure:
     """Revenue and total cost lines with break-even point highlighted."""
-    import plotly.graph_objects as go
     import numpy as np
+    import plotly.graph_objects as go
 
     p   = result.params
     fc  = p["fixed_cost"]
-    ppu = p["price_per_unit"]
-    vcu = p["variable_cost_per_unit"]
-    bep = result.bep_units
+    # break_even_sales() trabaja en ventas (no en unidades): precio 1 y costo variable = razón de costo variable.
+    en_ventas = "price_per_unit" not in p
+    if en_ventas:
+        ppu, vcu, bep = 1.0, p["variable_cost_ratio"], result.bep_revenue
+        actual = p.get("actual_revenue")
+    else:
+        ppu, vcu, bep = p["price_per_unit"], p["variable_cost_per_unit"], result.bep_units
+        actual = p.get("actual_units")
 
     units = np.linspace(0, bep * unit_range_factor, 300)
     rev   = ppu * units
@@ -513,7 +519,7 @@ def plot_break_even(
     fig.add_trace(go.Scatter(
         x=[bep], y=[result.bep_revenue],
         mode="markers+text",
-        text=[f"BEP ({bep:.0f} units)"],
+        text=[f"BEP ({bep:.0f} {'ventas' if en_ventas else 'units'})"],
         textposition="top right",
         marker=dict(color=ORANGE, size=12, symbol="star"),
         name="Break-even",
@@ -528,14 +534,13 @@ def plot_break_even(
         line=dict(color="rgba(0,0,0,0)"), name="Profit zone",
     ))
 
-    if "actual_units" in p:
-        au  = p["actual_units"]
-        fig.add_vline(x=au, line=dict(color=BLUE, width=1.5, dash="dot"),
-                      annotation_text=f"Actual ({au:.0f})", annotation_position="top left")
+    if actual is not None:
+        fig.add_vline(x=actual, line=dict(color=BLUE, width=1.5, dash="dot"),
+                      annotation_text=f"Actual ({actual:.0f})", annotation_position="top left")
 
     fig.update_layout(
         title=dict(text=title or "Break-Even Analysis", font=dict(size=16)),
-        xaxis_title="Units",
+        xaxis_title="Ventas" if en_ventas else "Units",
         yaxis_title="Amount",
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
@@ -548,11 +553,11 @@ def plot_break_even(
 # ---------------------------------------------------------------------------
 
 def plot_eoq(
-    result: "EOQResult",
+    result: EOQResult,
     *,
     title: str | None = None,
     figsize: tuple | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Total, holding, and ordering cost curves around the EOQ."""
     import matplotlib.pyplot as plt
     import numpy as np
@@ -589,11 +594,11 @@ def plot_eoq(
 # ---------------------------------------------------------------------------
 
 def plot_queue_distribution(
-    pmf_df: "pd.DataFrame",
-    cdf_df: "pd.DataFrame",
+    pmf_df: pd.DataFrame,
+    cdf_df: pd.DataFrame,
     *,
     title: str | None = None,
-) -> "go.Figure":
+) -> go.Figure:
     """Two-panel chart: queue-length PMF (bar) and sojourn-time CDF (line)."""
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots

@@ -2,6 +2,57 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
+## [0.3.0] — 2026-10-02
+
+Versión de endurecimiento tras la auditoría de madurez (`docs/auditoria/`). Cierra los hallazgos K-01…K-07,
+K-09…K-13 y N-01…N-16 (ver `docs/auditoria/ROADMAP.md`).
+
+### Cambios que rompen compatibilidad
+- **Validación estricta de entradas.** Ahora lanzan `ValueError`/`TypeError` valores que antes se aceptaban en silencio:
+  NaN/inf en `cpm`, `pert`, `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `mrp`, `weibull_analysis`,
+  `cv2_uniform`, `cv2_triangular`, `break_even_multi`, `eoq_multi_constrained`; `t`/`mttr` negativos en confiabilidad
+  (antes devolvían R(t) > 1); `initial_on_hand` inválido en `mrp`; `budget ≤ 0` en `eoq_multi_constrained` (antes se colgaba).
+- **`bool` ya no se acepta como número o entero** (`mmc(2, 3, True)` antes se interpretaba como `c=1`).
+- **`cv2_erlang(k)`** exige un entero ≥ 1 (antes truncaba `2.5` a `2`).
+- **Listas vacías** en `lot_for_lot`, `silver_meal`, `wagner_whitin`, `schedule_single` y `series_system`/`parallel_system` lanzan `ValueError`.
+- **Nombres de actividad duplicados** en `cpm`/`pert` lanzan `ValueError` (antes se fusionaban en silencio).
+- **Mensajes de error y avisos en español** (el texto cambia; los tipos de excepción no). La ayuda del CLI también está en español.
+- **Cotas de tamaño:** `c` ≤ 10⁶, `K`/`n_max`/`n_points` ≤ 10⁶, `n_customers` ≤ 10⁷.
+- `abc_analysis` acepta artículos con demanda 0 (clase C); si todas son 0 lanza `ValueError`.
+- `weibull_analysis` lanza `ValueError` si todos los tiempos son iguales y `UserWarning` si β alcanza la cota 100.
+- `mrp` emite `UserWarning` cuando una liberación cae antes del periodo 1; `MRPResult` incorpora `past_due_releases`.
+
+### Corregido
+- `mmc` desbordaba (`OverflowError`) con carga ofrecida ≳ 140; ahora usa la recurrencia de Erlang-B y es estable hasta 10⁶ servidores.
+- `abc_xyz` mezclaba artículos con nombres repetidos al emparejar por nombre; ahora empareja por posición.
+- `break_even_sales(...).plot()` lanzaba `KeyError`.
+- Holguras de CPM/PERT mostraban `-0.0`.
+- Seis doctests que nunca se habían ejecutado estaban rotos (ejemplos de `newsvendor`, `wagner_whitin`, `weibull_analysis`, `fit_from_data`, `batch_model`, `compare`).
+- Ejemplos del README: 13 de 61 usaban parámetros o atributos inexistentes; ahora los 61 se ejecutan.
+- `__version__` sin instalar devolvía `0.2.0`; ahora `0+unknown`.
+
+### Rendimiento
+- `wagner_whitin` pasa de O(n³) a O(n²) real (n=1000: 10,2 s → 0,06 s).
+- `neh_flowshop` usa la aceleración de Taillard, O(n²·m) (n=200, m=10: 5,3 s → 0,12 s).
+
+### Añadido
+- `batch_model(..., errors="collect"|"raise")`.
+- `py.typed`: los tipos de walopy se exportan a quienes lo usan.
+- README: secciones de ABC/XYZ, MRP, NEH, Weibull y CPM/PERT; referencia Sphinx de los 13 módulos; página de rendimiento.
+- Secciones `Raises` y `Examples` (con doctests ejecutables) en las 70 funciones públicas.
+- `examples/` (5 scripts) y `benchmarks/bench_core.py`.
+- `SECURITY.md`, `CODE_OF_CONDUCT.md`, plantillas de issues y de PR; `CLAUDE.md` y `CONTRIBUTING.md` reescritos.
+- CI: ruff, mypy, cobertura (global ≥ 85 % y por módulo ≥ 70 %), build + `twine check`, Sphinx `-W`, `pip-audit`,
+  matriz Python 3.9–3.13, dependencias mínimas y prueba semanal con las últimas versiones; la publicación verifica antes de publicar.
+- Tests: 357 → 1 165 (contrato de entradas sobre las 67 funciones, regresiones, referencias externas fijas, gráficas, CLI,
+  README, documentación, ejemplos, complejidad y doctests). Cobertura 80 % → 91 %.
+
+### Notas
+- Los tags `v0.2.4` y `v0.2.6` nunca se crearon en GitHub (las versiones sí se publicaron); no se reconstruyen.
+- Sigue sin existir dependencia de `scipy`.
+
+---
+
 ## [0.2.8] — 2026-09-29
 
 ### Añadido

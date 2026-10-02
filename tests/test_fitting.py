@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from walopy import fit_from_data, FitResult
+from walopy import fit_from_data
 
 
 def test_fit_exponential_ia():
@@ -71,7 +71,7 @@ def test_fit_to_frame():
 
 
 def test_fit_both_errors_both_given():
-    with pytest.raises(ValueError, match="not both"):
+    with pytest.raises(ValueError, match="no ambos"):
         fit_from_data(np.array([0.1, 0.2]), arrival_timestamps=np.array([0.1, 0.3]))
 
 

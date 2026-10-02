@@ -13,3 +13,4 @@ htmlcov/
 *.cover
 docs/build/
 .DS_Store
+coverage.json

@@ -1,11 +1,9 @@
 """Tests for M/G/1 (P-K) and CV² distribution helpers."""
 from __future__ import annotations
 
-import math
 import pytest
 
 import walopy as wl
-
 
 # ─── M/G/1 correctness ───────────────────────────────────────────────────────
 
@@ -50,7 +48,7 @@ def test_mg1_wq_formula():
 
 
 def test_mg1_unstable_raises():
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         wl.mg1(lam=5.0, mu=3.0, cs2=1.0)
 
 

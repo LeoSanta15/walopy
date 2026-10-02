@@ -1,7 +1,10 @@
 """Tests for Weibull analysis."""
 from __future__ import annotations
+
 import math
+
 import pytest
+
 import walopy as wl
 
 # Weibull(β=2, η=100): F(t) = 1 - exp(-(t/100)^2)

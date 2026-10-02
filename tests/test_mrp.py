@@ -1,7 +1,12 @@
 """Tests for MRP (single-level Material Requirements Planning)."""
 from __future__ import annotations
+
 import pytest
+
 import walopy as wl
+
+# Muchos casos usan el lead_time por defecto sobre horizontes cortos: el aviso es esperado.
+pytestmark = pytest.mark.filterwarnings("ignore:.*antes del periodo 1:UserWarning")
 
 GR = [0, 50, 0, 30, 60, 20]  # 6 periods
 

@@ -54,7 +54,7 @@ def test_multi_server_station():
 
 
 def test_unstable_raises():
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         jackson_network(["A"], mu=[2.0], gamma=[5.0], routing=[[0.0]])
 
 

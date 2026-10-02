@@ -2,14 +2,28 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg, as_fraction, as_int_positive, as_nonempty
+from ._utils import (
+    MAX_CLIENTES,
+    MAX_ESTADOS,
+    MAX_SERVIDORES,
+    as_float_list,
+    as_fraction,
+    as_int_positive,
+    as_nonempty,
+    as_nonneg,
+    as_positive,
+)
 from .queuing import QueueResult
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
 
 
 # ---------------------------------------------------------------------------
@@ -35,10 +49,24 @@ def erlang_b(lam: float, mu: float, c: int) -> float:
     -------
     float
         Blocking probability B(c, a) ∈ [0, 1].
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``c`` supera 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = erlang_b(lam=2.0, mu=3.0, c=2)
+    >>> round(r, 4)
+    0.1176
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    c   = as_int_positive(c, "c")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     a = lam / mu  # offered traffic
 
     # Recursive formula (numerically stable for large c)
@@ -72,10 +100,24 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
     QueueResult
         Note: ``rho`` here is traffic intensity λ/μ (may be ≥ 1);
         the system is always stable because of finite capacity.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``K`` supera 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mm1k(lam=2.0, mu=3.0, K=5)
+    >>> round(r.L, 4)
+    1.4226
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    K   = as_int_positive(K, "K")
+    K   = as_int_positive(K, "K", max=MAX_ESTADOS)
 
     rho = lam / mu
 
@@ -149,7 +191,7 @@ class SimulationResult:
     Wq_p95: float
     Wq_p99: float
     n_customers: int
-    _Wq_array: "np.ndarray" = field(repr=False)
+    _Wq_array: np.ndarray = field(repr=False)
     params: dict = field(default_factory=dict)
 
     def to_frame(self) -> pd.DataFrame:
@@ -184,7 +226,7 @@ class SimulationResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_simulation
         return plot_simulation(self, **kwargs)
 
@@ -223,15 +265,30 @@ def monte_carlo_gg1(
     Returns
     -------
     SimulationResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``n_customers`` supera 10⁷.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = monte_carlo_gg1(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0, n_customers=500, seed=1)
+    >>> round(r.L, 4)
+    2.0427
     """
     lam         = as_positive(lam, "lam")
     mu          = as_positive(mu, "mu")
     ca2         = as_nonneg(ca2, "ca2")
     cs2         = as_nonneg(cs2, "cs2")
-    n_customers = as_int_positive(n_customers, "n_customers")
+    n_customers = as_int_positive(n_customers, "n_customers", max=MAX_CLIENTES)
     rho         = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
 
     rng          = np.random.default_rng(seed)
     mean_ia      = 1.0 / lam
@@ -298,6 +355,19 @@ def takt_time(available_time: float, demand: float) -> float:
     -------
     float
         Takt time (time per unit).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = takt_time(available_time=480.0, demand=60.0)
+    >>> round(r, 4)
+    8.0
     """
     return as_positive(available_time, "available_time") / as_positive(demand, "demand")
 
@@ -346,7 +416,7 @@ class LineBalanceResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_line_balance
         return plot_line_balance(self, **kwargs)
 
@@ -370,6 +440,20 @@ def line_balance(
     Returns
     -------
     LineBalanceResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = line_balance(station_names=['A', 'B'], cycle_times=[5.0, 9.0], takt=10.0)
+    >>> round(r.balance_efficiency, 4)
+    0.7
     """
     names  = list(station_names)
     as_nonempty(names, "station_names")
@@ -378,7 +462,7 @@ def line_balance(
     n      = len(names)
 
     if len(cts) != n:
-        raise ValueError("'station_names' and 'cycle_times' must have the same length.")
+        raise ValueError("'station_names' y 'cycle_times' deben tener la misma longitud.")
 
     idle        = [max(takt - ct, 0.0) for ct in cts]
     utils       = [ct / takt for ct in cts]
@@ -463,7 +547,7 @@ class BreakEvenResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_break_even
         return plot_break_even(self, **kwargs)
 
@@ -491,6 +575,20 @@ def break_even(
     Returns
     -------
     BreakEvenResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el precio no supera al costo variable unitario.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = break_even(fixed_cost=1000.0, price_per_unit=10.0, variable_cost_per_unit=4.0)
+    >>> round(r.bep_units, 4)
+    166.6667
     """
     fixed_cost             = as_positive(fixed_cost, "fixed_cost")
     price_per_unit         = as_positive(price_per_unit, "price_per_unit")
@@ -498,7 +596,7 @@ def break_even(
 
     cm  = price_per_unit - variable_cost_per_unit
     if cm <= 0:
-        raise ValueError("price_per_unit must exceed variable_cost_per_unit for a positive contribution margin.")
+        raise ValueError("price_per_unit debe superar a variable_cost_per_unit para obtener un margen de contribución positivo.")
 
     cmr       = cm / price_per_unit
     bep_units = fixed_cost / cm
@@ -616,6 +714,15 @@ def break_even_multi(
     -------
     BreakEvenMultiResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si algún producto tiene margen de contribución no positivo o una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = break_even_multi(
@@ -627,24 +734,26 @@ def break_even_multi(
     >>> r.bep_units_total > 0
     True
     """
-    prices         = list(prices)
-    variable_costs = list(variable_costs)
-    sales_mix      = list(sales_mix)
+    prices         = as_float_list(prices, "prices")
+    variable_costs = as_float_list(variable_costs, "variable_costs", kind="nonneg")
+    sales_mix      = as_float_list(sales_mix, "sales_mix", kind="nonneg")
     n = len(prices)
     if len(variable_costs) != n or len(sales_mix) != n:
-        raise ValueError("prices, variable_costs and sales_mix must have the same length.")
+        raise ValueError("prices, variable_costs y sales_mix deben tener la misma longitud.")
     if names is None:
         names = [f"Product-{i+1}" for i in range(n)]
+    elif len(list(names)) != n:
+        raise ValueError("'names' debe tener la misma longitud que prices.")
     fixed_cost = as_positive(fixed_cost, "fixed_cost")
 
     total_mix = sum(sales_mix)
     if total_mix <= 0:
-        raise ValueError("sales_mix values must be positive.")
+        raise ValueError("La suma de sales_mix debe ser positiva.")
     mix_frac = [m / total_mix for m in sales_mix]
 
     cms = [p - v for p, v in zip(prices, variable_costs)]
     if any(cm <= 0 for cm in cms):
-        raise ValueError("All products must have a positive contribution margin (price > variable_cost).")
+        raise ValueError("Todos los productos deben tener margen de contribución positivo (precio > costo variable).")
 
     wacm     = sum(cm * mf for cm, mf in zip(cms, mix_frac))
     avg_price = sum(p * mf for p, mf in zip(prices, mix_frac))
@@ -679,7 +788,7 @@ def break_even_sales(
     variable_cost_ratio: float,
     *,
     actual_revenue: float | None = None,
-) -> "BreakEvenResult":
+) -> BreakEvenResult:
     """Break-even point expressed as sales revenue.
 
     Uses the contribution margin ratio (CMR) when costs are given as fractions
@@ -701,6 +810,15 @@ def break_even_sales(
     -------
     BreakEvenResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``variable_cost_ratio`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = break_even_sales(fixed_cost=50_000, variable_cost_ratio=0.60)
@@ -710,7 +828,7 @@ def break_even_sales(
     fc  = as_positive(fixed_cost, "fixed_cost")
     vcr = as_fraction(variable_cost_ratio, "variable_cost_ratio")
     if vcr == 0.0 or vcr == 1.0:
-        raise ValueError("'variable_cost_ratio' must be strictly between 0 and 1.")
+        raise ValueError("'variable_cost_ratio' debe estar estrictamente entre 0 y 1.")
 
     cmr       = 1.0 - vcr
     bep_sales = fc / cmr
@@ -757,18 +875,37 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     -------
     pd.DataFrame
         Columns: ``n``, ``P(N=n)``, ``P(N<=n)``.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``n_max`` no es un entero entre 0 y 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = queue_length_pmf(lam=2.0, mu=3.0, n_max=10)
+    >>> r.shape
+    (11, 3)
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+    if isinstance(n_max, bool) or not isinstance(n_max, (int, np.integer)):
+        raise TypeError(f"'n_max' debe ser un entero >= 0, se recibió {type(n_max).__name__!r}.")
+    if not 0 <= n_max <= MAX_ESTADOS:
+        raise ValueError(f"'n_max' debe estar entre 0 y {MAX_ESTADOS}, se recibió {n_max!r}.")
     ns    = np.arange(0, n_max + 1)
     pmf   = (1 - rho) * rho**ns
     return pd.DataFrame({"n": ns, "P(N=n)": pmf, "P(N<=n)": np.cumsum(pmf)})
 
 
-def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:  # noqa: E501
+def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:
     """CDF of the sojourn time (time in system) for an M/M/1 queue.
 
     F(t) = 1 − exp(−(μ − λ)·t)
@@ -788,14 +925,30 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     -------
     pd.DataFrame
         Columns: ``t``, ``F(t)`` (CDF), ``f(t)`` (PDF).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``n_points`` supera 10⁶ o ``t_max`` no es positivo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = sojourn_cdf(lam=2.0, mu=3.0, n_points=20)
+    >>> r.shape
+    (20, 3)
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+    n_points = as_int_positive(n_points, "n_points", max=MAX_ESTADOS)
     W_mean = 1.0 / (mu - lam)
-    t_upper = t_max if t_max is not None else 5.0 * W_mean
+    t_upper = as_positive(t_max, "t_max") if t_max is not None else 5.0 * W_mean
     t       = np.linspace(0, t_upper, n_points)
     rate    = mu - lam
     cdf     = 1.0 - np.exp(-rate * t)
@@ -829,16 +982,29 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
     -------
     QueueResult
         ``rho`` is server utilization λ_eff / (c · μ).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``K < c`` o ``c``/``K`` superan 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mmck(lam=2.0, mu=3.0, c=2, K=5)
+    >>> round(r.L, 4)
+    0.7381
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
-    c   = as_int_positive(c, "c")
-    K   = as_int_positive(K, "K")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    K   = as_int_positive(K, "K", max=MAX_ESTADOS)
     if K < c:
-        raise ValueError(f"'K' (system capacity) must be ≥ c (servers); got K={K}, c={c}.")
+        raise ValueError(f"'K' (capacidad del sistema) debe ser ≥ c (servidores); se recibió K={K}, c={c}.")
 
     a   = lam / mu           # offered load
-    rho = a / c              # traffic intensity per server
 
     # Unnormalised state probabilities:
     #   p_n = a^n / n!          for n = 0 … c
@@ -904,7 +1070,7 @@ class PriorityQueueResult:
     mu: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         return pd.DataFrame(self.classes)
 
     def summary(self) -> str:
@@ -957,6 +1123,16 @@ def mm1_priority(
     -------
     PriorityQueueResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = mm1_priority([2.0, 1.0], mu=5.0)
@@ -967,15 +1143,15 @@ def mm1_priority(
     mu   = as_positive(mu, "mu")
     N    = len(lams)
     if N == 0:
-        raise ValueError("'lam_list' must contain at least one class.")
+        raise ValueError("'lam_list' debe contener al menos una clase.")
 
     rho_total = sum(lams) / mu
     if rho_total >= 1.0:
-        raise ValueError(f"System unstable: ρ_total = {rho_total:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ_total = {rho_total:.4g} ≥ 1.")
 
     names = list(class_names) if class_names else [str(i) for i in range(N)]
     if len(names) != N:
-        raise ValueError("'class_names' must have the same length as 'lam_list'.")
+        raise ValueError("'class_names' debe tener la misma longitud que 'lam_list'.")
 
     # Residual service time for M/M/1 (exponential, cv²=1): R = ρ/μ
     R = rho_total / mu

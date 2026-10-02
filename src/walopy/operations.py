@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-import numpy as np
+from ._utils import as_fraction, as_nonneg, as_positive
 
-from ._utils import as_positive, as_nonneg, as_fraction
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import pandas as pd
 
 
 @dataclass
@@ -32,7 +35,7 @@ class OEEResult:
     oee: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
 
         return pd.DataFrame([{
@@ -57,7 +60,7 @@ class OEEResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_oee
         return plot_oee(self, **kwargs)
 
@@ -106,6 +109,20 @@ def oee(
     Returns
     -------
     OEEResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si algún factor no está en [0, 1].
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = oee(availability=0.9, performance=0.9, quality=0.9)
+    >>> round(r.oee, 4)
+    0.729
     """
     params: dict = {}
 
@@ -173,7 +190,7 @@ class UtilizationResult:
     capacity: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
 
         return pd.DataFrame([{
@@ -218,6 +235,19 @@ def utilization_efficiency(
     Returns
     -------
     UtilizationResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = utilization_efficiency(actual_output=75.0, capacity=100.0)
+    >>> round(r.utilization, 4)
+    0.75
     """
     actual_output = as_nonneg(actual_output, "actual_output")
     capacity      = as_positive(capacity, "capacity")
@@ -260,7 +290,7 @@ class UnitCostResult:
     units_produced: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
 
         return pd.DataFrame([{
@@ -308,6 +338,19 @@ def unit_cost(
     Returns
     -------
     UnitCostResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = unit_cost(fixed_cost=1000.0, variable_cost_per_unit=5.0, units_produced=100.0)
+    >>> round(r.unit_cost, 4)
+    15.0
     """
     fixed_cost              = as_nonneg(fixed_cost, "fixed_cost")
     variable_cost_per_unit  = as_nonneg(variable_cost_per_unit, "variable_cost_per_unit")

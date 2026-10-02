@@ -2,10 +2,28 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Optional, TypedDict
 
-from ._utils import as_positive, as_nonneg
+from ._utils import as_float_list, as_positive
+
+
+class _Trabajo(TypedDict):
+    name: str
+    p: float
+    d: Optional[float]
+    w: float
+
+
+class _TrabajoJohnson(TypedDict):
+    name: str
+    a: float
+    b: float
+
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @dataclass
@@ -59,7 +77,7 @@ class ScheduleResult:
     total_tardiness: float
     n_tardy: int
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Name": j.name,
@@ -163,7 +181,23 @@ def schedule_single(
     Returns
     -------
     ScheduleResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+        Si ``rule`` no es una de SPT, EDD, WSPT, CR, FIFO, o falta ``due_dates`` para EDD/CR.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = schedule_single(processing_times=[3.0, 1.0, 2.0])
+    >>> round(r.makespan, 4)
+    6.0
     """
+    processing_times = as_float_list(processing_times, "processing_times")
     n = len(processing_times)
     if names is None:
         names = [f"J{i + 1}" for i in range(n)]
@@ -172,23 +206,26 @@ def schedule_single(
     dd = list(due_dates) if due_dates is not None else [None] * n
 
     if len(dd) != n or len(weights) != n or len(names) != n:
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
 
     rule_up = rule.upper()
     valid = {"SPT", "EDD", "WSPT", "CR", "FIFO"}
     if rule_up not in valid:
-        raise ValueError(f"rule must be one of {valid}.")
+        raise ValueError(f"'rule' debe ser una de {valid}.")
     if rule_up in ("EDD", "CR") and all(d is None for d in dd):
-        raise ValueError(f"rule='{rule}' requires due_dates.")
+        raise ValueError(f"rule='{rule}' requiere due_dates.")
 
     for i, p in enumerate(processing_times):
         as_positive(p, f"processing_times[{i}]")
     for i, w in enumerate(weights):
         as_positive(w, f"weights[{i}]")
 
-    jobs = [{"name": str(names[i]), "p": float(processing_times[i]),
-             "d": float(dd[i]) if dd[i] is not None else None,
-             "w": float(weights[i])} for i in range(n)]
+    jobs: list[_Trabajo] = []
+    for i in range(n):
+        d_i = dd[i]
+        jobs.append({"name": str(names[i]), "p": float(processing_times[i]),
+                     "d": float(d_i) if d_i is not None else None,
+                     "w": float(weights[i])})
 
     if rule_up == "SPT":
         jobs_sorted = sorted(jobs, key=lambda j: j["p"])
@@ -230,7 +267,7 @@ class FlowShopResult:
     machine1_schedule: list
     machine2_schedule: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         rows = []
         for a, b in zip(self.machine1_schedule, self.machine2_schedule):
@@ -275,18 +312,33 @@ def johnson_flowshop(
     Returns
     -------
     FlowShopResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = johnson_flowshop(m1_times=[3.0, 1.0, 2.0], m2_times=[2.0, 4.0, 1.0])
+    >>> round(r.makespan, 4)
+    8.0
     """
     n = len(m1_times)
     if len(m2_times) != n:
-        raise ValueError("m1_times and m2_times must have the same length.")
+        raise ValueError("m1_times y m2_times deben tener la misma longitud.")
     if names is None:
         names = [f"J{i + 1}" for i in range(n)]
     for i, (a, b) in enumerate(zip(m1_times, m2_times)):
         as_positive(a, f"m1_times[{i}]")
         as_positive(b, f"m2_times[{i}]")
 
-    jobs = [{"name": str(names[i]), "a": float(m1_times[i]), "b": float(m2_times[i])}
-            for i in range(n)]
+    jobs: list[_TrabajoJohnson] = [
+        {"name": str(names[i]), "a": float(m1_times[i]), "b": float(m2_times[i])} for i in range(n)
+    ]
 
     # Johnson's rule: jobs where min(a,b)=a → sorted ascending by a (go first)
     #                  jobs where min(a,b)=b → sorted descending by b (go last)
@@ -338,6 +390,39 @@ def _flowshop_cmax(seq: list, T: list) -> tuple:
     return C[-1][-1], C
 
 
+def _mejor_insercion(seq: list, job: int, T: list, m: int) -> int:
+    """Posición de inserción de ``job`` en ``seq`` que minimiza el makespan (aceleración de Taillard).
+
+    Calcula una sola vez las finalizaciones hacia adelante ``e`` y las colas hacia atrás ``q`` de la
+    secuencia parcial; cada posición candidata se evalúa en O(m). En total NEH queda en O(n²·m)
+    (recalcular el makespan completo por posición costaba O(n³·m)). Empata a favor de la posición menor.
+    """
+    L = len(seq)
+    e = [[0.0] * m for _ in range(L + 1)]
+    for i in range(1, L + 1):
+        p_i = T[seq[i - 1]]
+        for j in range(m):
+            e[i][j] = max(e[i][j - 1] if j > 0 else 0.0, e[i - 1][j]) + p_i[j]
+    q = [[0.0] * m for _ in range(L + 2)]
+    for i in range(L - 1, -1, -1):
+        p_i = T[seq[i]]
+        for j in range(m - 1, -1, -1):
+            q[i][j] = max(q[i][j + 1] if j < m - 1 else 0.0, q[i + 1][j]) + p_i[j]
+    p_k = T[job]
+    mejor_cmax, mejor_pos = math.inf, 0
+    for pos in range(L + 1):
+        f_prev = 0.0
+        cmax = 0.0
+        for j in range(m):
+            f_prev = max(f_prev, e[pos][j]) + p_k[j]
+            cmax = max(cmax, f_prev + q[pos][j])
+        # Un empate se resuelve a favor de la posición menor; la tolerancia evita que el ruido de
+        # redondeo en datos decimales convierta un empate exacto en una "mejora" espuria.
+        if cmax < mejor_cmax - 1e-12 * max(1.0, abs(mejor_cmax)) or mejor_cmax == math.inf:
+            mejor_cmax, mejor_pos = cmax, pos
+    return mejor_pos
+
+
 @dataclass
 class NEHResult:
     """NEH heuristic result for the m-machine permutation flow-shop.
@@ -360,7 +445,7 @@ class NEHResult:
     n_machines: int
     machine_schedules: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Return a Gantt DataFrame with start/end per machine for each job."""
         import pandas as pd
         rows = []
@@ -389,14 +474,12 @@ def neh_flowshop(
     *,
     names: Sequence[str] | None = None,
 ) -> NEHResult:
-    """NEH heuristic for the *m*-machine permutation flow-shop.
+    """Heurística NEH para el flow-shop de permutación con *m* máquinas.
 
-    Nawaz, Enscore and Ham (1983) constructs a high-quality permutation by
-    iteratively inserting each job at the best position.  Runs in O(n²m) and
-    is the standard heuristic for permutation flow-shop scheduling.
-
-    For *m = 2* it always finds an optimal or near-optimal solution comparable
-    to Johnson's algorithm.
+    Nawaz, Enscore y Ham (1983) construyen una permutación de alta calidad insertando cada trabajo
+    en su mejor posición. Con la aceleración de Taillard corre en O(n²·m); es la heurística estándar
+    del flow-shop de permutación. Con *m = 2* obtiene soluciones óptimas o casi óptimas, comparables
+    al algoritmo de Johnson.
 
     Parameters
     ----------
@@ -409,17 +492,31 @@ def neh_flowshop(
     Returns
     -------
     NEHResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si la matriz está vacía, es irregular o ``names`` tiene otra longitud.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = neh_flowshop(times_matrix=[[3.0, 2.0, 4.0], [1.0, 4.0, 2.0], [2.0, 1.0, 3.0]])
+    >>> round(r.makespan, 4)
+    13.0
     """
     n = len(times_matrix)
     if n == 0:
-        raise ValueError("'times_matrix' must contain at least one job.")
+        raise ValueError("'times_matrix' debe contener al menos un trabajo.")
     m_cnt = len(times_matrix[0])
     if m_cnt == 0:
-        raise ValueError("Each job must have processing times for at least one machine.")
+        raise ValueError("Cada trabajo debe tener tiempos de proceso para al menos una máquina.")
     for i, row in enumerate(times_matrix):
         if len(row) != m_cnt:
             raise ValueError(
-                f"All rows must have the same length; row {i} has {len(row)} ≠ {m_cnt}."
+                f"Todas las filas deben tener la misma longitud; la fila {i} tiene {len(row)} ≠ {m_cnt}."
             )
         for j, p in enumerate(row):
             as_positive(float(p), f"times_matrix[{i}][{j}]")
@@ -429,7 +526,7 @@ def neh_flowshop(
     else:
         names_list = [str(s) for s in names]
     if len(names_list) != n:
-        raise ValueError("'names' must have the same length as 'times_matrix'.")
+        raise ValueError("'names' debe tener la misma longitud que 'times_matrix'.")
 
     T_mat = [[float(times_matrix[i][j]) for j in range(m_cnt)] for i in range(n)]
 
@@ -440,15 +537,8 @@ def neh_flowshop(
     seq = [order[0]]
     for k in range(1, n):
         job = order[k]
-        best_cmax = math.inf
-        best_pos  = 0
-        for pos in range(len(seq) + 1):
-            candidate = seq[:pos] + [job] + seq[pos:]
-            cmax, _   = _flowshop_cmax(candidate, T_mat)
-            if cmax < best_cmax:
-                best_cmax = cmax
-                best_pos  = pos
-        seq = seq[:best_pos] + [job] + seq[best_pos:]
+        pos = _mejor_insercion(seq, job, T_mat, m_cnt)
+        seq = seq[:pos] + [job] + seq[pos:]
 
     makespan, C_mat = _flowshop_cmax(seq, T_mat)
 
