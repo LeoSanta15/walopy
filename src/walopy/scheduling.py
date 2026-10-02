@@ -361,6 +361,39 @@ def _flowshop_cmax(seq: list, T: list) -> tuple:
     return C[-1][-1], C
 
 
+def _mejor_insercion(seq: list, job: int, T: list, m: int) -> int:
+    """Posición de inserción de ``job`` en ``seq`` que minimiza el makespan (aceleración de Taillard).
+
+    Calcula una sola vez las finalizaciones hacia adelante ``e`` y las colas hacia atrás ``q`` de la
+    secuencia parcial; cada posición candidata se evalúa en O(m). En total NEH queda en O(n²·m)
+    (recalcular el makespan completo por posición costaba O(n³·m)). Empata a favor de la posición menor.
+    """
+    L = len(seq)
+    e = [[0.0] * m for _ in range(L + 1)]
+    for i in range(1, L + 1):
+        p_i = T[seq[i - 1]]
+        for j in range(m):
+            e[i][j] = max(e[i][j - 1] if j > 0 else 0.0, e[i - 1][j]) + p_i[j]
+    q = [[0.0] * m for _ in range(L + 2)]
+    for i in range(L - 1, -1, -1):
+        p_i = T[seq[i]]
+        for j in range(m - 1, -1, -1):
+            q[i][j] = max(q[i][j + 1] if j < m - 1 else 0.0, q[i + 1][j]) + p_i[j]
+    p_k = T[job]
+    mejor_cmax, mejor_pos = math.inf, 0
+    for pos in range(L + 1):
+        f_prev = 0.0
+        cmax = 0.0
+        for j in range(m):
+            f_prev = max(f_prev, e[pos][j]) + p_k[j]
+            cmax = max(cmax, f_prev + q[pos][j])
+        # Un empate se resuelve a favor de la posición menor; la tolerancia evita que el ruido de
+        # redondeo en datos decimales convierta un empate exacto en una "mejora" espuria.
+        if cmax < mejor_cmax - 1e-12 * max(1.0, abs(mejor_cmax)) or mejor_cmax == math.inf:
+            mejor_cmax, mejor_pos = cmax, pos
+    return mejor_pos
+
+
 @dataclass
 class NEHResult:
     """NEH heuristic result for the m-machine permutation flow-shop.
@@ -412,14 +445,12 @@ def neh_flowshop(
     *,
     names: Sequence[str] | None = None,
 ) -> NEHResult:
-    """NEH heuristic for the *m*-machine permutation flow-shop.
+    """Heurística NEH para el flow-shop de permutación con *m* máquinas.
 
-    Nawaz, Enscore and Ham (1983) constructs a high-quality permutation by
-    iteratively inserting each job at the best position.  Runs in O(n²m) and
-    is the standard heuristic for permutation flow-shop scheduling.
-
-    For *m = 2* it always finds an optimal or near-optimal solution comparable
-    to Johnson's algorithm.
+    Nawaz, Enscore y Ham (1983) construyen una permutación de alta calidad insertando cada trabajo
+    en su mejor posición. Con la aceleración de Taillard corre en O(n²·m); es la heurística estándar
+    del flow-shop de permutación. Con *m = 2* obtiene soluciones óptimas o casi óptimas, comparables
+    al algoritmo de Johnson.
 
     Parameters
     ----------
@@ -463,15 +494,8 @@ def neh_flowshop(
     seq = [order[0]]
     for k in range(1, n):
         job = order[k]
-        best_cmax = math.inf
-        best_pos  = 0
-        for pos in range(len(seq) + 1):
-            candidate = seq[:pos] + [job] + seq[pos:]
-            cmax, _   = _flowshop_cmax(candidate, T_mat)
-            if cmax < best_cmax:
-                best_cmax = cmax
-                best_pos  = pos
-        seq = seq[:best_pos] + [job] + seq[best_pos:]
+        pos = _mejor_insercion(seq, job, T_mat, m_cnt)
+        seq = seq[:pos] + [job] + seq[pos:]
 
     makespan, C_mat = _flowshop_cmax(seq, T_mat)
 

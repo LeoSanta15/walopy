@@ -1341,11 +1341,14 @@ def wagner_whitin(
     dp[0] = 0.0
     last = [-1] * (n + 1)  # last[j] = period i where order was placed
 
-    for j in range(1, n + 1):
-        for i in range(1, j + 1):
-            # Order at start of period i to cover demands i..j (1-indexed)
-            hold = h * sum((k - i) * demands_v[k - 1] for k in range(i, j + 1))
-            cost = dp[i - 1] + K + hold
+    # Recursión hacia adelante: el costo de mantener se acumula de forma incremental
+    # (O(n²) en total; antes se recalculaba la suma completa para cada par (i, j): O(n³)).
+    for i in range(1, n + 1):
+        acum = 0.0  # Σ_{k=i..j} (k - i) · d_k
+        for j in range(i, n + 1):
+            acum += (j - i) * demands_v[j - 1]
+            # Pedido al inicio del periodo i que cubre las demandas i..j (índices desde 1)
+            cost = dp[i - 1] + K + h * acum
             if cost < dp[j]:
                 dp[j] = cost
                 last[j] = i
