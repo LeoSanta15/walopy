@@ -1,0 +1,196 @@
+[
+  {
+    "id": "W-01",
+    "titulo": "CPM/PERT aceptan duraciones NaN/inf",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'cpm_rechaza or pert_rechaza'"
+    ],
+    "guardas": [
+      "test_pert_rechaza_estimaciones_no_finitas"
+    ]
+  },
+  {
+    "id": "W-02",
+    "titulo": "reliability: t y mttr sin validar (NaN, negativos)",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'mtbf_rechaza or sistemas_rechazan_t or koon_rechaza or nunca_supera'"
+    ],
+    "guardas": [
+      "test_confiabilidad_nunca_supera_uno"
+    ]
+  },
+  {
+    "id": "W-03",
+    "titulo": "mrp: existencia inicial NaN/negativa",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k mrp_rechaza_existencia"
+    ]
+  },
+  {
+    "id": "W-04",
+    "titulo": "Weibull acepta tiempos NaN/inf",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k weibull_rechaza"
+    ]
+  },
+  {
+    "id": "W-05",
+    "titulo": "cv2_*, break_even_multi, pmf y sojourn sin validar",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'cv2_uniforme or cv2_media or break_even_multi or queue_length_pmf or sojourn or cv2_erlang'"
+    ],
+    "guardas": [
+      "valida_n_max[None]",
+      "n_max_cero_es_valido"
+    ]
+  },
+  {
+    "id": "W-06",
+    "titulo": "ABC/MRP: entradas mal formadas dan errores crípticos",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'abc_items or mrp_entradas or xyz_rechaza'"
+    ]
+  },
+  {
+    "id": "W-07",
+    "titulo": "ABC: demanda 0 rechazada o clase C inconsistente",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'abc_acepta or abc_todas'"
+    ],
+    "guardas": [
+      "test_abc_todas_las_demandas_cero_da_error_claro"
+    ]
+  },
+  {
+    "id": "W-08",
+    "titulo": "Weibull: datos constantes / cota de β sin aviso",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'weibull_datos or weibull_casi'"
+    ]
+  },
+  {
+    "id": "W-09",
+    "titulo": "mmc: OverflowError con muchos servidores",
+    "selectores": [
+      "tests/test_mmc_estable.py"
+    ]
+  },
+  {
+    "id": "W-10",
+    "titulo": "eoq_multi_constrained: presupuesto inválido cuelga la bisección",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k eoq_restringido"
+    ],
+    "guardas": [
+      "test_eoq_restringido_valido_sigue_funcionando"
+    ]
+  },
+  {
+    "id": "W-11",
+    "titulo": "listas vacías: IndexError/ZeroDivisionError en lugar de ValueError",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'lista_vacia or listas_vacias'"
+    ],
+    "guardas": [
+      "mrp-args4",
+      "lista_vacia[parallel_system]"
+    ]
+  },
+  {
+    "id": "W-12",
+    "titulo": "plot_break_even ignora break_even_sales",
+    "selectores": [
+      "tests/test_plotting.py -k break_even_sales"
+    ]
+  },
+  {
+    "id": "W-13",
+    "titulo": "Complejidad: Wagner-Whitin O(n³), NEH O(n³m)",
+    "selectores": [
+      "tests/test_complejidad.py -k 'n1000 or n200'"
+    ]
+  },
+  {
+    "id": "W-14",
+    "titulo": "CPM acepta actividades duplicadas/incompletas",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'actividades_duplicadas or actividad_sin_nombre'"
+    ]
+  },
+  {
+    "id": "W-15",
+    "titulo": "abc_xyz empareja por nombre con nombres repetidos",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k abc_xyz_con_nombres"
+    ]
+  },
+  {
+    "id": "W-16",
+    "titulo": "MRP: liberaciones vencidas sin aviso",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k mrp_avisa"
+    ]
+  },
+  {
+    "id": "W-17",
+    "titulo": "Tamaños absurdos (c, n_max, t_max) agotan memoria/tiempo",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k 'tamanos_absurdos or n_max or t_max or mmc_rechaza'",
+      "tests/test_mmc_estable.py -k rechaza_demasiados"
+    ],
+    "guardas": [
+      "valida_n_max[None]",
+      "n_max_cero_es_valido"
+    ]
+  },
+  {
+    "id": "W-18",
+    "titulo": "bool aceptado como número/entero",
+    "selectores": [
+      "tests/test_regresion_validacion.py -k bool"
+    ]
+  },
+  {
+    "id": "W-19",
+    "titulo": "-0.0 en holguras de CPM/PERT",
+    "selectores": [
+      "tests/test_cpm_pert.py -k holguras"
+    ]
+  },
+  {
+    "id": "W-20",
+    "titulo": "__version__ sin fallback si el paquete no está instalado",
+    "selectores": [
+      "tests/test_version.py -k sin_instalar"
+    ]
+  },
+  {
+    "id": "W-21",
+    "titulo": "batch_model oculta errores sin opción de propagarlos",
+    "selectores": [
+      "tests/test_solver.py -k 'errors_raise or errors_invalido or sin_errores'"
+    ],
+    "guardas": [
+      "sin_errores_no_agrega_columna_error"
+    ]
+  },
+  {
+    "id": "W-22",
+    "titulo": "Funciones públicas sin contrato de entradas homogéneo",
+    "selectores": [
+      "tests/test_contrato_entradas.py -k test_contrato_de_entradas"
+    ],
+    "guardas": [
+      "[cpm]",
+      "[ebq_multi]",
+      "[eoq_multi]",
+      "[fit_from_data]",
+      "[jackson_network]",
+      "[johnson_flowshop]",
+      "[mm1_priority]",
+      "[neh_flowshop]",
+      "[pert]",
+      "[safety_stock_curve]"
+    ]
+  }
+]
