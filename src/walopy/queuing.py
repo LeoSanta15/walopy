@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 
 from ._utils import as_int_positive, as_nonneg, as_positive
 
+MAX_SERVIDORES = 10**6  # cota para evitar bucles de duración prácticamente infinita
+
 
 @dataclass
 class QueueResult:
@@ -193,17 +195,24 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
     c   = as_int_positive(c, "c")
+    if c > MAX_SERVIDORES:
+        raise ValueError(f"'c' no puede superar {MAX_SERVIDORES} servidores, se recibió {c}.")
     rho = lam / (c * mu)
     if rho >= 1.0:
         raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < c·μ.")
-    a = lam / mu  # offered load
+    a = lam / mu  # carga ofrecida
 
-    # Erlang-C formula for P0
-    sum_terms = sum((a**n) / math.factorial(n) for n in range(c))
-    last_term = (a**c) / (math.factorial(c) * (1 - rho))
-    P0 = 1.0 / (sum_terms + last_term)
-
-    Pq = (a**c / (math.factorial(c) * (1 - rho))) * P0  # P(wait) = Erlang-C
+    # Erlang-B por recurrencia (estable para c grande) y de ahí Erlang-C y P0.
+    # Las fórmulas directas a**n / n! desbordan float a partir de c ≈ 140.
+    B = 1.0
+    for k in range(1, c + 1):
+        B = a * B / (k + a * B)
+    Pq = B / (1.0 - rho * (1.0 - B))  # P(espera) = Erlang-C
+    if B > 0.0:
+        log_Z = c * math.log(a) - math.lgamma(c + 1)  # ln(a^c / c!)
+        P0 = math.exp(math.log(B) - log_Z - math.log((1.0 - B) + B / (1.0 - rho)))
+    else:  # B subdesbordado: la cola de Poisson es despreciable y P0 ≈ e^{-a}
+        P0 = math.exp(-a)
     Lq = Pq * rho / (1 - rho)
     Wq = Lq / lam
     W  = Wq + 1 / mu

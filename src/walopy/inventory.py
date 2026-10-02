@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import math
+import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from statistics import NormalDist
 
-from ._utils import as_fraction, as_nonneg, as_positive
+from ._utils import as_float_list, as_fraction, as_nonneg, as_positive
 
 # ---------------------------------------------------------------------------
 # Economic Order Quantity
@@ -723,8 +724,12 @@ def _eoq_lagrangian_bisect(
 
     # Find upper bound for λ
     hi = 1.0
-    while total(hi) > bound:
+    for _ in range(200):
+        if total(hi) <= bound:
+            break
         hi *= 2.0
+    else:
+        raise ValueError("La restricción no se puede satisfacer con ninguna cantidad de pedido positiva.")
 
     lo = 0.0
     for _ in range(120):
@@ -843,12 +848,12 @@ def eoq_multi_constrained(
     >>> r.total_cost > 0
     True
     """
-    D = [as_positive(d, f"demand_rates[{i}]") for i, d in enumerate(demand_rates)]
-    K = [as_positive(k, f"ordering_costs[{i}]") for i, k in enumerate(ordering_costs)]
-    h = [as_positive(hi, f"holding_costs[{i}]") for i, hi in enumerate(holding_costs)]
+    D = as_float_list(demand_rates, "demand_rates")
+    K = as_float_list(ordering_costs, "ordering_costs")
+    h = as_float_list(holding_costs, "holding_costs")
     n = len(D)
     if len(K) != n or len(h) != n:
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
         names = [f"Item-{i+1}" for i in range(n)]
 
@@ -856,23 +861,32 @@ def eoq_multi_constrained(
     all_constraints: list[dict] = []
     if budget is not None:
         if budget_unit_costs is None:
-            raise ValueError("'budget_unit_costs' required when 'budget' is specified.")
-        bc = list(budget_unit_costs)
+            raise ValueError("'budget_unit_costs' es obligatorio cuando se indica 'budget'.")
+        bc = as_float_list(budget_unit_costs, "budget_unit_costs", kind="nonneg")
         if len(bc) != n:
-            raise ValueError("'budget_unit_costs' must have same length as demand_rates.")
-        all_constraints.append({"name": "budget", "weights": [c / 2 for c in bc], "bound": float(budget)})
+            raise ValueError("'budget_unit_costs' debe tener la misma longitud que demand_rates.")
+        all_constraints.append(
+            {"name": "budget", "weights": [c / 2 for c in bc], "bound": as_positive(budget, "budget")}
+        )
     if space is not None:
         if space_per_unit is None:
-            raise ValueError("'space_per_unit' required when 'space' is specified.")
-        sw = list(space_per_unit)
+            raise ValueError("'space_per_unit' es obligatorio cuando se indica 'space'.")
+        sw = as_float_list(space_per_unit, "space_per_unit", kind="nonneg")
         if len(sw) != n:
-            raise ValueError("'space_per_unit' must have same length as demand_rates.")
-        all_constraints.append({"name": "space", "weights": [s / 2 for s in sw], "bound": float(space)})
+            raise ValueError("'space_per_unit' debe tener la misma longitud que demand_rates.")
+        all_constraints.append(
+            {"name": "space", "weights": [s / 2 for s in sw], "bound": as_positive(space, "space")}
+        )
     if constraints:
-        for c in constraints:
-            if len(c["weights"]) != n:
-                raise ValueError(f"Constraint '{c['name']}' weights length mismatch.")
-            all_constraints.append(c)
+        for j, c in enumerate(constraints):
+            if not isinstance(c, dict) or not {"name", "weights", "bound"} <= set(c):
+                raise ValueError(f"constraints[{j}] debe ser un diccionario con 'name', 'weights' y 'bound'.")
+            w = as_float_list(c["weights"], f"constraints[{j}]['weights']", kind="nonneg")
+            if len(w) != n:
+                raise ValueError(f"La restricción '{c['name']}': 'weights' tiene una longitud distinta a demand_rates.")
+            all_constraints.append(
+                {"name": c["name"], "weights": w, "bound": as_positive(c["bound"], f"constraints[{j}]['bound']")}
+            )
 
     # Unconstrained solution
     Q_unc = [math.sqrt(2 * D[i] * K[i] / h[i]) for i in range(n)]
@@ -2138,6 +2152,26 @@ class ABCXYZResult:
         return self.summary()
 
 
+def _leer_items(items, nombre: str = "items") -> list:
+    """Valida que ``items`` sea una lista no vacía de diccionarios."""
+    if isinstance(items, (str, bytes, dict)) or not hasattr(items, "__iter__"):
+        raise TypeError(f"'{nombre}' debe ser una lista de diccionarios, se recibió {type(items).__name__!r}.")
+    items = list(items)
+    if not items:
+        raise ValueError(f"'{nombre}' debe contener al menos un elemento.")
+    for i, it in enumerate(items):
+        if not isinstance(it, dict):
+            raise TypeError(f"{nombre}[{i}] debe ser un diccionario, se recibió {type(it).__name__!r}.")
+    return items
+
+
+def _clave(it: dict, i: int, clave: str, nombre: str = "items"):
+    """Devuelve ``it[clave]`` o lanza un ValueError que indica el elemento y la clave que faltan."""
+    if clave not in it:
+        raise ValueError(f"{nombre}[{i}]: falta la clave '{clave}'.")
+    return it[clave]
+
+
 def abc_analysis(
     items: list,
     *,
@@ -2168,22 +2202,23 @@ def abc_analysis(
     -------
     ABCResult
     """
-    if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
+    items = _leer_items(items)
     if not (0.0 < a_threshold < b_threshold < 1.0):
-        raise ValueError("Must have 0 < a_threshold < b_threshold < 1.")
+        raise ValueError("Debe cumplirse 0 < a_threshold < b_threshold < 1.")
 
     enriched = []
     for i, it in enumerate(items):
         nm  = it.get("name", f"Item{i + 1}")
-        D   = as_positive(float(it["demand"]),     f"items[{i}]['demand']")
-        v   = as_positive(float(it["unit_value"]), f"items[{i}]['unit_value']")
+        D   = as_nonneg(_clave(it, i, "demand"), f"items[{i}]['demand']")
+        v   = as_positive(_clave(it, i, "unit_value"), f"items[{i}]['unit_value']")
         enriched.append({"name": str(nm), "demand": D, "unit_value": v,
-                         "annual_value": D * v})
+                         "annual_value": D * v, "index": i})
 
     enriched.sort(key=lambda x: -x["annual_value"])
     n           = len(enriched)
     total_value = sum(e["annual_value"] for e in enriched)
+    if total_value <= 0.0:
+        raise ValueError("El valor anual total es cero (todas las demandas son 0): no hay nada que clasificar.")
 
     cum = 0.0
     class_agg: dict = {"A": {"count": 0, "value": 0.0},
@@ -2252,26 +2287,25 @@ def xyz_analysis(
     -------
     XYZResult
     """
-    if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
+    items = _leer_items(items)
     if not (0.0 <= x_threshold < y_threshold):
-        raise ValueError("Must have 0 ≤ x_threshold < y_threshold.")
+        raise ValueError("Debe cumplirse 0 ≤ x_threshold < y_threshold.")
 
     enriched = []
     for i, it in enumerate(items):
         nm = it.get("name", f"Item{i + 1}")
         if "cv" in it:
-            cv = float(it["cv"])
+            cv = as_nonneg(it["cv"], f"items[{i}]['cv']")
         else:
-            std  = float(it["demand_std"])
-            mean = float(it.get("demand_mean", it.get("demand_rate", 0.0)))
-            if mean <= 0:
-                raise ValueError(
-                    f"items[{i}]: 'demand_mean' (or 'demand_rate') must be > 0 when 'cv' is not provided."
-                )
+            std  = as_nonneg(_clave(it, i, "demand_std"), f"items[{i}]['demand_std']")
+            if "demand_mean" in it:
+                mean = it["demand_mean"]
+            elif "demand_rate" in it:
+                mean = it["demand_rate"]
+            else:
+                raise ValueError(f"items[{i}]: falta 'cv' o ('demand_std' y 'demand_mean'/'demand_rate').")
+            mean = as_positive(mean, f"items[{i}]['demand_mean']")
             cv = std / mean
-        if cv < 0:
-            raise ValueError(f"items[{i}]: CV must be ≥ 0, got {cv}.")
         if cv <= x_threshold:
             cls = "X"
         elif cv <= y_threshold:
@@ -2327,13 +2361,11 @@ def abc_xyz(
     abc_r = abc_analysis(items, a_threshold=a_threshold, b_threshold=b_threshold)
     xyz_r = xyz_analysis(items, x_threshold=x_threshold, y_threshold=y_threshold)
 
-    xyz_map = {e["name"]: e for e in xyz_r.items}
-
     combined = []
     matrix: dict = {}
     for e_abc in abc_r.items:
         nm      = e_abc["name"]
-        e_xyz   = xyz_map[nm]
+        e_xyz   = xyz_r.items[e_abc["index"]]
         abc_cls = e_abc["class"]
         xyz_cls = e_xyz["class"]
         key     = (abc_cls, xyz_cls)
@@ -2372,6 +2404,9 @@ class MRPResult:
         Planned order receipts arriving this period.
     planned_releases : list[float]
         Planned order releases (issued *lead_time* periods before receipt).
+    past_due_releases : float
+        Cantidad total de órdenes planificadas cuya liberación debió ocurrir antes del
+        periodo 1 (el lead time no cabe en el horizonte); no aparece en ``planned_releases``.
     """
 
     item_name: str
@@ -2382,6 +2417,7 @@ class MRPResult:
     net_requirements: list
     planned_receipts: list
     planned_releases: list
+    past_due_releases: float = 0.0
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
@@ -2453,29 +2489,29 @@ def mrp(
     -------
     MRPResult
     """
-    GR  = [as_nonneg(float(g), f"gross_requirements[{i}]")
-           for i, g in enumerate(gross_requirements)]
+    GR  = as_float_list(gross_requirements, "gross_requirements", kind="nonneg")
     T   = len(GR)
-    if T == 0:
-        raise ValueError("'gross_requirements' must not be empty.")
 
     SR  = [0.0] * T
     if scheduled_receipts is not None:
-        sr_list = list(scheduled_receipts)
-        if len(sr_list) != T:
-            raise ValueError("'scheduled_receipts' must have the same length as 'gross_requirements'.")
-        SR = [as_nonneg(float(s), f"scheduled_receipts[{i}]") for i, s in enumerate(sr_list)]
+        SR = as_float_list(scheduled_receipts, "scheduled_receipts", kind="nonneg", min_len=0)
+        if len(SR) != T:
+            raise ValueError("'scheduled_receipts' debe tener la misma longitud que 'gross_requirements'.")
 
-    if not isinstance(lead_time, int) or lead_time < 0:
-        raise ValueError("'lead_time' must be a non-negative integer.")
+    if isinstance(lead_time, bool) or not isinstance(lead_time, int) or lead_time < 0:
+        raise ValueError("'lead_time' debe ser un entero no negativo.")
 
-    SS = as_nonneg(float(safety_stock), "safety_stock")
+    SS = as_nonneg(safety_stock, "safety_stock")
+    initial_on_hand = as_nonneg(initial_on_hand, "initial_on_hand")
     if isinstance(lot_size, str):
         if lot_size.upper() != "LFL":
-            raise ValueError("'lot_size' must be 'LFL' or a positive float.")
+            raise ValueError("'lot_size' debe ser 'LFL' o un número positivo.")
         lot_q: float | None = None
     else:
-        lot_q = as_positive(float(lot_size), "lot_size")
+        lot_q = as_positive(lot_size, "lot_size")
+
+    if periods is not None and len(list(periods)) != T:
+        raise ValueError("'periods' debe tener la misma longitud que 'gross_requirements'.")
 
     pds = list(periods) if periods is not None else list(range(1, T + 1))
 
@@ -2498,11 +2534,20 @@ def mrp(
 
     # Planned releases: release at period (t - lead_time) for receipt at t
     POR: list = [0.0] * T
+    past_due = 0.0
     for t in range(T):
         if PR_out[t] > 0.0:
             rel = t - lead_time
-            if 0 <= rel < T:
+            if rel < 0:
+                past_due += PR_out[t]
+            else:
                 POR[rel] += PR_out[t]
+    if past_due > 0.0:
+        warnings.warn(
+            f"{past_due:g} unidades planificadas debieron liberarse antes del periodo 1 "
+            f"(lead_time={lead_time} no cabe en el horizonte); consulte 'past_due_releases'.",
+            UserWarning, stacklevel=2,
+        )
 
     return MRPResult(
         item_name=item_name,
@@ -2513,4 +2558,5 @@ def mrp(
         net_requirements=NR_out,
         planned_receipts=PR_out,
         planned_releases=POR,
+        past_due_releases=past_due,
     )

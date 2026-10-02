@@ -2,10 +2,18 @@
 from __future__ import annotations
 
 import math
+import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from ._utils import as_positive
+from ._utils import as_float_list, as_int_positive, as_nonneg, as_positive
+
+
+def _validar_t_mttr(t: float | None, mttr: float | None) -> tuple:
+    """Valida los argumentos opcionales t (tiempo de evaluación) y mttr (tiempo medio de reparación)."""
+    t_v = None if t is None else as_nonneg(t, "t")
+    mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")
+    return t_v, mttr_v
 
 
 def _mtbf_numeric(R_func, lam_min: float) -> float:
@@ -140,6 +148,7 @@ def mtbf_analysis(
     ReliabilityResult
     """
     lam = as_positive(failure_rate, "failure_rate")
+    t, mttr = _validar_t_mttr(t, mttr)
     mtbf_val = 1.0 / lam
     avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None
     R_t = math.exp(-lam * t) if t is not None else None
@@ -178,7 +187,8 @@ def series_system(
     -------
     ReliabilityResult
     """
-    lams = [as_positive(l, f"failure_rates[{i}]") for i, l in enumerate(failure_rates)]
+    lams = as_float_list(failure_rates, "failure_rates")
+    t, mttr = _validar_t_mttr(t, mttr)
     lam_sys = sum(lams)
     mtbf_val = 1.0 / lam_sys
     avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None
@@ -220,7 +230,8 @@ def parallel_system(
     -------
     ReliabilityResult
     """
-    lams = [as_positive(l, f"failure_rates[{i}]") for i, l in enumerate(failure_rates)]
+    lams = as_float_list(failure_rates, "failure_rates")
+    t, mttr = _validar_t_mttr(t, mttr)
 
     def R_func(tt: float) -> float:
         return _r_system("parallel", lams, None, tt)
@@ -275,9 +286,12 @@ def koon_system(
     -------
     ReliabilityResult
     """
-    if not (1 <= k <= n):
-        raise ValueError("Must have 1 ≤ k ≤ n.")
+    n = as_int_positive(n, "n")
+    k = as_int_positive(k, "k")
+    if k > n:
+        raise ValueError(f"Debe cumplirse 1 ≤ k ≤ n (k={k}, n={n}).")
     lam = as_positive(failure_rate, "failure_rate")
+    t, mttr = _validar_t_mttr(t, mttr)
     lams = [lam] * n
 
     # Exact MTBF for k-of-n identical exponential:  (1/λ) * Σ_{j=k}^{n} 1/j
@@ -407,8 +421,18 @@ def _weibull_mle_beta(failure_times: list) -> float:
 
     lo, hi = 1e-4, 100.0
     if g(lo) <= 0.0:
+        warnings.warn(
+            f"La forma β estimada es menor o igual que la cota inferior {lo:g}; el resultado es el límite del intervalo "
+            "de búsqueda, no un máximo de verosimilitud exacto.",
+            UserWarning, stacklevel=3,
+        )
         return lo
     if g(hi) >= 0.0:
+        warnings.warn(
+            f"Los tiempos de falla casi no tienen dispersión: la forma β supera la cota {hi:g}; "
+            "el resultado es el límite del intervalo de búsqueda, no el estimador exacto.",
+            UserWarning, stacklevel=3,
+        )
         return hi
     for _ in range(120):
         mid = (lo + hi) / 2.0
@@ -469,12 +493,11 @@ def weibull_analysis(
     >>> 1.5 < r.shape < 2.5
     True
     """
-    t_list = [float(t) for t in failure_times]
-    if len(t_list) < 2:
-        raise ValueError("At least 2 failure times are required.")
-    for i, t in enumerate(t_list):
-        if t <= 0.0:
-            raise ValueError(f"failure_times[{i}] must be > 0, got {t}.")
+    t_list = as_float_list(failure_times, "failure_times", min_len=2)
+    if max(t_list) == min(t_list):
+        raise ValueError(
+            "Todos los tiempos de falla son iguales: la dispersión es nula y la forma β no es estimable."
+        )
 
     m = method.upper()
     if m not in ("MLE", "RRY"):

@@ -6,6 +6,8 @@ from collections import deque
 from dataclasses import dataclass
 from statistics import NormalDist
 
+from ._utils import as_finite_scalar, as_nonneg
+
 
 @dataclass
 class ActivityResult:
@@ -94,8 +96,9 @@ class ProjectResult:
         -------
         float
         """
+        target = as_finite_scalar(target, "target")
         if self.project_std is None or self.project_std == 0.0:
-            raise ValueError("probability() requires a PERT result with non-zero variance.")
+            raise ValueError("probability() requiere un resultado PERT con varianza distinta de cero.")
         z = (target - self.project_duration) / self.project_std
         return NormalDist().cdf(z)
 
@@ -132,6 +135,29 @@ class ProjectResult:
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
+def _leer_actividades(activities) -> list:
+    """Valida la lista de actividades: tipo, nombres obligatorios y sin duplicados."""
+    if isinstance(activities, (str, bytes, dict)) or not hasattr(activities, "__iter__"):
+        raise TypeError("'activities' debe ser una lista de diccionarios.")
+    activities = list(activities)
+    if not activities:
+        raise ValueError("'activities' debe contener al menos una actividad.")
+    vistos: set = set()
+    for i, a in enumerate(activities):
+        if not isinstance(a, dict):
+            raise TypeError(f"activities[{i}] debe ser un diccionario, se recibió {type(a).__name__!r}.")
+        if "name" not in a:
+            raise ValueError(f"activities[{i}]: falta la clave 'name'.")
+        nm = str(a["name"])
+        if nm in vistos:
+            raise ValueError(f"Nombre de actividad duplicado: '{nm}'. Cada actividad debe tener un nombre único.")
+        vistos.add(nm)
+        preds = a.get("predecessors", [])
+        if isinstance(preds, (str, bytes)) or not hasattr(preds, "__iter__"):
+            raise TypeError(f"activities[{i}]['predecessors'] debe ser una lista de nombres.")
+    return activities
+
 
 def _toposort_and_succ(acts: dict) -> tuple:
     """Kahn's algorithm. Returns (topo_order, successors_dict)."""
@@ -241,15 +267,12 @@ def cpm(activities: list) -> ProjectResult:
     >>> r.project_duration
     8.0
     """
-    if not activities:
-        raise ValueError("'activities' must contain at least one activity.")
-
     acts: dict = {}
-    for a in activities:
-        nm  = str(a["name"])
-        dur = float(a["duration"])
-        if dur < 0.0:
-            raise ValueError(f"Duration of '{nm}' must be ≥ 0.")
+    for a in _leer_actividades(activities):
+        nm = str(a["name"])
+        if "duration" not in a:
+            raise ValueError(f"Actividad '{nm}': falta la clave 'duration'.")
+        dur = as_nonneg(a["duration"], f"activities['{nm}']['duration']")
         acts[nm] = {
             "duration":     dur,
             "predecessors": [str(p) for p in a.get("predecessors", [])],
@@ -306,22 +329,22 @@ def pert(activities: list) -> ProjectResult:
     >>> round(r.project_duration, 4)
     7.0
     """
-    if not activities:
-        raise ValueError("'activities' must contain at least one activity.")
-
     acts:      dict = {}
     opt_d:     dict = {}
     ml_d:      dict = {}
     pess_d:    dict = {}
 
-    for a in activities:
+    for a in _leer_actividades(activities):
         nm = str(a["name"])
-        o  = float(a["optimistic"])
-        m  = float(a["most_likely"])
-        b  = float(a["pessimistic"])
+        for clave in ("optimistic", "most_likely", "pessimistic"):
+            if clave not in a:
+                raise ValueError(f"Actividad '{nm}': falta la clave '{clave}'.")
+        o = as_nonneg(a["optimistic"], f"activities['{nm}']['optimistic']")
+        m = as_nonneg(a["most_likely"], f"activities['{nm}']['most_likely']")
+        b = as_nonneg(a["pessimistic"], f"activities['{nm}']['pessimistic']")
         if not (o <= m <= b):
             raise ValueError(
-                f"Activity '{nm}': optimistic ≤ most_likely ≤ pessimistic required."
+                f"Actividad '{nm}': se requiere optimistic ≤ most_likely ≤ pessimistic."
             )
         te = (o + 4.0 * m + b) / 6.0
         acts[nm] = {
