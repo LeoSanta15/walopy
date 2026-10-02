@@ -2,8 +2,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from ._utils import as_fraction, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import pandas as pd
 
 
 @dataclass

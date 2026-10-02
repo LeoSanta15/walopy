@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    import pandas as pd
     import plotly.graph_objects as go
 
 from ._utils import as_finite_scalar, as_fraction, as_nonneg, as_positive

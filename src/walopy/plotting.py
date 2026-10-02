@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
+    import pandas as pd
     import plotly.graph_objects as go
 
     from .advanced import BreakEvenResult, LineBalanceResult, SimulationResult

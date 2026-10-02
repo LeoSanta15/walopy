@@ -4,8 +4,12 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from ._utils import as_float_list, as_positive
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @dataclass

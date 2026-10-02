@@ -3,10 +3,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from ._utils import as_int_positive, as_nonempty, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @dataclass

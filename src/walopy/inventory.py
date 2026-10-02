@@ -6,8 +6,14 @@ import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from statistics import NormalDist
+from typing import TYPE_CHECKING
 
 from ._utils import as_float_list, as_fraction, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
 
 # ---------------------------------------------------------------------------
 # Economic Order Quantity

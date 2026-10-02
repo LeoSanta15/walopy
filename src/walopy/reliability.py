@@ -5,8 +5,12 @@ import math
 import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from ._utils import as_float_list, as_int_positive, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def _validar_t_mttr(t: float | None, mttr: float | None) -> tuple:

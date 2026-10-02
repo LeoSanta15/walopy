@@ -3,11 +3,15 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
 from ._utils import as_nonempty, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
 
 
 @dataclass

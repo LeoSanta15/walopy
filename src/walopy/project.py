@@ -5,8 +5,12 @@ import math
 from collections import deque
 from dataclasses import dataclass
 from statistics import NormalDist
+from typing import TYPE_CHECKING
 
 from ._utils import as_finite_scalar, as_nonneg
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 @dataclass

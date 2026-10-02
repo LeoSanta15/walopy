@@ -3,12 +3,16 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 import pandas as pd
 
 from ._utils import as_positive
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
+
 
 # ---------------------------------------------------------------------------
 # Internal bisection — avoids scipy dependency; all target functions are monotone

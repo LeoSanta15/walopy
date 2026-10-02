@@ -3,8 +3,13 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from ._utils import MAX_SERVIDORES, as_finite_scalar, as_int_positive, as_nonneg, as_positive
+
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import pandas as pd
 
 
 @dataclass

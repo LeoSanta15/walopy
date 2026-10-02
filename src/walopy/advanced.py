@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,10 @@ from ._utils import (
     as_positive,
 )
 from .queuing import QueueResult
+
+if TYPE_CHECKING:
+    import plotly.graph_objects as go
+
 
 # ---------------------------------------------------------------------------
 # Erlang B — M/M/c/c (loss system, no queue)
