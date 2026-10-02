@@ -485,6 +485,8 @@ def sensitivity(
 def batch_model(
     model_fn: Callable[..., Any],
     df: pd.DataFrame,
+    *,
+    errors: str = "collect",
     **fixed_kwargs: Any,
 ) -> pd.DataFrame:
     """Apply a walopy model to every row of a DataFrame.
@@ -502,6 +504,9 @@ def batch_model(
     df : pd.DataFrame
         One row per scenario.  Column names must match parameter names of
         *model_fn*.
+    errors : {'collect', 'raise'}
+        ``'collect'`` (por defecto): una fila que falla no detiene el lote; su mensaje queda en la
+        columna ``_error``. ``'raise'``: la primera excepción se propaga.
     **fixed_kwargs
         Additional parameters shared across all rows (e.g. ``mu=5.0``).
         A column in *df* with the same name takes precedence.
@@ -523,6 +528,8 @@ def batch_model(
     >>> scenarios = pd.DataFrame({"lam": [1.0, 2.0, 3.0, 4.0], "mu": [5.0, 5.0, 5.0, 5.0]})
     >>> batch_model(mm1, scenarios)
     """
+    if errors not in ("collect", "raise"):
+        raise ValueError("'errors' debe ser 'collect' o 'raise'.")
     rows: list[dict] = []
     has_errors = False
 
@@ -554,6 +561,8 @@ def batch_model(
             elif isinstance(result, (int, float, np.floating)):
                 row["value"] = float(result)
         except Exception as exc:
+            if errors == "raise":
+                raise
             row = row_series.to_dict()
             row["_error"] = str(exc)
             has_errors = True

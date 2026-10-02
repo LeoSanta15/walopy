@@ -144,3 +144,19 @@ def test_batch_model_no_error_column_when_all_pass():
     scenarios = pd.DataFrame({"lam": [1.0, 2.0], "mu": [5.0, 5.0]})
     result = batch_model(mm1, scenarios)
     assert "_error" not in result.columns
+
+
+def test_batch_model_errors_raise_propaga_la_excepcion():
+    scenarios = pd.DataFrame({"lam": [1.0, 6.0], "mu": [5.0, 5.0]})
+    with pytest.raises(ValueError, match="unstable"):
+        batch_model(mm1, scenarios, errors="raise")
+
+
+def test_batch_model_errors_invalido():
+    with pytest.raises(ValueError, match="errors"):
+        batch_model(mm1, pd.DataFrame({"lam": [1.0], "mu": [5.0]}), errors="ignorar")
+
+
+def test_batch_model_sin_errores_no_agrega_columna_error():
+    result = batch_model(mm1, pd.DataFrame({"lam": [1.0, 2.0], "mu": [5.0, 5.0]}))
+    assert "_error" not in result.columns
