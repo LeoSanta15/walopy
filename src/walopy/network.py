@@ -166,30 +166,30 @@ def jackson_network(
     gamma_arr = np.array([as_nonneg(g, f"gamma[{i}]") for i, g in enumerate(gamma)], dtype=float)
 
     if len(mu_arr) != J or len(gamma_arr) != J:
-        raise ValueError("'mu', 'gamma' and 'station_names' must have the same length.")
+        raise ValueError("'mu', 'gamma' y 'station_names' deben tener la misma longitud.")
 
     P = np.array(routing, dtype=float)
     if P.shape != (J, J):
-        raise ValueError(f"'routing' must be a ({J}×{J}) matrix, got shape {P.shape}.")
+        raise ValueError(f"'routing' debe ser una matriz ({J}×{J}), se recibió forma {P.shape}.")
     if np.any(P < 0):
-        raise ValueError("All routing probabilities must be ≥ 0.")
+        raise ValueError("Todas las probabilidades de ruteo deben ser ≥ 0.")
     row_sums = P.sum(axis=1)
     if np.any(row_sums > 1.0 + 1e-10):
-        raise ValueError("Routing matrix rows must sum to ≤ 1.")
+        raise ValueError("Las filas de la matriz de ruteo deben sumar ≤ 1.")
 
     if servers is None:
         c_arr = np.ones(J, dtype=int)
     else:
         c_arr = np.array([as_int_positive(c, f"servers[{i}]") for i, c in enumerate(servers)], dtype=int)
         if len(c_arr) != J:
-            raise ValueError("'servers' must have the same length as 'station_names'.")
+            raise ValueError("'servers' debe tener la misma longitud que 'station_names'.")
 
     # Traffic equations: λ = γ + P^T λ  →  (I − P^T) λ = γ
     A   = np.eye(J) - P.T
     lam = np.linalg.solve(A, gamma_arr)
 
     if np.any(lam < 0):
-        raise ValueError("Negative effective arrival rates — check routing matrix for closed loops.")
+        raise ValueError("Tasas de llegada efectivas negativas: revise la matriz de ruteo (¿lazos cerrados?).")
 
     # Analyse each station as M/M/c
     from .queuing import mm1, mmc
@@ -202,8 +202,8 @@ def jackson_network(
         rho_j = lj / (cj * muj)
         if rho_j >= 1.0:
             raise ValueError(
-                f"Station '{names[j]}' is unstable: ρ = {rho_j:.4g} ≥ 1. "
-                "Increase capacity or reduce arrival rates."
+                f"La estación '{names[j]}' es inestable: ρ = {rho_j:.4g} ≥ 1. "
+                "Aumente la capacidad o reduzca las tasas de llegada."
             )
         res = mm1(lj, muj) if cj == 1 else mmc(lj, muj, cj)
         station_list.append(StationMetrics(

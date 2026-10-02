@@ -23,8 +23,8 @@ def _bisect(f: Callable[[float], float], a: float, b: float,
     fa, fb = f(a), f(b)
     if fa * fb > 0:
         raise ValueError(
-            f"Root not bracketed: f({a:.6g})={fa:.4g}, f({b:.6g})={fb:.4g}. "
-            "Target may be outside the feasible range."
+            f"La raíz no está acotada: f({a:.6g})={fa:.4g}, f({b:.6g})={fb:.4g}. "
+            "El objetivo puede estar fuera del rango factible."
         )
     for _ in range(max_iter):
         mid = 0.5 * (a + b)
@@ -42,7 +42,7 @@ def _get_metric(result: Any, metric: str) -> float:
     """Extract a named metric from any result dataclass."""
     if not hasattr(result, metric):
         valid = [k for k in vars(result) if not k.startswith("_")]
-        raise ValueError(f"Unknown metric '{metric}'. Valid options: {valid}")
+        raise ValueError(f"Métrica desconocida '{metric}'. Opciones válidas: {valid}")
     return float(getattr(result, metric))
 
 
@@ -178,7 +178,7 @@ def solve_lam(
         "gg1":  lambda lam: kingman(lam, mu, ca2, cs2),
     }
     if model not in _models:
-        raise ValueError(f"Unknown model '{model}'. Choose from {list(_models)}.")
+        raise ValueError(f"Modelo desconocido '{model}'. Elija entre {list(_models)}.")
 
     fn = _models[model]
 
@@ -194,8 +194,8 @@ def solve_lam(
     # Check feasibility: even at lam_min the metric might exceed target
     if residual(lam_min) > 0:
         raise ValueError(
-            f"{target_metric} exceeds {target_value} even at very low λ. "
-            "Target may be infeasible for this model / μ."
+            f"{target_metric} supera {target_value} incluso con λ muy baja. "
+            "El objetivo puede ser infactible para este modelo / μ."
         )
 
     lam_sol = _bisect(residual, lam_min, lam_max)
@@ -257,7 +257,7 @@ def solve_mu(
         "gg1": lambda mu: kingman(lam, mu, ca2, cs2),
     }
     if model not in _models:
-        raise ValueError(f"Unknown model '{model}'. Choose from {list(_models)}.")
+        raise ValueError(f"Modelo desconocido '{model}'. Elija entre {list(_models)}.")
 
     fn = _models[model]
 
@@ -273,8 +273,8 @@ def solve_mu(
     # Ensure the bracket is valid
     if residual(mu_max) > 0:
         raise ValueError(
-            f"{target_metric} still exceeds {target_value} at μ = {mu_max:.4g}. "
-            "Target may be numerically infeasible."
+            f"{target_metric} sigue superando {target_value} con μ = {mu_max:.4g}. "
+            "El objetivo puede ser numéricamente infactible."
         )
 
     mu_sol  = _bisect(residual, mu_min, mu_max)
@@ -344,8 +344,8 @@ def solve_servers(
             )
 
     raise ValueError(
-        f"Could not meet {target_metric} ≤ {target_value} with up to {c_max} servers. "
-        "Consider increasing μ or relaxing the target."
+        f"No se pudo cumplir {target_metric} ≤ {target_value} con hasta {c_max} servidores. "
+        "Considere aumentar μ o relajar el objetivo."
     )
 
 

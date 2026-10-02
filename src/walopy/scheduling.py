@@ -191,14 +191,14 @@ def schedule_single(
     dd = list(due_dates) if due_dates is not None else [None] * n
 
     if len(dd) != n or len(weights) != n or len(names) != n:
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
 
     rule_up = rule.upper()
     valid = {"SPT", "EDD", "WSPT", "CR", "FIFO"}
     if rule_up not in valid:
-        raise ValueError(f"rule must be one of {valid}.")
+        raise ValueError(f"'rule' debe ser una de {valid}.")
     if rule_up in ("EDD", "CR") and all(d is None for d in dd):
-        raise ValueError(f"rule='{rule}' requires due_dates.")
+        raise ValueError(f"rule='{rule}' requiere due_dates.")
 
     for i, p in enumerate(processing_times):
         as_positive(p, f"processing_times[{i}]")
@@ -300,7 +300,7 @@ def johnson_flowshop(
     """
     n = len(m1_times)
     if len(m2_times) != n:
-        raise ValueError("m1_times and m2_times must have the same length.")
+        raise ValueError("m1_times y m2_times deben tener la misma longitud.")
     if names is None:
         names = [f"J{i + 1}" for i in range(n)]
     for i, (a, b) in enumerate(zip(m1_times, m2_times)):
@@ -466,14 +466,14 @@ def neh_flowshop(
     """
     n = len(times_matrix)
     if n == 0:
-        raise ValueError("'times_matrix' must contain at least one job.")
+        raise ValueError("'times_matrix' debe contener al menos un trabajo.")
     m_cnt = len(times_matrix[0])
     if m_cnt == 0:
-        raise ValueError("Each job must have processing times for at least one machine.")
+        raise ValueError("Cada trabajo debe tener tiempos de proceso para al menos una máquina.")
     for i, row in enumerate(times_matrix):
         if len(row) != m_cnt:
             raise ValueError(
-                f"All rows must have the same length; row {i} has {len(row)} ≠ {m_cnt}."
+                f"Todas las filas deben tener la misma longitud; la fila {i} tiene {len(row)} ≠ {m_cnt}."
             )
         for j, p in enumerate(row):
             as_positive(float(p), f"times_matrix[{i}][{j}]")
@@ -483,7 +483,7 @@ def neh_flowshop(
     else:
         names_list = [str(s) for s in names]
     if len(names_list) != n:
-        raise ValueError("'names' must have the same length as 'times_matrix'.")
+        raise ValueError("'names' debe tener la misma longitud que 'times_matrix'.")
 
     T_mat = [[float(times_matrix[i][j]) for j in range(m_cnt)] for i in range(n)]
 

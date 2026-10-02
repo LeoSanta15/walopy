@@ -229,7 +229,7 @@ def reorder_point(
     sl  = as_nonneg(lead_time_std, "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc == 0.0 or svc == 1.0:
-        raise ValueError("'service_level' must be strictly between 0 and 1.")
+        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
 
     mean_dlt = D * LT
     var_dlt  = LT * sd**2 + D**2 * sl**2
@@ -363,9 +363,9 @@ def newsvendor(
     s   = as_nonneg(salvage, "salvage")
 
     if c >= p:
-        raise ValueError("'cost' must be less than 'price' (otherwise Cu ≤ 0).")
+        raise ValueError("'cost' debe ser menor que 'price' (de lo contrario Cu ≤ 0).")
     if s >= c:
-        raise ValueError("'salvage' must be less than 'cost' (otherwise Co ≤ 0).")
+        raise ValueError("'salvage' debe ser menor que 'cost' (de lo contrario Co ≤ 0).")
 
     Cu = p - c          # underage cost (opportunity loss)
     Co = c - s          # overage cost  (holding/disposal loss)
@@ -519,7 +519,7 @@ def ebq(
     h = as_positive(holding_cost, "holding_cost")
     P = as_positive(production_rate, "production_rate")
     if D >= P:
-        raise ValueError(f"production_rate ({P}) must exceed demand_rate ({D}).")
+        raise ValueError(f"production_rate ({P}) debe superar a demand_rate ({D}).")
 
     fraction = 1.0 - D / P
     q   = math.sqrt(2 * D * S / (h * fraction))
@@ -616,7 +616,7 @@ def eoq_multi(
     holding_costs  = list(holding_costs)
     n = len(demand_rates)
     if len(ordering_costs) != n or len(holding_costs) != n:
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
         names = [f"Item-{i+1}" for i in range(n)]
 
@@ -673,7 +673,7 @@ def ebq_multi(
     production_rates = list(production_rates)
     n = len(demand_rates)
     if not (len(setup_costs) == len(holding_costs) == len(production_rates) == n):
-        raise ValueError("All input sequences must have the same length.")
+        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
     if names is None:
         names = [f"Item-{i+1}" for i in range(n)]
 
@@ -1244,7 +1244,7 @@ def eoq_quantity_discount(
 
     breaks = list(price_breaks)
     if len(breaks) < 1:
-        raise ValueError("price_breaks must contain at least one entry.")
+        raise ValueError("price_breaks debe contener al menos una entrada.")
 
     # Sort by min_qty
     breaks.sort(key=lambda x: x[0])
@@ -1483,7 +1483,7 @@ def rq_policy(
     sl  = as_nonneg(lead_time_std,   "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc <= 0.0 or svc >= 1.0:
-        raise ValueError("'service_level' must be strictly between 0 and 1.")
+        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
 
     Q   = math.sqrt(2 * D * K / h)
     mean_dlt = D * LT
@@ -1613,7 +1613,7 @@ def rs_policy(
     sl  = as_nonneg(lead_time_std,   "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc <= 0.0 or svc >= 1.0:
-        raise ValueError("'service_level' must be strictly between 0 and 1.")
+        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
 
     # Exposure period = R + L
     RL = R + LT
@@ -1756,7 +1756,7 @@ def exchange_curve(
             "Specify at most one of 'target_orders' or 'target_investment'."
         )
     if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
+        raise ValueError("'items' debe contener al menos un elemento.")
 
     parsed: list[dict[str, Any]] = []
     for idx, it in enumerate(items):
@@ -1766,7 +1766,7 @@ def exchange_curve(
         v  = float(it.get("unit_value", 1.0))
         nm = str(it.get("name", f"I{idx + 1}"))
         if v <= 0:
-            raise ValueError(f"items[{idx}]['unit_value'] must be > 0.")
+            raise ValueError(f"items[{idx}]['unit_value'] debe ser > 0.")
         Q_eoq = math.sqrt(2 * D * K / h)
         parsed.append({"name": nm, "D": D, "K": K, "h": h, "v": v, "Q_eoq": Q_eoq})
 
@@ -1936,7 +1936,7 @@ def safety_stock_curve(
             "Specify at most one of 'target_service_level' or 'target_ss_investment'."
         )
     if len(items) == 0:
-        raise ValueError("'items' must contain at least one item.")
+        raise ValueError("'items' debe contener al menos un elemento.")
 
     _norm = NormalDist()
 
@@ -1950,9 +1950,9 @@ def safety_stock_curve(
         D    = it.get("demand_rate")
         D    = float(D) if D is not None else None
         if v <= 0:
-            raise ValueError(f"items[{idx}]['unit_value'] must be > 0.")
+            raise ValueError(f"items[{idx}]['unit_value'] debe ser > 0.")
         if sl < 0:
-            raise ValueError(f"items[{idx}]['lead_time_std'] must be ≥ 0.")
+            raise ValueError(f"items[{idx}]['lead_time_std'] debe ser ≥ 0.")
         # σ_DLT = √(L·σ_D² + D²·σ_L²)  — reduces to σ_D·√L when σ_L=0
         if D is not None and sl > 0:
             sigma_dlt = math.sqrt(L * sd**2 + D**2 * sl**2)
@@ -1966,14 +1966,14 @@ def safety_stock_curve(
     if target_service_level is not None:
         sl_val = float(target_service_level)
         if not (0.0 < sl_val < 1.0):
-            raise ValueError("'target_service_level' must be strictly between 0 and 1.")
+            raise ValueError("'target_service_level' debe estar estrictamente entre 0 y 1.")
         z = _norm.inv_cdf(sl_val)
         target_label = f"service_level={sl_val:.4%}"
     elif target_ss_investment is not None:
         ti = as_positive(float(target_ss_investment), "target_ss_investment")
         if total_sigma_v == 0.0:
             raise ValueError(
-                "All items have demand_std=0 — safety stock is always 0."
+                "Todos los artículos tienen demand_std=0: el stock de seguridad es siempre 0."
             )
         z = ti / total_sigma_v
         target_label = f"ss_investment={ti:.4g}"

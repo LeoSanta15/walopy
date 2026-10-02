@@ -171,7 +171,7 @@ def _toposort_and_succ(acts: dict) -> tuple:
         for pred in act["predecessors"]:
             if pred not in acts:
                 raise ValueError(
-                    f"Activity '{name}' references unknown predecessor '{pred}'."
+                    f"La actividad '{name}' referencia un predecesor desconocido '{pred}'."
                 )
             succ[pred].append(name)
             in_deg[name] += 1
@@ -185,7 +185,7 @@ def _toposort_and_succ(acts: dict) -> tuple:
             if in_deg[s] == 0:
                 queue.append(s)
     if len(order) != len(acts):
-        raise ValueError("Activities contain a cycle.")
+        raise ValueError("Las actividades contienen un ciclo.")
     return order, succ
 
 

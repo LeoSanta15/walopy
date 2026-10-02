@@ -35,7 +35,7 @@ def test_mm1_basic():
 
 
 def test_mm1_unstable():
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         mm1(lam=5.0, mu=4.0)
 
 

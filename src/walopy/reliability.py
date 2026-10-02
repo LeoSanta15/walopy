@@ -123,7 +123,7 @@ def _r_system(topology: str, lams: list, k, t: float) -> float:
             c = math.comb(n, j)
             total += c * (R_i ** j) * (F_i ** (n - j))
         return total
-    raise ValueError(f"Unknown topology: {topology!r}")
+    raise ValueError(f"Topología desconocida: {topology!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -375,7 +375,7 @@ class WeibullResult:
         """
         p = pct / 100.0
         if not (0.0 < p < 1.0):
-            raise ValueError("'pct' must be strictly between 0 and 100.")
+            raise ValueError("'pct' debe estar estrictamente entre 0 y 100.")
         return self.scale * (-math.log(1.0 - p)) ** (1.0 / self.shape)
 
     def summary(self) -> str:
@@ -505,7 +505,7 @@ def weibull_analysis(
 
     m = method.upper()
     if m not in ("MLE", "RRY"):
-        raise ValueError("'method' must be 'MLE' or 'RRY'.")
+        raise ValueError("'method' debe ser 'MLE' o 'RRY'.")
 
     if m == "MLE":
         beta  = _weibull_mle_beta(t_list)

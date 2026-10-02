@@ -83,7 +83,7 @@ def test_monte_carlo_percentiles_ordered():
 
 
 def test_monte_carlo_unstable_raises():
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         monte_carlo_gg1(lam=6.0, mu=5.0, ca2=1.0, cs2=1.0)
 
 
@@ -130,7 +130,7 @@ def test_break_even_margin_of_safety():
 
 
 def test_break_even_negative_cm_raises():
-    with pytest.raises(ValueError, match="contribution margin"):
+    with pytest.raises(ValueError, match="margen de contribución"):
         break_even(fixed_cost=1000, price_per_unit=5, variable_cost_per_unit=10)
 
 

@@ -131,7 +131,7 @@ def littles_law(
     provided = {k: v for k, v in {"L": L, "lam": lam, "W": W}.items() if v is not None}
     missing = [k for k, v in {"L": L, "lam": lam, "W": W}.items() if v is None]
     if len(missing) != 1:
-        raise ValueError("Exactly one of L, lam, W must be None.")
+        raise ValueError("Exactamente una de L, lam, W debe ser None.")
     for k, v in provided.items():
         as_positive(v, k)
     if missing[0] == "L":
@@ -163,7 +163,7 @@ def mm1(lam: float, mu: float) -> QueueResult:
     mu = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < μ.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1. Se requiere λ < μ.")
     Lq = rho**2 / (1 - rho)
     L  = rho / (1 - rho)
     Wq = Lq / lam
@@ -200,7 +200,7 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     rho = lam / (c * mu)
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.  Need λ < c·μ.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1. Se requiere λ < c·μ.")
     a = lam / mu  # carga ofrecida
 
     # Erlang-B por recurrencia (estable para c grande) y de ahí Erlang-C y P0.
@@ -250,7 +250,7 @@ def md1(lam: float, mu: float) -> QueueResult:
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     Lq = rho**2 / (2 * (1 - rho))
     L  = rho + Lq
     Wq = Lq / lam
@@ -298,7 +298,7 @@ def kingman(
     cs2  = as_nonneg(cs2, "cs2")
     rho  = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     Wq = (rho / (1 - rho)) * ((ca2 + cs2) / 2) * (1 / mu)
     Lq = lam * Wq
     W  = Wq + 1 / mu
@@ -345,7 +345,7 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
     cs2  = as_nonneg(cs2, "cs2")
     rho  = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     ES2  = (1.0 + cs2) / mu**2          # E[S²]
     Wq   = lam * ES2 / (2.0 * (1.0 - rho))
     Lq   = lam * Wq

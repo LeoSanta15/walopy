@@ -52,7 +52,7 @@ def test_mm1_priority_single_class_equals_mm1():
 
 
 def test_mm1_priority_unstable_raises():
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         mm1_priority([3.0, 4.0], mu=5.0)
 
 

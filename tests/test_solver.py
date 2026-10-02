@@ -148,7 +148,7 @@ def test_batch_model_no_error_column_when_all_pass():
 
 def test_batch_model_errors_raise_propaga_la_excepcion():
     scenarios = pd.DataFrame({"lam": [1.0, 6.0], "mu": [5.0, 5.0]})
-    with pytest.raises(ValueError, match="unstable"):
+    with pytest.raises(ValueError, match="inestable"):
         batch_model(mm1, scenarios, errors="raise")
 
 

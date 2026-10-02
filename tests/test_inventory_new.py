@@ -268,7 +268,7 @@ def test_break_even_multi_to_frame():
 
 
 def test_break_even_multi_negative_cm_raises():
-    with pytest.raises(ValueError, match="contribution margin"):
+    with pytest.raises(ValueError, match="margen de contribución"):
         wl.break_even_multi(100_000, [20, 80], [25, 50], [1, 1])
 
 

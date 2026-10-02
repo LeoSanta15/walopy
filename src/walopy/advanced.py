@@ -245,7 +245,7 @@ def monte_carlo_gg1(
     n_customers = as_int_positive(n_customers, "n_customers", max=MAX_CLIENTES)
     rho         = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
 
     rng          = np.random.default_rng(seed)
     mean_ia      = 1.0 / lam
@@ -392,7 +392,7 @@ def line_balance(
     n      = len(names)
 
     if len(cts) != n:
-        raise ValueError("'station_names' and 'cycle_times' must have the same length.")
+        raise ValueError("'station_names' y 'cycle_times' deben tener la misma longitud.")
 
     idle        = [max(takt - ct, 0.0) for ct in cts]
     utils       = [ct / takt for ct in cts]
@@ -512,7 +512,7 @@ def break_even(
 
     cm  = price_per_unit - variable_cost_per_unit
     if cm <= 0:
-        raise ValueError("price_per_unit must exceed variable_cost_per_unit for a positive contribution margin.")
+        raise ValueError("price_per_unit debe superar a variable_cost_per_unit para obtener un margen de contribución positivo.")
 
     cmr       = cm / price_per_unit
     bep_units = fixed_cost / cm
@@ -660,7 +660,7 @@ def break_even_multi(
 
     cms = [p - v for p, v in zip(prices, variable_costs)]
     if any(cm <= 0 for cm in cms):
-        raise ValueError("All products must have a positive contribution margin (price > variable_cost).")
+        raise ValueError("Todos los productos deben tener margen de contribución positivo (precio > costo variable).")
 
     wacm     = sum(cm * mf for cm, mf in zip(cms, mix_frac))
     avg_price = sum(p * mf for p, mf in zip(prices, mix_frac))
@@ -726,7 +726,7 @@ def break_even_sales(
     fc  = as_positive(fixed_cost, "fixed_cost")
     vcr = as_fraction(variable_cost_ratio, "variable_cost_ratio")
     if vcr == 0.0 or vcr == 1.0:
-        raise ValueError("'variable_cost_ratio' must be strictly between 0 and 1.")
+        raise ValueError("'variable_cost_ratio' debe estar estrictamente entre 0 y 1.")
 
     cmr       = 1.0 - vcr
     bep_sales = fc / cmr
@@ -778,7 +778,7 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     if isinstance(n_max, bool) or not isinstance(n_max, (int, np.integer)):
         raise TypeError(f"'n_max' debe ser un entero >= 0, se recibió {type(n_max).__name__!r}.")
     if not 0 <= n_max <= MAX_ESTADOS:
@@ -813,7 +813,7 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"System unstable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
     n_points = as_int_positive(n_points, "n_points", max=MAX_ESTADOS)
     W_mean = 1.0 / (mu - lam)
     t_upper = as_positive(t_max, "t_max") if t_max is not None else 5.0 * W_mean
@@ -856,7 +856,7 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
     c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     K   = as_int_positive(K, "K", max=MAX_ESTADOS)
     if K < c:
-        raise ValueError(f"'K' (system capacity) must be ≥ c (servers); got K={K}, c={c}.")
+        raise ValueError(f"'K' (capacidad del sistema) debe ser ≥ c (servidores); se recibió K={K}, c={c}.")
 
     a   = lam / mu           # offered load
 
@@ -987,15 +987,15 @@ def mm1_priority(
     mu   = as_positive(mu, "mu")
     N    = len(lams)
     if N == 0:
-        raise ValueError("'lam_list' must contain at least one class.")
+        raise ValueError("'lam_list' debe contener al menos una clase.")
 
     rho_total = sum(lams) / mu
     if rho_total >= 1.0:
-        raise ValueError(f"System unstable: ρ_total = {rho_total:.4g} ≥ 1.")
+        raise ValueError(f"Sistema inestable: ρ_total = {rho_total:.4g} ≥ 1.")
 
     names = list(class_names) if class_names else [str(i) for i in range(N)]
     if len(names) != N:
-        raise ValueError("'class_names' must have the same length as 'lam_list'.")
+        raise ValueError("'class_names' debe tener la misma longitud que 'lam_list'.")
 
     # Residual service time for M/M/1 (exponential, cv²=1): R = ρ/μ
     R = rho_total / mu

@@ -124,12 +124,12 @@ def bottleneck_analysis(
     n              = len(station_names)
 
     if len(capacities) != n:
-        raise ValueError("'station_names' and 'capacities' must have the same length.")
+        raise ValueError("'station_names' y 'capacities' deben tener la misma longitud.")
 
     if routing_fractions is None:
         routing_fractions = [1.0] * n
     elif len(routing_fractions) != n:
-        raise ValueError("'routing_fractions' must match the number of stations.")
+        raise ValueError("'routing_fractions' debe tener un valor por estación.")
     routing_fractions = [as_nonneg(f, f"routing_fractions[{i}]") for i, f in enumerate(routing_fractions)]
 
     demand_rates = [demand_rate * rf for rf in routing_fractions]

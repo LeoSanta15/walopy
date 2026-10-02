@@ -9,55 +9,55 @@ from . import __version__
 
 def _add_lam_mu(p: argparse.ArgumentParser) -> None:
     p.add_argument("--lam", type=float, required=True, metavar="LAM",
-                   help="Arrival rate λ")
+                   help="Tasa de llegadas λ")
     p.add_argument("--mu", type=float, required=True, metavar="MU",
-                   help="Service rate μ per server")
+                   help="Tasa de servicio μ por servidor")
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="walopy",
-        description="Queuing theory and operations analysis toolkit.",
+        description="Herramientas de teoría de colas e investigación de operaciones.",
     )
     parser.add_argument("--version", action="version", version=f"walopy {__version__}")
 
     sub = parser.add_subparsers(dest="model", metavar="MODEL")
 
     # --- mm1 ---
-    p1 = sub.add_parser("mm1", help="M/M/1 single-server queue")
+    p1 = sub.add_parser("mm1", help="Cola M/M/1 de un servidor")
     _add_lam_mu(p1)
 
     # --- mmc ---
-    pc = sub.add_parser("mmc", help="M/M/c multi-server queue")
+    pc = sub.add_parser("mmc", help="Cola M/M/c de varios servidores")
     _add_lam_mu(pc)
-    pc.add_argument("--c", type=int, required=True, metavar="C", help="Number of servers")
+    pc.add_argument("--c", type=int, required=True, metavar="C", help="Número de servidores")
 
     # --- md1 ---
-    pd1 = sub.add_parser("md1", help="M/D/1 deterministic service queue")
+    pd1 = sub.add_parser("md1", help="Cola M/D/1 con servicio determinístico")
     _add_lam_mu(pd1)
 
     # --- gg1 ---
-    pg = sub.add_parser("gg1", help="G/G/1 Kingman approximation")
+    pg = sub.add_parser("gg1", help="Aproximación de Kingman para G/G/1")
     _add_lam_mu(pg)
     pg.add_argument("--ca2", type=float, required=True, metavar="CA2",
-                    help="Squared CV of inter-arrival times")
+                    help="CV² de los tiempos entre llegadas")
     pg.add_argument("--cs2", type=float, required=True, metavar="CS2",
-                    help="Squared CV of service times")
+                    help="CV² de los tiempos de servicio")
 
     # --- littles ---
-    pl = sub.add_parser("littles", help="Solve Little's Law for the missing variable")
+    pl = sub.add_parser("littles", help="Resuelve la ley de Little para la variable faltante")
     pl.add_argument("--L",   type=float, default=None, metavar="L")
     pl.add_argument("--lam", type=float, default=None, metavar="LAM")
     pl.add_argument("--W",   type=float, default=None, metavar="W")
 
     # --- eoq ---
-    pe = sub.add_parser("eoq", help="Economic Order Quantity")
+    pe = sub.add_parser("eoq", help="Cantidad económica de pedido (EOQ)")
     pe.add_argument("--demand",   type=float, required=True, metavar="D",
-                    help="Demand rate (units/period)")
+                    help="Tasa de demanda (unidades/periodo)")
     pe.add_argument("--ordering", type=float, required=True, metavar="K",
-                    help="Fixed cost per order")
+                    help="Costo fijo por pedido")
     pe.add_argument("--holding",  type=float, required=True, metavar="H",
-                    help="Holding cost per unit per period")
+                    help="Costo de mantener por unidad y periodo")
 
     args = parser.parse_args(argv)
 
