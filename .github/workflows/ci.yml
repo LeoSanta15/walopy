@@ -5,6 +5,12 @@ on:
     branches: ["main", "claude/**", "feat/**", "fix/**"]
   pull_request:
     branches: ["main"]
+  schedule:
+    - cron: "17 5 * * 1"   # cada lunes: prueba contra las últimas versiones de las dependencias
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -13,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.11", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
@@ -22,9 +28,138 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: |
-          pip install -e ".[dev]"
+      - name: Instalar dependencias
+        run: pip install -e ".[dev]"
 
-      - name: Run tests
+      - name: Ejecutar tests
         run: pytest tests/ -q --tb=short
+
+  minimos:
+    name: Tests con dependencias mínimas (Python 3.9)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Instalar versiones mínimas declaradas
+        run: |
+          pip install "numpy==1.22.0" "pandas==1.4.0" "matplotlib==3.5.0" "plotly==5.0.0" "pytest>=7" "pytest-cov>=4"
+          pip install --no-deps -e .
+
+      - name: Ejecutar tests
+        run: pytest tests/ -q --tb=short
+
+  calidad:
+    name: Linter y tipos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e ".[dev]"
+
+      - name: ruff
+        run: ruff check src/ tests/
+
+      - name: mypy
+        run: mypy src/walopy --ignore-missing-imports
+
+  cobertura:
+    name: Cobertura
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e ".[dev]"
+
+      - name: Cobertura global (mínimo 85 % en pyproject.toml)
+        run: pytest --cov=walopy --cov-report=term-missing --cov-report=json -q
+
+      - name: Cobertura por módulo (mínimo 70 %)
+        run: python scripts/comprobar_cobertura_modulos.py 70
+
+  paquete:
+    name: Build y metadatos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e ".[release]"
+
+      - name: Construir
+        run: python -m build
+
+      - name: Verificar metadatos
+        run: twine check dist/*
+
+      - name: Instalar la rueda en un entorno limpio
+        run: |
+          python -m venv /tmp/limpio
+          /tmp/limpio/bin/pip install dist/*.whl
+          cd /tmp && /tmp/limpio/bin/python -c "import walopy, importlib.metadata as m; assert walopy.__version__ == m.version('walopy'); print(walopy.__version__)"
+          test -f "$(/tmp/limpio/bin/python -c 'import walopy, os; print(os.path.dirname(walopy.__file__))')/py.typed"
+
+      - name: Sin referencias obsoletas
+        run: |
+          if grep -rn "PLACEHOLDER\|TU_USUARIO\|cost_kpi_tree" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --exclude=CLAUDE.md --exclude-dir=.git --exclude-dir=auditoria --exclude-dir=referencia; then
+            echo "Se encontraron referencias obsoletas"; exit 1
+          fi
+
+  docs:
+    name: Documentación (Sphinx -W)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e ".[docs]"
+
+      - name: Construir documentación
+        run: sphinx-build -b html -W docs/source docs/build
+
+  auditoria:
+    name: Auditoría de dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install pip-audit
+
+      - name: pip-audit de las dependencias del proyecto
+        run: pip-audit .
+
+  ultimas-versiones:
+    name: Tests con las últimas dependencias
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - run: pip install --upgrade -e ".[dev]"
+
+      - run: pytest tests/ -q --tb=short
