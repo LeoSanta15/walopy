@@ -5,18 +5,21 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "walopy"
 version = "0.2.8"
-description = "Queuing theory, operations analysis, OEE, bottleneck analysis and KPI trees for Python"
+description = "Herramientas de investigación de operaciones: colas, inventarios, scheduling, CPM/PERT, confiabilidad, OEE, cuellos de botella y árboles de KPI"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "LeoSanta15", email = "angelsanta1@gmail.com" }]
 keywords = [
-    "queuing theory", "operations research", "little's law", "kingman",
-    "bottleneck", "OEE", "efficiency", "utilization", "unit cost", "KPI",
+    "operations research", "queuing theory", "little's law", "kingman",
+    "inventory", "EOQ", "MRP", "ABC analysis", "scheduling", "flow-shop",
+    "CPM", "PERT", "reliability", "weibull",
+    "bottleneck", "OEE", "KPI",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -25,12 +28,14 @@ classifiers = [
     "Operating System :: OS Independent",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
 ]
 dependencies = ["numpy>=1.22", "pandas>=1.4", "matplotlib>=3.5", "plotly>=5.0"]
 
 [project.optional-dependencies]
-dev  = ["pytest>=7", "pytest-cov>=4", "ruff>=0.6", "mypy>=1.10"]
-docs = ["sphinx>=7", "sphinx-rtd-theme>=2", "myst-parser>=2"]
+dev     = ["pytest>=7", "pytest-cov>=4", "ruff~=0.16.10", "mypy>=1.10,<3"]
+release = ["build", "twine", "pip-audit"]
+docs    = ["sphinx>=7", "sphinx-rtd-theme>=2", "myst-parser>=2"]
 
 [project.urls]
 Homepage  = "https://github.com/LeoSanta15/walopy"
@@ -39,6 +44,9 @@ Changelog = "https://github.com/LeoSanta15/walopy/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+walopy = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -50,3 +58,9 @@ ignore_missing_imports = true
 [tool.ruff]
 line-length    = 110
 target-version = "py39"
+
+[tool.ruff.lint]
+select = ["F", "E9", "B", "I", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S311"]
