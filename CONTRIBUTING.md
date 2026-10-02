@@ -12,7 +12,7 @@
 ```bash
 python -m pytest tests/ -q
 python -m pytest --cov=walopy --cov-report=term-missing -q   # global ≥ 85 %, ningún módulo público < 70 %
-python -m ruff check src/ tests/
+python -m ruff check src/ tests/ benchmarks/ scripts/ examples/
 python -m mypy src/walopy --ignore-missing-imports
 python -m build && python -m twine check dist/*
 python -m sphinx -b html -W docs/source docs/build

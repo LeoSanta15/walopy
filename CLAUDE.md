@@ -20,7 +20,9 @@ analistas de operaciones. Sin `scipy`: solo numpy, pandas, matplotlib y plotly.
 - `kpi.py`         — `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `roi_kpi_tree`
 - `plotting.py`    — todas las gráficas (matplotlib y plotly, importación perezosa)
 - `__main__.py`    — CLI (`python -m walopy`)
-- `_utils.py`      — validadores compartidos (única capa de ingesta numérica)
+- `_utils.py`      — validadores compartidos (única capa de ingesta numérica) y cotas de tamaño
+
+Otras carpetas: `tests/` (pytest; incluye doctests de `src/` y los ejemplos del README), `examples/` (scripts ejecutables), `benchmarks/` (rendimiento), `scripts/` (utilidades de CI), `docs/` (Sphinx, `auditoria/` y `referencia/`).
 
 ## Comandos estándar
 ```bash
@@ -28,7 +30,7 @@ analistas de operaciones. Sin `scipy`: solo numpy, pandas, matplotlib y plotly.
 python -m pytest tests/ -q
 
 # Linter (bugs reales, no solo estilo; reglas F, E9, B, I, S definidas en pyproject.toml)
-python -m ruff check src/ tests/
+python -m ruff check src/ tests/ benchmarks/ scripts/ examples/
 
 # Tipos
 python -m mypy src/walopy --ignore-missing-imports

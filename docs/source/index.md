@@ -7,5 +7,6 @@
 instalacion
 inicio_rapido
 referencia/index
+rendimiento
 changelog
 ```

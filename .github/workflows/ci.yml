@@ -65,7 +65,7 @@ jobs:
       - run: pip install -e ".[dev]"
 
       - name: ruff
-        run: ruff check src/ tests/
+        run: ruff check src/ tests/ benchmarks/ scripts/ examples/
 
       - name: mypy
         run: mypy src/walopy --ignore-missing-imports
@@ -163,3 +163,19 @@ jobs:
       - run: pip install --upgrade -e ".[dev]"
 
       - run: pytest tests/ -q --tb=short
+
+  benchmarks:
+    name: Benchmarks (informativo)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e .
+
+      - name: Medir
+        run: python benchmarks/bench_core.py
