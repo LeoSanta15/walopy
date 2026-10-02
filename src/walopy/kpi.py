@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Callable, Sequence
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import plotly.graph_objects as go
 
-from ._utils import as_fraction, as_positive, as_nonneg, as_finite_scalar
+from ._utils import as_finite_scalar, as_fraction, as_nonneg, as_positive
 
 
 @dataclass
@@ -38,7 +38,7 @@ class KPINode:
     # Tree navigation
     # ------------------------------------------------------------------ #
 
-    def find(self, name: str) -> "KPINode | None":
+    def find(self, name: str) -> KPINode | None:
         """Depth-first search by name."""
         if self.name == name:
             return self
@@ -48,7 +48,7 @@ class KPINode:
                 return result
         return None
 
-    def leaves(self) -> list["KPINode"]:
+    def leaves(self) -> list[KPINode]:
         """Return all leaf nodes (nodes with no children)."""
         if not self.children:
             return [self]
@@ -61,7 +61,7 @@ class KPINode:
     # Display
     # ------------------------------------------------------------------ #
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Flatten the tree into a DataFrame (depth-first)."""
         import pandas as pd
 
@@ -92,7 +92,7 @@ class KPINode:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         """Render an interactive Plotly treemap (or sunburst with ``kind='sunburst'``)."""
         from .plotting import plot_kpi_tree
         return plot_kpi_tree(self, **kwargs)

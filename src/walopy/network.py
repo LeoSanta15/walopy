@@ -1,12 +1,12 @@
 """Open Jackson network of queues."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 import numpy as np
 
-from ._utils import as_positive, as_nonneg, as_int_positive, as_nonempty
+from ._utils import as_int_positive, as_nonempty, as_nonneg, as_positive
 
 
 @dataclass
@@ -62,7 +62,7 @@ class JacksonResult:
     W_system: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Station":   s.name,
@@ -188,7 +188,7 @@ def jackson_network(
         raise ValueError("Negative effective arrival rates — check routing matrix for closed loops.")
 
     # Analyse each station as M/M/c
-    from .queuing import mmc, mm1
+    from .queuing import mm1, mmc
 
     station_list: list[StationMetrics] = []
     for j in range(J):

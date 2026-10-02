@@ -1,14 +1,14 @@
 """Solvers: find optimal parameters or user-defined targets for queuing / operations models."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Any, Callable, Sequence
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg
-
+from ._utils import as_positive
 
 # ---------------------------------------------------------------------------
 # Internal bisection — avoids scipy dependency; all target functions are monotone
@@ -109,7 +109,7 @@ class OptimizeResult:
 
     optimal_servers: int
     min_cost: float
-    cost_breakdown: "pd.DataFrame"
+    cost_breakdown: pd.DataFrame
     model_result: Any
     params: dict = field(default_factory=dict)
 
@@ -122,7 +122,7 @@ class OptimizeResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_optimize_servers
         return plot_optimize_servers(self, **kwargs)
 
@@ -162,7 +162,7 @@ def solve_lam(
     -------
     SolverResult
     """
-    from .queuing import mm1, mmc, md1, kingman
+    from .queuing import kingman, md1, mm1, mmc
 
     mu = as_positive(mu, "mu")
     target_value = as_positive(target_value, "target_value")
@@ -241,7 +241,7 @@ def solve_mu(
     -------
     SolverResult
     """
-    from .queuing import mm1, mmc, md1, kingman
+    from .queuing import kingman, md1, mm1, mmc
 
     lam = as_positive(lam, "lam")
     target_value = as_positive(target_value, "target_value")
@@ -480,7 +480,7 @@ def sensitivity(
 
 def batch_model(
     model_fn: Callable[..., Any],
-    df: "pd.DataFrame",
+    df: pd.DataFrame,
     **fixed_kwargs: Any,
 ) -> pd.DataFrame:
     """Apply a walopy model to every row of a DataFrame.

@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from statistics import NormalDist
-from typing import Sequence
 
-from ._utils import as_positive, as_nonneg, as_fraction
-
+from ._utils import as_fraction, as_nonneg, as_positive
 
 # ---------------------------------------------------------------------------
 # Economic Order Quantity
@@ -55,7 +54,7 @@ class EOQResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "EOQ": self.eoq,
@@ -66,7 +65,7 @@ class EOQResult:
             "Cycle time": self.cycle_time,
         }])
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_eoq
         return plot_eoq(self, **kwargs)
 
@@ -166,7 +165,7 @@ class ReorderResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Reorder point": self.reorder_point,
@@ -299,7 +298,7 @@ class NewsvendorResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Q*": self.optimal_qty,
@@ -378,9 +377,6 @@ def newsvendor(
         exp_leftover = max(Q - mu, 0.0)
         exp_stockout = max(mu - Q, 0.0)
     else:
-        z = (Q - mu) / sig
-        phi_z  = nd.pdf(Q)        # = NormalDist().pdf(z) / sig
-        Phi_z  = nd.cdf(Q)
         # Standard normal loss function: L(z) = phi(z) - z*(1-Phi(z))
         # E[max(D-Q,0)] = sig * L(z) using standard normal N(0,1)
         from statistics import NormalDist as _ND
@@ -466,7 +462,7 @@ class EBQResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "EBQ": self.ebq,
@@ -563,12 +559,11 @@ class MultiItemResult:
     total_cost: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
     def summary(self) -> str:
-        import pandas as pd
         df = self.to_frame()
         lines = [df.to_string(index=False), f"\nTotal cost: {self.total_cost:.6g}"]
         return "\n".join(lines)
@@ -771,7 +766,7 @@ class ConstrainedMultiEOQResult:
     binding_constraints: list
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
@@ -979,7 +974,7 @@ class LotSizingResult:
     method: str
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.orders)
 
@@ -1182,7 +1177,7 @@ class QuantityDiscountResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.candidates)
 
@@ -1408,7 +1403,7 @@ class RQPolicyResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Q*": self.order_qty,
@@ -1534,7 +1529,7 @@ class RSPolicyResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "R": self.review_period,
@@ -1659,12 +1654,12 @@ class ExchangeCurveResult:
     optimal_quantities: list
     curve_points: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Per-item quantities DataFrame: name, Q_eoq, Q_optimal, n_orders, investment."""
         import pandas as pd
         return pd.DataFrame(self.optimal_quantities)
 
-    def curve_to_frame(self) -> "pd.DataFrame":
+    def curve_to_frame(self) -> pd.DataFrame:
         """Exchange-curve hyperbola DataFrame: columns N (orders/yr) and I (investment)."""
         import pandas as pd
         return pd.DataFrame(self.curve_points)
@@ -1842,12 +1837,12 @@ class SafetyStockCurveResult:
     optimal_quantities: list
     curve_points: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Per-item safety-stock DataFrame."""
         import pandas as pd
         return pd.DataFrame(self.optimal_quantities)
 
-    def curve_to_frame(self) -> "pd.DataFrame":
+    def curve_to_frame(self) -> pd.DataFrame:
         """Full exchange curve DataFrame: z, service_level, ss_investment."""
         import pandas as pd
         return pd.DataFrame(self.curve_points)
@@ -2031,7 +2026,7 @@ class ABCResult:
     total_value: float
     thresholds: dict
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
@@ -2070,7 +2065,7 @@ class XYZResult:
     class_summary: dict
     thresholds: dict
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
@@ -2081,7 +2076,6 @@ class XYZResult:
             "Y": f"{t['x']:.2g} < CV ≤ {t['y']:.2g}",
             "Z": f"CV > {t['y']:.2g}",
         }
-        n_total = sum(s["count"] for s in self.class_summary.values())
         lines = [
             f"{'Class':<6} {'Items':>6}  {'%Items':>7}  {'CV range'}",
             "-" * 42,
@@ -2113,11 +2107,11 @@ class ABCXYZResult:
     items: list
     matrix: dict
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame(self.items)
 
-    def matrix_frame(self) -> "pd.DataFrame":
+    def matrix_frame(self) -> pd.DataFrame:
         """Pivot table ABC (rows) × XYZ (columns) with item counts."""
         import pandas as pd
         data = {
@@ -2333,7 +2327,6 @@ def abc_xyz(
     abc_r = abc_analysis(items, a_threshold=a_threshold, b_threshold=b_threshold)
     xyz_r = xyz_analysis(items, x_threshold=x_threshold, y_threshold=y_threshold)
 
-    abc_map = {e["name"]: e for e in abc_r.items}
     xyz_map = {e["name"]: e for e in xyz_r.items}
 
     combined = []
@@ -2390,7 +2383,7 @@ class MRPResult:
     planned_receipts: list
     planned_releases: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame({
             "Period":          self.periods,
@@ -2407,7 +2400,7 @@ class MRPResult:
         lines = [f"Item: {self.item_name}", hdr, "-" * len(hdr)]
         for i, p in enumerate(self.periods):
             lines.append(
-                f"{str(p):>8} {self.gross_requirements[i]:>8.2f}"
+                f"{p!s:>8} {self.gross_requirements[i]:>8.2f}"
                 f" {self.scheduled_receipts[i]:>8.2f}"
                 f" {self.projected_on_hand[i]:>8.2f}"
                 f" {self.net_requirements[i]:>8.2f}"

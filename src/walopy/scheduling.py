@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
-from typing import Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
 
-from ._utils import as_positive, as_nonneg
+from ._utils import as_positive
 
 
 @dataclass
@@ -59,7 +59,7 @@ class ScheduleResult:
     total_tardiness: float
     n_tardy: int
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Name": j.name,
@@ -230,7 +230,7 @@ class FlowShopResult:
     machine1_schedule: list
     machine2_schedule: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         rows = []
         for a, b in zip(self.machine1_schedule, self.machine2_schedule):
@@ -360,7 +360,7 @@ class NEHResult:
     n_machines: int
     machine_schedules: list
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Return a Gantt DataFrame with start/end per machine for each job."""
         import pandas as pd
         rows = []

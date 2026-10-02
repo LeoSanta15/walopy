@@ -1,13 +1,13 @@
 """Bottleneck analysis for multi-station production / service systems."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg, as_nonempty
+from ._utils import as_nonempty, as_nonneg, as_positive
 
 
 @dataclass
@@ -80,7 +80,7 @@ class BottleneckResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_bottleneck
         return plot_bottleneck(self, **kwargs)
 

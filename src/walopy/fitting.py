@@ -1,7 +1,6 @@
 """Parameter estimation from observed arrival / service time data."""
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -77,7 +76,7 @@ class FitResult:
             out["cs2"] = self.cs2
         return out
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "λ": self.lam,
@@ -108,10 +107,10 @@ def _fit_times(times: np.ndarray, name: str) -> tuple[float, float, float, float
 
 
 def fit_from_data(
-    inter_arrivals: "np.ndarray | None" = None,
-    service_times: "np.ndarray | None" = None,
+    inter_arrivals: np.ndarray | None = None,
+    service_times: np.ndarray | None = None,
     *,
-    arrival_timestamps: "np.ndarray | None" = None,
+    arrival_timestamps: np.ndarray | None = None,
 ) -> FitResult:
     """Estimate queuing model parameters from observed data.
 

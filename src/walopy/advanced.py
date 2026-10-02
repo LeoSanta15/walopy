@@ -2,15 +2,14 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 import numpy as np
 import pandas as pd
 
-from ._utils import as_positive, as_nonneg, as_fraction, as_int_positive, as_nonempty
+from ._utils import as_fraction, as_int_positive, as_nonempty, as_nonneg, as_positive
 from .queuing import QueueResult
-
 
 # ---------------------------------------------------------------------------
 # Erlang B — M/M/c/c (loss system, no queue)
@@ -149,7 +148,7 @@ class SimulationResult:
     Wq_p95: float
     Wq_p99: float
     n_customers: int
-    _Wq_array: "np.ndarray" = field(repr=False)
+    _Wq_array: np.ndarray = field(repr=False)
     params: dict = field(default_factory=dict)
 
     def to_frame(self) -> pd.DataFrame:
@@ -184,7 +183,7 @@ class SimulationResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_simulation
         return plot_simulation(self, **kwargs)
 
@@ -346,7 +345,7 @@ class LineBalanceResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_line_balance
         return plot_line_balance(self, **kwargs)
 
@@ -463,7 +462,7 @@ class BreakEvenResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "go.Figure":
+    def plot(self, **kwargs) -> go.Figure:
         from .plotting import plot_break_even
         return plot_break_even(self, **kwargs)
 
@@ -679,7 +678,7 @@ def break_even_sales(
     variable_cost_ratio: float,
     *,
     actual_revenue: float | None = None,
-) -> "BreakEvenResult":
+) -> BreakEvenResult:
     """Break-even point expressed as sales revenue.
 
     Uses the contribution margin ratio (CMR) when costs are given as fractions
@@ -768,7 +767,7 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     return pd.DataFrame({"n": ns, "P(N=n)": pmf, "P(N<=n)": np.cumsum(pmf)})
 
 
-def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:  # noqa: E501
+def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:
     """CDF of the sojourn time (time in system) for an M/M/1 queue.
 
     F(t) = 1 − exp(−(μ − λ)·t)
@@ -838,7 +837,6 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
         raise ValueError(f"'K' (system capacity) must be ≥ c (servers); got K={K}, c={c}.")
 
     a   = lam / mu           # offered load
-    rho = a / c              # traffic intensity per server
 
     # Unnormalised state probabilities:
     #   p_n = a^n / n!          for n = 0 … c
@@ -904,7 +902,7 @@ class PriorityQueueResult:
     mu: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         return pd.DataFrame(self.classes)
 
     def summary(self) -> str:

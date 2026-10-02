@@ -4,9 +4,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-import numpy as np
-
-from ._utils import as_positive, as_nonneg, as_fraction, as_int_positive
+from ._utils import as_int_positive, as_nonneg, as_positive
 
 
 @dataclass
@@ -48,7 +46,7 @@ class QueueResult:
     Wq: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         """Export key KPIs as a one-row DataFrame."""
         import pandas as pd
 
@@ -84,7 +82,7 @@ class QueueResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_queue_sensitivity
         return plot_queue_sensitivity(self, **kwargs)
 

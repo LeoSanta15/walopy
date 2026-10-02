@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import math
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from statistics import NormalDist
 
 
@@ -99,7 +99,7 @@ class ProjectResult:
         z = (target - self.project_duration) / self.project_std
         return NormalDist().cdf(z)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "Activity":    a.name,

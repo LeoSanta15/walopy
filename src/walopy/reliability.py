@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
-from ._utils import as_positive, as_nonneg
+from ._utils import as_positive
 
 
 def _mtbf_numeric(R_func, lam_min: float) -> float:
@@ -75,7 +75,7 @@ class ReliabilityResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         row: dict = {
             "Topology": self.topology,
@@ -373,7 +373,7 @@ class WeibullResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
             "shape_beta": self.shape,

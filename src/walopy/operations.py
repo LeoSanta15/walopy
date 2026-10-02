@@ -3,9 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-import numpy as np
-
-from ._utils import as_positive, as_nonneg, as_fraction
+from ._utils import as_fraction, as_nonneg, as_positive
 
 
 @dataclass
@@ -32,7 +30,7 @@ class OEEResult:
     oee: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
 
         return pd.DataFrame([{
@@ -57,7 +55,7 @@ class OEEResult:
     def __str__(self) -> str:
         return self.summary()
 
-    def plot(self, **kwargs) -> "plt.Figure":
+    def plot(self, **kwargs) -> plt.Figure:
         from .plotting import plot_oee
         return plot_oee(self, **kwargs)
 
@@ -173,7 +171,7 @@ class UtilizationResult:
     capacity: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
 
         return pd.DataFrame([{
@@ -260,7 +258,7 @@ class UnitCostResult:
     units_produced: float
     params: dict = field(default_factory=dict)
 
-    def to_frame(self) -> "pd.DataFrame":
+    def to_frame(self) -> pd.DataFrame:
         import pandas as pd
 
         return pd.DataFrame([{
