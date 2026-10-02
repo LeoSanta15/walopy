@@ -99,6 +99,14 @@ def eoq(
     -------
     EOQResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = eoq(demand_rate=1000, ordering_cost=50, holding_cost=2)
@@ -216,6 +224,15 @@ def reorder_point(
     Returns
     -------
     ReorderResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -349,6 +366,15 @@ def newsvendor(
     Returns
     -------
     NewsvendorResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``cost`` no es menor que ``price`` o ``salvage`` no es menor que ``cost``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -508,6 +534,15 @@ def ebq(
     -------
     EBQResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``production_rate`` no supera a ``demand_rate``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = ebq(demand_rate=1000, setup_cost=50, holding_cost=2, production_rate=4000)
@@ -605,6 +640,15 @@ def eoq_multi(
     -------
     MultiItemResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = eoq_multi([1000, 500], [50, 30], [2, 1])
@@ -660,6 +704,15 @@ def ebq_multi(
     Returns
     -------
     MultiItemResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -844,6 +897,16 @@ def eoq_multi_constrained(
     Returns
     -------
     ConstrainedMultiEOQResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+        Si ``budget``/``space`` no son positivos o falta la lista de costos/espacios asociada.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -1041,6 +1104,15 @@ def lot_for_lot(
     -------
     LotSizingResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = lot_for_lot([100, 80, 120, 60], setup_cost=200, holding_cost=1)
@@ -1091,6 +1163,15 @@ def silver_meal(
     Returns
     -------
     LotSizingResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -1229,6 +1310,15 @@ def eoq_quantity_discount(
     -------
     QuantityDiscountResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``price_breaks`` está vacío o mal formado.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = eoq_quantity_discount(
@@ -1324,6 +1414,15 @@ def wagner_whitin(
     -------
     LotSizingResult
         ``method`` is ``'Wagner-Whitin'``.
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -1473,6 +1572,26 @@ def rq_policy(
     Returns
     -------
     RQPolicyResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = rq_policy(
+    ...     demand_rate=100.0,
+    ...     ordering_cost=50.0,
+    ...     holding_cost=2.0,
+    ...     lead_time=2.0,
+    ...     demand_std=5.0,
+    ... )
+    >>> round(r.order_qty, 4)
+    70.7107
     """
     from statistics import NormalDist
     D   = as_positive(demand_rate,  "demand_rate")
@@ -1602,6 +1721,27 @@ def rs_policy(
     Returns
     -------
     RSPolicyResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = rs_policy(
+    ...     demand_rate=100.0,
+    ...     ordering_cost=50.0,
+    ...     holding_cost=2.0,
+    ...     lead_time=2.0,
+    ...     review_period=1.0,
+    ...     demand_std=5.0,
+    ... )
+    >>> round(r.total_cost, 4)
+    178.4897
     """
     from statistics import NormalDist
     D   = as_positive(demand_rate,   "demand_rate")
@@ -1750,6 +1890,23 @@ def exchange_curve(
     -----
     Only one of *target_orders* or *target_investment* may be specified.
     If neither is given the EOQ point (k = 1) is returned.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = exchange_curve(
+    ...     items=[{'name': 'A', 'demand': 1000, 'ordering_cost': 50, 'holding_cost': 2, 'unit_value': 10}, {'name': 'B', 'demand': 500, 'ordering_cost': 30, 'holding_cost': 1, 'unit_value': 5}],
+    ...     target_orders=10.0,
+    ... )
+    >>> round(r.n_orders_eoq, 4)
+    7.3589
     """
     if target_orders is not None and target_investment is not None:
         raise ValueError(
@@ -1930,6 +2087,24 @@ def safety_stock_curve(
     Only one of *target_service_level* or *target_ss_investment* may be given.
     If neither is supplied, z = 0 (50 % service level) is used as the
     baseline; pass ``target_service_level=0.95`` for the typical default.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si ``target_service_level`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = safety_stock_curve(
+    ...     items=[{'name': 'A', 'demand_rate': 100, 'demand_std': 10, 'lead_time': 2, 'unit_value': 10}, {'name': 'B', 'demand_rate': 50, 'demand_std': 5, 'lead_time': 1, 'unit_value': 5}],
+    ...     target_service_level=0.95,
+    ... )
+    >>> round(r.z, 4)
+    1.6449
     """
     if target_service_level is not None and target_ss_investment is not None:
         raise ValueError(
@@ -2210,6 +2385,23 @@ def abc_analysis(
     Returns
     -------
     ABCResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si los umbrales no cumplen 0 < a < b < 1 o el valor anual total es cero.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = abc_analysis(
+    ...     items=[{'name': 'A', 'demand': 50, 'unit_value': 10, 'cv': 0.2}, {'name': 'B', 'demand': 30, 'unit_value': 10, 'cv': 0.7}, {'name': 'C', 'demand': 100, 'unit_value': 1, 'cv': 1.5}],
+    ... )
+    >>> round(r.total_value, 4)
+    900.0
     """
     items = _leer_items(items)
     if not (0.0 < a_threshold < b_threshold < 1.0):
@@ -2295,6 +2487,21 @@ def xyz_analysis(
     Returns
     -------
     XYZResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si los umbrales no cumplen 0 ≤ x < y o falta el CV (o la desviación y la media).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = xyz_analysis([{"name": "a", "cv": 0.2}, {"name": "b", "cv": 0.7}, {"name": "c", "cv": 1.5}])
+    >>> [e["class"] for e in r.items]
+    ['X', 'Y', 'Z']
     """
     items = _leer_items(items)
     if not (0.0 <= x_threshold < y_threshold):
@@ -2366,6 +2573,22 @@ def abc_xyz(
     Returns
     -------
     ABCXYZResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.
+        Si algún umbral es inválido.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = abc_xyz([{"name": "a", "demand": 100, "unit_value": 10, "cv": 0.2},
+    ...             {"name": "b", "demand": 5, "unit_value": 1, "cv": 1.5}])
+    >>> [e["combined_class"] for e in r.items]
+    ['AX', 'CZ']
     """
     abc_r = abc_analysis(items, a_threshold=a_threshold, b_threshold=b_threshold)
     xyz_r = xyz_analysis(items, x_threshold=x_threshold, y_threshold=y_threshold)
@@ -2497,6 +2720,20 @@ def mrp(
     Returns
     -------
     MRPResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``gross_requirements`` está vacío, ``lead_time`` no es un entero ≥ 0, ``lot_size`` no es ``'LFL'`` ni positivo, o las longitudes no coinciden.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mrp([0, 50, 0, 30, 60, 20], initial_on_hand=40, lead_time=1, lot_size=40, safety_stock=10)
+    >>> r.planned_receipts
+    [0.0, 40.0, 0.0, 40.0, 40.0, 40.0]
     """
     GR  = as_float_list(gross_requirements, "gross_requirements", kind="nonneg")
     T   = len(GR)

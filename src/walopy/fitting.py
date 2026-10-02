@@ -136,6 +136,15 @@ def fit_from_data(
     FitResult
         Estimated λ, μ, ca², cs² and sample statistics.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se indica ninguna muestra, si se indican ``inter_arrivals`` y ``arrival_timestamps`` a la vez, o si hay menos de 2 observaciones.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> import numpy as np

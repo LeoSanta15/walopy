@@ -259,6 +259,15 @@ def cpm(activities: list) -> ProjectResult:
         ``method = 'CPM'``.  ``project_variance`` and ``project_std`` are
         ``None`` for CPM.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido o un ciclo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> acts = [
@@ -322,6 +331,15 @@ def pert(activities: list) -> ProjectResult:
     ProjectResult
         ``project_duration`` is the expected critical-path length.
         Call ``.probability(T)`` for P(completion ≤ T).
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido, un ciclo o no se cumple optimistic ≤ most_likely ≤ pessimistic.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------

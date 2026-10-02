@@ -49,6 +49,20 @@ def erlang_b(lam: float, mu: float, c: int) -> float:
     -------
     float
         Blocking probability B(c, a) ∈ [0, 1].
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``c`` supera 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = erlang_b(lam=2.0, mu=3.0, c=2)
+    >>> round(r, 4)
+    0.1176
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -86,6 +100,20 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
     QueueResult
         Note: ``rho`` here is traffic intensity λ/μ (may be ≥ 1);
         the system is always stable because of finite capacity.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``K`` supera 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mm1k(lam=2.0, mu=3.0, K=5)
+    >>> round(r.L, 4)
+    1.4226
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -237,6 +265,21 @@ def monte_carlo_gg1(
     Returns
     -------
     SimulationResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``n_customers`` supera 10⁷.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = monte_carlo_gg1(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0, n_customers=500, seed=1)
+    >>> round(r.L, 4)
+    2.0427
     """
     lam         = as_positive(lam, "lam")
     mu          = as_positive(mu, "mu")
@@ -312,6 +355,19 @@ def takt_time(available_time: float, demand: float) -> float:
     -------
     float
         Takt time (time per unit).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = takt_time(available_time=480.0, demand=60.0)
+    >>> round(r, 4)
+    8.0
     """
     return as_positive(available_time, "available_time") / as_positive(demand, "demand")
 
@@ -384,6 +440,20 @@ def line_balance(
     Returns
     -------
     LineBalanceResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = line_balance(station_names=['A', 'B'], cycle_times=[5.0, 9.0], takt=10.0)
+    >>> round(r.balance_efficiency, 4)
+    0.7
     """
     names  = list(station_names)
     as_nonempty(names, "station_names")
@@ -505,6 +575,20 @@ def break_even(
     Returns
     -------
     BreakEvenResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el precio no supera al costo variable unitario.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = break_even(fixed_cost=1000.0, price_per_unit=10.0, variable_cost_per_unit=4.0)
+    >>> round(r.bep_units, 4)
+    166.6667
     """
     fixed_cost             = as_positive(fixed_cost, "fixed_cost")
     price_per_unit         = as_positive(price_per_unit, "price_per_unit")
@@ -630,6 +714,15 @@ def break_even_multi(
     -------
     BreakEvenMultiResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si algún producto tiene margen de contribución no positivo o una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = break_even_multi(
@@ -717,6 +810,15 @@ def break_even_sales(
     -------
     BreakEvenResult
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``variable_cost_ratio`` no está estrictamente entre 0 y 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> r = break_even_sales(fixed_cost=50_000, variable_cost_ratio=0.60)
@@ -773,6 +875,21 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     -------
     pd.DataFrame
         Columns: ``n``, ``P(N=n)``, ``P(N<=n)``.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``n_max`` no es un entero entre 0 y 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = queue_length_pmf(lam=2.0, mu=3.0, n_max=10)
+    >>> r.shape
+    (11, 3)
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -808,6 +925,21 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     -------
     pd.DataFrame
         Columns: ``t``, ``F(t)`` (CDF), ``f(t)`` (PDF).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``n_points`` supera 10⁶ o ``t_max`` no es positivo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = sojourn_cdf(lam=2.0, mu=3.0, n_points=20)
+    >>> r.shape
+    (20, 3)
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -850,6 +982,20 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
     -------
     QueueResult
         ``rho`` is server utilization λ_eff / (c · μ).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``K < c`` o ``c``/``K`` superan 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mmck(lam=2.0, mu=3.0, c=2, K=5)
+    >>> round(r.L, 4)
+    0.7381
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -976,6 +1122,16 @@ def mm1_priority(
     Returns
     -------
     PriorityQueueResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------

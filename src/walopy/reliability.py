@@ -150,6 +150,19 @@ def mtbf_analysis(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mtbf_analysis(failure_rate=0.01, mttr=2.0, t=10.0)
+    >>> round(r.mtbf, 4)
+    100.0
     """
     lam = as_positive(failure_rate, "failure_rate")
     t, mttr = _validar_t_mttr(t, mttr)
@@ -190,6 +203,20 @@ def series_system(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``failure_rates`` está vacío.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = series_system(failure_rates=[0.01, 0.02], t=10.0)
+    >>> round(r.mtbf, 4)
+    33.3333
     """
     lams = as_float_list(failure_rates, "failure_rates")
     t, mttr = _validar_t_mttr(t, mttr)
@@ -233,6 +260,20 @@ def parallel_system(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``failure_rates`` está vacío.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = parallel_system(failure_rates=[0.01, 0.02], t=10.0)
+    >>> round(r.mtbf, 4)
+    116.6667
     """
     lams = as_float_list(failure_rates, "failure_rates")
     t, mttr = _validar_t_mttr(t, mttr)
@@ -289,6 +330,20 @@ def koon_system(
     Returns
     -------
     ReliabilityResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se cumple 1 ≤ k ≤ n.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = koon_system(n=3, k=2, failure_rate=0.01, t=10.0)
+    >>> round(r.mtbf, 4)
+    83.3333
     """
     n = as_int_positive(n, "n")
     k = as_int_positive(k, "k")
@@ -487,6 +542,15 @@ def weibull_analysis(
     Returns
     -------
     WeibullResult
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si hay menos de 2 tiempos de falla, todos son iguales o ``method`` no es ``'MLE'`` ni ``'RRY'``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------

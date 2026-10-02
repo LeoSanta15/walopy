@@ -116,6 +116,20 @@ def bottleneck_analysis(
     Returns
     -------
     BottleneckResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = bottleneck_analysis(station_names=['a', 'b'], capacities=[5.0, 3.0], demand_rate=2.0)
+    >>> round(r.system_throughput, 4)
+    3.0
     """
     station_names  = list(station_names)
     as_nonempty(station_names, "station_names")

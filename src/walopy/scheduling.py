@@ -181,6 +181,21 @@ def schedule_single(
     Returns
     -------
     ScheduleResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+        Si ``rule`` no es una de SPT, EDD, WSPT, CR, FIFO, o falta ``due_dates`` para EDD/CR.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = schedule_single(processing_times=[3.0, 1.0, 2.0])
+    >>> round(r.makespan, 4)
+    6.0
     """
     processing_times = as_float_list(processing_times, "processing_times")
     n = len(processing_times)
@@ -297,6 +312,20 @@ def johnson_flowshop(
     Returns
     -------
     FlowShopResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si una secuencia está vacía o las secuencias tienen longitudes distintas.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = johnson_flowshop(m1_times=[3.0, 1.0, 2.0], m2_times=[2.0, 4.0, 1.0])
+    >>> round(r.makespan, 4)
+    8.0
     """
     n = len(m1_times)
     if len(m2_times) != n:
@@ -463,6 +492,20 @@ def neh_flowshop(
     Returns
     -------
     NEHResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si la matriz está vacía, es irregular o ``names`` tiene otra longitud.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = neh_flowshop(times_matrix=[[3.0, 2.0, 4.0], [1.0, 4.0, 2.0], [2.0, 1.0, 3.0]])
+    >>> round(r.makespan, 4)
+    13.0
     """
     n = len(times_matrix)
     if n == 0:

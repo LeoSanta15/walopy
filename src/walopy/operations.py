@@ -109,6 +109,20 @@ def oee(
     Returns
     -------
     OEEResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si algún factor no está en [0, 1].
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = oee(availability=0.9, performance=0.9, quality=0.9)
+    >>> round(r.oee, 4)
+    0.729
     """
     params: dict = {}
 
@@ -221,6 +235,19 @@ def utilization_efficiency(
     Returns
     -------
     UtilizationResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = utilization_efficiency(actual_output=75.0, capacity=100.0)
+    >>> round(r.utilization, 4)
+    0.75
     """
     actual_output = as_nonneg(actual_output, "actual_output")
     capacity      = as_positive(capacity, "capacity")
@@ -311,6 +338,19 @@ def unit_cost(
     Returns
     -------
     UnitCostResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = unit_cost(fixed_cost=1000.0, variable_cost_per_unit=5.0, units_produced=100.0)
+    >>> round(r.unit_cost, 4)
+    15.0
     """
     fixed_cost              = as_nonneg(fixed_cost, "fixed_cost")
     variable_cost_per_unit  = as_nonneg(variable_cost_per_unit, "variable_cost_per_unit")

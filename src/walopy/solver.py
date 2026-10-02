@@ -165,6 +165,20 @@ def solve_lam(
     Returns
     -------
     SolverResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si la métrica o el modelo son desconocidos, o si el objetivo es infactible para el modelo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = solve_lam(target_metric='Wq', target_value=0.5, mu=5.0)
+    >>> round(r.value, 4)
+    3.5714
     """
     from .queuing import kingman, md1, mm1, mmc
 
@@ -244,6 +258,20 @@ def solve_mu(
     Returns
     -------
     SolverResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si la métrica o el modelo son desconocidos, o si el objetivo es infactible para el modelo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = solve_mu(target_metric='Wq', target_value=0.5, lam=2.0)
+    >>> round(r.value, 4)
+    3.2361
     """
     from .queuing import kingman, md1, mm1, mmc
 
@@ -320,6 +348,20 @@ def solve_servers(
     Returns
     -------
     SolverResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el objetivo no se alcanza con ``c_max`` servidores.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = solve_servers(target_metric='Wq', target_value=0.5, lam=4.0, mu=3.0)
+    >>> round(r.value, 4)
+    3.0
     """
     from .queuing import mmc
 
@@ -381,6 +423,19 @@ def optimize_servers(
     Returns
     -------
     OptimizeResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = optimize_servers(lam=4.0, mu=3.0, cost_per_server=10.0, cost_per_wait=5.0)
+    >>> round(r.min_cost, 4)
+    30.7232
     """
     from .queuing import mmc
 
@@ -454,6 +509,15 @@ def sensitivity(
     pd.DataFrame
         One row per value with the swept parameter and all result fields.
 
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``param`` no es un parámetro de ``model_fn`` o ``values`` está vacío.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
     Examples
     --------
     >>> from walopy import mm1
@@ -519,6 +583,15 @@ def batch_model(
         preserved.  If any row raises an exception an ``_error`` column is
         added; it contains the error message for failed rows and ``None``
         for successful ones.
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``errors`` no es ``'collect'`` ni ``'raise'``; con ``errors='raise'``, la excepción de la primera fila que falle.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------
@@ -598,6 +671,15 @@ def compare(
     -------
     pd.DataFrame
         One row per result with a ``label`` column prepended.
+
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se recibe ningún resultado.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
     Examples
     --------

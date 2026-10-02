@@ -158,6 +158,20 @@ def mm1(lam: float, mu: float) -> QueueResult:
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mm1(lam=2.0, mu=3.0)
+    >>> round(r.L, 4)
+    2.0
     """
     lam = as_positive(lam, "lam")
     mu = as_positive(mu, "mu")
@@ -194,6 +208,21 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+        Si ``c`` supera 10⁶.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mmc(lam=2.0, mu=3.0, c=2)
+    >>> round(r.L, 4)
+    0.75
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -245,6 +274,20 @@ def md1(lam: float, mu: float) -> QueueResult:
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = md1(lam=2.0, mu=3.0)
+    >>> round(r.L, 4)
+    1.3333
     """
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
@@ -291,6 +334,20 @@ def kingman(
     Returns
     -------
     QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = kingman(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0)
+    >>> round(r.L, 4)
+    2.0
     """
     lam  = as_positive(lam, "lam")
     mu   = as_positive(mu, "mu")
@@ -339,6 +396,20 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
     -----
     P-K formula:  Wq = λ · E[S²] / (2 · (1 − ρ))
     where  E[S²] = (1 + cs²) / μ².
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = mg1(lam=2.0, mu=3.0, cs2=1.0)
+    >>> round(r.L, 4)
+    2.0
     """
     lam  = as_positive(lam, "lam")
     mu   = as_positive(mu, "mu")
@@ -370,6 +441,20 @@ def cv2_triangular(a: float, m: float, b: float) -> float:
     a : float  Lower bound.
     m : float  Mode (peak).
     b : float  Upper bound.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si no se cumple a ≤ m ≤ b o la media de la distribución es 0.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_triangular(a=1.0, m=2.0, b=3.0)
+    >>> round(r, 4)
+    0.0417
     """
     a = as_finite_scalar(a, "a")
     m = as_finite_scalar(m, "m")
@@ -390,6 +475,20 @@ def cv2_uniform(a: float, b: float) -> float:
     ----------
     a : float  Lower bound.
     b : float  Upper bound (> a).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si b ≤ a o la media de la distribución es 0.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_uniform(a=1.0, b=3.0)
+    >>> round(r, 4)
+    0.0833
     """
     a = as_finite_scalar(a, "a")
     b = as_finite_scalar(b, "b")
@@ -409,6 +508,19 @@ def cv2_normal(mean: float, std: float) -> float:
     ----------
     mean : float  Mean (> 0 for service/inter-arrival times).
     std  : float  Standard deviation (≥ 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_normal(mean=5.0, std=1.0)
+    >>> round(r, 4)
+    0.04
     """
     as_positive(mean, "mean")
     as_nonneg(std, "std")
@@ -421,6 +533,20 @@ def cv2_erlang(k: int) -> float:
     Parameters
     ----------
     k : int  Shape parameter (≥ 1).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``k`` no es un entero ≥ 1.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_erlang(k=3)
+    >>> round(r, 4)
+    0.3333
     """
     k = as_int_positive(k, "k")
     return 1.0 / k
@@ -432,6 +558,19 @@ def cv2_gamma(shape: float) -> float:
     Parameters
     ----------
     shape : float  Shape parameter α (> 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_gamma(shape=2.0)
+    >>> round(r, 4)
+    0.5
     """
     as_positive(shape, "shape")
     return 1.0 / shape
@@ -444,6 +583,19 @@ def cv2_lognormal(mean: float, std: float) -> float:
     ----------
     mean : float  Mean of the lognormal variable (> 0).
     std  : float  Standard deviation of the lognormal variable (> 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_lognormal(mean=5.0, std=1.0)
+    >>> round(r, 4)
+    0.04
     """
     as_positive(mean, "mean")
     as_positive(std, "std")
@@ -458,6 +610,19 @@ def cv2_weibull(shape: float) -> float:
     Parameters
     ----------
     shape : float  Shape parameter k (> 0).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = cv2_weibull(shape=1.5)
+    >>> round(r, 4)
+    0.461
     """
     as_positive(shape, "shape")
     return math.gamma(1.0 + 2.0 / shape) / math.gamma(1.0 + 1.0 / shape) ** 2 - 1.0

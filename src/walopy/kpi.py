@@ -123,6 +123,19 @@ def oee_kpi_tree(
     -------
     KPINode
         Root node with OEE and its three sub-KPIs.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = oee_kpi_tree(availability=0.9, performance=0.9, quality=0.9)
+    >>> round(r.value, 4)
+    0.729
     """
     availability = as_fraction(availability, "availability")
     performance  = as_fraction(performance, "performance")
@@ -164,6 +177,20 @@ def throughput_kpi_tree(
     Returns
     -------
     KPINode
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``defect_rate`` no está en [0, 1].
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = throughput_kpi_tree(actual_throughput=80.0, capacity=100.0, defect_rate=0.05)
+    >>> round(r.value, 4)
+    76.0
     """
     actual_throughput = as_positive(actual_throughput, "actual_throughput")
     capacity          = as_positive(capacity, "capacity")
@@ -225,6 +252,25 @@ def roi_kpi_tree(
     -------
     KPINode
         Root node with ROI and its full decomposition.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = roi_kpi_tree(
+    ...     revenue=1000.0,
+    ...     fixed_cost=200.0,
+    ...     variable_cost_per_unit=3.0,
+    ...     units_sold=100.0,
+    ...     investment=500.0,
+    ... )
+    >>> round(r.value, 4)
+    1.0
     """
     revenue                = as_finite_scalar(revenue, "revenue")
     fixed_cost             = as_nonneg(fixed_cost, "fixed_cost")
