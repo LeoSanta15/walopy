@@ -143,7 +143,7 @@ def jackson_network(
     Raises
     ------
     ValueError
-        If the system is unstable (ρ_j ≥ 1 at any station).
+        Si el sistema es inestable (ρ_j ≥ 1 en alguna estación).
 
     Examples
     --------

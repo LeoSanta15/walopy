@@ -23,21 +23,23 @@
 
 **Nivel de madurez:** antes = 2 (parcial) · objetivo = 3 (sólido), con las bases del nivel 4 (publicada, versionada) ya cubiertas.
 
-## Gates del Playbook (estado actual)
+## Gates del Playbook
 
-| Gate | Requisito | Estado |
-|---|---|---|
-| `pytest` | 0 fallos | OK (357) |
-| `ruff check src/` | `All checks passed!` | **No** (215 con la configuración del repo; 82 con `F,E9,B,I,S`) |
-| `mypy src/walopy` | `Success` | **No** (78 errores) |
-| `python -m build` | `Successfully built` | OK (+ `twine check` OK) |
-| Cobertura | global ≥ 85 % y módulos públicos ≥ 70 % | **No** (80 %; `plotting.py` 0 %, `__main__.py` 62 %) |
-| Sin referencias obsoletas | `grep` limpio | **No** en `CLAUDE.md` (`cost_kpi_tree`, módulos faltantes) |
-| CHANGELOG actualizado | entrada de la versión | OK |
-| `CLAUDE.md` actualizado | refleja módulos y comandos | **No** |
-| `sphinx -W` | sin warnings | OK (pero cubre 4/15 módulos) |
-| Versión: metadata == `__version__` | iguales | OK (sin test que lo proteja) |
-| CI cubre todas las versiones de `classifiers` | 3.9–3.13 | **No** (3.9, 3.11, 3.13) |
+| Gate | Requisito | Antes (v0.2.8) | Ahora (HEAD) |
+|---|---|---|---|
+| `pytest` | 0 fallos | OK (357) | **OK (1 260** con doctests, README y ejemplos; 3.9, 3.11 y 3.9 con dependencias mínimas) |
+| `ruff check` | `All checks passed!` | No (215 / 82 con `F,E9,B,I,S`) | **OK** (`src/ tests/ benchmarks/ scripts/ examples/`) |
+| `mypy src/walopy` | `Success` | No (78 errores) | **OK** (16 archivos) |
+| `python -m build` | `Successfully built` | OK | OK (+ `twine check`, instalación de la rueda y `py.typed` en el CI) |
+| Cobertura | global ≥ 85 % y módulos ≥ 70 % | No (80 %; `plotting.py` 0 %) | **OK (94,7 %**; el módulo menor, 86,3 %) |
+| Sin referencias obsoletas | `grep` limpio | No en `CLAUDE.md` | **OK** |
+| CHANGELOG actualizado | entrada de la versión | OK | OK |
+| `CLAUDE.md` actualizado | refleja módulos y comandos | No | **OK** (17 reglas) |
+| `sphinx -W` | sin warnings | OK (4/15 módulos) | **OK** (13 páginas de referencia) |
+| Versión: metadata == `__version__` | iguales | OK (sin test) | **OK** (con test y test del fallback) |
+| CI cubre `classifiers` | 3.9–3.13 | No | **OK** (3.9–3.13) |
+| Los tests de regresión fallan en el tag anterior | 0 problemas | no existía | **OK** (23 entradas con selectores; job `regresion`) |
+| Texto visible en español | 0 hallazgos | 524 | **OK** (0; `tests/test_idioma.py`) |
 
 ## Seguimiento por fase
 
@@ -61,7 +63,7 @@ Notas de ejecución: `eoq_multi_constrained` ya no se cuelga con presupuesto ≤
 
 | Medida | Antes de la auditoría | Después |
 |---|---|---|
-| Tests | 357 | **1 165** (incluye 70 doctests, ejemplos del README y de `examples/`); 0 fallos en Python 3.9, 3.10, 3.11 y 3.13, y en 3.9 con dependencias mínimas |
+| Tests | 357 | **1 165** al cerrar la fase 4 (hoy 1 260; incluye 70 doctests, ejemplos del README y de `examples/`); 0 fallos en Python 3.9, 3.10, 3.11 y 3.13, y en 3.9 con dependencias mínimas |
 | Cobertura | 80 % (módulo menor 0 %) | **94,6 %** (módulo menor 86,3 %) |
 | ruff (F,E9,B,I,S) | 82 errores | **0** (también `benchmarks/`, `scripts/`, `examples/`) |
 | mypy | 78 errores | **0** |
@@ -73,9 +75,35 @@ Notas de ejecución: `eoq_multi_constrained` ya no se cuelga con presupuesto ≤
 | `pip-audit` | limpio | limpio (ahora en el CI) |
 | Paquete | sin `py.typed` | `py.typed` incluido y comprobado en la rueda |
 
+### Revisión posterior al merge del PR #14 (2026-10-02)
+
+Hecho: PR fusionado; **todo texto visible traducido al español** (D-6 resuelta: columnas, etiquetas de `summary()`, nombres de nodos KPI, textos de gráficas, docstrings; los identificadores y claves de datos siguen en inglés, por diseño), tests de regresión verificados contra `v0.2.8`, trazabilidad completa (`TRAZABILIDAD.md`), catálogo y Playbook ampliados, reglas R-16 y R-17 probadas y aplicadas (`REGLAS_PROPUESTAS.md`).
+
+| # | Dimensión | Nota | Qué falta para el siguiente punto |
+|---|---|---|---|
+| 1 | Estructura del repositorio | 4 | Plantilla de proyecto verificada en CI (`cookiecutter`/`copier`) |
+| 2 | Diseño de API pública | 4 | Política de deprecación explícita (`DeprecationWarning` + plazo) y API pública fijada en tests de firma |
+| 3 | Validación de entradas | 4 | Magnitudes extremas (K-08) y pruebas basadas en propiedades (`hypothesis`) |
+| 4 | Corrección numérica | 4 | Más referencias independientes (hoy 30) y cota de error documentada por modelo |
+| 5 | Suite de pruebas | 4 | Pruebas de mutación (`mutmut`) y propiedades; la verificación contra el tag anterior ya existe |
+| 6 | Tipado estático | 4 | `mypy --strict` en los módulos centrales |
+| 7 | Gestión de dependencias | 4 | Archivo de bloqueo de herramientas de desarrollo y Dependabot |
+| 8 | CI/CD | 4 | Acciones fijadas por SHA, `concurrency` y caché; job `regresion` en la matriz |
+| 9 | Documentación | 4 | Tutoriales por dominio y versión de la documentación publicada (Read the Docs) |
+| 10 | Rendimiento | 3 | Línea base guardada (`benchmarks/base.json`) y comparación automática; más de un módulo medido |
+| 11 | Seguridad | **3** | `attestations: true` (probado en TestPyPI), Dependabot, acciones por SHA, CodeQL / secret scanning, OpenSSF Scorecard |
+| 12 | Versionado y releases | 4 | Releases automatizados desde el CHANGELOG y tags históricos (D-5) |
+| 13 | Comunidad y contribución | 3 | Responder issues en < 7 días (aún no medible), `good first issue`, guía de revisión |
+| 14 | Developer Experience | 4 | `pre-commit`, `Makefile`/`nox` con la batería de «terminado» |
+| | **GLOBAL (media)** | **3,8** | |
+
+**Dimensión más rezagada: Seguridad (11).** Cumple los tres criterios del Playbook (`pip-audit`, rangos de dependencias, sin datos sensibles), pero de los cinco controles de cadena de suministro que añadió esta auditoría solo cumple uno (`SECURITY.md`): publica con `attestations: false`, no tiene Dependabot, las acciones se fijan por etiqueta (`@v4`, `@release/v1`) y no por SHA, y no ejecuta CodeQL ni *secret scanning*. Rendimiento y Comunidad también están en 3, pero su hueco es de madurez (línea base, actividad de la comunidad) y no de riesgo.
+
+**Acción siguiente de mayor impacto:** tras crear el release `v0.3.0` (acción de la persona responsable; esta sesión no puede), **habilitar Dependabot (`pip` y `github-actions`) y fijar las acciones por SHA**, que es de riesgo nulo y se hace en un PR; y a continuación **`attestations: true` probado primero en TestPyPI** (su activación sin probar fue la causa del fallo de la publicación de v0.2.7). Con ambas, la dimensión sube a 4 y la media a 3,9.
+
 **Pendiente (no ejecutado):**
-- Merge del PR y creación del release `v0.3.0` en GitHub (esta sesión no puede crear releases).
-- Habilitar `attestations` en la publicación: requiere probar con TestPyPI (fue la causa del fallo de v0.2.7).
-- Traducción al español del *cuerpo* de los docstrings (los mensajes de error, avisos, CLI, README, docs y secciones nuevas ya están en español). Columnas de DataFrame, etiquetas de `summary()` y textos de gráficas siguen en inglés porque cambiarlos rompe la API (decisión D-6).
+- Crear el release `v0.3.0` en GitHub tras el merge (esta sesión no puede crear releases).
+- Habilitar `attestations` en la publicación (probar con TestPyPI).
+- Quedan en inglés, por convención, los encabezados de sección de numpydoc (`Parameters`, `Returns`…), los tipos de los docstrings, los identificadores y las claves de datos (`items[i]["class"]`).
 - K-08: magnitudes extremas (1e308, 1e-320) siguen sin rechazarse de forma explícita.
 - Tags históricos v0.2.4 y v0.2.6 (D-5): no se crean; la laguna queda documentada en el CHANGELOG.

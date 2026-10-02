@@ -79,47 +79,59 @@ def ejecutar(selector: str, src_ref: Path, segundos: int, tests: Path) -> tuple[
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("selectores", nargs="*")
-    ap.add_argument("--manifiesto", default=None, help="JSON con [{id, titulo, selectores, guardas}] (p. ej. tests/regresiones.json)")
-    ap.add_argument("--ref", default=None, help="tag o commit de referencia (por defecto, el último tag)")
+    ap.add_argument("--manifiesto", default=None,
+                    help="JSON con [{id, titulo, ref, selectores, guardas}] (p. ej. tests/regresiones.json)")
+    ap.add_argument("--ref", default=None,
+                    help="tag o commit de referencia para los selectores sueltos (por defecto, el último tag); "
+                         "en el manifiesto cada entrada trae su propio ``ref``")
     ap.add_argument("--guardas", nargs="*", default=[],
                     help="fragmentos de nodeid de tests que PUEDEN pasar en la referencia (guardas de comportamiento)")
     ap.add_argument("--segundos", type=int, default=60, help="tiempo máximo por selector")
     args = ap.parse_args()
 
-    ref = args.ref or ultimo_tag()
+    # (id, ref, selector, guardas)
+    tareas: list[tuple[str, str, str, list[str]]] = []
+    if args.selectores:
+        ref_suelto = args.ref or ultimo_tag()
+        tareas += [("", ref_suelto, sel, args.guardas) for sel in args.selectores]
+    if args.manifiesto:
+        for entrada in json.loads(Path(args.manifiesto).read_text(encoding="utf-8")):
+            ref_entrada = args.ref or entrada.get("ref") or ultimo_tag()
+            tareas += [(entrada["id"], ref_entrada, sel, entrada.get("guardas", [])) for sel in entrada.get("selectores", [])]
+
+    problemas = 0
     with tempfile.TemporaryDirectory() as tmp:
-        arbol = Path(tmp) / "ref"
-        _git("worktree", "add", "--detach", str(arbol), ref)
-        tests = copiar_tests_sin_match(Path(tmp))
+        raiz_tmp = Path(tmp)
+        tests = copiar_tests_sin_match(raiz_tmp)
+        arboles: dict[str, Path] = {}
         try:
-            print(f"Referencia: {ref} ({_git('rev-parse', '--short', ref)})")
-            problemas = 0
-            tareas: list[tuple[str, str, list[str]]] = [("", sel, args.guardas) for sel in args.selectores]
-            if args.manifiesto:
-                for entrada in json.loads(Path(args.manifiesto).read_text(encoding="utf-8")):
-                    tareas += [(entrada["id"], sel, entrada.get("guardas", [])) for sel in entrada["selectores"]]
-            for ident, sel, guardas_sel in tareas:
-                estado, pasan, fallan = ejecutar(sel, arbol / "src", args.segundos, tests)
+            for ident, ref, sel, guardas_sel in tareas:
+                if ref not in arboles:
+                    arboles[ref] = raiz_tmp / f"ref{len(arboles)}"
+                    _git("worktree", "add", "--detach", str(arboles[ref]), ref)
+                estado, pasan, fallan = ejecutar(sel, arboles[ref] / "src", args.segundos, tests)
                 etiqueta = f"{ident} " if ident else ""
                 if estado == "SIN_TESTS":
                     print(f"[MAL] {etiqueta}SIN_TESTS  {sel}")
                     problemas += 1
                     continue
                 if estado == "COLGADO":
-                    print(f"[OK ] {etiqueta}COLGADO  {sel}  (el código anterior no termina)")
+                    print(f"[OK ] {etiqueta}COLGADO ({ref})  {sel}  (el código anterior no termina)")
                     continue
                 guardas = [t for t in pasan if any(g in t for g in guardas_sel)]
                 sospechosos = [t for t in pasan if t not in guardas]
                 marca = "MAL" if sospechosos or fallan == 0 else "OK "
-                print(f"[{marca}] {etiqueta}{fallan} fallan, {len(guardas)} guardas, {len(sospechosos)} pasan sin deber  {sel}")
+                print(f"[{marca}] {etiqueta}{fallan} fallan, {len(guardas)} guardas, "
+                      f"{len(sospechosos)} pasan sin deber en {ref}  {sel}")
                 for t in sospechosos:
                     print(f"        pasa en {ref}: {t}")
                 problemas += len(sospechosos) + (1 if fallan == 0 else 0)
         finally:
-            _git("worktree", "remove", "--force", str(arbol))
+            for arbol in arboles.values():
+                _git("worktree", "remove", "--force", str(arbol))
     if problemas:
-        print(f"\n{problemas} problema(s): tests que no detectan el bug en {ref} (o selectores vacíos). "
-              "Refuerza el test o decláralo guarda con --guardas.")
+        print(f"\n{problemas} problema(s): tests que no detectan el bug en su referencia (o selectores vacíos). "
+              "Refuerza el test o decláralo guarda con \"guardas\".")
     return 1 if problemas else 0
 
 

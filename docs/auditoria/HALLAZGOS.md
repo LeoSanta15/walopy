@@ -7,8 +7,9 @@
 
 ## Estado tras la ejecución (2026-10-02)
 
-**Cerrados con test de regresión:** K-01, K-02, K-03, K-04, K-05, K-06, K-07, K-09, K-10, K-11, K-12, K-13, N-01, N-02, N-03, N-04, N-05, N-06, N-07, N-08, N-09, N-10, N-11, N-14, N-16.
-**Parciales:** K-08 (listas vacías sí; magnitudes extremas 1e308/1e-320 no), N-12 (mensajes/CLI/docs en español; cuerpo de docstrings, columnas y etiquetas no), N-15 (SECURITY, CoC y plantillas sí; `attestations` sigue desactivado).
+**Cerrados con test de regresión:** K-01, K-02, K-03, K-04, K-05, K-06, K-07, K-09, K-10, K-11, K-12, K-13, N-01, N-02, N-03, N-04, N-05, N-06, N-07, N-08, N-09, N-10, N-11, N-12 (traducción completa, comprobada por `tests/test_idioma.py`), N-14, N-16.
+**Parciales:** K-08 (listas vacías sí; magnitudes extremas 1e308/1e-320 no), N-15 (SECURITY, CoC y plantillas sí; `attestations` sigue desactivado).
+**Trazabilidad:** cada bug corregido figura como `W-nn` en `tests/regresiones.json` y se verifica contra `v0.2.8` (ver `TRAZABILIDAD.md`).
 **Sin cambios por decisión:** N-13 (matplotlib y plotly siguen siendo obligatorias; extras `[plot]` pospuestos a 0.4.0).
 
 ---

@@ -88,6 +88,23 @@ jobs:
       - name: Cobertura por módulo (mínimo 70 %)
         run: python scripts/comprobar_cobertura_modulos.py 70
 
+  regresion:
+    name: Los tests de regresión fallan en la versión anterior
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # necesita los tags para crear el worktree de la referencia
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -e ".[dev]"
+
+      - name: verificar_regresion.py (manifiesto tests/regresiones.json)
+        run: python scripts/verificar_regresion.py --manifiesto tests/regresiones.json --segundos 300
+
   paquete:
     name: Build y metadatos
     runs-on: ubuntu-latest

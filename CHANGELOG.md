@@ -44,8 +44,12 @@ K-09…K-13 y N-01…N-16 (ver `docs/auditoria/ROADMAP.md`).
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, plantillas de issues y de PR; `CLAUDE.md` y `CONTRIBUTING.md` reescritos.
 - CI: ruff, mypy, cobertura (global ≥ 85 % y por módulo ≥ 70 %), build + `twine check`, Sphinx `-W`, `pip-audit`,
   matriz Python 3.9–3.13, dependencias mínimas y prueba semanal con las últimas versiones; la publicación verifica antes de publicar.
-- Tests: 357 → 1 165 (contrato de entradas sobre las 67 funciones, regresiones, referencias externas fijas, gráficas, CLI,
-  README, documentación, ejemplos, complejidad y doctests). Cobertura 80 % → 91 %.
+- Tests: 357 → 1 260 (contrato de entradas sobre las 67 funciones, regresiones, referencias externas fijas, gráficas, CLI,
+  README, documentación, ejemplos, complejidad, doctests, política de idioma y trazabilidad). Cobertura 80 % → 94,7 %.
+- Trazabilidad de bugs: `tests/regresiones.json` (25 bugs `W-nn`), `scripts/verificar_regresion.py` (los tests de regresión deben **fallar** en la versión anterior; job `regresion` del CI),
+  `tests/test_trazabilidad.py` y `tests/test_idioma.py` (mensajes, avisos y docstrings en español). `CLAUDE.md` pasa a 17 reglas (R-16 y R-17).
+  El catálogo de bugs y el Playbook de `docs/referencia/` incorporan las lecciones de walopy; ver `docs/auditoria/TRAZABILIDAD.md` y `REGLAS_PROPUESTAS.md`.
+- Extra de desarrollo `pytest-timeout` (la verificación de regresiones detecta bloqueos del código anterior).
 
 ### Notas
 - Los tags `v0.2.4` y `v0.2.6` nunca se crearon en GitHub (las versiones sí se publicaron); no se reconstruyen.

@@ -121,7 +121,7 @@ def littles_law(
     Raises
     ------
     ValueError
-        If zero or more than one variable is None.
+        Si hay cero o más de una variable igual a ``None``.
 
     Examples
     --------
