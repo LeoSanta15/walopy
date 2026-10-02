@@ -9,17 +9,18 @@ import pytest
 
 import walopy as wl
 
-# scipy.stats.weibull_min.fit(x, floc=0) sobre estos 10 tiempos de falla
+# Raíz de la ecuación de verosimilitud de Weibull resuelta con scipy.optimize.brentq (tolerancia 1e-15)
+# sobre estos 10 tiempos de falla (weibull_min.fit de scipy es menos preciso: difiere en el 6.º decimal)
 TIEMPOS = [12.5, 18.3, 24.1, 31.7, 38.2, 45.9, 52.4, 61.0, 70.8, 85.3]
 
 
 def test_weibull_mle_coincide_con_scipy():
     r = wl.weibull_analysis(TIEMPOS)
-    assert r.shape == pytest.approx(2.096098096219661, rel=1e-6)
-    assert r.scale == pytest.approx(49.855648822059145, rel=1e-6)
-    assert r.mttf == pytest.approx(44.157394124576975, rel=1e-6)   # weibull_min(...).mean()
-    assert r.b10 == pytest.approx(17.039488758348288, rel=1e-6)    # .ppf(0.10)
-    assert r.b50 == pytest.approx(41.85774959255791, rel=1e-6)     # .ppf(0.50)
+    assert r.shape == pytest.approx(2.0960949331865226, rel=1e-10)
+    assert r.scale == pytest.approx(49.855642038989785, rel=1e-10)
+    assert r.mttf == pytest.approx(44.15738858857231, rel=1e-9)    # weibull_min(β, η).mean()
+    assert r.b10 == pytest.approx(17.03945883486382, rel=1e-9)     # .ppf(0.10)
+    assert r.b50 == pytest.approx(41.8577328531316, rel=1e-9)      # .ppf(0.50)
 
 
 def test_pert_probabilidad_coincide_con_la_normal():
