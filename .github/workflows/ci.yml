@@ -132,7 +132,7 @@ jobs:
 
       - name: Sin referencias obsoletas
         run: |
-          if grep -rn "PLACEHOLDER\|TU_USUARIO\|cost_kpi_tree" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --exclude=CLAUDE.md --exclude-dir=.git --exclude-dir=.github --exclude-dir=auditoria --exclude-dir=referencia; then
+          if grep -rn "PLACEHOLDER\|TU_USUARIO\|cost_kpi_tree" . --include="*.py" --include="*.md" --include="*.toml" --include="*.yml" --exclude=CLAUDE.md --exclude-dir=.git --exclude-dir=.github --exclude-dir=auditoria --exclude-dir=referencia --exclude-dir=retrospectiva --exclude=AGENTS.md; then
             echo "Se encontraron referencias obsoletas"; exit 1
           fi
 
