@@ -1,7 +1,8 @@
 """walopy — Herramientas de investigación de operaciones para Python: colas, inventarios, scheduling, proyectos, confiabilidad, OEE y árboles de KPI."""
 from __future__ import annotations
 
-from importlib.metadata import PackageNotFoundError, version
+# Idioma de los textos
+from ._i18n import get_language, language, set_language
 
 # Advanced models
 from .advanced import (
@@ -163,12 +164,13 @@ from .solver import (
     solve_servers,
 )
 
-try:
-    __version__: str = version("walopy")
-except PackageNotFoundError:
-    __version__ = "0+unknown"  # sin instalar: la versión vive solo en pyproject.toml
+__version__ = "0.4.0"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
+    # idioma de los textos
+    "set_language",
+    "get_language",
+    "language",
     # queuing
     "QueueResult",
     "littles_law",

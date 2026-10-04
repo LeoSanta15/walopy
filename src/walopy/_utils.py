@@ -9,21 +9,23 @@ from typing import Any
 
 import numpy as np
 
+from ._i18n import t as _t
+
 
 def _to_float(value: Any, name: str) -> float:
     if isinstance(value, (bool, np.bool_)):
-        raise TypeError(f"'{name}' debe ser un número, se recibió un booleano ({value!r}).")
+        raise TypeError(_t("utils.error.to_float.debe_ser_numero_recibio_booleano", name=name, value=value))
     try:
         return float(value)
     except (TypeError, ValueError):
-        raise TypeError(f"'{name}' debe ser un número, se recibió {type(value).__name__!r}.") from None
+        raise TypeError(_t("utils.error.to_float.debe_ser_numero_recibio", name=name, __name__=type(value).__name__)) from None
 
 
 def as_positive(value: float, name: str) -> float:
     """Valida que un escalar sea finito y estrictamente positivo."""
     v = _to_float(value, name)
     if not np.isfinite(v) or v <= 0:
-        raise ValueError(f"'{name}' debe ser un número finito y positivo, se recibió {value!r}.")
+        raise ValueError(_t("utils.error.as_positive.debe_ser_numero_finito_positivo", name=name, value=value))
     return v
 
 
@@ -31,7 +33,7 @@ def as_nonneg(value: float, name: str) -> float:
     """Valida que un escalar sea finito y no negativo."""
     v = _to_float(value, name)
     if not np.isfinite(v) or v < 0:
-        raise ValueError(f"'{name}' debe ser finito y >= 0, se recibió {value!r}.")
+        raise ValueError(_t("utils.error.as_nonneg.debe_ser_finito_recibio", name=name, value=value))
     return v
 
 
@@ -39,7 +41,7 @@ def as_fraction(value: float, name: str) -> float:
     """Valida que un escalar esté en [0, 1]."""
     v = _to_float(value, name)
     if not np.isfinite(v) or not (0.0 <= v <= 1.0):
-        raise ValueError(f"'{name}' debe ser un valor finito en [0, 1], se recibió {value!r}.")
+        raise ValueError(_t("utils.error.as_fraction.debe_ser_valor_finito_recibio", name=name, value=value))
     return v
 
 
@@ -56,27 +58,27 @@ def as_int_positive(value: int, name: str, *, max: int | None = None) -> int:
     """
     if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)):
         raise TypeError(
-            f"'{name}' debe ser un entero positivo, se recibió {type(value).__name__!r} = {value!r}."
+            _t("utils.error.as_int_positive.debe_ser_entero_positivo_recibio", name=name, __name__=type(value).__name__, value=value)
         )
     v = int(value)
     if v < 1:
-        raise ValueError(f"'{name}' debe ser >= 1, se recibió {value!r}.")
+        raise ValueError(_t("utils.error.as_int_positive.debe_ser_recibio", name=name, value=value))
     if max is not None and v > max:
-        raise ValueError(f"'{name}' no puede superar {max}, se recibió {value!r}.")
+        raise ValueError(_t("utils.error.as_int_positive.puede_superar_recibio", name=name, max=max, value=value))
     return v
 
 
 def as_nonempty(seq: Any, name: str) -> None:
     """Lanza ValueError si la secuencia está vacía."""
     if len(seq) == 0:
-        raise ValueError(f"'{name}' debe contener al menos un elemento.")
+        raise ValueError(_t("utils.error.as_nonempty.debe_contener_menos_elemento", name=name))
 
 
 def as_finite_scalar(value: float, name: str) -> float:
     """Acepta cualquier número real finito (positivo, cero o negativo)."""
     v = _to_float(value, name)
     if not np.isfinite(v):
-        raise ValueError(f"'{name}' debe ser un número finito, se recibió {value!r}.")
+        raise ValueError(_t("utils.error.as_finite_scalar.debe_ser_numero_finito_recibio", name=name, value=value))
     return v
 
 
@@ -87,11 +89,11 @@ def as_float_list(seq: Any, name: str, *, kind: str = "positive", min_len: int =
     Rechaza cadenas, escalares y diccionarios; exige al menos ``min_len`` elementos.
     """
     if isinstance(seq, (str, bytes, dict)) or not hasattr(seq, "__iter__"):
-        raise TypeError(f"'{name}' debe ser una secuencia de números, se recibió {type(seq).__name__!r}.")
+        raise TypeError(_t("utils.error.as_float_list.debe_ser_secuencia_numeros_recibio", name=name, __name__=type(seq).__name__))
     check = {"positive": as_positive, "nonneg": as_nonneg, "finite": as_finite_scalar}[kind]
     out = [check(v, f"{name}[{i}]") for i, v in enumerate(seq)]
     if len(out) < min_len:
         if min_len == 1:
-            raise ValueError(f"'{name}' debe contener al menos un elemento.")
-        raise ValueError(f"'{name}' debe contener al menos {min_len} elementos, se recibieron {len(out)}.")
+            raise ValueError(_t("utils.error.as_nonempty.debe_contener_menos_elemento", name=name))
+        raise ValueError(_t("utils.error.as_float_list.debe_contener_menos_elementos_recibieron", name=name, min_len=min_len, expr=len(out)))
     return out

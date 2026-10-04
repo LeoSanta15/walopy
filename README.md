@@ -2,6 +2,8 @@
 
 **Teoría de colas, análisis de operaciones, modelos de inventario, árboles de KPI y más para Python.**
 
+🇬🇧 [English version of this document](https://github.com/LeoSanta15/walopy/blob/main/README.en.md)
+
 [![PyPI version](https://img.shields.io/pypi/v/walopy.svg)](https://pypi.org/project/walopy/)
 [![Python](https://img.shields.io/pypi/pyversions/walopy.svg)](https://pypi.org/project/walopy/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -38,7 +40,8 @@ pip install walopy
 21. [Gráficas](#21-gráficas)
 22. [CLI](#22-cli)
 23. [Referencia de módulos](#23-referencia-de-módulos)
-24. [Requisitos](#24-requisitos)
+24. [Idioma de los textos](#24-idioma-de-los-textos)
+25. [Requisitos](#25-requisitos)
 
 ---
 
@@ -1768,7 +1771,43 @@ Wq     : 0.3   (tiempo promedio de espera en cola)
 
 ---
 
-## 24. Requisitos
+## 24. Idioma de los textos
+
+Los mensajes de error, avisos, etiquetas de `summary()`, cabeceras de `to_frame()`, títulos de gráficas y la ayuda del CLI se muestran en el
+idioma activo: **español (`"es"`, por defecto) o inglés (`"en"`)**. Si algún texto no estuviera traducido, se muestra en español: nunca falla por eso.
+
+El idioma se elige, de mayor a menor prioridad, con:
+
+1. `with walopy.language("en"):` — solo dentro del bloque (seguro con hilos y `asyncio`).
+2. `walopy.set_language("en")` — para todo el proceso.
+3. La variable de entorno `WALOPY_LANG=en` (también para el CLI). Un valor desconocido se ignora y se usa el español.
+
+```python
+import walopy as wl
+
+wl.get_language()                  # 'es' (por defecto)
+with wl.language("en"):            # cambia el idioma solo dentro del bloque
+    print(wl.mm1(2, 3).summary().splitlines()[1])      # λ      : 2  (arrival rate)
+    print(list(wl.mm1(2, 3).to_frame().columns)[:3])
+wl.set_language("es")              # fija el idioma para todo el proceso
+try:
+    wl.set_language("fr")          # un idioma no admitido lanza ValueError
+except ValueError as e:
+    print(e)
+```
+
+Qué **no** cambia con el idioma: los nombres de funciones y argumentos, las claves de `result.params` (por ejemplo `"P0 (prob. de sistema vacío)"`;
+`summary()` sí muestra su etiqueta traducida) y los nombres de las claves de datos (`"Q*"`, `"name"`, las clases `"A"`/`"B"`/`"C"`). Los números
+tampoco cambian. Sí cambian, porque se crean en el idioma activo en ese momento: los nombres de las **columnas** de los `DataFrame`
+(`"Artículo"` → `"Item"`), las claves de texto de las tablas internas (`result.items[0]["Producto"]`), el texto de `result.model` o `result.method`
+cuando es una frase (`"Lote por lote"` → `"Lot-for-lot"`) y los nombres por defecto (`Artículo-1` → `Item-1`). Si cambias de idioma entre crear
+un resultado y mostrarlo o graficarlo, `walopy` sigue encontrando sus columnas; tu propio código debe usar el nombre que la tabla tenga.
+
+Desde la línea de comandos: `WALOPY_LANG=en python -m walopy mm1 --lam 2 --mu 3`.
+
+---
+
+## 25. Requisitos
 
 ```
 Python ≥ 3.9

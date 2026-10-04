@@ -1,0 +1,283 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/reliability.rst:2
+msgid "Confiabilidad (reliability)"
+msgstr "Reliability (reliability)"
+
+#: ../../source/referencia/reliability.rst:4
+msgid "Módulo ``walopy.reliability``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.reliability``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/reliability.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.reliability.mtbf_analysis:1
+msgid "Confiabilidad de un componente con distribución exponencial de fallas."
+msgstr "Reliability of a component with an exponential failure distribution."
+
+#: of walopy.reliability.koon_system walopy.reliability.mtbf_analysis
+#: walopy.reliability.parallel_system walopy.reliability.series_system
+#: walopy.reliability.weibull_analysis
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.reliability.mtbf_analysis:3
+msgid "Tasa de falla λ (fallas por unidad de tiempo, p. ej. 0.01 fallas/hora)."
+msgstr "Failure rate λ (failures per unit of time, e.g. 0.01 failures/hour)."
+
+#: of walopy.reliability.mtbf_analysis:5
+msgid "Tiempo medio de reparación. Si se indica, calcula la disponibilidad en régimen estacionario."
+msgstr "Mean time to repair. If given, the steady-state availability is computed."
+
+#: of walopy.reliability.mtbf_analysis:7
+#, python-brace-format
+msgid "Tiempo en que se evalúa R(t) = e^{−λt}."
+msgstr "Time at which R(t) = e^{−λt} is evaluated."
+
+#: of walopy.reliability.koon_system walopy.reliability.mtbf_analysis
+#: walopy.reliability.parallel_system walopy.reliability.series_system
+#: walopy.reliability.weibull_analysis
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.reliability.koon_system walopy.reliability.mtbf_analysis
+#: walopy.reliability.parallel_system walopy.reliability.series_system
+#: walopy.reliability.weibull_analysis
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.reliability.mtbf_analysis:12
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+
+#: of walopy.reliability.koon_system:25 walopy.reliability.mtbf_analysis:13
+#: walopy.reliability.parallel_system:17 walopy.reliability.series_system:15
+#: walopy.reliability.weibull_analysis:14
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.reliability.koon_system:28 walopy.reliability.mtbf_analysis:16
+#: walopy.reliability.parallel_system:20 walopy.reliability.series_system:18
+#: walopy.reliability.weibull_analysis:17
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.reliability.series_system:1
+msgid "Confiabilidad de un sistema en serie (todos los componentes deben funcionar)."
+msgstr "Reliability of a series system (all the components must work)."
+
+#: of walopy.reliability.series_system:3
+#, python-brace-format
+msgid "R_sys(t) = ∏ e^{−λi·t} = e^{−(Σλi)·t}"
+msgstr "R_sys(t) = ∏ e^{−λi·t} = e^{−(Σλi)·t}"
+
+#: of walopy.reliability.parallel_system:7 walopy.reliability.series_system:5
+msgid "Tasas de falla λi de los componentes."
+msgstr "Failure rates λi of the components."
+
+#: of walopy.reliability.koon_system:17 walopy.reliability.parallel_system:9
+#: walopy.reliability.series_system:7
+msgid "Tiempo para evaluar R(t)."
+msgstr "Time at which to evaluate R(t)."
+
+#: of walopy.reliability.koon_system:19 walopy.reliability.parallel_system:11
+#: walopy.reliability.series_system:9
+msgid "Tiempo medio de reparación para calcular la disponibilidad."
+msgstr "Mean time to repair to compute the availability."
+
+#: of walopy.reliability.parallel_system:16 walopy.reliability.series_system:14
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``failure_rates`` está vacío."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``failure_rates`` is empty."
+
+#: of walopy.reliability.parallel_system:1
+msgid "Confiabilidad de un sistema en paralelo (al menos un componente debe funcionar)."
+msgstr "Reliability of a parallel system (at least one component must work)."
+
+#: of walopy.reliability.parallel_system:3
+#, python-brace-format
+msgid "R_sys(t) = 1 − ∏(1 − e^{−λi·t})"
+msgstr "R_sys(t) = 1 − ∏(1 − e^{−λi·t})"
+
+#: of walopy.reliability.parallel_system:5
+msgid "El MTBF se calcula numéricamente (∫₀^∞ R_sys(t) dt)."
+msgstr "The MTBF is computed numerically (∫₀^∞ R_sys(t) dt)."
+
+#: of walopy.reliability.koon_system:1
+msgid "Confiabilidad de un sistema k-de-n (funcionan al menos k de n componentes idénticos)."
+msgstr "Reliability of a k-out-of-n system (at least k of n identical components work)."
+
+#: of walopy.reliability.koon_system:3
+msgid "Todos los componentes son idénticos con tasa de falla λ."
+msgstr "All the components are identical with failure rate λ."
+
+#: of walopy.reliability.koon_system:5
+#, python-brace-format
+msgid "R_sys(t) = Σ_{j=k}^{n} C(n,j) · e^{−jλt} · (1 − e^{−λt})^{n−j}"
+msgstr "R_sys(t) = Σ_{j=k}^{n} C(n,j) · e^{−jλt} · (1 − e^{−λt})^{n−j}"
+
+#: of walopy.reliability.koon_system:7
+#, python-brace-format
+msgid "MTBF (exacto, exponenciales idénticas): MTBF = (1/λ) · Σ_{j=k}^{n} (−1)^{j−k} · C(n,j) · C(j−1, k−1) · (1/j) que se simplifica a  (1/λ) · Σ_{i=k}^{n} 1/i  para el k-de-n estándar."
+msgstr "MTBF (exact, identical exponentials): MTBF = (1/λ) · Σ_{j=k}^{n} (−1)^{j−k} · C(n,j) · C(j−1, k−1) · (1/j) which simplifies to  (1/λ) · Σ_{i=k}^{n} 1/i  for the standard k-out-of-n."
+
+#: of walopy.reliability.koon_system:11
+msgid "Número total de componentes."
+msgstr "Total number of components."
+
+#: of walopy.reliability.koon_system:13
+msgid "Número mínimo de componentes que deben funcionar (1 ≤ k ≤ n)."
+msgstr "Minimum number of components that must work (1 ≤ k ≤ n)."
+
+#: of walopy.reliability.koon_system:15
+msgid "Tasa de falla λ de los componentes."
+msgstr "Failure rate λ of the components."
+
+#: of walopy.reliability.koon_system:24
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si no se cumple 1 ≤ k ≤ n."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If 1 ≤ k ≤ n does not hold."
+
+#: of walopy.reliability.weibull_analysis:1
+msgid "Ajusta una distribución Weibull de dos parámetros a datos de falla completos."
+msgstr "Fits a two-parameter Weibull distribution to complete failure data."
+
+#: of walopy.reliability.weibull_analysis:3
+msgid "F(t) = 1 − exp(−(t/η)^β)"
+msgstr "F(t) = 1 − exp(−(t/η)^β)"
+
+#: of walopy.reliability.weibull_analysis:5
+msgid "Tiempos de falla observados (todos deben ser > 0). Se requieren al menos 2 valores."
+msgstr "Observed failure times (all must be > 0). At least 2 values are required."
+
+#: of walopy.reliability.weibull_analysis:7
+msgid "``'MLE'`` (por defecto): máxima verosimilitud mediante bisección; ``'RRY'``: regresión de rangos sobre Y (método de papel de probabilidad, más rápido)."
+msgstr "``'MLE'`` (default): maximum likelihood by bisection; ``'RRY'``: rank regression on Y (probability-paper method, faster)."
+
+#: of walopy.reliability.weibull_analysis:13
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si hay menos de 2 tiempos de falla, todos son iguales o ``method`` no es ``'MLE'`` ni ``'RRY'``."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If there are fewer than 2 failure times, all are equal or ``method`` is neither ``'MLE'`` nor ``'RRY'``."
+
+#: ../../source/referencia/reliability.rst:20
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.reliability.ReliabilityResult:1
+msgid "Resultado de confiabilidad de un sistema."
+msgstr "Reliability result of a system."
+
+#: ../../source/referencia/reliability.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.reliability.ReliabilityResult:3
+msgid "``'series'``, ``'parallel'``, ``'k-of-n'`` o ``'component'``."
+msgstr "``'series'``, ``'parallel'``, ``'k-of-n'`` or ``'component'``."
+
+#: of walopy.reliability.ReliabilityResult:5
+msgid "Número de componentes del sistema."
+msgstr "Number of components of the system."
+
+#: of walopy.reliability.ReliabilityResult:7
+msgid "Tasas de falla individuales λi de los componentes (fallas/unidad de tiempo)."
+msgstr "Individual failure rates λi of the components (failures/unit of time)."
+
+#: of walopy.reliability.ReliabilityResult:9
+msgid "Tiempo medio entre fallas del sistema."
+msgstr "Mean time between failures of the system."
+
+#: of walopy.reliability.ReliabilityResult:11
+msgid "Tiempo en que se evaluó R(t) (si se indicó)."
+msgstr "Time at which R(t) was evaluated (if given)."
+
+#: of walopy.reliability.ReliabilityResult:13
+msgid "Confiabilidad del sistema R(t) en el t pedido."
+msgstr "System reliability R(t) at the requested t."
+
+#: of walopy.reliability.ReliabilityResult:15
+msgid "Disponibilidad en régimen estacionario A = MTBF / (MTBF + MTTR), si se indicó mttr."
+msgstr "Steady-state availability A = MTBF / (MTBF + MTTR), if mttr was given."
+
+#: of walopy.reliability.ReliabilityResult:17
+msgid "Tiempo medio de reparación, si se indicó."
+msgstr "Mean time to repair, if given."
+
+#: of walopy.reliability.ReliabilityResult.R:1
+msgid "Calcula la confiabilidad R(t) del sistema con la topología almacenada."
+msgstr "Computes the reliability R(t) of the system with the stored topology."
+
+#: of walopy.reliability.WeibullResult:1
+msgid "Resultado del análisis Weibull de dos parámetros."
+msgstr "Result of the two-parameter Weibull analysis."
+
+#: of walopy.reliability.WeibullResult:3
+msgid "La FDA es F(t) = 1 − exp(−(t/η)^β)."
+msgstr "The CDF is F(t) = 1 − exp(−(t/η)^β)."
+
+#: of walopy.reliability.WeibullResult:5
+msgid "Parámetro de forma β. β < 1 → tasa de falla decreciente (mortalidad infantil). β = 1 → tasa de falla constante (modelo exponencial). β > 1 → tasa de falla creciente (desgaste)."
+msgstr "Shape parameter β. β < 1 → decreasing failure rate (infant mortality). β = 1 → constant failure rate (exponential model). β > 1 → increasing failure rate (wear-out)."
+
+#: of walopy.reliability.WeibullResult:10
+msgid "Parámetro de escala η (vida característica); F(η) ≈ 63.2 %."
+msgstr "Scale parameter η (characteristic life); F(η) ≈ 63.2 %."
+
+#: of walopy.reliability.WeibullResult:12
+msgid "Tiempo medio hasta la falla = η · Γ(1 + 1/β)."
+msgstr "Mean time to failure = η · Γ(1 + 1/β)."
+
+#: of walopy.reliability.WeibullResult:14
+#, python-format
+msgid "Vida B10: tiempo en el que ha fallado el 10 % de la población."
+msgstr "B10 life: time at which 10 % of the population has failed."
+
+#: of walopy.reliability.WeibullResult:16
+msgid "Vida mediana (50 % ha fallado)."
+msgstr "Median life (50 % have failed)."
+
+#: of walopy.reliability.WeibullResult:18
+msgid "Método de estimación: ``'MLE'`` (máxima verosimilitud) o ``'RRY'`` (regresión de rangos sobre Y / papel de probabilidad)."
+msgstr "Estimation method: ``'MLE'`` (maximum likelihood) or ``'RRY'`` (rank regression on Y / probability paper)."
+
+#: of walopy.reliability.WeibullResult:21
+msgid "Número de tiempos de falla utilizados."
+msgstr "Number of failure times used."
+
+#: of walopy.reliability.WeibullResult.R:1
+msgid "Confiabilidad en el tiempo *t*: R(t) = exp(−(t/η)^β)."
+msgstr "Reliability at time *t*: R(t) = exp(−(t/η)^β)."
+
+#: of walopy.reliability.WeibullResult.F:1
+msgid "No confiabilidad (FDA) en el tiempo *t*: F(t) = 1 − R(t)."
+msgstr "Unreliability (CDF) at time *t*: F(t) = 1 − R(t)."
+
+#: of walopy.reliability.WeibullResult.h:1
+msgid "Tasa de falla instantánea: h(t) = (β/η)·(t/η)^(β−1)."
+msgstr "Instantaneous failure rate: h(t) = (β/η)·(t/η)^(β−1)."
+
+#: of walopy.reliability.WeibullResult.b_life:1
+msgid "Tiempo en el que ha fallado el porcentaje *pct* de la población."
+msgstr "Time at which the percentage *pct* of the population has failed."
+
+#: of walopy.reliability.WeibullResult.b_life:3
+msgid "Por ejemplo, ``b_life(10)`` devuelve la vida B10."
+msgstr "For example, ``b_life(10)`` returns the B10 life."
+

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from ._i18n import t as _t
 from ._utils import as_nonempty, as_nonneg, as_positive
 
 if TYPE_CHECKING:
@@ -55,26 +56,26 @@ class BottleneckResult:
         rows = []
         for s in self.stations:
             rows.append({
-                "Estación": s.name,
-                "Tasa de demanda": s.demand_rate,
-                "Capacidad": s.capacity,
-                "Utilización": s.utilization,
-                "Holgura": s.slack,
-                "Cuello de botella": s.is_bottleneck,
+                _t("bottleneck.cabecera.to_frame.estacion"): s.name,
+                _t("bottleneck.cabecera.to_frame.tasa_demanda"): s.demand_rate,
+                _t("bottleneck.cabecera.to_frame.capacidad"): s.capacity,
+                _t("bottleneck.cabecera.to_frame.utilizacion"): s.utilization,
+                _t("bottleneck.cabecera.to_frame.holgura"): s.slack,
+                _t("bottleneck.cabecera.to_frame.cuello_botella"): s.is_bottleneck,
             })
         return pd.DataFrame(rows)
 
     def summary(self) -> str:
         lines = [
-            f"Estación cuello de botella: {self.bottleneck}",
-            f"Throughput del sistema    : {self.system_throughput:.6g}",
-            f"Tasa de demanda           : {self.demand_rate:.6g}",
+            _t("bottleneck.etiqueta.summary.estacion_cuello_botella", bottleneck=self.bottleneck),
+            _t("bottleneck.etiqueta.summary.throughput_sistema", system_throughput=self.system_throughput),
+            _t("bottleneck.etiqueta.summary.tasa_demanda", demand_rate=self.demand_rate),
             "",
-            f"{'Estación':<20} {'Demanda':>10} {'Capacidad':>10} {'Util.':>8} {'Holgura':>10}",
+            f"{_t('bottleneck.texto_en_expresion.summary.estacion'):<20} {_t('bottleneck.texto_en_expresion.summary.demanda'):>10} {_t('bottleneck.texto_en_expresion.summary.capacidad'):>10} {_t('bottleneck.texto_en_expresion.summary.util'):>8} {_t('bottleneck.texto_en_expresion.summary.holgura'):>10}",
             "-" * 62,
         ]
         for s in self.stations:
-            marker = " ← CB" if s.is_bottleneck else ""
+            marker = _t("bottleneck.etiqueta.summary.cb") if s.is_bottleneck else ""
             lines.append(
                 f"{s.name:<20} {s.demand_rate:>10.4g} {s.capacity:>10.4g} "
                 f"{s.utilization:>7.2%} {s.slack:>10.4g}{marker}"
@@ -138,12 +139,12 @@ def bottleneck_analysis(
     n              = len(station_names)
 
     if len(capacities) != n:
-        raise ValueError("'station_names' y 'capacities' deben tener la misma longitud.")
+        raise ValueError(_t("bottleneck.error.bottleneck_analysis.station_names_capacities_deben_tener"))
 
     if routing_fractions is None:
         routing_fractions = [1.0] * n
     elif len(routing_fractions) != n:
-        raise ValueError("'routing_fractions' debe tener un valor por estación.")
+        raise ValueError(_t("bottleneck.error.bottleneck_analysis.routing_fractions_debe_tener_valor"))
     routing_fractions = [as_nonneg(f, f"routing_fractions[{i}]") for i, f in enumerate(routing_fractions)]
 
     demand_rates = [demand_rate * rf for rf in routing_fractions]

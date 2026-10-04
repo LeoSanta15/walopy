@@ -1,12 +1,11 @@
-from importlib import metadata
+import walopy
 
 project   = "walopy"
 author    = "LeoSanta15"
-language  = "es"
-try:
-    release = metadata.version("walopy")
-except metadata.PackageNotFoundError:
-    release = "0+unknown"
+language  = "es"          # idioma de origen; el inglés se construye con -D language=en (docs/source/locale/en)
+locale_dirs = ["locale/"]
+gettext_compact = False   # un .po por documento
+release   = walopy.__version__
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",

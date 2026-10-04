@@ -22,21 +22,12 @@ jobs:
 
       - run: pip install -e ".[dev,release]"
 
-      - name: La etiqueta del release coincide con la versión del paquete
-        run: |
-          python - <<'PY'
-          import os, tomllib
-          version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
-          etiqueta = os.environ["GITHUB_REF_NAME"]
-          assert etiqueta == f"v{version}", f"etiqueta {etiqueta!r} != v{version}"
-          PY
-
       - name: Tests
         run: pytest tests/ -q --tb=short
 
       - name: Linter y tipos
         run: |
-          ruff check src/ tests/
+          ruff check src/ tests/ benchmarks/ scripts/ examples/
           mypy src/walopy --ignore-missing-imports
 
   build:
@@ -54,6 +45,11 @@ jobs:
       - run: python -m pip install --upgrade build twine
       - run: python -m build
       - run: twine check dist/*
+
+      - name: El wheel construido tiene la versión del tag
+        # release published: GITHUB_REF_NAME es el tag (vX.Y.Z); un tag creado antes de subir la versión
+        # produciría artefactos antiguos y PyPI respondería 400 File exists.
+        run: python scripts/comprobar_version_release.py "$GITHUB_REF_NAME" dist
 
       - uses: actions/upload-artifact@v4
         with:

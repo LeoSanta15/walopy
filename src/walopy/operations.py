@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from ._i18n import etiqueta_param
+from ._i18n import t as _t
 from ._utils import as_fraction, as_nonneg, as_positive
 
 if TYPE_CHECKING:
@@ -39,22 +41,22 @@ class OEEResult:
         import pandas as pd
 
         return pd.DataFrame([{
-            "Disponibilidad (A)": self.availability,
-            "Rendimiento (P)": self.performance,
-            "Calidad (Q)": self.quality,
+            _t("operations.cabecera.to_frame.disponibilidad"): self.availability,
+            _t("operations.cabecera.to_frame.rendimiento"): self.performance,
+            _t("operations.cabecera.to_frame.calidad"): self.quality,
             "OEE": self.oee,
             **self.params,
         }])
 
     def summary(self) -> str:
         lines = [
-            f"Disponibilidad (A) : {self.availability:.2%}",
-            f"Rendimiento    (P) : {self.performance:.2%}",
-            f"Calidad        (Q) : {self.quality:.2%}",
-            f"OEE                : {self.oee:.2%}",
+            _t("operations.etiqueta.summary.disponibilidad", availability=self.availability),
+            _t("operations.etiqueta.summary.rendimiento", performance=self.performance),
+            _t("operations.etiqueta.summary.calidad", quality=self.quality),
+            _t("operations.etiqueta.summary.oee", oee=self.oee),
         ]
         for k, v in self.params.items():
-            lines.append(f"  {k}: {v}")
+            lines.append(f"  {etiqueta_param(k)}: {v}")
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -194,19 +196,16 @@ class UtilizationResult:
         import pandas as pd
 
         return pd.DataFrame([{
-            "Utilización": self.utilization,
-            "Eficiencia": self.efficiency,
-            "Throughput": self.throughput,
-            "Capacidad": self.capacity,
+            _t("operations.cabecera.to_frame.utilizacion"): self.utilization,
+            _t("operations.cabecera.to_frame.eficiencia"): self.efficiency,
+            _t("operations.cabecera.to_frame.throughput"): self.throughput,
+            _t("operations.cabecera.to_frame.capacidad"): self.capacity,
             **self.params,
         }])
 
     def summary(self) -> str:
         return (
-            f"Utilización : {self.utilization:.2%}\n"
-            f"Eficiencia  : {self.efficiency:.2%}\n"
-            f"Throughput  : {self.throughput:.6g}\n"
-            f"Capacidad   : {self.capacity:.6g}"
+            _t("operations.etiqueta.summary.utilizacion_eficiencia_throughput_capacidad", utilization=self.utilization, efficiency=self.efficiency, throughput=self.throughput, capacity=self.capacity)
         )
 
     def __str__(self) -> str:
@@ -294,21 +293,17 @@ class UnitCostResult:
         import pandas as pd
 
         return pd.DataFrame([{
-            "Unidades producidas": self.units_produced,
-            "Costo fijo / unidad": self.fixed_cost_per_unit,
-            "Costo variable / unidad": self.variable_cost_per_unit,
-            "Costo unitario total": self.unit_cost,
-            "Costo total": self.total_cost,
+            _t("operations.cabecera.to_frame.unidades_producidas"): self.units_produced,
+            _t("operations.cabecera.to_frame.costo_fijo_unidad"): self.fixed_cost_per_unit,
+            _t("operations.cabecera.to_frame.costo_variable_unidad"): self.variable_cost_per_unit,
+            _t("operations.cabecera.to_frame.costo_unitario_total"): self.unit_cost,
+            _t("operations.cabecera.to_frame.costo_total"): self.total_cost,
             **self.params,
         }])
 
     def summary(self) -> str:
         return (
-            f"Unidades producidas    : {self.units_produced:.6g}\n"
-            f"Costo fijo / unidad    : {self.fixed_cost_per_unit:.6g}\n"
-            f"Costo variable / unidad: {self.variable_cost_per_unit:.6g}\n"
-            f"Costo unitario total   : {self.unit_cost:.6g}\n"
-            f"Costo total            : {self.total_cost:.6g}"
+            _t("operations.etiqueta.summary.unidades_producidas_costo_fijo_unidad", units_produced=self.units_produced, fixed_cost_per_unit=self.fixed_cost_per_unit, variable_cost_per_unit=self.variable_cost_per_unit, unit_cost=self.unit_cost, total_cost=self.total_cost)
         )
 
     def __str__(self) -> str:

@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from ._i18n import t as _t
+
 if TYPE_CHECKING:
     import pandas as pd
 
@@ -47,20 +49,20 @@ class FitResult:
     params: dict = field(default_factory=dict)
 
     def summary(self) -> str:
-        lines = ["Ajuste (FitResult)"]
+        lines = [_t("fitting.etiqueta.summary.ajuste_fitresult")]
         if self.lam is not None:
             lines += [
-                f"  λ (tasa de llegada)     : {self.lam:.6g}  (n={self.n_arrivals})",
-                f"  media entre llegadas    : {self.mean_ia:.6g}",
-                f"  desv. entre llegadas    : {self.std_ia:.6g}",
-                f"  ca² (CV² de llegadas)   : {self.ca2:.6g}",
+                _t("fitting.etiqueta.summary.tasa_llegada", lam=self.lam, n_arrivals=self.n_arrivals),
+                _t("fitting.etiqueta.summary.media_entre_llegadas", mean_ia=self.mean_ia),
+                _t("fitting.etiqueta.summary.desv_entre_llegadas", std_ia=self.std_ia),
+                _t("fitting.etiqueta.summary.ca2_cv2_llegadas", ca2=self.ca2),
             ]
         if self.mu is not None:
             lines += [
-                f"  μ (tasa de servicio)    : {self.mu:.6g}  (n={self.n_services})",
-                f"  media de servicio       : {self.mean_svc:.6g}",
-                f"  desv. de servicio       : {self.std_svc:.6g}",
-                f"  cs² (CV² de servicio)   : {self.cs2:.6g}",
+                _t("fitting.etiqueta.summary.tasa_servicio", mu=self.mu, n_services=self.n_services),
+                _t("fitting.etiqueta.summary.media_servicio", mean_svc=self.mean_svc),
+                _t("fitting.etiqueta.summary.desv_servicio", std_svc=self.std_svc),
+                _t("fitting.etiqueta.summary.cs2_cv2_servicio", cs2=self.cs2),
             ]
         return "\n".join(lines)
 
@@ -85,8 +87,8 @@ class FitResult:
         return pd.DataFrame([{
             "λ": self.lam,
             "μ": self.mu,
-            "ca²": self.ca2,
-            "cs²": self.cs2,
+            _t("fitting.cabecera.to_frame.ca2"): self.ca2,
+            _t("fitting.cabecera.to_frame.cs2"): self.cs2,
             "mean_ia": self.mean_ia,
             "std_ia": self.std_ia,
             "mean_svc": self.mean_svc,
@@ -100,9 +102,9 @@ def _fit_times(times: np.ndarray, name: str) -> tuple[float, float, float, float
     """Devuelve (tasa, cv2, media, desviación) a partir de un arreglo 1D de duraciones positivas."""
     arr = np.asarray(times, dtype=float).ravel()
     if arr.size < 2:
-        raise ValueError(f"'{name}' debe contener al menos 2 observaciones.")
+        raise ValueError(_t("fitting.error.fit_times.debe_contener_menos_observaciones", name=name))
     if np.any(arr <= 0) or not np.all(np.isfinite(arr)):
-        raise ValueError(f"Todos los valores de '{name}' deben ser finitos y estrictamente positivos.")
+        raise ValueError(_t("fitting.error.fit_times.todos_valores_deben_ser_finitos", name=name))
     mean = float(np.mean(arr))
     std  = float(np.std(arr, ddof=1))
     rate = 1.0 / mean
@@ -156,19 +158,19 @@ def fit_from_data(
     (4.9, 9.8)
     """
     if inter_arrivals is not None and arrival_timestamps is not None:
-        raise ValueError("Indique 'inter_arrivals' o 'arrival_timestamps', no ambos.")
+        raise ValueError(_t("fitting.error.fit_from_data.indique_inter_arrivals_arrival_timestamps"))
 
     if arrival_timestamps is not None:
         ts = np.asarray(arrival_timestamps, dtype=float).ravel()
         if ts.size < 2:
-            raise ValueError("'arrival_timestamps' debe contener al menos 2 marcas de tiempo.")
+            raise ValueError(_t("fitting.error.fit_from_data.arrival_timestamps_debe_contener_menos"))
         if not np.all(np.isfinite(ts)):
-            raise ValueError("'arrival_timestamps' debe ser finito.")
+            raise ValueError(_t("fitting.error.fit_from_data.arrival_timestamps_debe_ser_finito"))
         inter_arrivals = np.diff(ts)
 
     if inter_arrivals is None and service_times is None:
         raise ValueError(
-            "Indique al menos uno de 'inter_arrivals', 'arrival_timestamps' o 'service_times'."
+            _t("fitting.error.fit_from_data.indique_menos_uno_inter_arrivals")
         )
 
     lam = mu = ca2 = cs2 = None

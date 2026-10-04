@@ -1,0 +1,207 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/operations.rst:2
+msgid "Operaciones (operations)"
+msgstr "Operations (operations)"
+
+#: ../../source/referencia/operations.rst:4
+msgid "Módulo ``walopy.operations``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.operations``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/operations.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.operations.oee:1
+msgid "Calcula la Eficiencia Global del Equipo (OEE)."
+msgstr "Computes the Overall Equipment Effectiveness (OEE)."
+
+#: of walopy.operations.oee:3
+msgid "Se pueden indicar directamente los tres factores (A, P, Q, cada uno en [0, 1]) o dejar que la función los derive de datos crudos."
+msgstr "The three factors (A, P, Q, each in [0, 1]) can be given directly, or the function can derive them from raw data."
+
+#: of walopy.operations.oee walopy.operations.unit_cost
+#: walopy.operations.utilization_efficiency
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.operations.oee:6
+msgid "Fracción del tiempo de producción planificado en que el equipo estuvo disponible [0, 1]. Indique 0.0 si prefiere derivarla de ``planned_time`` y ``downtime``."
+msgstr "Fraction of the planned production time during which the equipment was available [0, 1]. Give 0.0 if you prefer to derive it from ``planned_time`` and ``downtime``."
+
+#: of walopy.operations.oee:9
+msgid "Fracción de la tasa de producción real respecto de la ideal [0, 1]. Indique 0.0 si prefiere derivarla de los tiempos de ciclo."
+msgstr "Fraction of the actual production rate with respect to the ideal one [0, 1]. Give 0.0 if you prefer to derive it from the cycle times."
+
+#: of walopy.operations.oee:12
+msgid "Fracción de unidades buenas [0, 1]. Indique 0.0 si prefiere derivarla de los conteos de unidades."
+msgstr "Fraction of good units [0, 1]. Give 0.0 if you prefer to derive it from the unit counts."
+
+#: of walopy.operations.oee:15
+msgid "Tiempo de producción planificado total."
+msgstr "Total planned production time."
+
+#: of walopy.operations.oee:17
+msgid "Paradas no planificadas totales."
+msgstr "Total unplanned stops."
+
+#: of walopy.operations.oee:19
+msgid "Tiempo de ciclo ideal (mínimo) por unidad."
+msgstr "Ideal (minimum) cycle time per unit."
+
+#: of walopy.operations.oee:21
+msgid "Tiempo de ciclo promedio real por unidad."
+msgstr "Actual average cycle time per unit."
+
+#: of walopy.operations.oee:23
+msgid "Total de unidades producidas (buenas + defectuosas)."
+msgstr "Total units produced (good + defective)."
+
+#: of walopy.operations.oee:25
+msgid "Unidades defectuosas o para retrabajo."
+msgstr "Defective or rework units."
+
+#: of walopy.operations.oee walopy.operations.unit_cost
+#: walopy.operations.utilization_efficiency
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.operations.oee walopy.operations.unit_cost
+#: walopy.operations.utilization_efficiency
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.operations.oee:30
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si algún factor no está en [0, 1]."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If any factor is not in [0, 1]."
+
+#: of walopy.operations.oee:31 walopy.operations.unit_cost:15
+#: walopy.operations.utilization_efficiency:15
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.operations.oee:34 walopy.operations.unit_cost:18
+#: walopy.operations.utilization_efficiency:18
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.operations.utilization_efficiency:1
+msgid "Calcula la utilización y la eficiencia."
+msgstr "Computes the utilization and the efficiency."
+
+#: of walopy.operations.utilization_efficiency:3
+msgid "Unidades (o trabajo) realmente producidas por unidad de tiempo."
+msgstr "Units (or work) actually produced per unit of time."
+
+#: of walopy.operations.utilization_efficiency:5
+msgid "Máximo de unidades por unidad de tiempo (capacidad instalada)."
+msgstr "Maximum units per unit of time (installed capacity)."
+
+#: of walopy.operations.utilization_efficiency:7
+msgid "Salida esperada o estándar por unidad de tiempo. Si se indica, eficiencia = actual_output / standard_output; de lo contrario eficiencia = actual_output / capacity."
+msgstr "Expected or standard output per unit of time. If given, efficiency = actual_output / standard_output; otherwise efficiency = actual_output / capacity."
+
+#: of walopy.operations.unit_cost:14
+#: walopy.operations.utilization_efficiency:14
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+
+#: of walopy.operations.unit_cost:1
+msgid "Calcula el costo unitario con costos fijos, variables y gastos indirectos opcionales."
+msgstr "Computes the unit cost with fixed costs, variable costs and optional overhead."
+
+#: of walopy.operations.unit_cost:3
+msgid "Costo fijo total del periodo."
+msgstr "Total fixed cost of the period."
+
+#: of walopy.operations.unit_cost:5
+msgid "Costo variable por unidad producida."
+msgstr "Variable cost per unit produced."
+
+#: of walopy.operations.unit_cost:7
+msgid "Número de unidades producidas."
+msgstr "Number of units produced."
+
+#: of walopy.operations.unit_cost:9
+msgid "Gastos indirectos como fracción del costo variable (por defecto 0)."
+msgstr "Overhead as a fraction of the variable cost (default 0)."
+
+#: ../../source/referencia/operations.rst:16
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.operations.OEEResult:1
+msgid "Descomposición de la Eficiencia Global del Equipo (OEE)."
+msgstr "Breakdown of the Overall Equipment Effectiveness (OEE)."
+
+#: ../../source/referencia/operations.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.operations.OEEResult:3
+msgid "A — fracción del tiempo planificado en que el activo estuvo funcionando."
+msgstr "A — fraction of the planned time during which the asset was running."
+
+#: of walopy.operations.OEEResult:5
+msgid "P — fracción de la velocidad real respecto de la ideal."
+msgstr "P — fraction of the actual speed with respect to the ideal one."
+
+#: of walopy.operations.OEEResult:7
+msgid "Q — fracción de unidades buenas sobre el total producido."
+msgstr "Q — fraction of good units over the total produced."
+
+#: of walopy.operations.OEEResult:9
+msgid "OEE = A × P × Q."
+msgstr "OEE = A × P × Q."
+
+#: of walopy.operations.OEEResult:11
+msgid "Valores de entrada originales, conservados como referencia."
+msgstr "Original input values, kept for reference."
+
+#: of walopy.operations.UtilizationResult:1
+msgid "Métricas de utilización y eficiencia de un recurso."
+msgstr "Utilization and efficiency metrics of a resource."
+
+#: of walopy.operations.UtilizationResult:3
+msgid "Fracción de la capacidad realmente consumida (λ/μ o similar)."
+msgstr "Fraction of the capacity actually consumed (λ/μ or similar)."
+
+#: of walopy.operations.UtilizationResult:5
+msgid "Salida realmente producida / salida máxima teórica."
+msgstr "Output actually produced / theoretical maximum output."
+
+#: of walopy.operations.UtilizationResult:7
+msgid "Unidades (o trabajo) realmente completadas por unidad de tiempo."
+msgstr "Units (or work) actually completed per unit of time."
+
+#: of walopy.operations.UtilizationResult:9
+msgid "Throughput máximo alcanzable."
+msgstr "Maximum achievable throughput."
+
+#: of walopy.operations.UnitCostResult:1
+msgid "Desglose del costo unitario."
+msgstr "Unit cost breakdown."
+
+#: of walopy.operations.UnitCostResult:3
+msgid "Costo total por unidad producida."
+msgstr "Total cost per unit produced."
+

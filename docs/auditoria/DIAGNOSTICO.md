@@ -1,5 +1,7 @@
 # DIAGNÓSTICO — walopy v0.2.8
 
+> **Foto histórica:** este diagnóstico describe el estado de `v0.2.8` (`2cc17c1`) antes de la auditoría. Las cifras (357 tests, 80 % de cobertura, 78 errores de mypy…) ya no son las actuales: ver `docs/retrospectiva/SCORECARD.md`.
+
 > Auditoría contra `docs/referencia/PLAYBOOK.md` y `docs/referencia/BUG_CATALOG.md`.
 > Fecha: 2026-10-02 · Commit auditado: `2cc17c1` (main, v0.2.8) · Fase de solo lectura: no se modificó código fuente.
 > Convención: **HECHO** = observado con un comando; **INFERENCIA** = deducción razonada; **NO VERIFICADO** = sin evidencia.

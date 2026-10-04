@@ -178,10 +178,10 @@
   },
   {
     "id": "W-20",
-    "titulo": "__version__ sin fallback si el paquete no está instalado",
+    "titulo": "__version__ congelada en los metadatos de instalación (y fallback obsoleto 0.2.0)",
     "ref": "v0.2.8",
     "selectores": [
-      "tests/test_version.py -k sin_instalar"
+      "tests/test_version.py -k 'literal or init_no_lee or dinamicamente'"
     ]
   },
   {

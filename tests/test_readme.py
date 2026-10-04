@@ -16,7 +16,7 @@ import pytest
 matplotlib.use("Agg")
 
 RAIZ = Path(__file__).resolve().parents[1]
-ARCHIVOS = [RAIZ / "README.md", *sorted((RAIZ / "docs" / "source").glob("*.md"))]
+ARCHIVOS = [RAIZ / "README.md", RAIZ / "README.en.md", *sorted((RAIZ / "docs" / "source").glob("*.md"))]
 PATRON = re.compile(r"```python\n(.*?)```", re.S)
 
 

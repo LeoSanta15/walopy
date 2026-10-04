@@ -1,0 +1,117 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/bottleneck.rst:2
+msgid "Cuellos de botella (bottleneck)"
+msgstr "Bottlenecks (bottleneck)"
+
+#: ../../source/referencia/bottleneck.rst:4
+msgid "Módulo ``walopy.bottleneck``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.bottleneck``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/bottleneck.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.bottleneck.bottleneck_analysis:1
+msgid "Identifica el cuello de botella de un sistema con varias estaciones."
+msgstr "Identifies the bottleneck of a system with several stations."
+
+#: of walopy.bottleneck.bottleneck_analysis:3
+msgid "El cuello de botella es la estación con mayor utilización (demand_rate × fracción_de_ruteo / capacidad)."
+msgstr "The bottleneck is the station with the highest utilization (demand_rate × routing_fraction / capacity)."
+
+#: of walopy.bottleneck.bottleneck_analysis
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.bottleneck.bottleneck_analysis:6
+msgid "Nombres de las estaciones (en orden de flujo)."
+msgstr "Names of the stations (in flow order)."
+
+#: of walopy.bottleneck.bottleneck_analysis:8
+msgid "Throughput máximo de cada estación por unidad de tiempo."
+msgstr "Maximum throughput of each station per unit of time."
+
+#: of walopy.bottleneck.bottleneck_analysis:10
+msgid "Tasa de llegada (demanda) que entra al sistema."
+msgstr "Arrival rate (demand) entering the system."
+
+#: of walopy.bottleneck.bottleneck_analysis:12
+msgid "Fracción del flujo que visita cada estación. Por defecto 1.0 en todas (todas las unidades visitan todas las estaciones en secuencia)."
+msgstr "Fraction of the flow that visits each station. Defaults to 1.0 for all (all units visit all stations in sequence)."
+
+#: of walopy.bottleneck.bottleneck_analysis
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.bottleneck.bottleneck_analysis
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.bottleneck.bottleneck_analysis:18
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si una secuencia está vacía o las secuencias tienen longitudes distintas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a sequence is empty or the sequences have different lengths."
+
+#: of walopy.bottleneck.bottleneck_analysis:19
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.bottleneck.bottleneck_analysis:22
+msgid "Examples"
+msgstr "Examples"
+
+#: ../../source/referencia/bottleneck.rst:12
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.bottleneck.BottleneckResult:1
+msgid "Resultado de un análisis de cuello de botella sobre varias estaciones."
+msgstr "Result of a bottleneck analysis over several stations."
+
+#: ../../source/referencia/bottleneck.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.bottleneck.BottleneckResult:3
+msgid "Métricas por estación."
+msgstr "Per-station metrics."
+
+#: of walopy.bottleneck.BottleneckResult:5
+msgid "Nombre de la estación cuello de botella."
+msgstr "Name of the bottleneck station."
+
+#: of walopy.bottleneck.BottleneckResult:7
+msgid "Throughput máximo sostenible (limitado por el cuello de botella)."
+msgstr "Maximum sustainable throughput (limited by the bottleneck)."
+
+#: of walopy.bottleneck.BottleneckResult:9
+msgid "Throughput requerido (tasa de llegada al sistema)."
+msgstr "Required throughput (arrival rate into the system)."
+
+#: of walopy.bottleneck.BottleneckResult.to_frame:1
+msgid "Exporta las métricas por estación como un DataFrame."
+msgstr "Exports the per-station metrics as a DataFrame."
+
+#: of walopy.bottleneck.StationResult:1
+msgid "Métricas de una estación individual en una línea de flujo."
+msgstr "Metrics of a single station in a flow line."
+

@@ -1,0 +1,1199 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/inventory.rst:2
+msgid "Inventarios (inventory)"
+msgstr "Inventory (inventory)"
+
+#: ../../source/referencia/inventory.rst:4
+msgid "Módulo ``walopy.inventory``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.inventory``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/inventory.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.inventory.eoq:1
+msgid "Cantidad Económica de Pedido: fórmula de Wilson / Harris."
+msgstr "Economic Order Quantity: Wilson / Harris formula."
+
+#: of walopy.inventory.eoq:3
+msgid "Q* = sqrt(2 · D · K / h)"
+msgstr "Q* = sqrt(2 · D · K / h)"
+
+#: of walopy.inventory.abc_analysis walopy.inventory.abc_xyz
+#: walopy.inventory.ebq walopy.inventory.ebq_multi walopy.inventory.eoq
+#: walopy.inventory.eoq_multi walopy.inventory.eoq_quantity_discount
+#: walopy.inventory.exchange_curve walopy.inventory.lot_for_lot
+#: walopy.inventory.mrp walopy.inventory.newsvendor
+#: walopy.inventory.reorder_point walopy.inventory.rq_policy
+#: walopy.inventory.rs_policy walopy.inventory.safety_stock_curve
+#: walopy.inventory.silver_meal walopy.inventory.wagner_whitin
+#: walopy.inventory.xyz_analysis
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.inventory.eoq:5
+msgid "Demanda por periodo *D* (unidades/periodo)."
+msgstr "Demand per period *D* (units/period)."
+
+#: of walopy.inventory.eoq:7
+msgid "Costo fijo por pedido *K* ($/pedido)."
+msgstr "Fixed cost per order *K* ($/order)."
+
+#: of walopy.inventory.eoq:9
+msgid "Costo de mantener por unidad y periodo *h* ($/unidad/periodo)."
+msgstr "Holding cost per unit per period *h* ($/unit/period)."
+
+#: of walopy.inventory.abc_analysis walopy.inventory.abc_xyz
+#: walopy.inventory.ebq walopy.inventory.ebq_multi walopy.inventory.eoq
+#: walopy.inventory.eoq_multi walopy.inventory.eoq_quantity_discount
+#: walopy.inventory.exchange_curve walopy.inventory.lot_for_lot
+#: walopy.inventory.mrp walopy.inventory.newsvendor
+#: walopy.inventory.reorder_point walopy.inventory.rq_policy
+#: walopy.inventory.rs_policy walopy.inventory.safety_stock_curve
+#: walopy.inventory.silver_meal walopy.inventory.wagner_whitin
+#: walopy.inventory.xyz_analysis
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.inventory.abc_analysis walopy.inventory.abc_xyz
+#: walopy.inventory.ebq walopy.inventory.ebq_multi walopy.inventory.eoq
+#: walopy.inventory.eoq_multi walopy.inventory.eoq_quantity_discount
+#: walopy.inventory.exchange_curve walopy.inventory.lot_for_lot
+#: walopy.inventory.mrp walopy.inventory.newsvendor
+#: walopy.inventory.reorder_point walopy.inventory.rq_policy
+#: walopy.inventory.rs_policy walopy.inventory.safety_stock_curve
+#: walopy.inventory.silver_meal walopy.inventory.wagner_whitin
+#: walopy.inventory.xyz_analysis
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.inventory.eoq:14
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+
+#: of walopy.inventory.abc_analysis:22 walopy.inventory.abc_xyz:21
+#: walopy.inventory.ebq:17 walopy.inventory.ebq_multi:17
+#: walopy.inventory.eoq:15 walopy.inventory.eoq_multi:17
+#: walopy.inventory.eoq_multi_constrained:44
+#: walopy.inventory.eoq_quantity_discount:19 walopy.inventory.exchange_curve:39
+#: walopy.inventory.lot_for_lot:16 walopy.inventory.mrp:27
+#: walopy.inventory.newsvendor:21 walopy.inventory.reorder_point:23
+#: walopy.inventory.rq_policy:24 walopy.inventory.rs_policy:26
+#: walopy.inventory.safety_stock_curve:38 walopy.inventory.silver_meal:16
+#: walopy.inventory.wagner_whitin:17 walopy.inventory.xyz_analysis:22
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.inventory.abc_analysis:25 walopy.inventory.abc_xyz:24
+#: walopy.inventory.ebq:20 walopy.inventory.ebq_multi:20
+#: walopy.inventory.eoq:18 walopy.inventory.eoq_multi:20
+#: walopy.inventory.eoq_multi_constrained:47
+#: walopy.inventory.eoq_quantity_discount:22 walopy.inventory.exchange_curve:42
+#: walopy.inventory.lot_for_lot:19 walopy.inventory.mrp:30
+#: walopy.inventory.newsvendor:24 walopy.inventory.reorder_point:26
+#: walopy.inventory.rq_policy:27 walopy.inventory.rs_policy:29
+#: walopy.inventory.safety_stock_curve:41 walopy.inventory.silver_meal:19
+#: walopy.inventory.wagner_whitin:20 walopy.inventory.xyz_analysis:25
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.inventory.ebq:1
+msgid "Cantidad Económica de Lote (Cantidad Económica de Producción)."
+msgstr "Economic Batch Quantity (Economic Production Quantity)."
+
+#: of walopy.inventory.ebq:3
+msgid "Q* = sqrt(2 · D · S / (h · (1 − D/P)))"
+msgstr "Q* = sqrt(2 · D · S / (h · (1 − D/P)))"
+
+#: of walopy.inventory.ebq:5
+msgid "Demanda por periodo D (unidades/periodo)."
+msgstr "Demand per period D (units/period)."
+
+#: of walopy.inventory.ebq:7
+msgid "Costo fijo de preparación por corrida de producción S ($/corrida)."
+msgstr "Fixed setup cost per production run S ($/run)."
+
+#: of walopy.inventory.ebq:9
+msgid "Costo de mantener por unidad y periodo h ($/unidad/periodo)."
+msgstr "Holding cost per unit per period h ($/unit/period)."
+
+#: of walopy.inventory.ebq:11
+msgid "Tasa de producción P (unidades/periodo). Debe superar a demand_rate."
+msgstr "Production rate P (units/period). Must exceed demand_rate."
+
+#: of walopy.inventory.ebq:16
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``production_rate`` no supera a ``demand_rate``."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``production_rate`` does not exceed ``demand_rate``."
+
+#: of walopy.inventory.eoq_multi:1
+msgid "Cantidad Económica de Pedido independiente para varios artículos."
+msgstr "Independent Economic Order Quantity for several items."
+
+#: of walopy.inventory.eoq_multi:3
+msgid "Resuelve cada artículo por separado; no hay restricciones compartidas."
+msgstr "Solves each item separately; there are no shared constraints."
+
+#: of walopy.inventory.eoq_multi:5
+msgid "Tasa de demanda D_i de cada artículo."
+msgstr "Demand rate D_i of each item."
+
+#: of walopy.inventory.eoq_multi:7
+msgid "Costo fijo de ordenar K_i de cada artículo."
+msgstr "Fixed ordering cost K_i of each item."
+
+#: of walopy.inventory.eoq_multi:9
+msgid "Costo de mantener h_i por unidad y periodo de cada artículo."
+msgstr "Holding cost h_i per unit per period of each item."
+
+#: of walopy.inventory.eoq_multi:11
+msgid "Nombres de los artículos. Por defecto Artículo-1, Artículo-2, …"
+msgstr "Names of the items. Defaults to Item-1, Item-2, …"
+
+#: of walopy.inventory.ebq_multi:16 walopy.inventory.eoq_multi:16
+#: walopy.inventory.lot_for_lot:15 walopy.inventory.silver_meal:15
+#: walopy.inventory.wagner_whitin:16
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si una secuencia está vacía o las secuencias tienen longitudes distintas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a sequence is empty or the sequences have different lengths."
+
+#: of walopy.inventory.ebq_multi:1
+msgid "Cantidad Económica de Lote independiente para varios artículos."
+msgstr "Independent Economic Batch Quantity for several items."
+
+#: of walopy.inventory.eoq_multi_constrained:1
+msgid "EOQ multi-artículo con restricciones mediante relajación lagrangiana."
+msgstr "Multi-item EOQ with constraints using Lagrangian relaxation."
+
+#: of walopy.inventory.eoq_multi_constrained:3
+msgid "Minimiza la suma de costos de inventario sujeta a restricciones lineales sobre las cantidades de pedido:  sum_i(w_ij · Q_i) ≤ B_j."
+msgstr "Minimizes the sum of the inventory costs subject to linear constraints on the order quantities:  sum_i(w_ij · Q_i) ≤ B_j."
+
+#: of walopy.inventory.eoq_multi_constrained:7
+msgid "Atajos de uso frecuente"
+msgstr "Frequently used shortcuts"
+
+#: of walopy.inventory.eoq_multi_constrained:8
+msgid "budget / budget_unit_costs"
+msgstr "budget / budget_unit_costs"
+
+#: of walopy.inventory.eoq_multi_constrained:9
+msgid "Restricción de presupuesto sobre la inversión *promedio* en inventario: sum(c_i · Q_i / 2) ≤ budget. Indique ``budget_unit_costs`` = costos unitarios de compra c_i."
+msgstr "Budget constraint on the *average* inventory investment: sum(c_i · Q_i / 2) ≤ budget. Give ``budget_unit_costs`` = unit purchase costs c_i."
+
+#: of walopy.inventory.eoq_multi_constrained:12
+msgid "space / space_per_unit"
+msgstr "space / space_per_unit"
+
+#: of walopy.inventory.eoq_multi_constrained:13
+msgid "Restricción de espacio sobre el inventario promedio: sum(s_i · Q_i / 2) ≤ space."
+msgstr "Space constraint on the average inventory: sum(s_i · Q_i / 2) ≤ space."
+
+#: of walopy.inventory.eoq_multi_constrained:17
+msgid "Restricciones genéricas"
+msgstr "Generic constraints"
+
+#: of walopy.inventory.eoq_multi_constrained:18
+msgid "constraints"
+msgstr "constraints"
+
+#: of walopy.inventory.eoq_multi_constrained:-1
+msgid "list of dict, cada uno con las claves"
+msgstr "list of dict, each with the keys"
+
+#: of walopy.inventory.eoq_multi_constrained:19
+msgid "``name`` (str), ``weights`` (lista de floats a_i), ``bound`` (float B): impone sum(a_i · Q_i) ≤ B."
+msgstr "``name`` (str), ``weights`` (list of floats a_i), ``bound`` (float B): imposes sum(a_i · Q_i) ≤ B."
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param demand_rates"
+msgstr "param demand_rates"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type demand_rates"
+msgstr "type demand_rates"
+
+#: of walopy.inventory.eoq_multi_constrained:23
+#: walopy.inventory.eoq_multi_constrained:25
+#: walopy.inventory.eoq_multi_constrained:27
+msgid "sequence of float"
+msgstr "sequence of float"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param ordering_costs"
+msgstr "param ordering_costs"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type ordering_costs"
+msgstr "type ordering_costs"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param holding_costs"
+msgstr "param holding_costs"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type holding_costs"
+msgstr "type holding_costs"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param names"
+msgstr "param names"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type names"
+msgstr "type names"
+
+#: of walopy.inventory.eoq_multi_constrained:29
+msgid "sequence of str, optional"
+msgstr "sequence of str, optional"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param budget"
+msgstr "param budget"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type budget"
+msgstr "type budget"
+
+#: of walopy.inventory.eoq_multi_constrained:31
+#: walopy.inventory.eoq_multi_constrained:35
+msgid "float, optional"
+msgstr "float, optional"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param budget_unit_costs"
+msgstr "param budget_unit_costs"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type budget_unit_costs"
+msgstr "type budget_unit_costs"
+
+#: of walopy.inventory.eoq_multi_constrained:33
+#: walopy.inventory.eoq_multi_constrained:37
+msgid "sequence of float, optional"
+msgstr "sequence of float, optional"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param space"
+msgstr "param space"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type space"
+msgstr "type space"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param space_per_unit"
+msgstr "param space_per_unit"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type space_per_unit"
+msgstr "type space_per_unit"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "param constraints"
+msgstr "param constraints"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "type constraints"
+msgstr "type constraints"
+
+#: of walopy.inventory.eoq_multi_constrained:39
+msgid "list of dict, optional"
+msgstr "list of dict, optional"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "rtype"
+msgstr "rtype"
+
+#: of walopy.inventory.eoq_multi_constrained:41
+msgid "ConstrainedMultiEOQResult"
+msgstr "ConstrainedMultiEOQResult"
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "raises ValueError"
+msgstr "raises ValueError"
+
+#: of walopy.inventory.eoq_multi_constrained:43
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si una secuencia está vacía o las secuencias tienen longitudes distintas.     Si ``budget``/``space`` no son positivos o falta la lista de costos/espacios asociada."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a sequence is empty or the sequences have different lengths.     If ``budget``/``space`` are not positive or the associated list of costs/spaces is missing."
+
+#: of walopy.inventory.eoq_multi_constrained
+msgid "raises TypeError"
+msgstr "raises TypeError"
+
+#: of walopy.inventory.lot_for_lot:1
+msgid "Heurística de dimensionado dinámico de lotes Lote por Lote (L4L)."
+msgstr "Lot-for-Lot (L4L) dynamic lot-sizing heuristic."
+
+#: of walopy.inventory.lot_for_lot:3
+msgid "Pide exactamente la demanda de cada periodo: no se arrastra inventario. Minimiza el costo de mantener a costa de una preparación por cada periodo con demanda > 0."
+msgstr "Orders exactly the demand of each period: no inventory is carried. It minimizes the holding cost at the expense of one setup for every period with demand > 0."
+
+#: of walopy.inventory.lot_for_lot:6 walopy.inventory.silver_meal:6
+#: walopy.inventory.wagner_whitin:6
+msgid "Demanda d_t de los periodos t = 1, 2, …, T."
+msgstr "Demand d_t of the periods t = 1, 2, …, T."
+
+#: of walopy.inventory.lot_for_lot:8 walopy.inventory.silver_meal:8
+msgid "Costo fijo de preparación S por pedido."
+msgstr "Fixed setup cost S per order."
+
+#: of walopy.inventory.lot_for_lot:10 walopy.inventory.rq_policy:10
+#: walopy.inventory.rs_policy:10 walopy.inventory.wagner_whitin:10
+msgid "Costo de mantener h por unidad y periodo."
+msgstr "Holding cost h per unit per period."
+
+#: of walopy.inventory.silver_meal:1
+msgid "Heurística de Silver-Meal para el dimensionado dinámico de lotes."
+msgstr "Silver-Meal heuristic for dynamic lot sizing."
+
+#: of walopy.inventory.silver_meal:3
+msgid "Extiende cada pedido para cubrir periodos adicionales mientras el costo promedio por periodo (preparación + mantener) siga disminuyendo."
+msgstr "Extends each order to cover additional periods as long as the average cost per period (setup + holding) keeps decreasing."
+
+#: of walopy.inventory.silver_meal:10
+msgid "Costo de mantener h por unidad y periodo (se carga por los periodos en inventario)."
+msgstr "Holding cost h per unit per period (charged for the periods in inventory)."
+
+#: of walopy.inventory.eoq_quantity_discount:1
+msgid "EOQ con descuentos por cantidad en todas las unidades."
+msgstr "EOQ with all-units quantity discounts."
+
+#: of walopy.inventory.eoq_quantity_discount:3
+msgid "Para cada tramo de precio calcula el EOQ con h = holding_cost_rate × precio_unitario y comprueba si cae dentro del rango válido. Devuelve el tramo de menor costo anual total (compra + ordenar + mantener)."
+msgstr "For each price break it computes the EOQ with h = holding_cost_rate × unit_price and checks whether it falls inside the valid range. It returns the break with the lowest total annual cost (purchase + ordering + holding)."
+
+#: of walopy.inventory.eoq_quantity_discount:7
+msgid "Demanda anual D."
+msgstr "Annual demand D."
+
+#: of walopy.inventory.eoq_quantity_discount:9
+msgid "Costo fijo de ordenar por pedido K."
+msgstr "Fixed ordering cost per order K."
+
+#: of walopy.inventory.eoq_quantity_discount:11
+msgid "Costo de mantener como fracción del precio unitario (p. ej. 0.20 = 20 % anual)."
+msgstr "Holding cost as a fraction of the unit price (e.g. 0.20 = 20 % per year)."
+
+#: of walopy.inventory.eoq_quantity_discount:13
+msgid "Ordenados ascendentemente por min_qty. Ejemplo: [(0, 10), (500, 9.5), (1000, 9)]."
+msgstr "Sorted ascending by min_qty. Example: [(0, 10), (500, 9.5), (1000, 9)]."
+
+#: of walopy.inventory.eoq_quantity_discount:18
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``price_breaks`` está vacío o mal formado."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``price_breaks`` is empty or malformed."
+
+#: of walopy.inventory.reorder_point:1
+msgid "Calcula el punto de reorden (ROP) y el stock de seguridad."
+msgstr "Computes the reorder point (ROP) and the safety stock."
+
+#: of walopy.inventory.reorder_point:3
+#, python-brace-format
+msgid "ROP = D̄ · L̄ + z · σ_{DLT}"
+msgstr "ROP = D̄ · L̄ + z · σ_{DLT}"
+
+#: of walopy.inventory.reorder_point:5
+#, python-brace-format
+msgid "donde σ_{DLT} = √(L̄ · σ_D² + D̄² · σ_L²)  y  z es el valor normal estándar correspondiente al nivel de servicio por ciclo deseado."
+msgstr "where σ_{DLT} = √(L̄ · σ_D² + D̄² · σ_L²)  and  z is the standard normal value corresponding to the desired cycle service level."
+
+#: of walopy.inventory.reorder_point:8
+msgid "Tasa media de demanda D̄ (unidades/periodo)."
+msgstr "Mean demand rate D̄ (units/period)."
+
+#: of walopy.inventory.reorder_point:10
+msgid "Tiempo de entrega medio L̄ (en las mismas unidades de tiempo que demand_rate)."
+msgstr "Mean lead time L̄ (in the same time units as demand_rate)."
+
+#: of walopy.inventory.reorder_point:12 walopy.inventory.rq_policy:14
+#: walopy.inventory.rs_policy:16
+msgid "Desviación estándar de la demanda por periodo σ_D (por defecto 0)."
+msgstr "Standard deviation of demand per period σ_D (default 0)."
+
+#: of walopy.inventory.reorder_point:14 walopy.inventory.rq_policy:16
+#: walopy.inventory.rs_policy:18
+msgid "Desviación estándar del tiempo de entrega σ_L (por defecto 0)."
+msgstr "Standard deviation of the lead time σ_L (default 0)."
+
+#: of walopy.inventory.reorder_point:16
+msgid "Probabilidad de no tener faltante por ciclo de reposición ∈ (0, 1). Por defecto 0.95."
+msgstr "Probability of not having a stockout per replenishment cycle ∈ (0, 1). Defaults to 0.95."
+
+#: of walopy.inventory.reorder_point:22 walopy.inventory.rq_policy:23
+#: walopy.inventory.rs_policy:25
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``service_level`` no está estrictamente entre 0 y 1."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``service_level`` is not strictly between 0 and 1."
+
+#: of walopy.inventory.newsvendor:1
+msgid "Modelo newsvendor (inventario de un solo periodo) con demanda normal."
+msgstr "Newsvendor model (single-period inventory) with normal demand."
+
+#: of walopy.inventory.newsvendor:3
+#, python-brace-format
+msgid "Cantidad óptima Q* = F^{-1}(Cu / (Cu + Co)) donde Cu = precio − costo  (costo de subestimar: utilidad perdida), Co = costo − valor de rescate  (costo de sobrestimar: unidades no vendidas)."
+msgstr "Optimal quantity Q* = F^{-1}(Cu / (Cu + Co)) where Cu = price − cost  (underage cost: lost profit), Co = cost − salvage value  (overage cost: unsold units)."
+
+#: of walopy.inventory.newsvendor:7
+msgid "Demanda media μ_D."
+msgstr "Mean demand μ_D."
+
+#: of walopy.inventory.newsvendor:9
+msgid "Desviación estándar de la demanda σ_D (≥ 0; 0 = determinística)."
+msgstr "Standard deviation of demand σ_D (≥ 0; 0 = deterministic)."
+
+#: of walopy.inventory.newsvendor:11
+msgid "Precio de venta por unidad."
+msgstr "Selling price per unit."
+
+#: of walopy.inventory.newsvendor:13
+msgid "Costo de compra o producción por unidad."
+msgstr "Purchase or production cost per unit."
+
+#: of walopy.inventory.newsvendor:15
+msgid "Valor de rescate por unidad no vendida (por defecto 0)."
+msgstr "Salvage value per unsold unit (default 0)."
+
+#: of walopy.inventory.newsvendor:20
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``cost`` no es menor que ``price`` o ``salvage`` no es menor que ``cost``."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``cost`` is not less than ``price`` or ``salvage`` is not less than ``cost``."
+
+#: of walopy.inventory.rq_policy:1
+msgid "Política de inventario (r, Q) de revisión continua."
+msgstr "(r, Q) continuous-review inventory policy."
+
+#: of walopy.inventory.rq_policy:3
+msgid "Combina el EOQ como cantidad de pedido con un punto de reorden obtenido estadísticamente. Ambas decisiones se determinan de forma independiente."
+msgstr "Combines the EOQ as the order quantity with a statistically derived reorder point. Both decisions are determined independently."
+
+#: of walopy.inventory.rq_policy:6 walopy.inventory.rs_policy:6
+msgid "Demanda media por periodo D̄."
+msgstr "Mean demand per period D̄."
+
+#: of walopy.inventory.rq_policy:8 walopy.inventory.rs_policy:8
+msgid "Costo fijo de ordenar K por pedido."
+msgstr "Fixed ordering cost K per order."
+
+#: of walopy.inventory.rq_policy:12 walopy.inventory.rs_policy:12
+msgid "Tiempo de entrega medio de reposición L̄."
+msgstr "Mean replenishment lead time L̄."
+
+#: of walopy.inventory.rq_policy:18 walopy.inventory.rs_policy:20
+msgid "Nivel de servicio por ciclo ∈ (0, 1). Por defecto 0.95."
+msgstr "Cycle service level ∈ (0, 1). Defaults to 0.95."
+
+#: of walopy.inventory.rs_policy:1
+msgid "Política de inventario (R, S) de revisión periódica."
+msgstr "(R, S) periodic-review inventory policy."
+
+#: of walopy.inventory.rs_policy:3
+msgid "La posición de inventario se revisa cada R periodos y se emite un pedido para llevarla hasta S."
+msgstr "The inventory position is reviewed every R periods and an order is placed to bring it up to S."
+
+#: of walopy.inventory.rs_policy:14
+msgid "Intervalo de revisión R (periodos entre revisiones de inventario)."
+msgstr "Review interval R (periods between inventory reviews)."
+
+#: of walopy.inventory.wagner_whitin:1
+msgid "Dimensionado dinámico óptimo de lotes de Wagner-Whitin mediante programación dinámica."
+msgstr "Optimal Wagner-Whitin dynamic lot sizing using dynamic programming."
+
+#: of walopy.inventory.wagner_whitin:3
+msgid "Encuentra la política de pedidos de costo mínimo exacto en un horizonte finito, a diferencia de Silver-Meal (heurística). Complejidad temporal O(n²)."
+msgstr "Finds the exact minimum-cost ordering policy over a finite horizon, unlike Silver-Meal (a heuristic). Time complexity O(n²)."
+
+#: of walopy.inventory.wagner_whitin:8
+msgid "Costo fijo de preparación u ordenar S por pedido."
+msgstr "Fixed setup or ordering cost S per order."
+
+#: of walopy.inventory.wagner_whitin
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.inventory.wagner_whitin:13
+msgid "``method`` es ``'Wagner-Whitin'``."
+msgstr "``method`` is ``'Wagner-Whitin'``."
+
+#: of walopy.inventory.exchange_curve:1
+msgid "Curva de intercambio agregada para una familia de artículos de inventario."
+msgstr "Aggregate exchange curve for a family of inventory items."
+
+#: of walopy.inventory.exchange_curve:3
+msgid "Para una familia de artículos gestionados cada uno con política EOQ, variar un multiplicador común *k* sobre todas las cantidades de pedido traza una hipérbola en el plano (N pedidos/año, inversión promedio):"
+msgstr "For a family of items each managed with an EOQ policy, varying a common multiplier *k* over all the order quantities traces a hyperbola in the plane (N orders/year, average investment):"
+
+#: of walopy.inventory.exchange_curve:7
+msgid "N(k) = N* / k        I(k) = k · I*       →    N · I = N* · I*"
+msgstr "N(k) = N* / k        I(k) = k · I*       →    N · I = N* · I*"
+
+#: of walopy.inventory.exchange_curve:9
+msgid "La función calcula el punto EOQ (k=1) y, si se indica una meta, resuelve el k que la cumple y reescala todas las cantidades."
+msgstr "The function computes the EOQ point (k=1) and, if a target is given, solves the k that meets it and rescales all the quantities."
+
+#: of walopy.inventory.exchange_curve:12
+msgid "Cada diccionario debe contener:  - ``demand`` (float) — demanda anual Di. - ``ordering_cost`` (float) — costo de preparación u ordenar Ki. - ``holding_cost`` (float) — costo de mantener por unidad y año hi.  Claves opcionales:  - ``unit_value`` (float) — valor unitario vi para calcular la inversión   (por defecto 1). - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
+msgstr "Each dictionary must contain:  - ``demand`` (float) — annual demand Di. - ``ordering_cost`` (float) — setup or ordering cost Ki. - ``holding_cost`` (float) — holding cost per unit per year hi.  Optional keys:  - ``unit_value`` (float) — unit value vi to compute the investment   (default 1). - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
+
+#: of walopy.inventory.exchange_curve:24
+msgid "Total de pedidos por año deseado. Resuelve k = N* / target_orders."
+msgstr "Desired total orders per year. Solves k = N* / target_orders."
+
+#: of walopy.inventory.exchange_curve:26
+msgid "Inversión promedio total en inventario deseada. Resuelve k = target / I*."
+msgstr "Desired total average inventory investment. Solves k = target / I*."
+
+#: of walopy.inventory.exchange_curve:28
+msgid "Número de puntos de la hipérbola graficada (por defecto 50)."
+msgstr "Number of points of the plotted hyperbola (default 50)."
+
+#: of walopy.inventory.exchange_curve:34 walopy.inventory.safety_stock_curve:32
+msgid "Notes"
+msgstr "Notes"
+
+#: of walopy.inventory.exchange_curve:35
+msgid "Solo se puede indicar uno de *target_orders* o *target_investment*. Si no se da ninguno se devuelve el punto EOQ (k = 1)."
+msgstr "Only one of *target_orders* or *target_investment* can be given. If neither is given, the EOQ point (k = 1) is returned."
+
+#: of walopy.inventory.exchange_curve:38
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``items`` is empty or some element is not a dictionary with the required keys."
+
+#: of walopy.inventory.safety_stock_curve:1
+msgid "Curva de intercambio del stock de seguridad para una familia de artículos (política de z común)."
+msgstr "Safety-stock exchange curve for a family of items (common-z policy)."
+
+#: of walopy.inventory.safety_stock_curve:3
+msgid "Con un **z común** todos los artículos comparten el mismo nivel de servicio por ciclo Φ(z). Variar z traza la curva de intercambio entre la inversión agregada en SS y el nivel de servicio:"
+msgstr "With a **common z** all the items share the same cycle service level Φ(z). Varying z traces the exchange curve between the aggregate SS investment and the service level:"
+
+#: of walopy.inventory.safety_stock_curve:7
+msgid "Inversión_SS(z) = z · Σ σᵢ_DLT · vᵢ"
+msgstr "SS_Investment(z) = z · Σ σᵢ_DLT · vᵢ"
+
+#: of walopy.inventory.safety_stock_curve:9
+msgid "Cada diccionario debe contener:  - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo. - ``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo).  Claves opcionales:  - ``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0). - ``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para   calcular el punto de reorden r = D·L + SS (por defecto: se omite). - ``unit_value`` (float) — valor unitario para la inversión (por defecto 1). - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
+msgstr "Each dictionary must contain:  - ``demand_std`` (float) — standard deviation of demand per unit of time. - ``lead_time`` (float) — replenishment lead time (same time unit).  Optional keys:  - ``lead_time_std`` (float) — standard deviation of the lead time (default 0). - ``demand_rate`` (float) — mean demand per unit of time; used to   compute the reorder point r = D·L + SS (default: omitted). - ``unit_value`` (float) — unit value for the investment (default 1). - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
+
+#: of walopy.inventory.safety_stock_curve:22
+msgid "Nivel de servicio por ciclo deseado ∈ (0, 1). Resuelve z = Φ⁻¹(NS)."
+msgstr "Desired cycle service level ∈ (0, 1). Solves z = Φ⁻¹(SL)."
+
+#: of walopy.inventory.safety_stock_curve:24
+msgid "Inversión total en SS deseada. Resuelve z = objetivo / (Σ σᵢ_DLT · vᵢ)."
+msgstr "Desired total SS investment. Solves z = target / (Σ σᵢ_DLT · vᵢ)."
+
+#: of walopy.inventory.safety_stock_curve:26
+msgid "Número de puntos de la curva graficada (por defecto 60, z de −2 a 4)."
+msgstr "Number of points of the plotted curve (default 60, z from −2 to 4)."
+
+#: of walopy.inventory.safety_stock_curve:33
+msgid "Solo se puede indicar uno de *target_service_level* o *target_ss_investment*. Si no se da ninguno se usa z = 0 (nivel de servicio del 50 %) como línea base; indique ``target_service_level=0.95`` para el valor típico."
+msgstr "Only one of *target_service_level* or *target_ss_investment* can be given. If neither is given, z = 0 (50 % service level) is used as the baseline; give ``target_service_level=0.95`` for the typical value."
+
+#: of walopy.inventory.safety_stock_curve:37
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.     Si ``target_service_level`` no está estrictamente entre 0 y 1."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``items`` is empty or some element is not a dictionary with the required keys.     If ``target_service_level`` is not strictly between 0 and 1."
+
+#: of walopy.inventory.abc_analysis:1
+msgid "Clasificación ABC de Pareto de artículos de inventario por valor anual."
+msgstr "Pareto ABC classification of inventory items by annual value."
+
+#: of walopy.inventory.abc_analysis:3
+msgid "Los artículos se ordenan de mayor a menor valor anual (demanda × valor_unitario). La clasificación sigue el porcentaje acumulado del valor total:"
+msgstr "The items are sorted from highest to lowest annual value (demand × unit_value). The classification follows the cumulative percentage of the total value:"
+
+#: of walopy.inventory.abc_analysis:6
+#, python-format
+msgid "**A**: artículos cuyo valor acumulado aún no ha superado *a_threshold* (típicamente ~80 % del valor, ~20 % de los artículos)."
+msgstr "**A**: items whose cumulative value has not yet exceeded *a_threshold* (typically ~80 % of the value, ~20 % of the items)."
+
+#: of walopy.inventory.abc_analysis:8
+#, python-format
+msgid "**B**: la siguiente banda hasta *b_threshold* (~15 % del valor)."
+msgstr "**B**: the next band up to *b_threshold* (~15 % of the value)."
+
+#: of walopy.inventory.abc_analysis:9
+#, python-format
+msgid "**C**: el resto (~5 % del valor, ~50 % de los artículos)."
+msgstr "**C**: the rest (~5 % of the value, ~50 % of the items)."
+
+#: of walopy.inventory.abc_analysis:11
+msgid "Cada diccionario debe tener ``'demand'`` (demanda anual) y ``'unit_value'``. Clave opcional ``'name'``."
+msgstr "Each dictionary must have ``'demand'`` (annual demand) and ``'unit_value'``. Optional key ``'name'``."
+
+#: of walopy.inventory.abc_analysis:14
+msgid "Fracción de valor acumulado que cierra la clase A (por defecto 0.80)."
+msgstr "Cumulative value fraction that closes class A (default 0.80)."
+
+#: of walopy.inventory.abc_analysis:16
+msgid "Fracción de valor acumulado que cierra la clase B (por defecto 0.95)."
+msgstr "Cumulative value fraction that closes class B (default 0.95)."
+
+#: of walopy.inventory.abc_analysis:21
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.     Si los umbrales no cumplen 0 < a < b < 1 o el valor anual total es cero."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``items`` is empty or some element is not a dictionary with the required keys.     If the thresholds do not satisfy 0 < a < b < 1 or the total annual value is zero."
+
+#: of walopy.inventory.xyz_analysis:1
+msgid "Clasificación XYZ de artículos de inventario por variabilidad de la demanda (CV)."
+msgstr "XYZ classification of inventory items by demand variability (CV)."
+
+#: of walopy.inventory.xyz_analysis:3
+msgid "**X**: CV ≤ *x_threshold* — demanda estable y predecible."
+msgstr "**X**: CV ≤ *x_threshold* — stable, predictable demand."
+
+#: of walopy.inventory.xyz_analysis:4
+msgid "**Y**: *x_threshold* < CV ≤ *y_threshold* — variabilidad moderada."
+msgstr "**Y**: *x_threshold* < CV ≤ *y_threshold* — moderate variability."
+
+#: of walopy.inventory.xyz_analysis:5
+msgid "**Z**: CV > *y_threshold* — errática, difícil de pronosticar."
+msgstr "**Z**: CV > *y_threshold* — erratic, hard to forecast."
+
+#: of walopy.inventory.xyz_analysis:7
+msgid "Cada diccionario debe aportar el coeficiente de variación de una de dos formas:  - ``'cv'`` directamente, **o** - ``'demand_std'`` **+** (``'demand_mean'`` o ``'demand_rate'``).  Clave opcional ``'name'``."
+msgstr "Each dictionary must provide the coefficient of variation in one of two ways:  - ``'cv'`` directly, **or** - ``'demand_std'`` **+** (``'demand_mean'`` or ``'demand_rate'``).  Optional key ``'name'``."
+
+#: of walopy.inventory.xyz_analysis:14
+msgid "Límite superior de CV de la clase X (por defecto 0.5)."
+msgstr "Upper CV limit of class X (default 0.5)."
+
+#: of walopy.inventory.xyz_analysis:16
+msgid "Límite superior de CV de la clase Y (por defecto 1.0)."
+msgstr "Upper CV limit of class Y (default 1.0)."
+
+#: of walopy.inventory.xyz_analysis:21
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.     Si los umbrales no cumplen 0 ≤ x < y o falta el CV (o la desviación y la media)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``items`` is empty or some element is not a dictionary with the required keys.     If the thresholds do not satisfy 0 ≤ x < y or the CV (or the deviation and the mean) is missing."
+
+#: of walopy.inventory.abc_xyz:1
+msgid "Clasificación combinada ABC-XYZ."
+msgstr "Combined ABC-XYZ classification."
+
+#: of walopy.inventory.abc_xyz:3
+msgid "Cada artículo requiere los campos de ABC (``demand``, ``unit_value``) y de XYZ (``cv`` o ``demand_std`` + ``demand_mean``/``demand_rate``)."
+msgstr "Each item requires the ABC fields (``demand``, ``unit_value``) and the XYZ fields (``cv`` or ``demand_std`` + ``demand_mean``/``demand_rate``)."
+
+#: of walopy.inventory.abc_xyz:6
+msgid "Debe aportar los campos que exigen :func:`abc_analysis` y :func:`xyz_analysis`. ``name`` es opcional."
+msgstr "Must provide the fields required by :func:`abc_analysis` and :func:`xyz_analysis`. ``name`` is optional."
+
+#: of walopy.inventory.abc_xyz:9 walopy.inventory.abc_xyz:11
+msgid "Umbrales ABC (ver :func:`abc_analysis`)."
+msgstr "ABC thresholds (see :func:`abc_analysis`)."
+
+#: of walopy.inventory.abc_xyz:13 walopy.inventory.abc_xyz:15
+msgid "Umbrales XYZ (ver :func:`xyz_analysis`)."
+msgstr "XYZ thresholds (see :func:`xyz_analysis`)."
+
+#: of walopy.inventory.abc_xyz:20
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.     Si algún umbral es inválido."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``items`` is empty or some element is not a dictionary with the required keys.     If any threshold is invalid."
+
+#: of walopy.inventory.mrp:1
+msgid "Planeación de requerimientos de materiales (MRP) de un nivel."
+msgstr "Single-level Material Requirements Planning (MRP)."
+
+#: of walopy.inventory.mrp:3
+msgid "Calcula la tabla MRP estándar: requerimientos brutos → requerimientos netos → recepciones planificadas → liberaciones planificadas de órdenes."
+msgstr "Computes the standard MRP table: gross requirements → net requirements → planned receipts → planned order releases."
+
+#: of walopy.inventory.mrp:6
+msgid "Demanda de cada periodo (longitud T)."
+msgstr "Demand of each period (length T)."
+
+#: of walopy.inventory.mrp:8
+msgid "Inventario disponible al inicio del periodo 1 (por defecto 0)."
+msgstr "On-hand inventory at the start of period 1 (default 0)."
+
+#: of walopy.inventory.mrp:10
+msgid "Recepciones ya ordenadas que llegan en cada periodo (longitud T, por defecto todas 0)."
+msgstr "Already-ordered receipts arriving in each period (length T, default all 0)."
+
+#: of walopy.inventory.mrp:12
+msgid "Tiempo de entrega de reposición en periodos (por defecto 1)."
+msgstr "Replenishment lead time in periods (default 1)."
+
+#: of walopy.inventory.mrp:14
+msgid "Política de pedido: ``'LFL'`` (lote por lote) pide exactamente el requerimiento neto; un número positivo redondea hacia arriba al múltiplo más cercano de esa cantidad."
+msgstr "Ordering policy: ``'LFL'`` (lot-for-lot) orders exactly the net requirement; a positive number rounds up to the nearest multiple of that quantity."
+
+#: of walopy.inventory.mrp:17
+msgid "Inventario final mínimo deseado en cada periodo (por defecto 0)."
+msgstr "Minimum desired ending inventory in each period (default 0)."
+
+#: of walopy.inventory.mrp:19
+msgid "Etiqueta del artículo (por defecto ``'Artículo'``, o su traducción según el idioma activo)."
+msgstr "Item label (default ``'Item'``, or its translation according to the active language)."
+
+#: of walopy.inventory.mrp:21
+msgid "Etiquetas de periodo (por defecto 1, 2, …, T)."
+msgstr "Period labels (default 1, 2, …, T)."
+
+#: of walopy.inventory.mrp:26
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``gross_requirements`` está vacío, ``lead_time`` no es un entero ≥ 0, ``lot_size`` no es ``'LFL'`` ni positivo, o las longitudes no coinciden."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``gross_requirements`` is empty, ``lead_time`` is not an integer ≥ 0, ``lot_size`` is neither ``'LFL'`` nor positive, or the lengths do not match."
+
+#: ../../source/referencia/inventory.rst:48
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.inventory.EOQResult:1
+msgid "Resultado de la Cantidad Económica de Pedido (EOQ)."
+msgstr "Result of the Economic Order Quantity (EOQ)."
+
+#: ../../source/referencia/inventory.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.inventory.EOQResult:3
+msgid "Cantidad óptima de pedido Q*."
+msgstr "Optimal order quantity Q*."
+
+#: of walopy.inventory.EOQResult:5
+msgid "Costo total mínimo por periodo en Q*."
+msgstr "Minimum total cost per period at Q*."
+
+#: of walopy.inventory.EBQResult:7 walopy.inventory.EOQResult:7
+msgid "Componente anual del costo de mantener en Q*."
+msgstr "Annual holding-cost component at Q*."
+
+#: of walopy.inventory.EOQResult:9
+msgid "Componente anual del costo de ordenar en Q*."
+msgstr "Annual ordering-cost component at Q*."
+
+#: of walopy.inventory.EOQResult:11
+msgid "Número de pedidos por periodo."
+msgstr "Number of orders per period."
+
+#: of walopy.inventory.EOQResult:13
+msgid "Tiempo promedio entre pedidos (1 / order_frequency)."
+msgstr "Average time between orders (1 / order_frequency)."
+
+#: of walopy.inventory.EBQResult:1
+msgid "Resultado de la Cantidad Económica de Lote (EPQ)."
+msgstr "Result of the Economic Batch Quantity (EPQ)."
+
+#: of walopy.inventory.EBQResult:3
+msgid "Lote óptimo de producción Q*."
+msgstr "Optimal production batch Q*."
+
+#: of walopy.inventory.EBQResult:5
+msgid "Costo total mínimo por periodo."
+msgstr "Minimum total cost per period."
+
+#: of walopy.inventory.EBQResult:9
+msgid "Componente anual del costo de preparación en Q*."
+msgstr "Annual setup-cost component at Q*."
+
+#: of walopy.inventory.EBQResult:11
+msgid "Nivel máximo de inventario = Q*(1 − D/P)."
+msgstr "Maximum inventory level = Q*(1 − D/P)."
+
+#: of walopy.inventory.EBQResult:13
+msgid "Nivel promedio de inventario = max_inventory / 2."
+msgstr "Average inventory level = max_inventory / 2."
+
+#: of walopy.inventory.EBQResult:15
+msgid "Fracción del ciclo dedicada a producir = Q*/P."
+msgstr "Fraction of the cycle spent producing = Q*/P."
+
+#: of walopy.inventory.EBQResult:17
+msgid "Duración de un ciclo de reposición = Q*/D."
+msgstr "Duration of a replenishment cycle = Q*/D."
+
+#: of walopy.inventory.EBQResult:19
+msgid "Número de corridas de producción por periodo = D/Q*."
+msgstr "Number of production runs per period = D/Q*."
+
+#: of walopy.inventory.MultiItemResult:1
+msgid "Resultado de un análisis de inventario independiente de varios artículos."
+msgstr "Result of an independent inventory analysis of several items."
+
+#: of walopy.inventory.MultiItemResult:3
+msgid "Resultados por artículo con las claves: Artículo, EOQ/EBQ, Costo total, Costo de mantener, Costo de ordenar (o de preparación), Frecuencia, Tiempo de ciclo."
+msgstr "Per-item results with the keys: Item, EOQ/EBQ, Total cost, Holding cost, Ordering cost (or Setup cost), Frequency, Cycle time (the text keys are in the active language)."
+
+#: of walopy.inventory.MultiItemResult:6
+msgid "Suma de los costos óptimos individuales."
+msgstr "Sum of the individual optimal costs."
+
+#: of walopy.inventory.ConstrainedMultiEOQResult:1
+msgid "Resultado del EOQ multi-artículo con restricciones (relajación lagrangiana)."
+msgstr "Result of the multi-item EOQ with constraints (Lagrangian relaxation)."
+
+#: of walopy.inventory.ConstrainedMultiEOQResult:3
+msgid "Cantidades óptimas y costos por artículo."
+msgstr "Optimal quantities and costs per item."
+
+#: of walopy.inventory.ConstrainedMultiEOQResult:5
+msgid "Costo total de inventario en las cantidades óptimas."
+msgstr "Total inventory cost at the optimal quantities."
+
+#: of walopy.inventory.ConstrainedMultiEOQResult:7
+msgid "Costo total del EOQ sin restricciones (cota inferior)."
+msgstr "Total cost of the unconstrained EOQ (lower bound)."
+
+#: of walopy.inventory.ConstrainedMultiEOQResult:9
+msgid "Multiplicador de Lagrange λ de cada restricción."
+msgstr "Lagrange multiplier λ of each constraint."
+
+#: of walopy.inventory.ConstrainedMultiEOQResult:11
+msgid "Nombres de las restricciones activas."
+msgstr "Names of the active constraints."
+
+#: of walopy.inventory.LotSizingResult:1
+msgid "Resultado del dimensionado dinámico de lotes."
+msgstr "Result of dynamic lot sizing."
+
+#: of walopy.inventory.LotSizingResult:3
+#, python-brace-format
+msgid "Cada diccionario: {period, order_qty, covers_periods}."
+msgstr "Each dictionary: {period, order_qty, covers_periods}."
+
+#: of walopy.inventory.LotSizingResult:5
+msgid "Costo total de preparación + mantener en el horizonte."
+msgstr "Total setup + holding cost over the horizon."
+
+#: of walopy.inventory.QuantityDiscountResult:1
+msgid "Resultado del EOQ con descuentos por cantidad en todas las unidades."
+msgstr "Result of the EOQ with all-units quantity discounts."
+
+#: of walopy.inventory.QuantityDiscountResult:3
+msgid "Cantidad óptima de pedido considerando los tramos de precio."
+msgstr "Optimal order quantity considering the price breaks."
+
+#: of walopy.inventory.QuantityDiscountResult:5
+msgid "Precio unitario en optimal_qty."
+msgstr "Unit price at optimal_qty."
+
+#: of walopy.inventory.QuantityDiscountResult:7
+msgid "Costo total anual mínimo (compra + ordenar + mantener)."
+msgstr "Minimum total annual cost (purchase + ordering + holding)."
+
+#: of walopy.inventory.QuantityDiscountResult:9
+msgid "Costo anual de compra D * unit_price."
+msgstr "Annual purchase cost D * unit_price."
+
+#: of walopy.inventory.QuantityDiscountResult:11
+msgid "Costo anual de ordenar (D/Q) * K."
+msgstr "Annual ordering cost (D/Q) * K."
+
+#: of walopy.inventory.QuantityDiscountResult:13
+msgid "Costo anual de mantener (Q/2) * h * unit_price."
+msgstr "Annual holding cost (Q/2) * h * unit_price."
+
+#: of walopy.inventory.QuantityDiscountResult:15
+msgid "Índice del tramo de precio seleccionado."
+msgstr "Index of the selected price break."
+
+#: of walopy.inventory.QuantityDiscountResult:17
+msgid "Todos los candidatos evaluados (uno por tramo)."
+msgstr "All the candidates evaluated (one per break)."
+
+#: of walopy.inventory.ReorderResult:1
+msgid "Resultado del punto de reorden y el stock de seguridad."
+msgstr "Result of the reorder point and the safety stock."
+
+#: of walopy.inventory.ReorderResult:3
+msgid "Nivel de inventario al que se emite un pedido de reposición."
+msgstr "Inventory level at which a replenishment order is placed."
+
+#: of walopy.inventory.ReorderResult:5
+#, python-brace-format
+msgid "Stock de amortiguación = z · σ_{DLT}."
+msgstr "Buffer stock = z · σ_{DLT}."
+
+#: of walopy.inventory.ReorderResult:7
+msgid "Nivel de servicio por ciclo (P(no hay faltante en el ciclo))."
+msgstr "Cycle service level (P(no stockout in the cycle))."
+
+#: of walopy.inventory.ReorderResult:9
+msgid "Factor de seguridad z correspondiente al nivel de servicio."
+msgstr "Safety factor z corresponding to the service level."
+
+#: of walopy.inventory.ReorderResult:11
+msgid "Demanda esperada durante el tiempo de entrega D̄ · L̄."
+msgstr "Expected demand during the lead time D̄ · L̄."
+
+#: of walopy.inventory.ReorderResult:13
+msgid "Desviación estándar de la demanda durante el tiempo de entrega √(L̄σ_D² + D̄²σ_L²)."
+msgstr "Standard deviation of the demand during the lead time √(L̄σ_D² + D̄²σ_L²)."
+
+#: of walopy.inventory.NewsvendorResult:1
+msgid "Resultado del modelo newsvendor."
+msgstr "Result of the newsvendor model."
+
+#: of walopy.inventory.NewsvendorResult:3
+#, python-brace-format
+msgid "Cantidad óptima de pedido Q* = F^{-1}(CR)."
+msgstr "Optimal order quantity Q* = F^{-1}(CR)."
+
+#: of walopy.inventory.NewsvendorResult:5
+msgid "Cu / (Cu + Co)."
+msgstr "Cu / (Cu + Co)."
+
+#: of walopy.inventory.NewsvendorResult:7
+msgid "Utilidad esperada en Q*."
+msgstr "Expected profit at Q*."
+
+#: of walopy.inventory.NewsvendorResult:9
+msgid "E[min(D, Q*)]."
+msgstr "E[min(D, Q*)]."
+
+#: of walopy.inventory.NewsvendorResult:11
+msgid "E[max(Q* - D, 0)]."
+msgstr "E[max(Q* - D, 0)]."
+
+#: of walopy.inventory.NewsvendorResult:13
+msgid "E[max(D - Q*, 0)]."
+msgstr "E[max(D - Q*, 0)]."
+
+#: of walopy.inventory.NewsvendorResult:15
+msgid "Cu = precio − costo."
+msgstr "Cu = price − cost."
+
+#: of walopy.inventory.NewsvendorResult:17
+msgid "Co = costo − valor de rescate."
+msgstr "Co = cost − salvage value."
+
+#: of walopy.inventory.RQPolicyResult:1
+msgid "Resultado de la política de inventario (r, Q) de revisión continua."
+msgstr "Result of the (r, Q) continuous-review inventory policy."
+
+#: of walopy.inventory.RQPolicyResult:3
+msgid "Cantidad de pedido Q* basada en el EOQ."
+msgstr "Order quantity Q* based on the EOQ."
+
+#: of walopy.inventory.RQPolicyResult:5
+msgid "Punto de reorden r = demanda media durante el tiempo de entrega + stock de seguridad."
+msgstr "Reorder point r = mean demand during the lead time + safety stock."
+
+#: of walopy.inventory.RQPolicyResult:7
+msgid "Stock de seguridad SS = z · σ_DLT."
+msgstr "Safety stock SS = z · σ_DLT."
+
+#: of walopy.inventory.RQPolicyResult:9
+msgid "Nivel de servicio por ciclo P(no hay faltante en el ciclo)."
+msgstr "Cycle service level P(no stockout in the cycle)."
+
+#: of walopy.inventory.RQPolicyResult:11
+msgid "Inventario promedio disponible ≈ Q*/2 + SS."
+msgstr "Average on-hand inventory ≈ Q*/2 + SS."
+
+#: of walopy.inventory.RQPolicyResult:13
+msgid "Costo anual de mantener + ordenar en (Q*, r)."
+msgstr "Annual holding + ordering cost at (Q*, r)."
+
+#: of walopy.inventory.RSPolicyResult:1
+msgid "Resultado de la política de inventario (R, S) de revisión periódica."
+msgstr "Result of the (R, S) periodic-review inventory policy."
+
+#: of walopy.inventory.RSPolicyResult:3
+msgid "Intervalo de revisión R."
+msgstr "Review interval R."
+
+#: of walopy.inventory.RSPolicyResult:5
+msgid "Nivel de reposición S = demanda media en (R+L) + stock de seguridad."
+msgstr "Order-up-to level S = mean demand over (R+L) + safety stock."
+
+#: of walopy.inventory.RSPolicyResult:7
+#, python-brace-format
+msgid "Stock de seguridad SS = z · σ_{R+L}."
+msgstr "Safety stock SS = z · σ_{R+L}."
+
+#: of walopy.inventory.RSPolicyResult:9
+msgid "Nivel de servicio por ciclo."
+msgstr "Cycle service level."
+
+#: of walopy.inventory.RSPolicyResult:11
+msgid "Inventario promedio disponible ≈ D·R/2 + SS."
+msgstr "Average on-hand inventory ≈ D·R/2 + SS."
+
+#: of walopy.inventory.RSPolicyResult:13
+msgid "Costo anual de mantener + ordenar en (R, S)."
+msgstr "Annual holding + ordering cost at (R, S)."
+
+#: of walopy.inventory.ExchangeCurveResult:1
+msgid "Resultado agregado de la curva de intercambio para una familia de artículos."
+msgstr "Aggregate result of the exchange curve for a family of items."
+
+#: of walopy.inventory.ExchangeCurveResult:3
+msgid "Total de pedidos por año en el punto de EOQ individual (k = 1)."
+msgstr "Total orders per year at the individual EOQ point (k = 1)."
+
+#: of walopy.inventory.ExchangeCurveResult:5
+msgid "Inversión promedio total en inventario en el punto EOQ."
+msgstr "Total average inventory investment at the EOQ point."
+
+#: of walopy.inventory.ExchangeCurveResult:7
+msgid "Factor de escala k aplicado a todas las cantidades EOQ (k = 1 → EOQ)."
+msgstr "Scale factor k applied to all the EOQ quantities (k = 1 → EOQ)."
+
+#: of walopy.inventory.ExchangeCurveResult:9
+msgid "Total de pedidos por año en el punto de política elegido."
+msgstr "Total orders per year at the chosen policy point."
+
+#: of walopy.inventory.ExchangeCurveResult:11
+msgid "Inversión promedio total en inventario en el punto de política elegido."
+msgstr "Total average inventory investment at the chosen policy point."
+
+#: of walopy.inventory.ExchangeCurveResult:13
+msgid "Descripción del objetivo usado (``'eoq'``, ``'orders'`` o ``'investment'``)."
+msgstr "Description of the target used (``'eoq'``, ``'orders'`` or ``'investment'``)."
+
+#: of walopy.inventory.ExchangeCurveResult:16
+msgid "Diccionarios por artículo con las claves ``name``, ``Q_eoq``, ``Q_optimal``, ``n_orders``, ``investment``."
+msgstr "Dictionaries per item with the keys ``name``, ``Q_eoq``, ``Q_optimal``, ``n_orders``, ``investment``."
+
+#: of walopy.inventory.ExchangeCurveResult:19
+#, python-brace-format
+msgid "Puntos de la hipérbola de intercambio: ``[{'N': …, 'I': …}, …]``."
+msgstr "Points of the exchange hyperbola: ``[{'N': …, 'I': …}, …]``."
+
+#: of walopy.inventory.ExchangeCurveResult.to_frame:1
+msgid "DataFrame de cantidades por artículo: artículo, Q_eoq, Q_óptima, n_pedidos, inversión."
+msgstr "DataFrame of quantities per item: item, Q_eoq, Q_optimal, n_orders, investment."
+
+#: of walopy.inventory.ExchangeCurveResult.curve_to_frame:1
+msgid "DataFrame de la hipérbola de intercambio: columnas N (pedidos/año) e I (inversión)."
+msgstr "DataFrame of the exchange hyperbola: columns N (orders/year) and I (investment)."
+
+#: of walopy.inventory.SafetyStockCurveResult:1
+msgid "Resultado de la curva de intercambio de stock de seguridad para una familia de artículos."
+msgstr "Result of the safety-stock exchange curve for a family of items."
+
+#: of walopy.inventory.SafetyStockCurveResult:3
+msgid "Usa una política de **z común** para todos los artículos, que es el enfoque agregado estándar: todos comparten el mismo nivel de servicio por ciclo Φ(z)."
+msgstr "Uses a **common-z** policy for all the items, which is the standard aggregate approach: all of them share the same cycle service level Φ(z)."
+
+#: of walopy.inventory.SafetyStockCurveResult:6
+msgid "Valor z común (cuantil de la normal estándar) aplicado."
+msgstr "Common z value (standard normal quantile) applied."
+
+#: of walopy.inventory.SafetyStockCurveResult:8
+msgid "Nivel de servicio por ciclo = Φ(z)."
+msgstr "Cycle service level = Φ(z)."
+
+#: of walopy.inventory.SafetyStockCurveResult:10
+msgid "Inversión total en stock de seguridad = z · Σ σᵢ_DLT · vᵢ."
+msgstr "Total safety-stock investment = z · Σ σᵢ_DLT · vᵢ."
+
+#: of walopy.inventory.SafetyStockCurveResult:12
+msgid "Descripción del objetivo usado."
+msgstr "Description of the target used."
+
+#: of walopy.inventory.SafetyStockCurveResult:14
+msgid "Diccionarios por artículo: ``name``, ``sigma_dlt``, ``safety_stock``, ``investment``, ``reorder_point`` (solo si se indicó ``demand_rate``)."
+msgstr "Dictionaries per item: ``name``, ``sigma_dlt``, ``safety_stock``, ``investment``, ``reorder_point`` (only if ``demand_rate`` was given)."
+
+#: of walopy.inventory.SafetyStockCurveResult:17
+#, python-brace-format
+msgid "Puntos de la curva: ``[{'z': …, 'service_level': …, 'ss_investment': …}, …]``."
+msgstr "Points of the curve: ``[{'z': …, 'service_level': …, 'ss_investment': …}, …]``."
+
+#: of walopy.inventory.SafetyStockCurveResult.to_frame:1
+msgid "DataFrame de stock de seguridad por artículo."
+msgstr "DataFrame of safety stock per item."
+
+#: of walopy.inventory.SafetyStockCurveResult.curve_to_frame:1
+msgid "DataFrame de la curva de intercambio completa: z, nivel_de_servicio, inversión_ss."
+msgstr "DataFrame of the complete exchange curve: z, service_level, ss_investment."
+
+#: of walopy.inventory.ABCResult:1
+msgid "Resultado de la clasificación ABC de Pareto."
+msgstr "Result of the Pareto ABC classification."
+
+#: of walopy.inventory.ABCResult:3
+msgid "Artículos ordenados de mayor a menor valor anual; cada diccionario tiene las claves ``name``, ``demand``, ``unit_value``, ``annual_value``, ``cumulative_pct``, ``pct_value``, ``rank``, ``class``."
+msgstr "Items sorted from highest to lowest annual value; each dictionary has the keys ``name``, ``demand``, ``unit_value``, ``annual_value``, ``cumulative_pct``, ``pct_value``, ``rank``, ``class``."
+
+#: of walopy.inventory.ABCResult:7
+#, python-brace-format
+msgid "``{A: {count, pct_items, pct_value}, B: …, C: …}``."
+msgstr "``{A: {count, pct_items, pct_value}, B: …, C: …}``."
+
+#: of walopy.inventory.ABCResult:9
+msgid "Valor anual total del inventario."
+msgstr "Total annual value of the inventory."
+
+#: of walopy.inventory.ABCResult:11
+#, python-brace-format
+msgid "``{a: float, b: float}`` usados en la clasificación."
+msgstr "``{a: float, b: float}`` used in the classification."
+
+#: of walopy.inventory.XYZResult:1
+msgid "Resultado de la clasificación XYZ por variabilidad de la demanda."
+msgstr "Result of the XYZ classification by demand variability."
+
+#: of walopy.inventory.XYZResult:3
+msgid "Cada diccionario tiene las claves ``name``, ``cv``, ``class``."
+msgstr "Each dictionary has the keys ``name``, ``cv``, ``class``."
+
+#: of walopy.inventory.XYZResult:5
+#, python-brace-format
+msgid "``{X: {count, pct_items}, Y: …, Z: …}``."
+msgstr "``{X: {count, pct_items}, Y: …, Z: …}``."
+
+#: of walopy.inventory.XYZResult:7
+#, python-brace-format
+msgid "``{x: float, y: float}`` límites de CV."
+msgstr "``{x: float, y: float}`` CV limits."
+
+#: of walopy.inventory.ABCXYZResult:1
+msgid "Resultado de la clasificación combinada ABC-XYZ."
+msgstr "Result of the combined ABC-XYZ classification."
+
+#: of walopy.inventory.ABCXYZResult:3
+msgid "Cada diccionario tiene las claves ``name``, ``annual_value``, ``cv``, ``abc_class``, ``xyz_class``, ``combined_class``."
+msgstr "Each dictionary has the keys ``name``, ``annual_value``, ``cv``, ``abc_class``, ``xyz_class``, ``combined_class``."
+
+#: of walopy.inventory.ABCXYZResult:6
+#, python-brace-format
+msgid "``{(abc, xyz): conteo}`` para las 9 celdas."
+msgstr "``{(abc, xyz): count}`` for the 9 cells."
+
+#: of walopy.inventory.ABCXYZResult.matrix_frame:1
+msgid "Tabla dinámica ABC (filas) × XYZ (columnas) con el conteo de artículos."
+msgstr "ABC (rows) × XYZ (columns) pivot table with the item count."
+
+#: of walopy.inventory.MRPResult:1
+msgid "Resultado del MRP de un nivel."
+msgstr "Result of the single-level MRP."
+
+#: of walopy.inventory.MRPResult:5
+msgid "Etiquetas de periodo (1, 2, … o las que indique la persona usuaria)."
+msgstr "Period labels (1, 2, … or those given by the user)."
+
+#: of walopy.inventory.MRPResult:11
+msgid "Inventario disponible al final de cada periodo tras todas las transacciones."
+msgstr "On-hand inventory at the end of each period after all the transactions."
+
+#: of walopy.inventory.MRPResult:15
+msgid "Recepciones planificadas de órdenes que llegan en el periodo."
+msgstr "Planned order receipts arriving in the period."
+
+#: of walopy.inventory.MRPResult:17
+msgid "Liberaciones planificadas de órdenes (emitidas *lead_time* periodos antes de la recepción)."
+msgstr "Planned order releases (issued *lead_time* periods before the receipt)."
+
+#: of walopy.inventory.MRPResult:19
+msgid "Cantidad total de órdenes planificadas cuya liberación debió ocurrir antes del periodo 1 (el lead time no cabe en el horizonte); no aparece en ``planned_releases``."
+msgstr "Total quantity of planned orders whose release should have occurred before period 1 (the lead time does not fit in the horizon); it does not appear in ``planned_releases``."
+

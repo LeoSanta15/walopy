@@ -1,0 +1,45 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/inicio_rapido.md:1
+msgid "Inicio rápido"
+msgstr "Quick start"
+
+#: ../../source/inicio_rapido.md:3
+msgid "Modelos de colas"
+msgstr "Queueing models"
+
+#: ../../source/inicio_rapido.md:20
+msgid "OEE"
+msgstr "OEE"
+
+#: ../../source/inicio_rapido.md:28
+msgid "Análisis de cuellos de botella"
+msgstr "Bottleneck analysis"
+
+#: ../../source/inicio_rapido.md:40
+msgid "Árbol de KPIs"
+msgstr "KPI tree"
+
+#: ../../source/inicio_rapido.md:59
+msgid "Costo unitario"
+msgstr "Unit cost"
+

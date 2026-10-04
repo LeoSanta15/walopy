@@ -1,0 +1,188 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/project.rst:2
+msgid "Proyectos: CPM y PERT (project)"
+msgstr "Projects: CPM and PERT (project)"
+
+#: ../../source/referencia/project.rst:4
+msgid "Módulo ``walopy.project``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.project``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/project.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.project.cpm:1
+msgid "Método de la Ruta Crítica (CPM) para la programación determinística de proyectos."
+msgstr "Critical Path Method (CPM) for deterministic project scheduling."
+
+#: of walopy.project.cpm:3
+msgid "Calcula los tiempos de inicio y fin más tempranos y más tardíos, las holguras total y libre, e identifica la ruta crítica (actividades con holgura total cero)."
+msgstr "Computes the earliest and latest start and finish times, the total and free floats, and identifies the critical path (activities with zero total float)."
+
+#: ../../source/referencia/project.rst of walopy.project.cpm
+#: walopy.project.pert
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.project.cpm:6
+msgid "Cada diccionario debe tener:  - ``'name'``: identificador de la actividad (str). - ``'duration'``: tiempo de proceso determinístico (float ≥ 0). - ``'predecessors'``: lista de nombres de predecesoras (vacía en las actividades iniciales)."
+msgstr "Each dictionary must have:  - ``'name'``: activity identifier (str). - ``'duration'``: deterministic processing time (float ≥ 0). - ``'predecessors'``: list of predecessor names (empty for the initial activities)."
+
+#: of walopy.project.cpm walopy.project.pert
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.project.cpm:13
+msgid "``method = 'CPM'``. ``project_variance`` y ``project_std`` son ``None`` en CPM."
+msgstr "``method = 'CPM'``. ``project_variance`` and ``project_std`` are ``None`` in CPM."
+
+#: ../../source/referencia/project.rst of walopy.project.cpm
+#: walopy.project.pert
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.project.cpm walopy.project.pert
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.project.cpm:17
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido o un ciclo."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``activities`` is empty, there are duplicate names, an unknown predecessor or a cycle."
+
+#: of walopy.project.cpm:18 walopy.project.pert:25
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.project.cpm:21 walopy.project.pert:28
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.project.pert:1
+msgid "Programación de proyectos PERT (Técnica de Evaluación y Revisión de Programas)."
+msgstr "PERT (Program Evaluation and Review Technique) project scheduling."
+
+#: of walopy.project.pert:3
+msgid "Usa la aproximación de la distribución beta con tres estimaciones:"
+msgstr "Uses the beta-distribution approximation with three estimates:"
+
+#: of walopy.project.pert:5
+msgid "te = (a + 4m + b) / 6       (duración esperada) σ² = ((b − a) / 6)²         (varianza)"
+msgstr "te = (a + 4m + b) / 6       (expected duration) σ² = ((b − a) / 6)²         (variance)"
+
+#: of walopy.project.pert:8
+msgid "La distribución de la duración del proyecto se aproxima como normal con μ = longitud esperada de la ruta crítica y σ² = suma de las varianzas de la ruta crítica."
+msgstr "The distribution of the project duration is approximated as normal with μ = expected length of the critical path and σ² = sum of the variances of the critical path."
+
+#: of walopy.project.pert:11
+msgid "Cada diccionario debe tener:  - ``'name'``: identificador de la actividad. - ``'optimistic'`` (a): duración en el mejor caso. - ``'most_likely'`` (m): duración más probable. - ``'pessimistic'`` (b): duración en el peor caso. - ``'predecessors'``: lista de nombres de predecesoras."
+msgstr "Each dictionary must have:  - ``'name'``: activity identifier. - ``'optimistic'`` (a): best-case duration. - ``'most_likely'`` (m): most likely duration. - ``'pessimistic'`` (b): worst-case duration. - ``'predecessors'``: list of predecessor names."
+
+#: of walopy.project.pert:20
+msgid "``project_duration`` es la longitud esperada de la ruta crítica. Llame a ``.probability(T)`` para P(terminación ≤ T)."
+msgstr "``project_duration`` is the expected length of the critical path. Call ``.probability(T)`` for P(completion ≤ T)."
+
+#: of walopy.project.pert:24
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido, un ciclo o no se cumple optimistic ≤ most_likely ≤ pessimistic."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``activities`` is empty, there are duplicate names, an unknown predecessor, a cycle or optimistic ≤ most_likely ≤ pessimistic does not hold."
+
+#: ../../source/referencia/project.rst:14
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.project.ActivityResult:1
+msgid "Actividad programada por CPM / PERT."
+msgstr "Activity scheduled by CPM / PERT."
+
+#: ../../source/referencia/project.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.project.ActivityResult:5
+msgid "Duración determinística (CPM) o duración esperada tₑ de PERT."
+msgstr "Deterministic duration (CPM) or PERT expected duration tₑ."
+
+#: of walopy.project.ActivityResult:9
+msgid "Inicio más temprano."
+msgstr "Earliest start."
+
+#: of walopy.project.ActivityResult:11
+msgid "Fin más temprano."
+msgstr "Earliest finish."
+
+#: of walopy.project.ActivityResult:13
+msgid "Inicio más tardío."
+msgstr "Latest start."
+
+#: of walopy.project.ActivityResult:15
+msgid "Fin más tardío."
+msgstr "Latest finish."
+
+#: of walopy.project.ActivityResult:17
+msgid "Holgura total = LS − ES."
+msgstr "Total float = LS − ES."
+
+#: of walopy.project.ActivityResult:19
+msgid "Holgura libre = min(ES de los sucesores) − EF."
+msgstr "Free float = min(ES of the successors) − EF."
+
+#: of walopy.project.ActivityResult:23 walopy.project.ActivityResult:25
+#: walopy.project.ActivityResult:27
+msgid "Solo PERT."
+msgstr "PERT only."
+
+#: of walopy.project.ActivityResult:29
+msgid "((b − a) / 6)² — solo PERT."
+msgstr "((b − a) / 6)² — PERT only."
+
+#: of walopy.project.ProjectResult:1
+msgid "Resultado de la programación de un proyecto con CPM / PERT."
+msgstr "Result of scheduling a project with CPM / PERT."
+
+#: of walopy.project.ProjectResult:5
+msgid "Nombres de las actividades de la ruta crítica en orden topológico."
+msgstr "Names of the critical-path activities in topological order."
+
+#: of walopy.project.ProjectResult:7
+msgid "Menor tiempo de terminación del proyecto (duración esperada en PERT)."
+msgstr "Shortest project completion time (expected duration in PERT)."
+
+#: of walopy.project.ProjectResult:9
+msgid "``'CPM'`` o ``'PERT'``."
+msgstr "``'CPM'`` or ``'PERT'``."
+
+#: of walopy.project.ProjectResult:11
+msgid "Suma de las varianzas de la ruta crítica (solo PERT)."
+msgstr "Sum of the variances of the critical path (PERT only)."
+
+#: of walopy.project.ProjectResult:13
+msgid "√(project_variance) (solo PERT)."
+msgstr "√(project_variance) (PERT only)."
+
+#: of walopy.project.ProjectResult.probability:1
+msgid "P(duración del proyecto ≤ objetivo) mediante aproximación normal (solo PERT)."
+msgstr "P(project duration ≤ target) using a normal approximation (PERT only)."
+
+#: of walopy.project.ProjectResult.probability:3
+msgid "Tiempo objetivo T de terminación del proyecto."
+msgstr "Target project completion time T."
+

@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from ._i18n import t as _t
+
 if TYPE_CHECKING:
     import pandas as pd
     import plotly.graph_objects as go
@@ -69,7 +71,7 @@ class KPINode:
         rows: list[dict] = []
         self._collect(rows, depth=0)
         return pd.DataFrame(rows).rename(
-            columns={"depth": "nivel", "name": "nombre", "value": "valor", "unit": "unidad", "formula": "fórmula"}
+            columns={"depth": _t("kpi.cabecera.to_frame.nivel"), "name": _t("kpi.cabecera.to_frame.nombre"), "value": _t("kpi.cabecera.to_frame.valor"), "unit": _t("kpi.cabecera.to_frame.unidad"), "formula": _t("kpi.cabecera.to_frame.formula")}
         )
 
     def _collect(self, rows: list[dict], depth: int) -> None:
@@ -144,14 +146,14 @@ def oee_kpi_tree(
     quality      = as_fraction(quality, "quality")
     oee_val = availability * performance * quality
     return KPINode(
-        name="OEE",
+        name=_t("kpi.kpi.oee_kpi_tree.oee"),
         value=oee_val,
         unit="%",
-        formula="A × P × Q",
+        formula=_t("kpi.kpi.oee_kpi_tree.texto"),
         children=[
-            KPINode(name="Disponibilidad", value=availability, unit="%", formula="(Planificado − Paradas) / Planificado"),
-            KPINode(name="Rendimiento",  value=performance,  unit="%", formula="Ciclo ideal / Ciclo real"),
-            KPINode(name="Calidad",      value=quality,      unit="%", formula="Unidades buenas / Unidades totales"),
+            KPINode(name=_t("kpi.kpi.oee_kpi_tree.disponibilidad"), value=availability, unit="%", formula=_t("kpi.kpi.oee_kpi_tree.planificado_paradas_planificado")),
+            KPINode(name=_t("kpi.kpi.oee_kpi_tree.rendimiento"),  value=performance,  unit="%", formula=_t("kpi.kpi.oee_kpi_tree.ciclo_ideal_ciclo_real")),
+            KPINode(name=_t("kpi.kpi.oee_kpi_tree.calidad"),      value=quality,      unit="%", formula=_t("kpi.kpi.oee_kpi_tree.unidades_buenas_unidades_totales")),
         ],
     )
 
@@ -200,22 +202,22 @@ def throughput_kpi_tree(
     utilization = actual_throughput / capacity
     good_rate   = 1.0 - defect_rate
     return KPINode(
-        name="Throughput efectivo",
+        name=_t("kpi.kpi.throughput_kpi_tree.throughput_efectivo"),
         value=actual_throughput * good_rate,
-        unit=f"unidades/{time_unit}",
-        formula="Real × (1 − Tasa de defectos)",
+        unit=_t("kpi.kpi.throughput_kpi_tree.unidades", time_unit=time_unit),
+        formula=_t("kpi.kpi.throughput_kpi_tree.real_tasa_defectos"),
         children=[
             KPINode(
-                name="Throughput real",
+                name=_t("kpi.kpi.throughput_kpi_tree.throughput_real"),
                 value=actual_throughput,
-                unit=f"unidades/{time_unit}",
+                unit=_t("kpi.kpi.throughput_kpi_tree.unidades", time_unit=time_unit),
                 formula="",
                 children=[
-                    KPINode(name="Capacidad",    value=capacity,    unit=f"unidades/{time_unit}"),
-                    KPINode(name="Utilización", value=utilization, unit="%", formula="Real / Capacidad"),
+                    KPINode(name=_t("kpi.kpi.throughput_kpi_tree.capacidad"),    value=capacity,    unit=_t("kpi.kpi.throughput_kpi_tree.unidades", time_unit=time_unit)),
+                    KPINode(name=_t("kpi.kpi.throughput_kpi_tree.utilizacion"), value=utilization, unit="%", formula=_t("kpi.kpi.throughput_kpi_tree.real_capacidad")),
                 ],
             ),
-            KPINode(name="Tasa de buenos", value=good_rate, unit="%", formula="1 − Tasa de defectos"),
+            KPINode(name=_t("kpi.kpi.throughput_kpi_tree.tasa_buenos"), value=good_rate, unit="%", formula=_t("kpi.kpi.throughput_kpi_tree.tasa_defectos")),
         ],
     )
 
@@ -285,39 +287,39 @@ def roi_kpi_tree(
     roi_val       = net_profit / investment if investment != 0 else 0.0
 
     return KPINode(
-        name="ROI",
+        name=_t("kpi.kpi.roi_kpi_tree.roi"),
         value=roi_val,
         unit=f"{currency}/{currency}",
-        formula="Utilidad neta / Inversión",
+        formula=_t("kpi.kpi.roi_kpi_tree.utilidad_neta_inversion"),
         children=[
             KPINode(
-                name="Utilidad neta",
+                name=_t("kpi.kpi.roi_kpi_tree.utilidad_neta"),
                 value=net_profit,
                 unit=currency,
-                formula="Ingresos − Costo total",
+                formula=_t("kpi.kpi.roi_kpi_tree.ingresos_costo_total"),
                 children=[
-                    KPINode(name="Ingresos", value=revenue, unit=currency),
+                    KPINode(name=_t("kpi.kpi.roi_kpi_tree.ingresos"), value=revenue, unit=currency),
                     KPINode(
-                        name="Costo total",
+                        name=_t("kpi.kpi.roi_kpi_tree.costo_total"),
                         value=total_cost,
                         unit=currency,
-                        formula="Costo fijo + Costo variable",
+                        formula=_t("kpi.kpi.roi_kpi_tree.costo_fijo_costo_variable"),
                         children=[
-                            KPINode(name="Costo fijo",     value=fixed_cost,     unit=currency),
+                            KPINode(name=_t("kpi.kpi.roi_kpi_tree.costo_fijo"),     value=fixed_cost,     unit=currency),
                             KPINode(
-                                name="Costo variable",
+                                name=_t("kpi.kpi.roi_kpi_tree.costo_variable"),
                                 value=variable_cost,
                                 unit=currency,
-                                formula="Costo/unidad × Unidades vendidas",
+                                formula=_t("kpi.kpi.roi_kpi_tree.costo_unidad_unidades_vendidas"),
                                 children=[
-                                    KPINode(name="Costo / unidad",  value=variable_cost_per_unit, unit=f"{currency}/unidad"),
-                                    KPINode(name="Unidades vendidas",   value=units_sold,             unit="unidades"),
+                                    KPINode(name=_t("kpi.kpi.roi_kpi_tree.costo_unidad"),  value=variable_cost_per_unit, unit=_t("kpi.kpi.roi_kpi_tree.unidad", currency=currency)),
+                                    KPINode(name=_t("kpi.kpi.roi_kpi_tree.unidades_vendidas"),   value=units_sold,             unit=_t("kpi.kpi.roi_kpi_tree.unidades")),
                                 ],
                             ),
                         ],
                     ),
                 ],
             ),
-            KPINode(name="Inversión", value=investment, unit=currency),
+            KPINode(name=_t("kpi.kpi.roi_kpi_tree.inversion"), value=investment, unit=currency),
         ],
     )

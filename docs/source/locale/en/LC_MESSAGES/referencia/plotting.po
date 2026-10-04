@@ -1,0 +1,121 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/plotting.rst:2
+msgid "Gráficas (plotting)"
+msgstr "Plots (plotting)"
+
+#: ../../source/referencia/plotting.rst:4
+msgid "Funciones de ``walopy.plotting``. Cada resultado con gráfica también expone un método ``.plot()``."
+msgstr "Functions of ``walopy.plotting``. Each result with a plot also exposes a ``.plot()`` method."
+
+#: of walopy.plotting:1
+msgid "Todas las funciones de gráficas de walopy. Matplotlib y Plotly se importan de forma perezosa."
+msgstr "All the plotting functions of walopy. Matplotlib and Plotly are imported lazily."
+
+#: of walopy.plotting.plot_queue_sensitivity:1
+msgid "Grafica Wq y Lq en función de la utilización ρ alrededor del punto de operación."
+msgstr "Plots Wq and Lq as a function of the utilization ρ around the operating point."
+
+#: of walopy.plotting.plot_queue_metrics:1
+msgid "Gráfico de barras de los principales KPI de colas."
+msgstr "Bar chart of the main queueing KPIs."
+
+#: of walopy.plotting.plot_oee:1
+msgid "Gráfico de barras horizontales con la descomposición del OEE."
+msgstr "Horizontal bar chart with the OEE breakdown."
+
+#: of walopy.plotting.plot_bottleneck:1
+msgid "Gráfico de barras de utilización por estación con el cuello de botella resaltado."
+msgstr "Bar chart of utilization per station with the bottleneck highlighted."
+
+#: of walopy.plotting.plot_kpi_tree:1
+msgid "Árbol de KPI interactivo con Plotly."
+msgstr "Interactive KPI tree with Plotly."
+
+#: ../../source/referencia/plotting.rst
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.plotting.plot_kpi_tree:3
+msgid "Raíz de la jerarquía de KPI."
+msgstr "Root of the KPI hierarchy."
+
+#: of walopy.plotting.plot_kpi_tree:5
+msgid "Título de la figura. Por defecto \"Árbol de KPI — <root.name>\"."
+msgstr "Title of the figure. Defaults to \"KPI tree — <root.name>\"."
+
+#: of walopy.plotting.plot_kpi_tree:7
+msgid "Tipo de gráfico. 'treemap' (por defecto) codifica el valor con el área; 'sunburst' usa una disposición radial."
+msgstr "Chart type. 'treemap' (default) encodes the value with the area; 'sunburst' uses a radial layout."
+
+#: ../../source/referencia/plotting.rst
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.plotting.plot_kpi_tree:11
+msgid "Llame a ``.show()`` para mostrarla o a ``.write_html()`` para guardarla."
+msgstr "Call ``.show()`` to display it or ``.write_html()`` to save it."
+
+#: ../../source/referencia/plotting.rst
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.plotting.plot_sensitivity:1
+msgid "Gráfico de líneas de KPI al variar un parámetro."
+msgstr "Line chart of KPIs as a parameter varies."
+
+#: of walopy.plotting.plot_sensitivity:3
+msgid "Salida de ``walopy.solver.sensitivity()``."
+msgstr "Output of ``walopy.solver.sensitivity()``."
+
+#: of walopy.plotting.plot_sensitivity:5
+msgid "Nombre del parámetro barrido (eje x)."
+msgstr "Name of the swept parameter (x axis)."
+
+#: of walopy.plotting.plot_sensitivity:7
+msgid "Columnas a graficar. Por defecto ``['rho', 'Wq', 'Lq', 'W', 'L']`` (filtradas a las presentes en *df*)."
+msgstr "Columns to plot. Defaults to ``['rho', 'Wq', 'Lq', 'W', 'L']`` (filtered to those present in *df*)."
+
+#: of walopy.plotting.plot_optimize_servers:1
+msgid "Gráfico de barras y línea con el desglose de costos por número de servidores."
+msgstr "Bar and line chart with the cost breakdown by number of servers."
+
+#: of walopy.plotting.plot_simulation:1
+msgid "Histograma de tiempos de espera simulados con anotaciones de percentiles."
+msgstr "Histogram of simulated waiting times with percentile annotations."
+
+#: of walopy.plotting.plot_line_balance:1
+msgid "Gráfico de barras de tiempos de ciclo por estación con la línea de referencia del takt."
+msgstr "Bar chart of cycle times per station with the takt reference line."
+
+#: of walopy.plotting.plot_break_even:1
+msgid "Líneas de ingresos y costo total con el punto de equilibrio resaltado."
+msgstr "Revenue and total cost lines with the break-even point highlighted."
+
+#: of walopy.plotting.plot_eoq:1
+msgid "Curvas de costo total, de mantener y de ordenar alrededor del EOQ."
+msgstr "Total, holding and ordering cost curves around the EOQ."
+
+#: of walopy.plotting.plot_queue_distribution:1
+msgid "Gráfico de dos paneles: PMF de la longitud de la cola (barras) y FDA del tiempo de permanencia (línea)."
+msgstr "Two-panel chart: PMF of the queue length (bars) and CDF of the sojourn time (line)."
+

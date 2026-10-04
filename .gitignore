@@ -14,3 +14,10 @@ htmlcov/
 docs/build/
 .DS_Store
 coverage.json
+docs/_build/
+.coverage.*
+.venv/
+venv/
+.tox/
+.nox/
+*.mo

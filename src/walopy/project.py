@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from statistics import NormalDist
 from typing import TYPE_CHECKING
 
+from ._i18n import t as _t
 from ._utils import as_finite_scalar, as_nonneg
 
 if TYPE_CHECKING:
@@ -102,33 +103,33 @@ class ProjectResult:
         """
         target = as_finite_scalar(target, "target")
         if self.project_std is None or self.project_std == 0.0:
-            raise ValueError("probability() requiere un resultado PERT con varianza distinta de cero.")
+            raise ValueError(_t("project.error.probability.probability_requiere_resultado_pert_varianza"))
         z = (target - self.project_duration) / self.project_std
         return NormalDist().cdf(z)
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Actividad":    a.name,
-            "Duración":    a.duration,
-            "Predecesoras": ", ".join(str(p) for p in a.predecessors),
+            _t("project.cabecera.to_frame.actividad"):    a.name,
+            _t("project.cabecera.to_frame.duracion"):    a.duration,
+            _t("project.cabecera.to_frame.predecesoras"): ", ".join(str(p) for p in a.predecessors),
             "ES": a.es,  "EF": a.ef,
             "LS": a.ls,  "LF": a.lf,
-            "HT": a.total_float,
-            "HL": a.free_float,
-            "Crítica": a.is_critical,
+            _t("project.cabecera.to_frame.ht"): a.total_float,
+            _t("project.cabecera.to_frame.hl"): a.free_float,
+            _t("project.cabecera.to_frame.critica"): a.is_critical,
         } for a in self.activities])
 
     def summary(self) -> str:
         lines = [
-            f"Método            : {self.method}",
-            f"Duración proyecto  : {self.project_duration:.4g}",
-            f"Ruta crítica       : {' → '.join(self.critical_path)}",
+            _t("project.etiqueta.summary.metodo", method=self.method),
+            _t("project.etiqueta.summary.duracion_proyecto", project_duration=self.project_duration),
+            _t("project.etiqueta.summary.ruta_critica", expr=' → '.join(self.critical_path)),
         ]
         if self.project_variance is not None:
             lines += [
-                f"Varianza proyecto  : {self.project_variance:.4g}",
-                f"σ del proyecto     : {self.project_std:.4g}",
+                _t("project.etiqueta.summary.varianza_proyecto", project_variance=self.project_variance),
+                _t("project.etiqueta.summary.proyecto", project_std=self.project_std),
             ]
         return "\n".join(lines)
 
@@ -143,23 +144,23 @@ class ProjectResult:
 def _leer_actividades(activities) -> list:
     """Valida la lista de actividades: tipo, nombres obligatorios y sin duplicados."""
     if isinstance(activities, (str, bytes, dict)) or not hasattr(activities, "__iter__"):
-        raise TypeError("'activities' debe ser una lista de diccionarios.")
+        raise TypeError(_t("project.error.leer_actividades.activities_debe_ser_lista_diccionarios"))
     activities = list(activities)
     if not activities:
-        raise ValueError("'activities' debe contener al menos una actividad.")
+        raise ValueError(_t("project.error.leer_actividades.activities_debe_contener_menos_actividad"))
     vistos: set = set()
     for i, a in enumerate(activities):
         if not isinstance(a, dict):
-            raise TypeError(f"activities[{i}] debe ser un diccionario, se recibió {type(a).__name__!r}.")
+            raise TypeError(_t("project.error.leer_actividades.activities_debe_ser_diccionario_recibio", i=i, __name__=type(a).__name__))
         if "name" not in a:
-            raise ValueError(f"activities[{i}]: falta la clave 'name'.")
+            raise ValueError(_t("project.error.leer_actividades.activities_falta_clave_name", i=i))
         nm = str(a["name"])
         if nm in vistos:
-            raise ValueError(f"Nombre de actividad duplicado: '{nm}'. Cada actividad debe tener un nombre único.")
+            raise ValueError(_t("project.error.leer_actividades.nombre_actividad_duplicado_cada_actividad", nm=nm))
         vistos.add(nm)
         preds = a.get("predecessors", [])
         if isinstance(preds, (str, bytes)) or not hasattr(preds, "__iter__"):
-            raise TypeError(f"activities[{i}]['predecessors'] debe ser una lista de nombres.")
+            raise TypeError(_t("project.error.leer_actividades.activities_predecessors_debe_ser_lista", i=i))
     return activities
 
 
@@ -171,7 +172,7 @@ def _toposort_and_succ(acts: dict) -> tuple:
         for pred in act["predecessors"]:
             if pred not in acts:
                 raise ValueError(
-                    f"La actividad '{name}' referencia un predecesor desconocido '{pred}'."
+                    _t("project.error.toposort_and_succ.actividad_referencia_predecesor_desconocido", name=name, pred=pred)
                 )
             succ[pred].append(name)
             in_deg[name] += 1
@@ -185,7 +186,7 @@ def _toposort_and_succ(acts: dict) -> tuple:
             if in_deg[s] == 0:
                 queue.append(s)
     if len(order) != len(acts):
-        raise ValueError("Las actividades contienen un ciclo.")
+        raise ValueError(_t("project.error.toposort_and_succ.actividades_contienen_ciclo"))
     return order, succ
 
 
@@ -284,7 +285,7 @@ def cpm(activities: list) -> ProjectResult:
     for a in _leer_actividades(activities):
         nm = str(a["name"])
         if "duration" not in a:
-            raise ValueError(f"Actividad '{nm}': falta la clave 'duration'.")
+            raise ValueError(_t("project.error.cpm.actividad_falta_clave_duration", nm=nm))
         dur = as_nonneg(a["duration"], f"activities['{nm}']['duration']")
         acts[nm] = {
             "duration":     dur,
@@ -360,13 +361,13 @@ def pert(activities: list) -> ProjectResult:
         nm = str(a["name"])
         for clave in ("optimistic", "most_likely", "pessimistic"):
             if clave not in a:
-                raise ValueError(f"Actividad '{nm}': falta la clave '{clave}'.")
+                raise ValueError(_t("project.error.pert.actividad_falta_clave", nm=nm, clave=clave))
         o = as_nonneg(a["optimistic"], f"activities['{nm}']['optimistic']")
         m = as_nonneg(a["most_likely"], f"activities['{nm}']['most_likely']")
         b = as_nonneg(a["pessimistic"], f"activities['{nm}']['pessimistic']")
         if not (o <= m <= b):
             raise ValueError(
-                f"Actividad '{nm}': se requiere optimistic ≤ most_likely ≤ pessimistic."
+                _t("project.error.pert.actividad_requiere_optimistic_most_likely", nm=nm)
             )
         te = (o + 4.0 * m + b) / 6.0
         acts[nm] = {
