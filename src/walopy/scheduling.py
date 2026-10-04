@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional, TypedDict
 
+from ._i18n import t as _t
 from ._utils import as_float_list, as_positive
 
 
@@ -80,27 +81,27 @@ class ScheduleResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Trabajo": j.name,
+            _t("scheduling.cabecera.to_frame.trabajo"): j.name,
             "p": j.processing_time,
             "d": j.due_date,
             "w": j.weight,
-            "Inicio": j.start_time,
+            _t("scheduling.cabecera.to_frame.inicio_2"): j.start_time,
             "C": j.completion_time,
             "L": j.lateness,
             "T": j.tardiness,
-            "Con retraso": j.is_tardy,
+            _t("scheduling.cabecera.to_frame.retraso"): j.is_tardy,
         } for j in self.jobs])
 
     def summary(self) -> str:
         lines = [
-            f"Regla                   : {self.rule}",
-            f"Secuencia               : {' → '.join(self.sequence)}",
-            f"Makespan (Cmax)         : {self.makespan:.4g}",
-            f"Finalización total ΣCj  : {self.total_completion_time:.4g}",
-            f"Finalización pond. ΣwCj : {self.total_weighted_completion_time:.4g}",
-            f"Retraso máximo          : {self.max_lateness:.4g}",
-            f"Tardanza total ΣTj      : {self.total_tardiness:.4g}",
-            f"Trabajos con retraso    : {self.n_tardy}",
+            _t("scheduling.etiqueta.summary.regla", rule=self.rule),
+            _t("scheduling.etiqueta.summary.secuencia", expr=' → '.join(self.sequence)),
+            _t("scheduling.etiqueta.summary.makespan_cmax", makespan=self.makespan),
+            _t("scheduling.etiqueta.summary.finalizacion_total_cj", total_completion_time=self.total_completion_time),
+            _t("scheduling.etiqueta.summary.finalizacion_pond_wcj", total_weighted_completion_time=self.total_weighted_completion_time),
+            _t("scheduling.etiqueta.summary.retraso_maximo", max_lateness=self.max_lateness),
+            _t("scheduling.etiqueta.summary.tardanza_total_tj", total_tardiness=self.total_tardiness),
+            _t("scheduling.etiqueta.summary.trabajos_retraso", n_tardy=self.n_tardy),
         ]
         return "\n".join(lines)
 
@@ -200,20 +201,20 @@ def schedule_single(
     processing_times = as_float_list(processing_times, "processing_times")
     n = len(processing_times)
     if names is None:
-        names = [f"J{i + 1}" for i in range(n)]
+        names = [_t("scheduling.valor_por_defecto.schedule_single.texto", expr=i + 1) for i in range(n)]
     if weights is None:
         weights = [1.0] * n
     dd = list(due_dates) if due_dates is not None else [None] * n
 
     if len(dd) != n or len(weights) != n or len(names) != n:
-        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
+        raise ValueError(_t("scheduling.error.schedule_single.todas_secuencias_entrada_deben_tener"))
 
     rule_up = rule.upper()
     valid = {"SPT", "EDD", "WSPT", "CR", "FIFO"}
     if rule_up not in valid:
-        raise ValueError(f"'rule' debe ser una de {valid}.")
+        raise ValueError(_t("scheduling.error.schedule_single.rule_debe_ser", valid=valid))
     if rule_up in ("EDD", "CR") and all(d is None for d in dd):
-        raise ValueError(f"rule='{rule}' requiere due_dates.")
+        raise ValueError(_t("scheduling.error.schedule_single.rule_requiere_due_dates", rule=rule))
 
     for i, p in enumerate(processing_times):
         as_positive(p, f"processing_times[{i}]")
@@ -272,16 +273,15 @@ class FlowShopResult:
         rows = []
         for a, b in zip(self.machine1_schedule, self.machine2_schedule):
             rows.append({
-                "Trabajo": a["name"],
-                "M1 inicio": a["start"], "M1 fin": a["end"],
-                "M2 inicio": b["start"], "M2 fin": b["end"],
+                _t("scheduling.cabecera.to_frame.trabajo"): a["name"],
+                _t("scheduling.cabecera.to_frame.m1_inicio"): a["start"], _t("scheduling.cabecera.to_frame.m1_fin"): a["end"],
+                _t("scheduling.cabecera.to_frame.m2_inicio"): b["start"], _t("scheduling.cabecera.to_frame.m2_fin"): b["end"],
             })
         return pd.DataFrame(rows)
 
     def summary(self) -> str:
         return (
-            f"Secuencia : {' → '.join(self.sequence)}\n"
-            f"Makespan  : {self.makespan:.4g}"
+            _t("scheduling.etiqueta.summary.secuencia_makespan", expr=' → '.join(self.sequence), makespan=self.makespan)
         )
 
     def __str__(self) -> str:
@@ -328,9 +328,9 @@ def johnson_flowshop(
     """
     n = len(m1_times)
     if len(m2_times) != n:
-        raise ValueError("m1_times y m2_times deben tener la misma longitud.")
+        raise ValueError(_t("scheduling.error.johnson_flowshop.m1_times_m2_times_deben"))
     if names is None:
-        names = [f"J{i + 1}" for i in range(n)]
+        names = [_t("scheduling.valor_por_defecto.schedule_single.texto", expr=i + 1) for i in range(n)]
     for i, (a, b) in enumerate(zip(m1_times, m2_times)):
         as_positive(a, f"m1_times[{i}]")
         as_positive(b, f"m2_times[{i}]")
@@ -449,19 +449,16 @@ class NEHResult:
         import pandas as pd
         rows = []
         for idx, job in enumerate(self.sequence):
-            row: dict = {"Trabajo": job}
+            row: dict = {_t("scheduling.cabecera.to_frame.trabajo"): job}
             for mi, m_sched in enumerate(self.machine_schedules):
-                row[f"M{mi + 1}_inicio"] = m_sched[idx]["start"]
-                row[f"M{mi + 1}_fin"]   = m_sched[idx]["end"]
+                row[_t("scheduling.cabecera.to_frame.inicio", expr=mi + 1)] = m_sched[idx]["start"]
+                row[_t("scheduling.cabecera.to_frame.fin", expr=mi + 1)]   = m_sched[idx]["end"]
             rows.append(row)
         return pd.DataFrame(rows)
 
     def summary(self) -> str:
         return (
-            f"Algoritmo : heurística NEH\n"
-            f"Máquinas  : {self.n_machines}\n"
-            f"Secuencia : {' → '.join(str(s) for s in self.sequence)}\n"
-            f"Makespan  : {self.makespan:.4g}"
+            _t("scheduling.etiqueta.summary.algoritmo_heuristica_neh_maquinas_secuencia", n_machines=self.n_machines, expr=' → '.join((str(s) for s in self.sequence)), makespan=self.makespan)
         )
 
     def __str__(self) -> str:
@@ -508,24 +505,24 @@ def neh_flowshop(
     """
     n = len(times_matrix)
     if n == 0:
-        raise ValueError("'times_matrix' debe contener al menos un trabajo.")
+        raise ValueError(_t("scheduling.error.neh_flowshop.times_matrix_debe_contener_menos"))
     m_cnt = len(times_matrix[0])
     if m_cnt == 0:
-        raise ValueError("Cada trabajo debe tener tiempos de proceso para al menos una máquina.")
+        raise ValueError(_t("scheduling.error.neh_flowshop.cada_trabajo_debe_tener_tiempos"))
     for i, row in enumerate(times_matrix):
         if len(row) != m_cnt:
             raise ValueError(
-                f"Todas las filas deben tener la misma longitud; la fila {i} tiene {len(row)} ≠ {m_cnt}."
+                _t("scheduling.error.neh_flowshop.todas_filas_deben_tener_misma", i=i, expr=len(row), m_cnt=m_cnt)
             )
         for j, p in enumerate(row):
             as_positive(float(p), f"times_matrix[{i}][{j}]")
 
     if names is None:
-        names_list = [f"J{i + 1}" for i in range(n)]
+        names_list = [_t("scheduling.valor_por_defecto.schedule_single.texto", expr=i + 1) for i in range(n)]
     else:
         names_list = [str(s) for s in names]
     if len(names_list) != n:
-        raise ValueError("'names' debe tener la misma longitud que 'times_matrix'.")
+        raise ValueError(_t("scheduling.error.neh_flowshop.names_debe_tener_misma_longitud"))
 
     T_mat = [[float(times_matrix[i][j]) for j in range(m_cnt)] for i in range(n)]
 

@@ -1,29 +1,29 @@
 # INVENTARIO I18N — texto visible de walopy (generado)
 
-> Generado por `python scripts/inventario_i18n.py`; **no editar a mano**. Fuente de verdad: `docs/auditoria/inventario_i18n.json`.
-> 667 textos únicos, 820 usos en el código. Idioma base: `es`.
+> Generado por `python scripts/inventario_i18n.py`; **no editar a mano**. Línea base **congelada** de los textos de v0.3.0 (antes de pasar al catálogo): `docs/auditoria/inventario_i18n_base.json`.
+> 645 textos únicos, 762 usos en el código. Idioma base: `es`.
 > Un texto repetido en un módulo cuenta una vez (clave única) y aparece con su número de usos.
 
 ## Por tipo y módulo (textos únicos)
 
-| módulo | acceso_columna | aviso | cabecera | clave_params | cli | columna_df | error | etiqueta | grafica | kpi | modelo | nombre_arg | valor_por_defecto | total |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `__main__` |  |  |  |  | 17 |  |  |  |  |  |  |  |  | 17 |
-| `_utils` |  |  |  |  |  |  | 12 |  |  |  |  |  |  | 12 |
-| `advanced` |  |  | 14 | 11 |  | 15 | 14 | 34 |  |  | 3 | 2 | 1 | 94 |
-| `bottleneck` |  |  | 6 |  |  |  | 2 | 10 |  |  |  | 2 |  | 20 |
-| `fitting` |  |  | 2 |  |  |  | 6 | 9 |  |  |  |  |  | 17 |
-| `inventory` | 8 | 1 | 52 | 15 |  | 18 | 29 | 70 |  |  | 3 | 16 | 4 | 216 |
-| `kpi` |  |  | 5 |  |  |  |  | 1 |  | 32 |  |  |  | 38 |
-| `network` |  |  | 3 | 2 |  |  | 7 | 14 |  |  |  | 3 |  | 29 |
-| `operations` |  |  | 12 |  |  |  |  | 6 |  |  |  |  |  | 18 |
-| `plotting` | 8 |  |  |  |  |  |  |  | 66 |  |  |  |  | 74 |
-| `project` |  |  | 4 |  |  |  | 9 | 5 |  |  |  | 7 |  | 25 |
-| `queuing` |  |  | 8 | 4 |  |  | 7 | 11 |  |  | 2 |  |  | 32 |
-| `reliability` |  | 2 | 7 | 1 |  |  | 5 | 7 |  |  |  |  |  | 22 |
-| `scheduling` |  |  | 9 |  |  |  | 8 | 10 |  |  |  | 5 | 1 | 33 |
-| `solver` |  |  |  | 5 |  | 3 | 7 | 5 |  |  |  |  |  | 20 |
-| **total** | 16 | 3 | 122 | 38 | 17 | 36 | 106 | 182 | 66 | 32 | 8 | 35 | 6 | **667** |
+| módulo | acceso_columna | aviso | cabecera | clave_params | cli | columna_df | error | etiqueta | grafica | kpi | modelo | nombre_arg | texto_en_expresion | valor_por_defecto | total |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `__main__` |  |  |  |  | 17 |  |  |  |  |  |  |  |  |  | 17 |
+| `_utils` |  |  |  |  |  |  | 12 |  |  |  |  |  |  |  | 12 |
+| `advanced` | 6 |  | 14 | 11 |  | 15 | 14 | 12 |  |  | 3 | 2 | 12 | 1 | 90 |
+| `bottleneck` |  |  | 6 |  |  |  | 2 | 4 |  |  |  | 2 | 5 |  | 19 |
+| `fitting` |  |  | 2 |  |  |  | 6 | 9 |  |  |  |  |  |  | 17 |
+| `inventory` | 8 | 1 | 52 | 15 |  | 16 | 33 | 46 |  |  | 3 | 12 | 15 | 4 | 205 |
+| `kpi` |  |  | 5 |  |  |  |  |  |  | 32 |  |  |  |  | 37 |
+| `network` |  |  | 3 | 2 |  |  | 7 | 2 |  |  |  | 3 | 7 |  | 24 |
+| `operations` |  |  | 12 |  |  |  |  | 6 |  |  |  |  |  |  | 18 |
+| `plotting` | 8 |  |  |  |  |  |  |  | 66 |  |  |  | 2 |  | 76 |
+| `project` |  |  | 4 |  |  |  | 12 | 5 |  |  |  | 4 |  |  | 25 |
+| `queuing` |  |  | 8 | 4 |  |  | 7 | 9 |  |  | 2 |  |  |  | 30 |
+| `reliability` |  | 2 | 7 | 1 |  |  | 5 | 7 |  |  |  |  |  |  | 22 |
+| `scheduling` |  |  | 9 |  |  |  | 8 | 10 |  |  |  | 5 |  | 1 | 33 |
+| `solver` |  |  |  | 5 |  | 3 | 7 | 5 |  |  |  |  |  |  | 20 |
+| **total** | 22 | 3 | 122 | 38 | 17 | 34 | 113 | 115 | 66 | 32 | 8 | 28 | 41 | 6 | **645** |
 
 ## Complejidad de la plantilla
 
@@ -31,24 +31,25 @@
 
 | tipo | fija | simple | formato | compleja |
 |---|---|---|---|---|
-| acceso_columna | 16 |  |  |  |
+| acceso_columna | 22 |  |  |  |
 | aviso |  |  | 3 |  |
 | cabecera | 119 | 1 |  | 2 |
 | clave_params | 38 |  |  |  |
 | cli | 15 | 2 |  |  |
-| columna_df | 36 |  |  |  |
-| error | 60 | 19 | 22 | 5 |
-| etiqueta | 81 | 13 | 77 | 11 |
+| columna_df | 34 |  |  |  |
+| error | 60 | 25 | 23 | 5 |
+| etiqueta | 14 | 13 | 77 | 11 |
 | grafica | 52 | 8 | 5 | 1 |
 | kpi | 30 | 2 |  |  |
 | modelo | 4 | 3 | 1 |  |
-| nombre_arg |  | 34 | 1 |  |
+| nombre_arg |  | 28 |  |  |
+| texto_en_expresion | 41 |  |  |  |
 | valor_por_defecto | 1 |  |  | 5 |
 
 ## Riesgos que detecta el inventario
 
-- **Columnas/claves de `DataFrame` devueltas directamente por funciones públicas: 36**, y **16 accesos por texto** (`df["Estación"]`). Traducir una columna sin cambiar sus accesos rompe el código (p. ej. `plotting.py` lee `df["Tiempo_ciclo"]`).
-- **Nombres de argumento dentro de mensajes: 35** (`capacity[{i}]`…): no se traducen; el inventario los separa para no contarlos.
+- **Columnas/claves de `DataFrame` devueltas directamente por funciones públicas: 34**, y **22 accesos por texto** (`df["Estación"]`). Traducir una columna sin cambiar sus accesos rompe el código (p. ej. `plotting.py` lee `df["Tiempo_ciclo"]`).
+- **Nombres de argumento dentro de mensajes: 28** (`capacity[{i}]`…): no se traducen; el inventario los separa para no contarlos.
 - **Claves de `params` legibles: 38.** Si cambian con el idioma, `result.params[«clave»]` deja de funcionar al cambiar de idioma (ver `PLAN_I18N.md`).
 - **Nombres generados por defecto: 6** (`Artículo{i}`, `escenario_{n}`): si dependen del idioma cambian los datos, no solo la presentación.
 - **Textos sin clasificar: 0** (revisión manual obligatoria antes de la fase 1).
@@ -65,61 +66,65 @@ _(ninguno)_
 
 ## Accesos a columnas por su texto (acoplamiento)
 
-- `inventory.eoq_quantity_discount`: 'Costo de compra'
-- `inventory.eoq_quantity_discount`: 'Costo de mantener'
-- `inventory.eoq_quantity_discount`: 'Costo de ordenar'
-- `inventory.eoq_quantity_discount`: 'Costo total'
-- `inventory.eoq_quantity_discount`: 'Precio unitario'
-- `inventory.eoq_quantity_discount`: 'Q ajustada'
-- `inventory.eoq_quantity_discount`: 'Índice de tramo'
-- `inventory.exchange_curve`: 'Q_eoq'
-- `plotting.plot_line_balance`: 'Estación'
-- `plotting.plot_line_balance`: 'Sobrecargada'
-- `plotting.plot_line_balance`: 'Tiempo_ciclo'
-- `plotting.plot_line_balance`: 'Tiempo_ocioso'
-- `plotting.plot_queue_distribution`: 'F(t)'
-- `plotting.plot_queue_distribution`: 'P(N<=n)'
-- `plotting.plot_queue_distribution`: 'P(N=n)'
-- `plotting.plot_queue_distribution`: 'f(t)'
+- `advanced.advanced.BreakEvenMultiResult.summary`: 'Costo variable'
+- `advanced.advanced.BreakEvenMultiResult.summary`: 'Mezcla'
+- `advanced.advanced.BreakEvenMultiResult.summary`: 'PE ingresos'
+- `advanced.advanced.BreakEvenMultiResult.summary`: 'PE unidades'
+- `advanced.advanced.BreakEvenMultiResult.summary`: 'Precio'
+- `advanced.advanced.BreakEvenMultiResult.summary`: 'Producto'
+- `inventory.inventory.ConstrainedMultiEOQResult.summary`: 'Artículo'
+- `inventory.inventory.ConstrainedMultiEOQResult.summary`: 'Costo total'
+- `inventory.inventory.eoq_quantity_discount`: 'Costo de compra'
+- `inventory.inventory.eoq_quantity_discount`: 'Costo de mantener'
+- `inventory.inventory.eoq_quantity_discount`: 'Costo de ordenar'
+- `inventory.inventory.eoq_quantity_discount`: 'Precio unitario'
+- `inventory.inventory.eoq_quantity_discount`: 'Q ajustada'
+- `inventory.inventory.eoq_quantity_discount`: 'Índice de tramo'
+- `plotting.plotting.plot_line_balance`: 'Estación'
+- `plotting.plotting.plot_line_balance`: 'Sobrecargada'
+- `plotting.plotting.plot_line_balance`: 'Tiempo_ciclo'
+- `plotting.plotting.plot_line_balance`: 'Tiempo_ocioso'
+- `plotting.plotting.plot_queue_distribution`: 'F(t)'
+- `plotting.plotting.plot_queue_distribution`: 'P(N<=n)'
+- `plotting.plotting.plot_queue_distribution`: 'P(N=n)'
+- `plotting.plotting.plot_queue_distribution`: 'f(t)'
 
 ## Columnas de DataFrame devueltas por funciones públicas
 
-- `advanced.break_even_multi`: 'Costo variable'
-- `advanced.break_even_multi`: 'Mezcla'
-- `advanced.break_even_multi`: 'PE ingresos'
-- `advanced.break_even_multi`: 'PE unidades'
-- `advanced.break_even_multi`: 'Precio'
-- `advanced.break_even_multi`: 'Producto'
-- `advanced.line_balance`: 'Estación'
-- `advanced.line_balance`: 'Sobrecargada'
-- `advanced.line_balance`: 'Tiempo_ciclo'
-- `advanced.line_balance`: 'Tiempo_ocioso'
-- `advanced.line_balance`: 'Utilización'
-- `advanced.queue_length_pmf`: 'P(N<=n)'
-- `advanced.queue_length_pmf`: 'P(N=n)'
-- `advanced.sojourn_cdf`: 'F(t)'
-- `advanced.sojourn_cdf`: 'f(t)'
-- `inventory.<módulo>`: 'Q_eoq'
-- `inventory.<módulo>`: 'Q_optimal'
-- `inventory.ebq_multi`: 'Costo de preparación'
-- `inventory.ebq_multi`: 'Frecuencia de lotes'
-- `inventory.ebq_multi`: 'Inventario máximo'
-- `inventory.ebq_multi`: 'Inventario promedio'
-- `inventory.eoq_multi`: 'Artículo'
-- `inventory.eoq_multi`: 'Costo de mantener'
-- `inventory.eoq_multi`: 'Costo de ordenar'
-- `inventory.eoq_multi`: 'Costo total'
-- `inventory.eoq_multi`: 'Frecuencia de pedidos'
-- `inventory.eoq_multi`: 'Tiempo de ciclo'
-- `inventory.eoq_quantity_discount`: 'Cantidad mín.'
-- `inventory.eoq_quantity_discount`: 'Costo de compra'
-- `inventory.eoq_quantity_discount`: 'Factible'
-- `inventory.eoq_quantity_discount`: 'Precio unitario'
-- `inventory.eoq_quantity_discount`: 'Q ajustada'
-- `inventory.eoq_quantity_discount`: 'Índice de tramo'
-- `solver.solve_lam`: 'lam'
-- `solver.solve_mu`: 'mu'
-- `solver.solve_servers`: 'c (servidores)'
+- `advanced.advanced.break_even_multi`: 'Costo variable'
+- `advanced.advanced.break_even_multi`: 'Mezcla'
+- `advanced.advanced.break_even_multi`: 'PE ingresos'
+- `advanced.advanced.break_even_multi`: 'PE unidades'
+- `advanced.advanced.break_even_multi`: 'Precio'
+- `advanced.advanced.break_even_multi`: 'Producto'
+- `advanced.advanced.line_balance`: 'Estación'
+- `advanced.advanced.line_balance`: 'Sobrecargada'
+- `advanced.advanced.line_balance`: 'Tiempo_ciclo'
+- `advanced.advanced.line_balance`: 'Tiempo_ocioso'
+- `advanced.advanced.line_balance`: 'Utilización'
+- `advanced.advanced.queue_length_pmf`: 'P(N<=n)'
+- `advanced.advanced.queue_length_pmf`: 'P(N=n)'
+- `advanced.advanced.sojourn_cdf`: 'F(t)'
+- `advanced.advanced.sojourn_cdf`: 'f(t)'
+- `inventory.inventory.ebq_multi`: 'Costo de preparación'
+- `inventory.inventory.ebq_multi`: 'Frecuencia de lotes'
+- `inventory.inventory.ebq_multi`: 'Inventario máximo'
+- `inventory.inventory.ebq_multi`: 'Inventario promedio'
+- `inventory.inventory.eoq_multi`: 'Artículo'
+- `inventory.inventory.eoq_multi`: 'Costo de mantener'
+- `inventory.inventory.eoq_multi`: 'Costo de ordenar'
+- `inventory.inventory.eoq_multi`: 'Costo total'
+- `inventory.inventory.eoq_multi`: 'Frecuencia de pedidos'
+- `inventory.inventory.eoq_multi`: 'Tiempo de ciclo'
+- `inventory.inventory.eoq_quantity_discount`: 'Cantidad mín.'
+- `inventory.inventory.eoq_quantity_discount`: 'Costo de compra'
+- `inventory.inventory.eoq_quantity_discount`: 'Factible'
+- `inventory.inventory.eoq_quantity_discount`: 'Precio unitario'
+- `inventory.inventory.eoq_quantity_discount`: 'Q ajustada'
+- `inventory.inventory.eoq_quantity_discount`: 'Índice de tramo'
+- `solver.solver.solve_lam`: 'lam'
+- `solver.solver.solve_mu`: 'mu'
+- `solver.solver.solve_servers`: 'c (servidores)'
 
 ## Nombres generados por defecto
 

@@ -1,8 +1,9 @@
-"""Inventario de texto visible (fase 0 de la internacionalización).
+"""Catálogo de textos (internacionalización): consistencia entre el código, el catálogo en español y la línea base de la fase 0.
 
-El inventario (``docs/auditoria/inventario_i18n.json``) lo genera ``scripts/inventario_i18n.py`` recorriendo el código con ``ast``.
-Estos tests garantizan que no se queda atrás del código mientras se prepara la migración y que su cobertura se comprueba
-con un método **independiente** del extractor (cualquier cadena con rasgos del español debe figurar en él).
+* ``docs/auditoria/inventario_i18n_base.json`` es el inventario **congelado** de los textos que había en ``src/walopy`` antes de migrarlos
+  al catálogo (lo generó ``scripts/inventario_i18n.py --src <código anterior>``). No cambia salvo que se decida cambiar un texto.
+* Tras la migración, el código solo usa claves ``_t("modulo.tipo.funcion.resumen", ...)``; los textos viven en ``_catalogo_es.py``.
+* Las comprobaciones «independientes» no usan el extractor: recorren el código con ``ast`` por su cuenta.
 """
 from __future__ import annotations
 
@@ -16,77 +17,151 @@ from string import Formatter
 
 import pytest
 
+from walopy._catalogo_es import ES
+
 RAIZ = Path(__file__).resolve().parents[1]
 SRC = RAIZ / "src" / "walopy"
-INVENTARIO = json.loads((RAIZ / "docs" / "auditoria" / "inventario_i18n.json").read_text(encoding="utf-8"))
+BASE = json.loads((RAIZ / "docs" / "auditoria" / "inventario_i18n_base.json").read_text(encoding="utf-8"))
+ENTRADAS = BASE["entradas"]
+CLAVE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+){2,3}(_\d+)?$")
 RASGOS_ES = re.compile(r"[áéíóúñÁÉÍÓÚÑ¿¡]|\b(debe|deben|para|con|sin|por|valor|tiempo|costo|demanda|tasa|error|lista|número)\b")
-FORMATO_CLAVE = re.compile(r"^[a-z0-9]+\.[a-z_]+\.[a-z0-9_]+\.[a-z0-9_]+$")
+CATALOGOS = {"_catalogo_es", "_catalogo_en"}
+SIN_CLAVE_DE_CATALOGO = {"nombre_arg", "acceso_columna"}    # nombres de argumentos y lecturas de columnas: no son textos a traducir
 
 
-def cadenas_con_rasgos_del_espanol() -> list[tuple[str, int, str]]:
-    """Cadenas literales (fuera de docstrings) con tildes, ñ o palabras españolas, sin usar el extractor."""
-    encontradas = []
-    for archivo in sorted(SRC.glob("*.py")):
-        arbol = ast.parse(archivo.read_text(encoding="utf-8"))
-        docs = {
-            id(n.body[0].value)
-            for n in ast.walk(arbol)
-            if isinstance(n, (ast.Module, ast.ClassDef, ast.FunctionDef)) and n.body
-            and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant)
-        }
-        for n in ast.walk(arbol):
-            if isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docs and RASGOS_ES.search(n.value):
-                encontradas.append((archivo.stem, n.lineno, n.value))
-    return encontradas
+def _archivos():
+    return [a for a in sorted(SRC.glob("*.py")) if a.stem not in CATALOGOS]
 
 
-def ausentes_del_inventario(entradas: list[dict]) -> list[tuple[str, int, str]]:
-    union = "\n".join(e["es"] for e in entradas).replace("{{", "{").replace("}}", "}")
-    ausentes = []
-    for modulo, linea, texto in cadenas_con_rasgos_del_espanol():
-        fragmento = re.sub(r"\{[^{}]*\}", "", texto).strip()
-        if fragmento and fragmento not in union:
-            ausentes.append((modulo, linea, texto[:60]))
-    return ausentes
+def _arbol(archivo: Path) -> ast.AST:
+    return ast.parse(archivo.read_text(encoding="utf-8"))
 
 
-def test_el_inventario_esta_al_dia():
-    """Falla si hay textos nuevos, cambiados o eliminados en ``src/`` sin regenerar el inventario."""
-    r = subprocess.run(  # noqa: S603
-        [sys.executable, str(RAIZ / "scripts" / "inventario_i18n.py"), "--comprobar"], capture_output=True, text=True, check=False
-    )
+def _docstrings(arbol: ast.AST) -> set[int]:
+    return {
+        id(n.body[0].value)
+        for n in ast.walk(arbol)
+        if isinstance(n, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and n.body
+        and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant)
+    }
+
+
+def _marcadores(plantilla: str) -> set[str]:
+    return {campo for _, campo, _, _ in Formatter().parse(plantilla) if campo}
+
+
+def _claves_de_t(archivo: Path):
+    """(clave, nombres de argumentos con nombre | None si hay ``**``, línea) de cada llamada ``_t("clave", ...)``."""
+    for n in ast.walk(_arbol(archivo)):
+        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "_t" and n.args
+                and isinstance(n.args[0], ast.Constant) and isinstance(n.args[0].value, str)):
+            nombres = None if any(k.arg is None for k in n.keywords) else {k.arg for k in n.keywords}
+            yield n.args[0].value, nombres, n.lineno
+
+
+# --- el código no tiene textos fuera del catálogo ---------------------------------------------------------------------------------
+def test_no_quedan_textos_visibles_fuera_del_catalogo():
+    """El extractor (``scripts/inventario_i18n.py``) no encuentra literales visibles: todo pasa por ``_t()``."""
+    r = subprocess.run([sys.executable, str(RAIZ / "scripts" / "inventario_i18n.py")], capture_output=True, text=True, check=False)  # noqa: S603
     assert r.returncode == 0, r.stdout + r.stderr
 
 
-def test_no_hay_textos_sin_clasificar_ni_mensajes_indirectos():
-    sin = [e["es"] for e in INVENTARIO["entradas"] if e["tipo"] == "sin_clasificar"]
+def test_el_inventario_base_esta_completo():
+    sin = [e["es"] for e in ENTRADAS if e["tipo"] == "sin_clasificar"]
     assert not sin, f"clasifica estos textos en scripts/inventario_i18n.py: {sin}"
-    assert not INVENTARIO["indirectos"], INVENTARIO["indirectos"]
+    assert not BASE["indirectos"], BASE["indirectos"]
+    assert BASE["total"] == len(ENTRADAS)
 
 
-def test_cobertura_independiente_del_extractor():
-    assert ausentes_del_inventario(INVENTARIO["entradas"]) == []
+def test_los_argumentos_de_raise_y_warn_son_claves_de_catalogo():
+    """Comprobación independiente del extractor: en un ``raise``/``warnings.warn`` solo se admiten claves, nunca prosa literal."""
+    sueltos = []
+    for archivo in _archivos():
+        arbol = _arbol(archivo)
+        padres = {id(h): p for p in ast.walk(arbol) for h in ast.iter_child_nodes(p)}
+        for n in ast.walk(arbol):
+            args = None
+            if isinstance(n, ast.Raise) and isinstance(n.exc, ast.Call):
+                args = n.exc.args
+            elif isinstance(n, ast.Call) and getattr(n.func, "attr", getattr(n.func, "id", "")) == "warn" and n.args:
+                args = n.args[:1]
+            for a in args or ():
+                for m in ast.walk(a):
+                    if (isinstance(m, ast.Constant) and isinstance(m.value, str) and re.search("[A-Za-z]{3}", m.value)
+                            and not CLAVE.match(m.value) and not isinstance(padres.get(id(m)), ast.Subscript)):
+                        sueltos.append(f"{archivo.name}:{m.lineno} {m.value[:50]!r}")
+    assert not sueltos, "texto literal en un raise/warn (usa _t('clave')):\n" + "\n".join(sueltos)
 
 
-def test_el_verificador_independiente_detecta_un_texto_ausente():
-    """Control negativo: sin la entrada de un mensaje real, la comprobación independiente debe señalarlo."""
-    sin_una = [e for e in INVENTARIO["entradas"] if e["clave"] != "utils.error.as_positive.numero_finito_positivo_recibio"]
-    if len(sin_una) == len(INVENTARIO["entradas"]):  # la clave cambió: busca otra de _utils
-        objetivo = next(e for e in INVENTARIO["entradas"] if e["modulo"] == "_utils" and e["tipo"] == "error")
-        sin_una = [e for e in INVENTARIO["entradas"] if e is not objetivo]
-    assert len(ausentes_del_inventario(sin_una)) >= 1
+def test_los_literales_con_rasgos_del_espanol_son_solo_claves_fijas_de_params():
+    """Fuera de docstrings y catálogos, un literal en español solo puede ser una clave fija de ``result.params`` (decisión D1)."""
+    permitidos = {texto for clave, texto in ES.items() if ".clave_params." in clave}
+    sueltos = []
+    for archivo in _archivos():
+        arbol = _arbol(archivo)
+        docs = _docstrings(arbol)
+        for n in ast.walk(arbol):
+            if (isinstance(n, ast.Constant) and isinstance(n.value, str) and id(n) not in docs and RASGOS_ES.search(n.value)
+                    and not CLAVE.match(n.value) and n.value not in permitidos):
+                sueltos.append(f"{archivo.name}:{n.lineno} {n.value[:50]!r}")
+    assert not sueltos, "\n".join(sueltos)
+
+
+def test_el_verificador_independiente_detecta_un_texto_literal(tmp_path):
+    """Control negativo: la misma lógica señala un mensaje literal en un ``raise``."""
+    f = tmp_path / "malo.py"
+    f.write_text('def g():\n    raise ValueError("x debe ser positivo")\n', encoding="utf-8")
+    assert [m.value for m in ast.walk(_arbol(f)) if isinstance(m, ast.Constant) and RASGOS_ES.search(str(m.value))] == ["x debe ser positivo"]
+
+
+# --- el catálogo en español es consistente con el código y con la línea base ------------------------------------------------------
+def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
+    esperadas = {e["clave"]: e["es"] for e in ENTRADAS if e["tipo"] not in SIN_CLAVE_DE_CATALOGO}
+    assert {k for k in esperadas if k not in ES} == set()
+    cambiadas = [k for k, v in esperadas.items() if ES[k] != v]
+    assert not cambiadas, f"el texto en español cambió respecto a v0.3.0 (¿intencionado? regenera la base): {cambiadas[:5]}"
+
+
+# Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
+AÑADIDAS_TRAS_V030 = {"i18n.error.validar.idioma_no_admitido"}
+
+
+def test_el_catalogo_no_tiene_claves_que_no_estaban_en_v030():
+    """Toda clave del catálogo viene de la línea base (o se declara arriba): detecta etiquetas inventadas por una migración errónea."""
+    en_base = {e["clave"] for e in ENTRADAS}
+    sobran = sorted(set(ES) - en_base - AÑADIDAS_TRAS_V030)
+    assert not sobran, f"claves que no estaban en v0.3.0 (añádelas a AÑADIDAS_TRAS_V030 si son intencionadas): {sobran[:5]}"
+
+
+def test_las_claves_usadas_en_el_codigo_existen_en_el_catalogo():
+    usadas = {c for a in _archivos() for c, _, _ in _claves_de_t(a)}
+    usadas |= {c.value for a in _archivos() for c in ast.walk(_arbol(a)) if isinstance(c, ast.Constant) and isinstance(c.value, str) and CLAVE.match(c.value)}
+    assert sorted(usadas - set(ES)) == []
+
+
+def test_no_hay_claves_huerfanas_en_el_catalogo():
+    en_codigo = {c.value for a in _archivos() for c in ast.walk(_arbol(a)) if isinstance(c, ast.Constant) and isinstance(c.value, str)}
+    huerfanas = [k for k in ES if k not in en_codigo and ".clave_params." not in k]
+    assert huerfanas == [], "claves del catálogo que ningún código usa: " + ", ".join(huerfanas[:5])
+
+
+def test_cada_llamada_a_t_pasa_exactamente_los_marcadores_de_la_plantilla():
+    errores = []
+    for archivo in _archivos():
+        for clave, nombres, linea in _claves_de_t(archivo):
+            if clave in ES and nombres is not None and nombres != _marcadores(ES[clave]):
+                errores.append(f"{archivo.name}:{linea} {clave}: pasa {sorted(nombres)}, la plantilla pide {sorted(_marcadores(ES[clave]))}")
+    assert not errores, "\n".join(errores)
 
 
 def test_claves_unicas_y_con_formato():
-    claves = [e["clave"] for e in INVENTARIO["entradas"]]
-    assert len(claves) == len(set(claves))
-    malas = [c for c in claves if not FORMATO_CLAVE.match(re.sub(r"_\d+$", "", c))]
+    assert len({e["clave"] for e in ENTRADAS}) == len(ENTRADAS)
+    malas = [k for k in ES if not CLAVE.match(k)]
     assert not malas, malas[:5]
 
 
-@pytest.mark.parametrize("entrada", INVENTARIO["entradas"], ids=lambda e: e["clave"])
-def test_cada_plantilla_es_un_formato_valido_con_sus_marcadores(entrada):
-    nombres = {campo for _, campo, _, _ in Formatter().parse(entrada["es"]) if campo}
-    assert nombres == {m["nombre"] for m in entrada["marcadores"]}
+@pytest.mark.parametrize("clave", sorted(ES))
+def test_cada_plantilla_es_un_formato_valido(clave):
+    nombres = _marcadores(ES[clave])
     assert all(n.isidentifier() for n in nombres)
-    entrada["es"].format(**{n: 1 for n in nombres})  # no lanza: llaves y conversiones bien formadas
+    ES[clave].format(**{n: 1 for n in nombres})   # no lanza: llaves y conversiones bien formadas

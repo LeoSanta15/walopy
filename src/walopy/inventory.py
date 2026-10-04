@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from statistics import NormalDist
 from typing import TYPE_CHECKING, Any
 
+from ._i18n import t as _t
 from ._utils import as_float_list, as_fraction, as_nonneg, as_positive
 
 if TYPE_CHECKING:
@@ -19,21 +20,51 @@ if TYPE_CHECKING:
 # Economic Order Quantity
 # ---------------------------------------------------------------------------
 
-# Encabezados visibles (español) de los DataFrame que se construyen desde listas de diccionarios.
-# Las claves de los diccionarios (identificadores) permanecen en inglés.
-_COL_LOTES = {"period": "periodo", "order_qty": "cantidad_pedido", "covers_periods": "periodos_cubiertos"}
+# Encabezados visibles de los DataFrame que se construyen desde listas de diccionarios: clave de dato (inglés, fija) → clave del
+# catálogo de textos (el encabezado se resuelve al llamar, con el idioma activo; ver `_cabeceras`).
+
+_COL_LOTES = {
+    "period": "inventory.cabecera.modulo.periodo",
+    "order_qty": "inventory.cabecera.modulo.cantidad_pedido",
+    "covers_periods": "inventory.cabecera.modulo.periodos_cubiertos",
+}
 _COL_CANTIDADES = {
-    "name": "artículo", "Q_eoq": "Q_eoq", "Q_optimal": "Q_óptima", "n_orders": "n_pedidos",
-    "investment": "inversión", "sigma_dlt": "sigma_dlt", "safety_stock": "stock_de_seguridad",
-    "reorder_point": "punto_de_reorden",
+    "name": "inventory.cabecera.modulo.articulo",
+    "Q_eoq": "inventory.cabecera.modulo.eoq",
+    "Q_optimal": "inventory.cabecera.modulo.optima",
+    "n_orders": "inventory.cabecera.modulo.pedidos",
+    "investment": "inventory.cabecera.modulo.inversion_2",
+    "sigma_dlt": "inventory.cabecera.modulo.sigma_dlt",
+    "safety_stock": "inventory.cabecera.modulo.stock_seguridad",
+    "reorder_point": "inventory.cabecera.modulo.punto_reorden",
 }
-_COL_CURVA_CICLO = {"N": "N (pedidos/año)", "I": "I (inversión)"}
-_COL_CURVA_SEGURIDAD = {"service_level": "nivel_de_servicio", "ss_investment": "inversión_ss"}
+_COL_CURVA_CICLO = {
+    "N": "inventory.cabecera.modulo.pedidos_ano",
+    "I": "inventory.cabecera.modulo.inversion",
+}
+_COL_CURVA_SEGURIDAD = {
+    "service_level": "inventory.cabecera.modulo.nivel_servicio",
+    "ss_investment": "inventory.cabecera.modulo.inversion_ss",
+}
 _COL_ARTICULOS = {
-    "name": "artículo", "demand": "demanda", "unit_value": "valor_unitario", "annual_value": "valor_anual",
-    "index": "índice", "cumulative_pct": "pct_acumulado", "pct_value": "pct_valor", "rank": "posición",
-    "class": "clase", "abc_class": "clase_abc", "xyz_class": "clase_xyz", "combined_class": "clase_combinada",
+    "name": "inventory.cabecera.modulo.articulo",
+    "demand": "inventory.cabecera.modulo.demanda",
+    "unit_value": "inventory.cabecera.modulo.valor_unitario",
+    "annual_value": "inventory.cabecera.modulo.valor_anual",
+    "index": "inventory.cabecera.modulo.indice",
+    "cumulative_pct": "inventory.cabecera.modulo.pct_acumulado",
+    "pct_value": "inventory.cabecera.modulo.pct_valor",
+    "rank": "inventory.cabecera.modulo.posicion",
+    "class": "inventory.cabecera.modulo.clase",
+    "abc_class": "inventory.cabecera.modulo.clase_abc",
+    "xyz_class": "inventory.cabecera.modulo.clase_xyz",
+    "combined_class": "inventory.cabecera.modulo.clase_combinada",
 }
+
+
+def _cabeceras(mapa: dict[str, str]) -> dict[str, str]:
+    """Encabezados de ``mapa`` en el idioma activo."""
+    return {dato: _t(clave) for dato, clave in mapa.items()}
 
 
 @dataclass
@@ -67,12 +98,7 @@ class EOQResult:
 
     def summary(self) -> str:
         return (
-            f"EOQ (cantidad de pedido): {self.eoq:.4g} unidades\n"
-            f"Frecuencia de pedidos   : {self.order_frequency:.4g} pedidos/periodo\n"
-            f"Tiempo de ciclo         : {self.cycle_time:.4g} periodos\n"
-            f"Costo total             : {self.total_cost:.6g}\n"
-            f"  Costo de mantener     : {self.holding_cost_total:.6g}\n"
-            f"  Costo de ordenar      : {self.ordering_cost_total:.6g}"
+            _t("inventory.etiqueta.summary.eoq_cantidad_pedido_unidades_frecuencia", eoq=self.eoq, order_frequency=self.order_frequency, cycle_time=self.cycle_time, total_cost=self.total_cost, holding_cost_total=self.holding_cost_total, ordering_cost_total=self.ordering_cost_total)
         )
 
     def __str__(self) -> str:
@@ -82,11 +108,11 @@ class EOQResult:
         import pandas as pd
         return pd.DataFrame([{
             "EOQ": self.eoq,
-            "Costo total": self.total_cost,
-            "Costo de mantener": self.holding_cost_total,
-            "Costo de ordenar": self.ordering_cost_total,
-            "Frecuencia de pedidos": self.order_frequency,
-            "Tiempo de ciclo": self.cycle_time,
+            _t("inventory.cabecera.to_frame.costo_total"): self.total_cost,
+            _t("inventory.cabecera.to_frame.costo_mantener"): self.holding_cost_total,
+            _t("inventory.cabecera.to_frame.costo_ordenar"): self.ordering_cost_total,
+            _t("inventory.cabecera.to_frame.frecuencia_pedidos"): self.order_frequency,
+            _t("inventory.cabecera.to_frame.tiempo_ciclo"): self.cycle_time,
         }])
 
     def plot(self, **kwargs) -> plt.Figure:
@@ -186,12 +212,7 @@ class ReorderResult:
 
     def summary(self) -> str:
         return (
-            f"Punto de reorden    : {self.reorder_point:.4g} unidades\n"
-            f"Stock de seguridad  : {self.safety_stock:.4g} unidades\n"
-            f"Nivel de servicio   : {self.service_level:.2%}\n"
-            f"z                   : {self.z_score:.4g}\n"
-            f"Demanda media en LT : {self.mean_demand_lt:.4g}\n"
-            f"Desv. demanda en LT : {self.std_demand_lt:.4g}"
+            _t("inventory.etiqueta.summary.punto_reorden_unidades_stock_seguridad", reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, z_score=self.z_score, mean_demand_lt=self.mean_demand_lt, std_demand_lt=self.std_demand_lt)
         )
 
     def __str__(self) -> str:
@@ -200,12 +221,12 @@ class ReorderResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Punto de reorden": self.reorder_point,
-            "Stock de seguridad": self.safety_stock,
-            "Nivel de servicio": self.service_level,
+            _t("inventory.cabecera.to_frame.punto_reorden"): self.reorder_point,
+            _t("inventory.cabecera.to_frame.stock_seguridad"): self.safety_stock,
+            _t("inventory.cabecera.to_frame.nivel_servicio"): self.service_level,
             "z": self.z_score,
-            "Demanda media en LT": self.mean_demand_lt,
-            "Desv. demanda en LT": self.std_demand_lt,
+            _t("inventory.cabecera.to_frame.demanda_media_lt"): self.mean_demand_lt,
+            _t("inventory.cabecera.to_frame.desv_demanda_lt"): self.std_demand_lt,
         }])
 
 
@@ -263,7 +284,7 @@ def reorder_point(
     sl  = as_nonneg(lead_time_std, "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc == 0.0 or svc == 1.0:
-        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
+        raise ValueError(_t("inventory.error.reorder_point.service_level_debe_estar_estrictamente"))
 
     mean_dlt = D * LT
     var_dlt  = LT * sd**2 + D**2 * sl**2
@@ -326,14 +347,7 @@ class NewsvendorResult:
 
     def summary(self) -> str:
         return (
-            f"Cantidad óptima     : {self.optimal_qty:.4g} unidades\n"
-            f"Razón crítica       : {self.critical_ratio:.4g}\n"
-            f"Utilidad esperada   : {self.expected_profit:.6g}\n"
-            f"Ventas esperadas    : {self.expected_sales:.4g}\n"
-            f"Sobrante esperado   : {self.expected_leftover:.4g}\n"
-            f"Faltante esperado   : {self.expected_stockout:.4g}\n"
-            f"Costo de subestimar Cu: {self.underage_cost:.4g}\n"
-            f"Costo de sobrestimar Co: {self.overage_cost:.4g}"
+            _t("inventory.etiqueta.summary.cantidad_optima_unidades_razon_critica", optimal_qty=self.optimal_qty, critical_ratio=self.critical_ratio, expected_profit=self.expected_profit, expected_sales=self.expected_sales, expected_leftover=self.expected_leftover, expected_stockout=self.expected_stockout, underage_cost=self.underage_cost, overage_cost=self.overage_cost)
         )
 
     def __str__(self) -> str:
@@ -343,11 +357,11 @@ class NewsvendorResult:
         import pandas as pd
         return pd.DataFrame([{
             "Q*": self.optimal_qty,
-            "Razón crítica": self.critical_ratio,
-            "Utilidad esperada": self.expected_profit,
-            "Ventas esperadas": self.expected_sales,
-            "Sobrante esperado": self.expected_leftover,
-            "Faltante esperado": self.expected_stockout,
+            _t("inventory.cabecera.to_frame.razon_critica"): self.critical_ratio,
+            _t("inventory.cabecera.to_frame.utilidad_esperada"): self.expected_profit,
+            _t("inventory.cabecera.to_frame.ventas_esperadas"): self.expected_sales,
+            _t("inventory.cabecera.to_frame.sobrante_esperado"): self.expected_leftover,
+            _t("inventory.cabecera.to_frame.faltante_esperado"): self.expected_stockout,
             "Cu": self.underage_cost,
             "Co": self.overage_cost,
         }])
@@ -406,9 +420,9 @@ def newsvendor(
     s   = as_nonneg(salvage, "salvage")
 
     if c >= p:
-        raise ValueError("'cost' debe ser menor que 'price' (de lo contrario Cu ≤ 0).")
+        raise ValueError(_t("inventory.error.newsvendor.cost_debe_ser_menor_price"))
     if s >= c:
-        raise ValueError("'salvage' debe ser menor que 'cost' (de lo contrario Co ≤ 0).")
+        raise ValueError(_t("inventory.error.newsvendor.salvage_debe_ser_menor_cost"))
 
     Cu = p - c          # underage cost (opportunity loss)
     Co = c - s          # overage cost  (holding/disposal loss)
@@ -498,15 +512,7 @@ class EBQResult:
 
     def summary(self) -> str:
         return (
-            f"EBQ (tamaño de lote): {self.ebq:.4g} unidades\n"
-            f"Inventario máximo   : {self.max_inventory:.4g}\n"
-            f"Inventario promedio : {self.avg_inventory:.4g}\n"
-            f"Frecuencia de lotes : {self.order_frequency:.4g} lotes/periodo\n"
-            f"Tiempo de ciclo     : {self.cycle_time:.4g} periodos\n"
-            f"Tiempo de producción: {self.production_time:.4g} periodos\n"
-            f"Costo total         : {self.total_cost:.6g}\n"
-            f"  Costo de mantener : {self.holding_cost_total:.6g}\n"
-            f"  Costo de preparación: {self.setup_cost_total:.6g}"
+            _t("inventory.etiqueta.summary.ebq_tamano_lote_unidades_inventario", ebq=self.ebq, max_inventory=self.max_inventory, avg_inventory=self.avg_inventory, order_frequency=self.order_frequency, cycle_time=self.cycle_time, production_time=self.production_time, total_cost=self.total_cost, holding_cost_total=self.holding_cost_total, setup_cost_total=self.setup_cost_total)
         )
 
     def __str__(self) -> str:
@@ -516,13 +522,13 @@ class EBQResult:
         import pandas as pd
         return pd.DataFrame([{
             "EBQ": self.ebq,
-            "Costo total": self.total_cost,
-            "Costo de mantener": self.holding_cost_total,
-            "Costo de preparación": self.setup_cost_total,
-            "Inventario máximo": self.max_inventory,
-            "Inventario promedio": self.avg_inventory,
-            "Frecuencia de lotes": self.order_frequency,
-            "Tiempo de ciclo": self.cycle_time,
+            _t("inventory.cabecera.to_frame.costo_total"): self.total_cost,
+            _t("inventory.cabecera.to_frame.costo_mantener"): self.holding_cost_total,
+            _t("inventory.cabecera.to_frame.costo_preparacion"): self.setup_cost_total,
+            _t("inventory.cabecera.to_frame.inventario_maximo"): self.max_inventory,
+            _t("inventory.cabecera.to_frame.inventario_promedio"): self.avg_inventory,
+            _t("inventory.cabecera.to_frame.frecuencia_lotes"): self.order_frequency,
+            _t("inventory.cabecera.to_frame.tiempo_ciclo"): self.cycle_time,
         }])
 
 
@@ -571,7 +577,7 @@ def ebq(
     h = as_positive(holding_cost, "holding_cost")
     P = as_positive(production_rate, "production_rate")
     if D >= P:
-        raise ValueError(f"production_rate ({P}) debe superar a demand_rate ({D}).")
+        raise ValueError(_t("inventory.error.ebq.production_rate_debe_superar_demand", P=P, D=D))
 
     fraction = 1.0 - D / P
     q   = math.sqrt(2 * D * S / (h * fraction))
@@ -624,7 +630,7 @@ class MultiItemResult:
 
     def summary(self) -> str:
         df = self.to_frame()
-        lines = [df.to_string(index=False), f"\nCosto total: {self.total_cost:.6g}"]
+        lines = [df.to_string(index=False), _t("inventory.etiqueta.summary.costo_total_2", total_cost=self.total_cost)]
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -677,22 +683,22 @@ def eoq_multi(
     holding_costs  = list(holding_costs)
     n = len(demand_rates)
     if len(ordering_costs) != n or len(holding_costs) != n:
-        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
+        raise ValueError(_t("inventory.error.eoq_multi.todas_secuencias_entrada_deben_tener"))
     if names is None:
-        names = [f"Artículo-{i+1}" for i in range(n)]
+        names = [_t("inventory.valor_por_defecto.eoq_multi.articulo", expr=i + 1) for i in range(n)]
 
     items = []
     total_cost = 0.0
     for i in range(n):
         r = eoq(demand_rates[i], ordering_costs[i], holding_costs[i])
         items.append({
-            "Artículo": names[i],
+            _t("columnas.columna_df.global.articulo"): names[i],
             "EOQ": r.eoq,
-            "Costo total": r.total_cost,
-            "Costo de mantener": r.holding_cost_total,
-            "Costo de ordenar": r.ordering_cost_total,
-            "Frecuencia de pedidos": r.order_frequency,
-            "Tiempo de ciclo": r.cycle_time,
+            _t("columnas.columna_df.global.costo_total"): r.total_cost,
+            _t("columnas.columna_df.global.costo_mantener"): r.holding_cost_total,
+            _t("columnas.columna_df.global.costo_ordenar"): r.ordering_cost_total,
+            _t("columnas.columna_df.global.frecuencia_pedidos"): r.order_frequency,
+            _t("columnas.columna_df.global.tiempo_ciclo_2"): r.cycle_time,
         })
         total_cost += r.total_cost
 
@@ -743,23 +749,23 @@ def ebq_multi(
     production_rates = list(production_rates)
     n = len(demand_rates)
     if not (len(setup_costs) == len(holding_costs) == len(production_rates) == n):
-        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
+        raise ValueError(_t("inventory.error.eoq_multi.todas_secuencias_entrada_deben_tener"))
     if names is None:
-        names = [f"Artículo-{i+1}" for i in range(n)]
+        names = [_t("inventory.valor_por_defecto.eoq_multi.articulo", expr=i + 1) for i in range(n)]
 
     items = []
     total_cost = 0.0
     for i in range(n):
         r = ebq(demand_rates[i], setup_costs[i], holding_costs[i], production_rates[i])
         items.append({
-            "Artículo": names[i],
+            _t("columnas.columna_df.global.articulo"): names[i],
             "EBQ": r.ebq,
-            "Costo total": r.total_cost,
-            "Costo de mantener": r.holding_cost_total,
-            "Costo de preparación": r.setup_cost_total,
-            "Inventario máximo": r.max_inventory,
-            "Inventario promedio": r.avg_inventory,
-            "Frecuencia de lotes": r.order_frequency,
+            _t("columnas.columna_df.global.costo_total"): r.total_cost,
+            _t("columnas.columna_df.global.costo_mantener"): r.holding_cost_total,
+            _t("columnas.columna_df.global.costo_preparacion"): r.setup_cost_total,
+            _t("columnas.columna_df.global.inventario_maximo"): r.max_inventory,
+            _t("columnas.columna_df.global.inventario_promedio"): r.avg_inventory,
+            _t("columnas.columna_df.global.frecuencia_lotes"): r.order_frequency,
         })
         total_cost += r.total_cost
 
@@ -805,7 +811,7 @@ def _eoq_lagrangian_bisect(
             break
         hi *= 2.0
     else:
-        raise ValueError("La restricción no se puede satisfacer con ninguna cantidad de pedido positiva.")
+        raise ValueError(_t("inventory.error.eoq_lagrangian_bisect.restriccion_puede_satisfacer_ninguna_cantidad"))
 
     lo = 0.0
     for _ in range(120):
@@ -853,14 +859,14 @@ class ConstrainedMultiEOQResult:
 
     def summary(self) -> str:
         lines = [
-            f"Costo total (con restricciones): {self.total_cost:.6g}",
-            f"Costo total (sin restricciones) : {self.unconstrained_total_cost:.6g}",
-            f"Restricciones activas: {', '.join(self.binding_constraints) or 'ninguna'}",
+            _t("inventory.etiqueta.summary.costo_total_restricciones", total_cost=self.total_cost),
+            _t("inventory.etiqueta.summary.costo_total_sin_restricciones", unconstrained_total_cost=self.unconstrained_total_cost),
+            _t("inventory.etiqueta.summary.restricciones_activas", expr=', '.join(self.binding_constraints) or _t('inventory.texto_en_expresion.summary.ninguna')),
             "",
         ]
         for row in self.items:
             lines.append(
-                f"  {row['Artículo']:<16} Q*={row['Q*']:.4g}  CT={row['Costo total']:.4g}"
+                _t("inventory.etiqueta.summary.ct", expr=row[_t('columnas.columna_df.global.articulo')], expr2=row['Q*'], expr3=row[_t('columnas.columna_df.global.costo_total')])
             )
         return "\n".join(lines)
 
@@ -939,37 +945,37 @@ def eoq_multi_constrained(
     h = as_float_list(holding_costs, "holding_costs")
     n = len(D)
     if len(K) != n or len(h) != n:
-        raise ValueError("Todas las secuencias de entrada deben tener la misma longitud.")
+        raise ValueError(_t("inventory.error.eoq_multi.todas_secuencias_entrada_deben_tener"))
     if names is None:
-        names = [f"Artículo-{i+1}" for i in range(n)]
+        names = [_t("inventory.valor_por_defecto.eoq_multi.articulo", expr=i + 1) for i in range(n)]
 
     # Build constraint list
     all_constraints: list[dict] = []
     if budget is not None:
         if budget_unit_costs is None:
-            raise ValueError("'budget_unit_costs' es obligatorio cuando se indica 'budget'.")
+            raise ValueError(_t("inventory.error.eoq_multi_constrained.budget_unit_costs_obligatorio_cuando"))
         bc = as_float_list(budget_unit_costs, "budget_unit_costs", kind="nonneg")
         if len(bc) != n:
-            raise ValueError("'budget_unit_costs' debe tener la misma longitud que demand_rates.")
+            raise ValueError(_t("inventory.error.eoq_multi_constrained.budget_unit_costs_debe_tener"))
         all_constraints.append(
             {"name": "budget", "weights": [c / 2 for c in bc], "bound": as_positive(budget, "budget")}
         )
     if space is not None:
         if space_per_unit is None:
-            raise ValueError("'space_per_unit' es obligatorio cuando se indica 'space'.")
+            raise ValueError(_t("inventory.error.eoq_multi_constrained.space_per_unit_obligatorio_cuando"))
         sw = as_float_list(space_per_unit, "space_per_unit", kind="nonneg")
         if len(sw) != n:
-            raise ValueError("'space_per_unit' debe tener la misma longitud que demand_rates.")
+            raise ValueError(_t("inventory.error.eoq_multi_constrained.space_per_unit_debe_tener"))
         all_constraints.append(
             {"name": "space", "weights": [s / 2 for s in sw], "bound": as_positive(space, "space")}
         )
     if constraints:
         for j, c in enumerate(constraints):
             if not isinstance(c, dict) or not {"name", "weights", "bound"} <= set(c):
-                raise ValueError(f"constraints[{j}] debe ser un diccionario con 'name', 'weights' y 'bound'.")
+                raise ValueError(_t("inventory.error.eoq_multi_constrained.constraints_debe_ser_diccionario_name", j=j))
             w = as_float_list(c["weights"], f"constraints[{j}]['weights']", kind="nonneg")
             if len(w) != n:
-                raise ValueError(f"La restricción '{c['name']}': 'weights' tiene una longitud distinta a demand_rates.")
+                raise ValueError(_t("inventory.error.eoq_multi_constrained.restriccion_weights_tiene_longitud_distinta", expr=c['name']))
             all_constraints.append(
                 {"name": c["name"], "weights": w, "bound": as_positive(c["bound"], f"constraints[{j}]['bound']")}
             )
@@ -983,8 +989,8 @@ def eoq_multi_constrained(
         items = []
         for i in range(n):
             tc_i = h[i] * Q_unc[i] / 2 + D[i] * K[i] / Q_unc[i]
-            items.append({"Artículo": names[i], "Q*": Q_unc[i], "Costo total": tc_i,
-                          "Costo de mantener": h[i] * Q_unc[i] / 2, "Costo de ordenar": D[i] * K[i] / Q_unc[i]})
+            items.append({_t("columnas.columna_df.global.articulo"): names[i], "Q*": Q_unc[i], _t("columnas.columna_df.global.costo_total"): tc_i,
+                          _t("columnas.columna_df.global.costo_mantener"): h[i] * Q_unc[i] / 2, _t("columnas.columna_df.global.costo_ordenar"): D[i] * K[i] / Q_unc[i]})
         return ConstrainedMultiEOQResult(
             items=items, total_cost=tc_unc, unconstrained_total_cost=tc_unc,
             lagrange_multipliers={}, binding_constraints=[], params={"n_items": n})
@@ -1032,8 +1038,8 @@ def eoq_multi_constrained(
     items = []
     for i in range(n):
         tc_i = h[i] * Q_opt[i] / 2 + D[i] * K[i] / Q_opt[i]
-        items.append({"Artículo": names[i], "Q*": Q_opt[i], "Costo total": tc_i,
-                      "Costo de mantener": h[i] * Q_opt[i] / 2, "Costo de ordenar": D[i] * K[i] / Q_opt[i]})
+        items.append({_t("columnas.columna_df.global.articulo"): names[i], "Q*": Q_opt[i], _t("columnas.columna_df.global.costo_total"): tc_i,
+                      _t("columnas.columna_df.global.costo_mantener"): h[i] * Q_opt[i] / 2, _t("columnas.columna_df.global.costo_ordenar"): D[i] * K[i] / Q_opt[i]})
 
     return ConstrainedMultiEOQResult(
         items=items,
@@ -1076,17 +1082,17 @@ class LotSizingResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.orders).rename(columns=_COL_LOTES)
+        return pd.DataFrame(self.orders).rename(columns=_cabeceras(_COL_LOTES))
 
     def summary(self) -> str:
         lines = [
-            f"Método               : {self.method}",
-            f"Número de pedidos    : {self.n_orders}",
-            f"Costo total          : {self.total_cost:.6g}",
-            f"  Costo de preparación: {self.total_setup_cost:.6g}",
-            f"  Costo de mantener  : {self.total_holding_cost:.6g}",
+            _t("inventory.etiqueta.summary.metodo", method=self.method),
+            _t("inventory.etiqueta.summary.numero_pedidos", n_orders=self.n_orders),
+            _t("inventory.etiqueta.summary.costo_total", total_cost=self.total_cost),
+            _t("inventory.etiqueta.summary.costo_preparacion", total_setup_cost=self.total_setup_cost),
+            _t("inventory.etiqueta.summary.costo_mantener", total_holding_cost=self.total_holding_cost),
             "",
-            f"{'Periodo':<8} {'Cantidad':>10} {'Cubre':>20}",
+            f"{_t('inventory.texto_en_expresion.summary.periodo'):<8} {_t('inventory.texto_en_expresion.summary.cantidad'):>10} {_t('inventory.texto_en_expresion.summary.cubre'):>20}",
             "-" * 42,
         ]
         for o in self.orders:
@@ -1153,7 +1159,7 @@ def lot_for_lot(
         total_setup_cost=total_setup,
         total_holding_cost=0.0,
         n_orders=len(orders),
-        method="Lote por lote",
+        method=_t("inventory.modelo.lot_for_lot.lote_lote"),
         params={"setup_cost": setup_cost, "holding_cost": holding_cost},
     )
 
@@ -1238,7 +1244,7 @@ def silver_meal(
         total_setup_cost=total_setup,
         total_holding_cost=total_holding,
         n_orders=len(orders),
-        method="Silver-Meal",
+        method=_t("inventory.modelo.silver_meal.silver_meal"),
         params={"setup_cost": setup_cost, "holding_cost": holding_cost},
     )
 
@@ -1284,12 +1290,7 @@ class QuantityDiscountResult:
 
     def summary(self) -> str:
         return (
-            f"Cantidad óptima    : {self.optimal_qty:.4g} unidades\n"
-            f"Precio unitario    : {self.unit_price:.4g}\n"
-            f"Costo total/año    : {self.total_cost:.6g}\n"
-            f"  Costo de compra  : {self.purchase_cost:.6g}\n"
-            f"  Costo de ordenar : {self.ordering_cost_total:.6g}\n"
-            f"  Costo de mantener: {self.holding_cost_total:.6g}"
+            _t("inventory.etiqueta.summary.cantidad_optima_unidades_precio_unitario", optimal_qty=self.optimal_qty, unit_price=self.unit_price, total_cost=self.total_cost, purchase_cost=self.purchase_cost, ordering_cost_total=self.ordering_cost_total, holding_cost_total=self.holding_cost_total)
         )
 
     def __str__(self) -> str:
@@ -1351,7 +1352,7 @@ def eoq_quantity_discount(
 
     breaks = list(price_breaks)
     if len(breaks) < 1:
-        raise ValueError("price_breaks debe contener al menos una entrada.")
+        raise ValueError(_t("inventory.error.eoq_quantity_discount.price_breaks_debe_contener_menos"))
 
     # Sort by min_qty
     breaks.sort(key=lambda x: x[0])
@@ -1374,31 +1375,31 @@ def eoq_quantity_discount(
         hc = (q_adj / 2) * h
         tc = pc + oc + hc
         candidates.append({
-            "Índice de tramo": idx,
-            "Cantidad mín.": min_q,
-            "Precio unitario": price,
+            _t("columnas.columna_df.global.indice_tramo"): idx,
+            _t("columnas.columna_df.global.cantidad_min"): min_q,
+            _t("columnas.columna_df.global.precio_unitario"): price,
             "EOQ": q_eoq,
-            "Q ajustada": q_adj,
-            "Costo de compra": pc,
-            "Costo de ordenar": oc,
-            "Costo de mantener": hc,
-            "Costo total": tc,
-            "Factible": lo <= q_adj <= (upper_bounds[idx] + 1e-9),
+            _t("columnas.columna_df.global.ajustada"): q_adj,
+            _t("columnas.columna_df.global.costo_compra"): pc,
+            _t("columnas.columna_df.global.costo_ordenar"): oc,
+            _t("columnas.columna_df.global.costo_mantener"): hc,
+            _t("columnas.columna_df.global.costo_total"): tc,
+            _t("columnas.columna_df.global.factible"): lo <= q_adj <= (upper_bounds[idx] + 1e-9),
         })
-        if best is None or tc < best["Costo total"]:
+        if best is None or tc < best[_t("columnas.columna_df.global.costo_total")]:
             best = candidates[-1]
 
     if best is None:
-        raise ValueError("No feasible price break found.")
+        raise ValueError(_t("inventory.error.eoq_quantity_discount.feasible_price_break_found"))
 
     return QuantityDiscountResult(
-        optimal_qty=best["Q ajustada"],
-        unit_price=best["Precio unitario"],
-        total_cost=best["Costo total"],
-        purchase_cost=best["Costo de compra"],
-        ordering_cost_total=best["Costo de ordenar"],
-        holding_cost_total=best["Costo de mantener"],
-        break_idx=best["Índice de tramo"],
+        optimal_qty=best[_t("columnas.columna_df.global.ajustada")],
+        unit_price=best[_t("columnas.columna_df.global.precio_unitario")],
+        total_cost=best[_t("columnas.columna_df.global.costo_total")],
+        purchase_cost=best[_t("columnas.columna_df.global.costo_compra")],
+        ordering_cost_total=best[_t("columnas.columna_df.global.costo_ordenar")],
+        holding_cost_total=best[_t("columnas.columna_df.global.costo_mantener")],
+        break_idx=best[_t("columnas.columna_df.global.indice_tramo")],
         candidates=candidates,
         params={"demand_rate": D, "ordering_cost": K, "holding_cost_rate": Ih},
     )
@@ -1491,7 +1492,7 @@ def wagner_whitin(
         total_setup_cost=total_setup,
         total_holding_cost=total_holding,
         n_orders=len(orders),
-        method="Wagner-Whitin",
+        method=_t("inventory.modelo.wagner_whitin.wagner_whitin"),
         params={"setup_cost": K, "holding_cost": h},
     )
 
@@ -1530,13 +1531,7 @@ class RQPolicyResult:
 
     def summary(self) -> str:
         return (
-            f"Política (r, Q) de revisión continua\n"
-            f"  Cantidad de pedido Q*: {self.order_qty:.4g}\n"
-            f"  Punto de reorden r   : {self.reorder_point:.4g}\n"
-            f"  Stock de seguridad SS: {self.safety_stock:.4g}\n"
-            f"  Nivel de servicio    : {self.service_level:.2%}\n"
-            f"  Inventario promedio  : {self.avg_inventory:.4g}\n"
-            f"  Costo total          : {self.total_cost:.6g}"
+            _t("inventory.etiqueta.summary.politica_revision_continua_cantidad_pedido", order_qty=self.order_qty, reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, avg_inventory=self.avg_inventory, total_cost=self.total_cost)
         )
 
     def __str__(self) -> str:
@@ -1547,10 +1542,10 @@ class RQPolicyResult:
         return pd.DataFrame([{
             "Q*": self.order_qty,
             "r": self.reorder_point,
-            "Stock de seguridad": self.safety_stock,
-            "Nivel de servicio": self.service_level,
-            "Inventario promedio": self.avg_inventory,
-            "Costo total": self.total_cost,
+            _t("inventory.cabecera.to_frame.stock_seguridad"): self.safety_stock,
+            _t("inventory.cabecera.to_frame.nivel_servicio"): self.service_level,
+            _t("inventory.cabecera.to_frame.inventario_promedio"): self.avg_inventory,
+            _t("inventory.cabecera.to_frame.costo_total"): self.total_cost,
         }])
 
 
@@ -1619,7 +1614,7 @@ def rq_policy(
     sl  = as_nonneg(lead_time_std,   "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc <= 0.0 or svc >= 1.0:
-        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
+        raise ValueError(_t("inventory.error.reorder_point.service_level_debe_estar_estrictamente"))
 
     Q   = math.sqrt(2 * D * K / h)
     mean_dlt = D * LT
@@ -1676,13 +1671,7 @@ class RSPolicyResult:
 
     def summary(self) -> str:
         return (
-            f"Política (R, S) de revisión periódica\n"
-            f"  Periodo de revisión R: {self.review_period:.4g}\n"
-            f"  Nivel de reposición S: {self.order_up_to:.4g}\n"
-            f"  Stock de seguridad SS: {self.safety_stock:.4g}\n"
-            f"  Nivel de servicio    : {self.service_level:.2%}\n"
-            f"  Inventario promedio  : {self.avg_inventory:.4g}\n"
-            f"  Costo total          : {self.total_cost:.6g}"
+            _t("inventory.etiqueta.summary.politica_revision_periodica_periodo_revision", review_period=self.review_period, order_up_to=self.order_up_to, safety_stock=self.safety_stock, service_level=self.service_level, avg_inventory=self.avg_inventory, total_cost=self.total_cost)
         )
 
     def __str__(self) -> str:
@@ -1693,10 +1682,10 @@ class RSPolicyResult:
         return pd.DataFrame([{
             "R": self.review_period,
             "S": self.order_up_to,
-            "Stock de seguridad": self.safety_stock,
-            "Nivel de servicio": self.service_level,
-            "Inventario promedio": self.avg_inventory,
-            "Costo total": self.total_cost,
+            _t("inventory.cabecera.to_frame.stock_seguridad"): self.safety_stock,
+            _t("inventory.cabecera.to_frame.nivel_servicio"): self.service_level,
+            _t("inventory.cabecera.to_frame.inventario_promedio"): self.avg_inventory,
+            _t("inventory.cabecera.to_frame.costo_total"): self.total_cost,
         }])
 
 
@@ -1770,7 +1759,7 @@ def rs_policy(
     sl  = as_nonneg(lead_time_std,   "lead_time_std")
     svc = as_fraction(service_level, "service_level")
     if svc <= 0.0 or svc >= 1.0:
-        raise ValueError("'service_level' debe estar estrictamente entre 0 y 1.")
+        raise ValueError(_t("inventory.error.reorder_point.service_level_debe_estar_estrictamente"))
 
     # Exposure period = R + L
     RL = R + LT
@@ -1837,21 +1826,21 @@ class ExchangeCurveResult:
     def to_frame(self) -> pd.DataFrame:
         """DataFrame de cantidades por artículo: artículo, Q_eoq, Q_óptima, n_pedidos, inversión."""
         import pandas as pd
-        return pd.DataFrame(self.optimal_quantities).rename(columns=_COL_CANTIDADES)
+        return pd.DataFrame(self.optimal_quantities).rename(columns=_cabeceras(_COL_CANTIDADES))
 
     def curve_to_frame(self) -> pd.DataFrame:
         """DataFrame de la hipérbola de intercambio: columnas N (pedidos/año) e I (inversión)."""
         import pandas as pd
-        return pd.DataFrame(self.curve_points).rename(columns=_COL_CURVA_CICLO)
+        return pd.DataFrame(self.curve_points).rename(columns=_cabeceras(_COL_CURVA_CICLO))
 
     def summary(self) -> str:
         lines = [
-            f"Objetivo                : {self.target}",
-            f"Multiplicador k         : {self.multiplier:.4f}",
-            f"N pedidos/año (EOQ)     : {self.n_orders_eoq:.4g}",
-            f"N pedidos/año (óptimo)  : {self.n_orders_optimal:.4g}",
-            f"Inversión (EOQ)         : {self.investment_eoq:.4g}",
-            f"Inversión (óptimo)      : {self.investment_optimal:.4g}",
+            _t("inventory.etiqueta.summary.objetivo", target=self.target),
+            _t("inventory.etiqueta.summary.multiplicador", multiplier=self.multiplier),
+            _t("inventory.etiqueta.summary.pedidos_ano_eoq", n_orders_eoq=self.n_orders_eoq),
+            _t("inventory.etiqueta.summary.pedidos_ano_optimo", n_orders_optimal=self.n_orders_optimal),
+            _t("inventory.etiqueta.summary.inversion_eoq", investment_eoq=self.investment_eoq),
+            _t("inventory.etiqueta.summary.inversion_optimo", investment_optimal=self.investment_optimal),
         ]
         return "\n".join(lines)
 
@@ -1927,10 +1916,10 @@ def exchange_curve(
     """
     if target_orders is not None and target_investment is not None:
         raise ValueError(
-            "Indique como máximo uno de 'target_orders' o 'target_investment'."
+            _t("inventory.error.exchange_curve.indique_como_maximo_uno_target")
         )
     if len(items) == 0:
-        raise ValueError("'items' debe contener al menos un elemento.")
+        raise ValueError(_t("inventory.error.exchange_curve.items_debe_contener_menos_elemento"))
 
     parsed: list[dict[str, Any]] = []
     for idx, it in enumerate(items):
@@ -1938,9 +1927,9 @@ def exchange_curve(
         K  = as_positive(float(it["ordering_cost"]), f"items[{idx}]['ordering_cost']")
         h  = as_positive(float(it["holding_cost"]),  f"items[{idx}]['holding_cost']")
         v  = float(it.get("unit_value", 1.0))
-        nm = str(it.get("name", f"I{idx + 1}"))
+        nm = str(it.get("name", _t("inventory.valor_por_defecto.exchange_curve.texto", expr=idx + 1)))
         if v <= 0:
-            raise ValueError(f"items[{idx}]['unit_value'] debe ser > 0.")
+            raise ValueError(_t("inventory.error.exchange_curve.items_unit_value_debe_ser", idx=idx))
         Q_eoq = math.sqrt(2 * D * K / h)
         parsed.append({"name": nm, "D": D, "K": K, "h": h, "v": v, "Q_eoq": Q_eoq})
 
@@ -1950,14 +1939,14 @@ def exchange_curve(
     if target_orders is not None:
         to = as_positive(target_orders, "target_orders")
         k = N_star / to
-        target_label = f"pedidos={to:.4g}"
+        target_label = _t("inventory.etiqueta.exchange_curve.pedidos", to=to)
     elif target_investment is not None:
         ti = as_positive(target_investment, "target_investment")
         k = ti / I_star
-        target_label = f"inversión={ti:.4g}"
+        target_label = _t("inventory.etiqueta.exchange_curve.inversion", ti=ti)
     else:
         k = 1.0
-        target_label = "eoq"
+        target_label = _t("inventory.etiqueta.exchange_curve.eoq")
 
     N_opt = N_star / k
     I_opt = k * I_star
@@ -2037,19 +2026,19 @@ class SafetyStockCurveResult:
     def to_frame(self) -> pd.DataFrame:
         """DataFrame de stock de seguridad por artículo."""
         import pandas as pd
-        return pd.DataFrame(self.optimal_quantities).rename(columns=_COL_CANTIDADES)
+        return pd.DataFrame(self.optimal_quantities).rename(columns=_cabeceras(_COL_CANTIDADES))
 
     def curve_to_frame(self) -> pd.DataFrame:
         """DataFrame de la curva de intercambio completa: z, nivel_de_servicio, inversión_ss."""
         import pandas as pd
-        return pd.DataFrame(self.curve_points).rename(columns=_COL_CURVA_SEGURIDAD)
+        return pd.DataFrame(self.curve_points).rename(columns=_cabeceras(_COL_CURVA_SEGURIDAD))
 
     def summary(self) -> str:
         lines = [
-            f"Objetivo          : {self.target}",
-            f"z               : {self.z:.4f}",
-            f"Nivel de servicio : {self.service_level:.4%}",
-            f"Inversión en SS   : {self.ss_investment:.4g}",
+            _t("inventory.etiqueta.summary.objetivo_2", target=self.target),
+            _t("inventory.etiqueta.summary.texto_4", z=self.z),
+            _t("inventory.etiqueta.summary.nivel_servicio", service_level=self.service_level),
+            _t("inventory.etiqueta.summary.inversion_ss", ss_investment=self.ss_investment),
         ]
         return "\n".join(lines)
 
@@ -2125,10 +2114,10 @@ def safety_stock_curve(
     """
     if target_service_level is not None and target_ss_investment is not None:
         raise ValueError(
-            "Indique como máximo uno de 'target_service_level' o 'target_ss_investment'."
+            _t("inventory.error.safety_stock_curve.indique_como_maximo_uno_target")
         )
     if len(items) == 0:
-        raise ValueError("'items' debe contener al menos un elemento.")
+        raise ValueError(_t("inventory.error.exchange_curve.items_debe_contener_menos_elemento"))
 
     _norm = NormalDist()
 
@@ -2138,13 +2127,13 @@ def safety_stock_curve(
         L    = as_positive(float(it["lead_time"]), f"items[{idx}]['lead_time']")
         sl   = float(it.get("lead_time_std", 0.0))
         v    = float(it.get("unit_value", 1.0))
-        nm   = str(it.get("name", f"I{idx + 1}"))
+        nm   = str(it.get("name", _t("inventory.valor_por_defecto.exchange_curve.texto", expr=idx + 1)))
         D    = it.get("demand_rate")
         D    = float(D) if D is not None else None
         if v <= 0:
-            raise ValueError(f"items[{idx}]['unit_value'] debe ser > 0.")
+            raise ValueError(_t("inventory.error.exchange_curve.items_unit_value_debe_ser", idx=idx))
         if sl < 0:
-            raise ValueError(f"items[{idx}]['lead_time_std'] debe ser ≥ 0.")
+            raise ValueError(_t("inventory.error.safety_stock_curve.items_lead_time_std_debe", idx=idx))
         # σ_DLT = √(L·σ_D² + D²·σ_L²)  — reduces to σ_D·√L when σ_L=0
         if D is not None and sl > 0:
             sigma_dlt = math.sqrt(L * sd**2 + D**2 * sl**2)
@@ -2158,20 +2147,20 @@ def safety_stock_curve(
     if target_service_level is not None:
         sl_val = float(target_service_level)
         if not (0.0 < sl_val < 1.0):
-            raise ValueError("'target_service_level' debe estar estrictamente entre 0 y 1.")
+            raise ValueError(_t("inventory.error.safety_stock_curve.target_service_level_debe_estar"))
         z = _norm.inv_cdf(sl_val)
-        target_label = f"nivel_de_servicio={sl_val:.4%}"
+        target_label = _t("inventory.etiqueta.safety_stock_curve.nivel_servicio", sl_val=sl_val)
     elif target_ss_investment is not None:
         ti = as_positive(float(target_ss_investment), "target_ss_investment")
         if total_sigma_v == 0.0:
             raise ValueError(
-                "Todos los artículos tienen demand_std=0: el stock de seguridad es siempre 0."
+                _t("inventory.error.safety_stock_curve.todos_articulos_tienen_demand_std")
             )
         z = ti / total_sigma_v
-        target_label = f"inversión_ss={ti:.4g}"
+        target_label = _t("inventory.etiqueta.safety_stock_curve.inversion_ss", ti=ti)
     else:
         z = 0.0
-        target_label = "base (z=0)"
+        target_label = _t("inventory.etiqueta.safety_stock_curve.base")
 
     sl_result = _norm.cdf(z)
     ss_inv    = z * total_sigma_v
@@ -2243,15 +2232,15 @@ class ABCResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.items).rename(columns=_COL_ARTICULOS)
+        return pd.DataFrame(self.items).rename(columns=_cabeceras(_COL_ARTICULOS))
 
     def summary(self) -> str:
         lines = [
-            f"Valor anual total : {self.total_value:.6g}",
-            f"{'Clase':<6} {'Artíc.':>6}  {'%Artíc.':>7}  {'%Valor':>7}",
+            _t("inventory.etiqueta.summary.valor_anual_total", total_value=self.total_value),
+            f"{_t('inventory.texto_en_expresion.summary.clase'):<6} {_t('inventory.texto_en_expresion.summary.artic_2'):>6}  {_t('inventory.texto_en_expresion.summary.artic'):>7}  {_t('inventory.texto_en_expresion.summary.valor'):>7}",
             "-" * 32,
         ]
-        for cls in ["A", "B", "C"]:
+        for cls in [_t("inventory.etiqueta.summary.texto"), _t("inventory.etiqueta.summary.texto_2"), _t("inventory.etiqueta.summary.texto_3")]:
             s = self.class_summary[cls]
             lines.append(
                 f"  {cls}    {s['count']:>4}    {s['pct_items']:>6.1%}   {s['pct_value']:>6.1%}"
@@ -2282,20 +2271,20 @@ class XYZResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.items).rename(columns=_COL_ARTICULOS)
+        return pd.DataFrame(self.items).rename(columns=_cabeceras(_COL_ARTICULOS))
 
     def summary(self) -> str:
         t = self.thresholds
         ranges = {
-            "X": f"CV ≤ {t['x']:.2g}",
-            "Y": f"{t['x']:.2g} < CV ≤ {t['y']:.2g}",
-            "Z": f"CV > {t['y']:.2g}",
+            _t("inventory.etiqueta.summary.texto_5"): _t("inventory.etiqueta.summary.cv_2", expr=t['x']),
+            _t("inventory.etiqueta.summary.texto_6"): _t("inventory.etiqueta.summary.cv_3", expr=t['x'], expr2=t['y']),
+            _t("inventory.etiqueta.summary.texto_7"): _t("inventory.etiqueta.summary.cv", expr=t['y']),
         }
         lines = [
-            f"{'Clase':<6} {'Artíc.':>6}  {'%Artíc.':>7}  {'Rango CV'}",
+            f"{_t('inventory.texto_en_expresion.summary.clase'):<6} {_t('inventory.texto_en_expresion.summary.artic_2'):>6}  {_t('inventory.texto_en_expresion.summary.artic'):>7}  {_t('inventory.texto_en_expresion.summary.rango_cv')}",
             "-" * 42,
         ]
-        for cls in ["X", "Y", "Z"]:
+        for cls in [_t("inventory.etiqueta.summary.texto_5"), _t("inventory.etiqueta.summary.texto_6"), _t("inventory.etiqueta.summary.texto_7")]:
             s = self.class_summary[cls]
             lines.append(
                 f"  {cls}    {s['count']:>4}    {s['pct_items']:>6.1%}   {ranges[cls]}"
@@ -2324,7 +2313,7 @@ class ABCXYZResult:
 
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
-        return pd.DataFrame(self.items).rename(columns=_COL_ARTICULOS)
+        return pd.DataFrame(self.items).rename(columns=_cabeceras(_COL_ARTICULOS))
 
     def matrix_frame(self) -> pd.DataFrame:
         """Tabla dinámica ABC (filas) × XYZ (columnas) con el conteo de artículos."""
@@ -2336,17 +2325,17 @@ class ABCXYZResult:
         return pd.DataFrame(data, index=["A", "B", "C"])
 
     def summary(self) -> str:
-        lines = ["ABC\\XYZ   X     Y     Z   Total"]
-        for abc in ["A", "B", "C"]:
-            row_total = sum(self.matrix.get((abc, xyz), 0) for xyz in ["X", "Y", "Z"])
+        lines = [_t("inventory.etiqueta.summary.abc_xyz_total")]
+        for abc in [_t("inventory.etiqueta.summary.texto"), _t("inventory.etiqueta.summary.texto_2"), _t("inventory.etiqueta.summary.texto_3")]:
+            row_total = sum(self.matrix.get((abc, xyz), 0) for xyz in [_t("inventory.etiqueta.summary.texto_5"), _t("inventory.etiqueta.summary.texto_6"), _t("inventory.etiqueta.summary.texto_7")])
             lines.append(
                 f"   {abc}    "
-                + "".join(f"  {self.matrix.get((abc, xyz), 0):3d}" for xyz in ["X", "Y", "Z"])
+                + "".join(f"  {self.matrix.get((abc, xyz), 0):3d}" for xyz in [_t("inventory.etiqueta.summary.texto_5"), _t("inventory.etiqueta.summary.texto_6"), _t("inventory.etiqueta.summary.texto_7")])
                 + f"   {row_total:4d}"
             )
-        col_totals = [sum(self.matrix.get((abc, xyz), 0) for abc in ["A", "B", "C"]) for xyz in ["X", "Y", "Z"]]
+        col_totals = [sum(self.matrix.get((abc, xyz), 0) for abc in [_t("inventory.etiqueta.summary.texto"), _t("inventory.etiqueta.summary.texto_2"), _t("inventory.etiqueta.summary.texto_3")]) for xyz in [_t("inventory.etiqueta.summary.texto_5"), _t("inventory.etiqueta.summary.texto_6"), _t("inventory.etiqueta.summary.texto_7")]]
         grand = sum(col_totals)
-        lines.append("Total  " + "".join(f"  {c:3d}" for c in col_totals) + f"   {grand:4d}")
+        lines.append(_t("inventory.etiqueta.summary.total") + "".join(f"  {c:3d}" for c in col_totals) + f"   {grand:4d}")
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -2356,20 +2345,20 @@ class ABCXYZResult:
 def _leer_items(items, nombre: str = "items") -> list:
     """Valida que ``items`` sea una lista no vacía de diccionarios."""
     if isinstance(items, (str, bytes, dict)) or not hasattr(items, "__iter__"):
-        raise TypeError(f"'{nombre}' debe ser una lista de diccionarios, se recibió {type(items).__name__!r}.")
+        raise TypeError(_t("inventory.error.leer_items.debe_ser_lista_diccionarios_recibio", nombre=nombre, __name__=type(items).__name__))
     items = list(items)
     if not items:
-        raise ValueError(f"'{nombre}' debe contener al menos un elemento.")
+        raise ValueError(_t("inventory.error.leer_items.debe_contener_menos_elemento", nombre=nombre))
     for i, it in enumerate(items):
         if not isinstance(it, dict):
-            raise TypeError(f"{nombre}[{i}] debe ser un diccionario, se recibió {type(it).__name__!r}.")
+            raise TypeError(_t("inventory.error.leer_items.debe_ser_diccionario_recibio", nombre=nombre, i=i, __name__=type(it).__name__))
     return items
 
 
 def _clave(it: dict, i: int, clave: str, nombre: str = "items"):
     """Devuelve ``it[clave]`` o lanza un ValueError que indica el elemento y la clave que faltan."""
     if clave not in it:
-        raise ValueError(f"{nombre}[{i}]: falta la clave '{clave}'.")
+        raise ValueError(_t("inventory.error.clave.falta_clave", nombre=nombre, i=i, clave=clave))
     return it[clave]
 
 
@@ -2422,11 +2411,11 @@ def abc_analysis(
     """
     items = _leer_items(items)
     if not (0.0 < a_threshold < b_threshold < 1.0):
-        raise ValueError("Debe cumplirse 0 < a_threshold < b_threshold < 1.")
+        raise ValueError(_t("inventory.error.abc_analysis.debe_cumplirse_threshold_threshold"))
 
     enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
-        nm  = it.get("name", f"Artículo{i + 1}")
+        nm  = it.get("name", _t("inventory.valor_por_defecto.abc_analysis.articulo", expr=i + 1))
         D   = as_nonneg(_clave(it, i, "demand"), f"items[{i}]['demand']")
         v   = as_positive(_clave(it, i, "unit_value"), f"items[{i}]['unit_value']")
         enriched.append({"name": str(nm), "demand": D, "unit_value": v,
@@ -2436,7 +2425,7 @@ def abc_analysis(
     n           = len(enriched)
     total_value = sum(e["annual_value"] for e in enriched)
     if total_value <= 0.0:
-        raise ValueError("El valor anual total es cero (todas las demandas son 0): no hay nada que clasificar.")
+        raise ValueError(_t("inventory.error.abc_analysis.valor_anual_total_cero_todas"))
 
     cum = 0.0
     class_agg: dict = {"A": {"count": 0, "value": 0.0},
@@ -2522,11 +2511,11 @@ def xyz_analysis(
     """
     items = _leer_items(items)
     if not (0.0 <= x_threshold < y_threshold):
-        raise ValueError("Debe cumplirse 0 ≤ x_threshold < y_threshold.")
+        raise ValueError(_t("inventory.error.xyz_analysis.debe_cumplirse_threshold_threshold"))
 
     enriched: list[dict[str, Any]] = []
     for i, it in enumerate(items):
-        nm = it.get("name", f"Artículo{i + 1}")
+        nm = it.get("name", _t("inventory.valor_por_defecto.abc_analysis.articulo", expr=i + 1))
         if "cv" in it:
             cv = as_nonneg(it["cv"], f"items[{i}]['cv']")
         else:
@@ -2536,7 +2525,7 @@ def xyz_analysis(
             elif "demand_rate" in it:
                 mean = it["demand_rate"]
             else:
-                raise ValueError(f"items[{i}]: falta 'cv' o ('demand_std' y 'demand_mean'/'demand_rate').")
+                raise ValueError(_t("inventory.error.xyz_analysis.items_falta_cv_demand_std", i=i))
             mean = as_positive(mean, f"items[{i}]['demand_mean']")
             cv = std / mean
         if cv <= x_threshold:
@@ -2671,18 +2660,18 @@ class MRPResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame({
-            "Periodo":         self.periods,
-            "Req_bruto":       self.gross_requirements,
-            "Recep_prog":      self.scheduled_receipts,
-            "Exist_proy":      self.projected_on_hand,
-            "Req_neto":        self.net_requirements,
-            "Recep_plan":      self.planned_receipts,
-            "Lib_plan":        self.planned_releases,
+            _t("inventory.cabecera.to_frame.periodo"):         self.periods,
+            _t("inventory.cabecera.to_frame.req_bruto"):       self.gross_requirements,
+            _t("inventory.cabecera.to_frame.recep_prog"):      self.scheduled_receipts,
+            _t("inventory.cabecera.to_frame.exist_proy"):      self.projected_on_hand,
+            _t("inventory.cabecera.to_frame.req_neto"):        self.net_requirements,
+            _t("inventory.cabecera.to_frame.recep_plan"):      self.planned_receipts,
+            _t("inventory.cabecera.to_frame.lib_plan"):        self.planned_releases,
         })
 
     def summary(self) -> str:
-        hdr = f"{'Periodo':>8} {'RB':>8} {'RP':>8} {'EP':>8} {'RN':>8} {'RPl':>8} {'LPl':>8}"
-        lines = [f"Artículo: {self.item_name}", hdr, "-" * len(hdr)]
+        hdr = f"{_t('inventory.texto_en_expresion.summary.periodo'):>8} {_t('inventory.texto_en_expresion.summary.rb'):>8} {_t('inventory.texto_en_expresion.summary.rp'):>8} {_t('inventory.texto_en_expresion.summary.ep'):>8} {_t('inventory.texto_en_expresion.summary.rn'):>8} {_t('inventory.texto_en_expresion.summary.rpl'):>8} {_t('inventory.texto_en_expresion.summary.lpl'):>8}"
+        lines = [_t("inventory.etiqueta.summary.articulo", item_name=self.item_name), hdr, "-" * len(hdr)]
         for i, p in enumerate(self.periods):
             lines.append(
                 f"{p!s:>8} {self.gross_requirements[i]:>8.2f}"
@@ -2706,7 +2695,7 @@ def mrp(
     lead_time: int = 1,
     lot_size: float | str = "LFL",
     safety_stock: float = 0.0,
-    item_name: str = "Artículo",
+    item_name: str | None = None,
     periods: Sequence | None = None,
 ) -> MRPResult:
     """Planeación de requerimientos de materiales (MRP) de un nivel.
@@ -2730,7 +2719,7 @@ def mrp(
     safety_stock : float
         Inventario final mínimo deseado en cada periodo (por defecto 0).
     item_name : str
-        Etiqueta del artículo (por defecto ``'Artículo'``).
+        Etiqueta del artículo (por defecto ``'Artículo'``, o su traducción según el idioma activo).
     periods : sequence, optional
         Etiquetas de periodo (por defecto 1, 2, …, T).
 
@@ -2759,22 +2748,24 @@ def mrp(
     if scheduled_receipts is not None:
         SR = as_float_list(scheduled_receipts, "scheduled_receipts", kind="nonneg", min_len=0)
         if len(SR) != T:
-            raise ValueError("'scheduled_receipts' debe tener la misma longitud que 'gross_requirements'.")
+            raise ValueError(_t("inventory.error.mrp.scheduled_receipts_debe_tener_misma"))
 
     if isinstance(lead_time, bool) or not isinstance(lead_time, int) or lead_time < 0:
-        raise ValueError("'lead_time' debe ser un entero no negativo.")
+        raise ValueError(_t("inventory.error.mrp.lead_time_debe_ser_entero"))
 
     SS = as_nonneg(safety_stock, "safety_stock")
     initial_on_hand = as_nonneg(initial_on_hand, "initial_on_hand")
+    if item_name is None:
+        item_name = _t("inventory.valor_por_defecto.mrp.articulo")
     if isinstance(lot_size, str):
         if lot_size.upper() != "LFL":
-            raise ValueError("'lot_size' debe ser 'LFL' o un número positivo.")
+            raise ValueError(_t("inventory.error.mrp.lot_size_debe_ser_lfl"))
         lot_q: float | None = None
     else:
         lot_q = as_positive(lot_size, "lot_size")
 
     if periods is not None and len(list(periods)) != T:
-        raise ValueError("'periods' debe tener la misma longitud que 'gross_requirements'.")
+        raise ValueError(_t("inventory.error.mrp.periods_debe_tener_misma_longitud"))
 
     pds = list(periods) if periods is not None else list(range(1, T + 1))
 
@@ -2807,8 +2798,7 @@ def mrp(
                 POR[rel] += PR_out[t]
     if past_due > 0.0:
         warnings.warn(
-            f"{past_due:g} unidades planificadas debieron liberarse antes del periodo 1 "
-            f"(lead_time={lead_time} no cabe en el horizonte); consulte 'past_due_releases'.",
+            _t("inventory.aviso.mrp.unidades_planificadas_debieron_liberarse_antes", past_due=past_due, lead_time=lead_time),
             UserWarning, stacklevel=2,
         )
 

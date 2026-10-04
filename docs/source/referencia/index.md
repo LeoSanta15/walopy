@@ -14,4 +14,5 @@ operations
 bottleneck
 kpi
 plotting
+idioma
 ```

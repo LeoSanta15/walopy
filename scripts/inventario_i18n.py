@@ -17,16 +17,18 @@ modelo      nombre de modelo o método que se muestra (``model=``, ``method=``):
 valor_por_defecto  nombre o valor de argumento por defecto (``Artículo{i}``, ``item_name="Artículo"``): cambiaría con el idioma
 columna_df  clave de diccionario o columna de un ``DataFrame`` que devuelve una función pública: forma parte de la API
 acceso_columna  lectura de una columna o clave por su texto (``df["Estación"]``): acoplamiento que rompe al traducir
+texto_en_expresion  texto escondido dentro de la expresión de un f-string (``x or "ninguna"``)
 nombre_arg  nombre de argumento dentro de un mensaje (``capacity[{i}]``): NO se traduce
 sin_clasificar  cadena que parece texto visible y no encaja en ninguna clase anterior (revisión manual)
 ========== =====================================================================================
 
 Uso::
 
-    python scripts/inventario_i18n.py                # escribe docs/auditoria/inventario_i18n.json y INVENTARIO_I18N.md
-    python scripts/inventario_i18n.py --comprobar    # falla si el JSON versionado no coincide con el código (no escribe)
+    python scripts/inventario_i18n.py            # falla si queda algún texto visible literal en src/ fuera del catálogo
+    python scripts/inventario_i18n.py --src DIR --escribir ref.json --informe ref.md   # inventario de otro directorio (p. ej. un tag)
 
 El JSON **no guarda números de línea** (cambiarían con cualquier edición); identifica cada texto por módulo, función y plantilla.
+La referencia anterior a la migración (v0.3.0) está en ``docs/auditoria/inventario_i18n_base.json`` y es la fuente del catálogo en español.
 """
 from __future__ import annotations
 
@@ -41,8 +43,6 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
 SRC = RAIZ / "src" / "walopy"
-JSON_SALIDA = RAIZ / "docs" / "auditoria" / "inventario_i18n.json"
-MD_SALIDA = RAIZ / "docs" / "auditoria" / "INVENTARIO_I18N.md"
 
 KW_GRAFICA = {
     "label", "title", "xlabel", "ylabel", "text", "name", "xaxis_title", "yaxis_title", "legend_title_text",
@@ -55,8 +55,11 @@ STOP = {"de", "la", "el", "los", "las", "un", "una", "que", "se", "en", "y", "o"
 ESTILO = {"steps-mid", "--", "-", ":", "-.", "o", "s", "^", "x", "+", "*", "k", "w", "left", "right", "center", "top", "bottom", "bar", "pie",
           "top left", "top right", "bottom left", "bottom right", "x unified", "y unified", "closest", "Blues", "Greens", "Reds"}
 KW_MODELO = {"model", "method", "policy", "rule", "strategy"}
+CLAVES_DE_DATOS = {"Q_eoq", "Q_optimal"}   # claves internas de diccionarios (no son texto para la persona usuaria)
 IDENT = re.compile(r"^[a-z_][a-z0-9_]*$")
-NOMBRE_ARG = re.compile(r"^[a-z_][a-z0-9_]*\[")
+NOMBRE_ARG = re.compile(r"^[a-z_][a-z0-9_]*(\[[^\]]*\])+$")      # solo el nombre; si sigue texto («... debe ser > 0.») es un mensaje
+ESPECIFICACION = re.compile(r"^[<>^=]?[+\- ]?#?0?\d*,?(\.\d+)?[bcdeEfFgGnosxX%]?$")   # «.4g», «<16», «.2%»: formato numérico, no texto
+CLAVE_CATALOGO = re.compile(r"^[a-z0-9_]+(\.[a-z0-9_]+){2,3}(_\d+)?$")      # «inventory.error.eoq.demanda_positiva»
 POR_DEFECTO = re.compile(r"^[^\s{}]+\{[^{}]+\}$")
 SIMBOLICO = re.compile(r"^[A-Z0-9/ ()+\-.,:=%^_|<>≤≥²μλρσ]+$")  # notación de dominio: «M/M/1», «G/G/1», «OEE»
 
@@ -94,6 +97,7 @@ class Marcadores:
             "conversion": {-1: "", 114: "r", 115: "s", 97: "a"}[conversion],
             "formato": formato,
             "simple": simple,
+            "_nodo": valor,          # solo para la migración; no se serializa
         })
         suf = ("!" + self.items[-1]["conversion"] if self.items[-1]["conversion"] else "") + (":" + formato if formato else "")
         return "{" + nombre + suf + "}"
@@ -135,7 +139,7 @@ def _candidato_visible(texto: str) -> bool:
     """True si la cadena parece texto para una persona (no un identificador, color, estilo ni símbolo)."""
     t = texto.strip()
     sin = re.sub(r"\{[^{}]*\}", "", t.replace("{{", "").replace("}}", ""))
-    return bool(sin) and not (IDENT.match(t) or t in ESTILO or t.startswith("#") or len(sin) <= 2 or not _tiene_letras(t)
+    return bool(sin) and t not in CLAVES_DE_DATOS and not (IDENT.match(t) or t in ESTILO or t.startswith("#") or len(sin) <= 2 or not _tiene_letras(t)
                               or SIMBOLICO.match(sin) or t.startswith("__"))
 
 
@@ -166,15 +170,35 @@ class Extractor(ast.NodeVisitor):
             return
         marc = Marcadores()
         texto = plantilla(nodo, marc)
-        if texto is None or not _tiene_letras(texto):
+        if texto is None or CLAVE_CATALOGO.match(texto):
             return
-        self._marcar(nodo)
+        self._marcar(nodo)                       # aunque no tenga letras: sus hijos (formatos, claves) no son textos sueltos
+        self._ocultos(marc, tipo, nodo)
+        if not _tiene_letras(texto):
+            return
         if NOMBRE_ARG.match(texto):
             tipo = "nombre_arg"
         elif tipo in {"sin_clasificar", "cabecera"} and POR_DEFECTO.match(texto) and marc.items and "frame" not in self.funcion:
             tipo = "valor_por_defecto"
         self.entradas.append({"tipo": tipo, "modulo": self.modulo, "funcion": self.funcion, "es": texto,
-                              "marcadores": marc.items, **(extra or {})})
+                              "marcadores": marc.items, "nodo": nodo, **(extra or {})})
+
+    def _ocultos(self, marc: Marcadores, tipo: str, padre_nodo: ast.AST) -> None:
+        """Texto o clave de columna escondidos DENTRO de una expresión de un f-string: ``x or 'ninguna'``, ``row['Artículo']``."""
+        for m in marc.items:
+            padre = m["_nodo"]
+            claves = {id(n.slice) for n in ast.walk(padre) if isinstance(n, ast.Subscript)}
+            for n in ast.walk(padre):
+                if not (isinstance(n, ast.Constant) and isinstance(n.value, str)):
+                    continue
+                if id(n) in claves:
+                    if _candidato_visible(n.value) and (" " in n.value.strip() or re.search(r"[áéíóúñÁÉÍÓÚÑ()/]", n.value) or n.value[0].isupper()):
+                        self.entradas.append({"tipo": "acceso_columna", "modulo": self.modulo, "funcion": self.funcion, "es": _esc(n.value),
+                                              "marcadores": [], "nodo": n, "anidado": True, "padre_nodo": padre_nodo})
+                elif _tiene_letras(n.value) and not ESPECIFICACION.match(n.value) and n.value not in CLAVES_DE_DATOS \
+                        and not CLAVE_CATALOGO.match(n.value):
+                    self.entradas.append({"tipo": "texto_en_expresion", "modulo": self.modulo, "funcion": self.funcion, "es": _esc(n.value),
+                                          "marcadores": [], "nodo": n, "anidado": True, "padre": tipo, "padre_nodo": padre_nodo})
 
     # --- recorrido ------------------------------------------------------------------------------------
     def _docstring(self, nodo: ast.AST) -> None:
@@ -204,8 +228,9 @@ class Extractor(ast.NodeVisitor):
                     if isinstance(n, ast.JoinedStr) or (isinstance(n.value, str) and _candidato_visible(n.value)):
                         self._registrar("cabecera", n)
         if nodo.name in FUNCIONES_ETIQUETA:
+            claves = {id(n.slice) for n in ast.walk(nodo) if isinstance(n, ast.Subscript)}      # t['x'], row['Q*']: claves de datos
             for n in ast.walk(nodo):
-                if isinstance(n, (ast.JoinedStr, ast.Constant)) and id(n) not in self.docstrings:
+                if isinstance(n, (ast.JoinedStr, ast.Constant)) and id(n) not in self.docstrings and id(n) not in claves:
                     self._registrar("etiqueta", n)
         self.generic_visit(nodo)
         self.pila.pop()
@@ -220,6 +245,9 @@ class Extractor(ast.NodeVisitor):
                 for c in _cadenas_de(nodo.value):
                     self._registrar("etiqueta", c)
             if isinstance(destino, ast.Name) and destino.id.startswith("_COL_") and isinstance(nodo.value, ast.Dict):
+                for clave in nodo.value.keys:
+                    if clave is not None:
+                        self._marcar(clave)
                 for valor in nodo.value.values:
                     self._registrar("cabecera", valor, {"constante": destino.id})
         self.generic_visit(nodo)
@@ -231,6 +259,8 @@ class Extractor(ast.NodeVisitor):
                 if cand:
                     for c in cand:
                         self._registrar("error", c)
+                elif isinstance(arg, ast.Call) and getattr(arg.func, "id", "") in {"_t", "t"}:
+                    continue                  # ya está en el catálogo
                 elif isinstance(arg, (ast.Name, ast.Call, ast.Attribute, ast.Subscript)):
                     self.indirectos.append({"modulo": self.modulo, "funcion": self.funcion, "expresion": ast.unparse(arg)})
         self.generic_visit(nodo)
@@ -334,34 +364,67 @@ def _complejidad(entrada: dict) -> str:
     return "simple"
 
 
-def extraer() -> tuple[list[dict], list[dict]]:
+def extraer(con_sitios: bool = False):
     crudas: list[dict] = []
     indirectos: list[dict] = []
     for archivo in sorted(SRC.glob("*.py")):
+        if archivo.stem in {"_i18n", "_catalogo_es", "_catalogo_en"}:      # el catálogo contiene los textos a propósito
+            continue
         arbol = ast.parse(archivo.read_text(encoding="utf-8"))
         ex = Extractor(archivo.stem)
         ex.visit(arbol)
         crudas += ex.entradas
         indirectos += ex.indirectos
-    # agrupar por (módulo, tipo, plantilla): un texto repetido es una sola clave con varios usos
+    # agrupar por (módulo, tipo, plantilla): un texto repetido es una sola clave con varios usos.
+    # Las columnas de DataFrame devueltas por funciones públicas se agrupan por texto entre módulos: quien las crea y quien las lee usan la MISMA clave.
     grupos: dict[tuple, dict] = {}
     for e in crudas:
-        k = (e["modulo"], e["tipo"], e["es"])
-        g = grupos.setdefault(k, {**e, "usos": 0, "funciones": []})
+        modulo_grupo = "columnas" if e["tipo"] in {"columna_df", "acceso_columna"} else e["modulo"]
+        k = (modulo_grupo, e["tipo"], e["es"])
+        g = grupos.setdefault(k, {**{x: y for x, y in e.items() if x != "nodo"}, "usos": 0, "funciones": []})
         g["usos"] += 1
-        if e["funcion"] not in g["funciones"]:
-            g["funciones"].append(e["funcion"])
+        calificada = f"{e['modulo']}.{e['funcion']}" if e["tipo"] in {"columna_df", "acceso_columna"} else e["funcion"]
+        if calificada not in g["funciones"]:
+            g["funciones"].append(calificada)
     entradas = sorted(grupos.values(), key=lambda g: (g["modulo"], g["tipo"], g["funciones"][0], g["es"]))
     vistas: Counter = Counter()
     for g in entradas:
         g["funcion"] = g["funciones"][0]
-        funcion = g["funcion"].split(".")[-1].strip("_<>").replace("módulo", "modulo") or "modulo"
-        base = f"{g['modulo'].strip('_')}.{g['tipo']}.{funcion}.{_slug(g['es'])}"
+        compartida = g["tipo"] in {"columna_df", "acceso_columna"}
+        funcion = "global" if compartida else (g["funcion"].split(".")[-1].strip("_<>").replace("módulo", "modulo") or "modulo")
+        modulo = "columnas" if compartida else g["modulo"].strip("_")
+        tipo = "columna_df" if g["tipo"] == "acceso_columna" else g["tipo"]
+        base = f"{modulo}.{tipo}.{funcion}.{_slug(g['es'])}"
+        if g["tipo"] == "acceso_columna":
+            g["usa_clave"] = ""            # se resuelve abajo contra la columna creada con el mismo texto
+            base = base.replace(".columna_df.", ".acceso_columna.")
+            vistas[base] += 1
+            g["clave"] = base if vistas[base] == 1 else f"{base}_{vistas[base]}"
+            continue
         vistas[base] += 1
         g["clave"] = base if vistas[base] == 1 else f"{base}_{vistas[base]}"
+    por_texto = {g["es"]: g["clave"] for g in entradas if g["tipo"] == "columna_df"}
+    for g in entradas:
         g["complejidad"] = _complejidad(g)
         g["funciones"] = sorted(g["funciones"])
-    return entradas, sorted(indirectos, key=lambda i: (i["modulo"], i["funcion"], i["expresion"]))
+        if g["tipo"] == "acceso_columna":
+            g["usa_clave"] = por_texto.get(g["es"], "")
+    indirectos = sorted(indirectos, key=lambda i: (i["modulo"], i["funcion"], i["expresion"]))
+    if con_sitios:
+        clave_de = {(("columnas" if e["tipo"] in {"columna_df", "acceso_columna"} else e["modulo"]), e["tipo"], e["es"]): g
+                    for g in entradas for e in [g]}
+        return entradas, indirectos, crudas, clave_de
+    return entradas, indirectos
+
+
+def _serializable(e: dict) -> dict:
+    """Campos del inventario (sin nodos AST ni números de línea)."""
+    salida = {k: e[k] for k in ("clave", "tipo", "modulo", "funcion", "funciones", "usos", "complejidad", "es")}
+    salida["marcadores"] = [{a: b for a, b in m.items() if a != "_nodo"} for m in e["marcadores"]]
+    for extra in ("constante", "campo", "usa_clave", "padre"):
+        if extra in e:
+            salida[extra] = e[extra]
+    return salida
 
 
 def construir() -> dict:
@@ -371,7 +434,7 @@ def construir() -> dict:
         "idioma_base": "es",
         "total": len(entradas),
         "usos": sum(e["usos"] for e in entradas),
-        "entradas": [{k: e[k] for k in ("clave", "tipo", "modulo", "funcion", "funciones", "usos", "complejidad", "es", "marcadores", *(["constante"] if "constante" in e else []), *(["campo"] if "campo" in e else []))} for e in entradas],
+        "entradas": [_serializable(e) for e in entradas],
         "indirectos": indirectos,
     }
 
@@ -388,7 +451,7 @@ def informe(datos: dict) -> str:
     lineas = [
         "# INVENTARIO I18N — texto visible de walopy (generado)",
         "",
-        "> Generado por `python scripts/inventario_i18n.py`; **no editar a mano**. Fuente de verdad: `docs/auditoria/inventario_i18n.json`.",
+        "> Generado por `python scripts/inventario_i18n.py`; **no editar a mano**. Línea base **congelada** de los textos de v0.3.0 (antes de pasar al catálogo): `docs/auditoria/inventario_i18n_base.json`.",
         f"> {datos['total']} textos únicos, {datos['usos']} usos en el código. Idioma base: `{datos['idioma_base']}`.",
         "> Un texto repetido en un módulo cuenta una vez (clave única) y aparece con su número de usos.",
         "",
@@ -431,23 +494,34 @@ def informe(datos: dict) -> str:
     return "\n".join(lineas) + "\n"
 
 
+PERMITIDOS_TRAS_LA_MIGRACION = {"clave_params", "nombre_arg"}   # claves fijas de result.params (decisión D1) y nombres de argumentos
+
+
 def main() -> int:
+    global SRC
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--comprobar", action="store_true", help="falla si el JSON versionado no coincide con el código")
+    ap.add_argument("--src", metavar="DIR", help="directorio del paquete a analizar (por defecto src/walopy)")
+    ap.add_argument("--escribir", metavar="RUTA_JSON", help="escribe el inventario en JSON (y el informe en --informe)")
+    ap.add_argument("--informe", metavar="RUTA_MD", help="escribe el informe en Markdown")
     args = ap.parse_args()
+    if args.src:
+        SRC = Path(args.src)
     datos = construir()
-    nuevo = json.dumps(datos, ensure_ascii=False, indent=1, sort_keys=False) + "\n"
-    if args.comprobar:
-        actual = JSON_SALIDA.read_text(encoding="utf-8") if JSON_SALIDA.exists() else ""
-        if actual != nuevo:
-            print("El inventario i18n está desactualizado: ejecuta `python scripts/inventario_i18n.py` y revisa el diff "
-                  "(hay textos nuevos, cambiados o eliminados en src/).")
-            return 1
-        print(f"Inventario i18n al día: {datos['total']} textos únicos.")
+    if args.escribir:
+        Path(args.escribir).write_text(json.dumps(datos, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        if args.informe:
+            Path(args.informe).write_text(informe(datos), encoding="utf-8")
+        print(f"{datos['total']} textos únicos ({datos['usos']} usos) → {args.escribir}")
         return 0
-    JSON_SALIDA.write_text(nuevo, encoding="utf-8")
-    MD_SALIDA.write_text(informe(datos), encoding="utf-8")
-    print(f"{datos['total']} textos únicos ({datos['usos']} usos) → {JSON_SALIDA.relative_to(RAIZ)} y {MD_SALIDA.relative_to(RAIZ)}")
+    # modo por defecto: tras la migración no debe quedar ningún texto visible literal en el código
+    restantes = [e for e in datos["entradas"] if e["tipo"] not in PERMITIDOS_TRAS_LA_MIGRACION]
+    restantes += [{"tipo": "indirecto", "clave": f"{i['modulo']}.{i['funcion']}", "es": i["expresion"]} for i in datos["indirectos"]]
+    for e in restantes:
+        print(f"{e['tipo']:18s} {e.get('clave', '')}: {e['es']!r}")
+    if restantes:
+        print(f"\n{len(restantes)} texto(s) visible(s) fuera del catálogo: muévelos a _catalogo_es.py y usa _t(\"clave\").")
+        return 1
+    print("Sin textos visibles literales fuera del catálogo.")
     return 0
 
 

@@ -157,9 +157,12 @@ def _grafica(resultado):
     return textos
 
 
+NOMBRES_NUEVOS = {"set_language", "get_language", "language"}   # API de 0.4.0: v0.3.0 no la tenía, no hay salida de referencia
+
+
 def capturar_funciones(contrato) -> dict:
     salida: dict = {}
-    for nombre in sorted(contrato.BASE):
+    for nombre in sorted(set(contrato.BASE) - NOMBRES_NUEVOS):
         fn = getattr(wl, nombre)
         with warnings.catch_warnings(record=True) as avisos:
             warnings.simplefilter("always")
@@ -180,7 +183,7 @@ def capturar_funciones(contrato) -> dict:
 
 def capturar_errores(contrato) -> dict:
     salida: dict = {}
-    for nombre in sorted(contrato.BASE):
+    for nombre in sorted(set(contrato.BASE) - NOMBRES_NUEVOS):
         fn = getattr(wl, nombre)
         base = contrato.BASE[nombre]
         params = __import__("inspect").signature(fn).parameters
@@ -241,6 +244,9 @@ def capturar_escenarios() -> dict:
     return salida
 
 
+API_NUEVA = re.compile(r"\b(set_language|get_language|language)\(")   # no existía en v0.3.0: sus ejemplos no tienen salida de referencia
+
+
 def capturar_readme() -> dict:
     salida: dict = {}
     archivos = [RAIZ / "README.md", *sorted((RAIZ / "docs" / "source").glob("*.md"))]
@@ -252,6 +258,8 @@ def capturar_readme() -> dict:
             os.chdir(tmp)
             try:
                 for i, bloque in enumerate(patron.findall(archivo.read_text(encoding="utf-8")), 1):
+                    if API_NUEVA.search(bloque):
+                        continue
                     buf = io.StringIO()
                     try:
                         with warnings.catch_warnings(), redirect_stdout(buf):

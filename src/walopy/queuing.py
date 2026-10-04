@@ -5,6 +5,8 @@ import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from ._i18n import etiqueta_param
+from ._i18n import t as _t
 from ._utils import MAX_SERVIDORES, as_finite_scalar, as_int_positive, as_nonneg, as_positive
 
 if TYPE_CHECKING:
@@ -57,30 +59,31 @@ class QueueResult:
 
         return pd.DataFrame([{
             "model": self.model,
-            "λ (tasa de llegada)": self.lam,
-            "μ (tasa de servicio)": self.mu,
-            "c (servidores)": self.servers,
-            "ρ (utilización)": self.rho,
-            "L (en el sistema)": self.L,
-            "Lq (en cola)": self.Lq,
-            "W (tiempo en el sistema)": self.W,
-            "Wq (tiempo de espera)": self.Wq,
-            **self.params,
+            _t("queuing.cabecera.to_frame.tasa_llegada"): self.lam,
+            _t("queuing.cabecera.to_frame.tasa_servicio"): self.mu,
+            _t("queuing.cabecera.to_frame.servidores"): self.servers,
+            _t("queuing.cabecera.to_frame.utilizacion"): self.rho,
+            _t("queuing.cabecera.to_frame.sistema"): self.L,
+            _t("queuing.cabecera.to_frame.lq_cola"): self.Lq,
+            _t("queuing.cabecera.to_frame.tiempo_sistema"): self.W,
+            _t("queuing.cabecera.to_frame.wq_tiempo_espera"): self.Wq,
+            **{etiqueta_param(k): v for k, v in self.params.items()},
         }])
 
     def summary(self) -> str:
         lines = [
-            f"Modelo : {self.model}",
-            f"λ      : {self.lam:.6g}  (tasa de llegada)",
-            f"μ      : {self.mu:.6g}  (tasa de servicio por servidor)",
-            f"c      : {self.servers}  (servidores)",
-            f"ρ      : {self.rho:.6g}  (utilización por servidor)",
-            f"L      : {self.L:.6g}  (unidades promedio en el sistema)",
-            f"Lq     : {self.Lq:.6g}  (unidades promedio en cola)",
-            f"W      : {self.W:.6g}  (tiempo promedio en el sistema)",
-            f"Wq     : {self.Wq:.6g}  (tiempo promedio de espera en cola)",
+            _t("queuing.etiqueta.summary.modelo", model=self.model),
+            _t("queuing.etiqueta.summary.tasa_llegada", lam=self.lam),
+            _t("queuing.etiqueta.summary.tasa_servicio_servidor", mu=self.mu),
+            _t("queuing.etiqueta.summary.servidores", servers=self.servers),
+            _t("queuing.etiqueta.summary.utilizacion_servidor", rho=self.rho),
+            _t("queuing.etiqueta.summary.unidades_promedio_sistema", L=self.L),
+            _t("queuing.etiqueta.summary.lq_unidades_promedio_cola", Lq=self.Lq),
+            _t("queuing.etiqueta.summary.tiempo_promedio_sistema", W=self.W),
+            _t("queuing.etiqueta.summary.wq_tiempo_promedio_espera_cola", Wq=self.Wq),
         ]
         for k, v in self.params.items():
+            k = etiqueta_param(k)
             lines.append(f"  {k:8s}: {v:.6g}" if isinstance(v, float) else f"  {k:8s}: {v}")
         return "\n".join(lines)
 
@@ -131,7 +134,7 @@ def littles_law(
     provided = {k: v for k, v in {"L": L, "lam": lam, "W": W}.items() if v is not None}
     missing = [k for k, v in {"L": L, "lam": lam, "W": W}.items() if v is None]
     if len(missing) != 1:
-        raise ValueError("Exactamente una de L, lam, W debe ser None.")
+        raise ValueError(_t("queuing.error.littles_law.exactamente_lam_debe_ser_none"))
     for k, v in provided.items():
         as_positive(v, k)
     if missing[0] == "L":
@@ -177,7 +180,7 @@ def mm1(lam: float, mu: float) -> QueueResult:
     mu = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1. Se requiere λ < μ.")
+        raise ValueError(_t("queuing.error.mm1.sistema_inestable_requiere", rho=rho))
     Lq = rho**2 / (1 - rho)
     L  = rho / (1 - rho)
     Wq = Lq / lam
@@ -229,7 +232,7 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     rho = lam / (c * mu)
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1. Se requiere λ < c·μ.")
+        raise ValueError(_t("queuing.error.mmc.sistema_inestable_requiere", rho=rho))
     a = lam / mu  # carga ofrecida
 
     # Erlang-B por recurrencia (estable para c grande) y de ahí Erlang-C y P0.
@@ -248,7 +251,7 @@ def mmc(lam: float, mu: float, c: int) -> QueueResult:
     W  = Wq + 1 / mu
     L  = lam * W
     return QueueResult(
-        model=f"M/M/{c}", lam=lam, mu=mu, servers=c,
+        model=_t("queuing.modelo.mmc.texto", c=c), lam=lam, mu=mu, servers=c,
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
         params={
             "P0 (prob. de sistema vacío)": P0,
@@ -293,7 +296,7 @@ def md1(lam: float, mu: float) -> QueueResult:
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(_t("queuing.error.md1.sistema_inestable", rho=rho))
     Lq = rho**2 / (2 * (1 - rho))
     L  = rho + Lq
     Wq = Lq / lam
@@ -355,13 +358,13 @@ def kingman(
     cs2  = as_nonneg(cs2, "cs2")
     rho  = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(_t("queuing.error.md1.sistema_inestable", rho=rho))
     Wq = (rho / (1 - rho)) * ((ca2 + cs2) / 2) * (1 / mu)
     Lq = lam * Wq
     W  = Wq + 1 / mu
     L  = lam * W
     return QueueResult(
-        model="G/G/1 (Kingman)", lam=lam, mu=mu, servers=1,
+        model=_t("queuing.modelo.kingman.kingman"), lam=lam, mu=mu, servers=1,
         rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
         params={"ca² (CV² de llegadas)": ca2, "cs² (CV² de servicio)": cs2},
     )
@@ -416,7 +419,7 @@ def mg1(lam: float, mu: float, cs2: float) -> QueueResult:
     cs2  = as_nonneg(cs2, "cs2")
     rho  = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(_t("queuing.error.md1.sistema_inestable", rho=rho))
     ES2  = (1.0 + cs2) / mu**2          # E[S²]
     Wq   = lam * ES2 / (2.0 * (1.0 - rho))
     Lq   = lam * Wq
@@ -460,10 +463,10 @@ def cv2_triangular(a: float, m: float, b: float) -> float:
     m = as_finite_scalar(m, "m")
     b = as_finite_scalar(b, "b")
     if not (a <= m <= b):
-        raise ValueError("La triangular requiere a ≤ m ≤ b.")
+        raise ValueError(_t("queuing.error.cv2_triangular.triangular_requiere"))
     mean = (a + m + b) / 3.0
     if mean == 0.0:
-        raise ValueError("La media de la distribución es 0: CV² no está definido.")
+        raise ValueError(_t("queuing.error.cv2_triangular.media_distribucion_cv2_esta_definido"))
     var  = (a**2 + m**2 + b**2 - a*m - a*b - m*b) / 18.0
     return var / mean**2
 
@@ -493,10 +496,10 @@ def cv2_uniform(a: float, b: float) -> float:
     a = as_finite_scalar(a, "a")
     b = as_finite_scalar(b, "b")
     if b <= a:
-        raise ValueError("La uniforme requiere b > a.")
+        raise ValueError(_t("queuing.error.cv2_uniform.uniforme_requiere"))
     mean = (a + b) / 2.0
     if mean == 0.0:
-        raise ValueError("La media de la distribución es 0: CV² no está definido.")
+        raise ValueError(_t("queuing.error.cv2_triangular.media_distribucion_cv2_esta_definido"))
     var  = (b - a)**2 / 12.0
     return var / mean**2
 

@@ -1,7 +1,7 @@
 """Paridad entre idiomas del catálogo de mensajes (fase 1+ de la internacionalización).
 
-Los verificadores están activos desde la fase 0 (con catálogos de prueba); los tests sobre los catálogos reales esperan a que
-exista ``walopy._i18n`` y se activan solos entonces.
+Los verificadores se prueban con catálogos de prueba; el test sobre los catálogos reales se activa solo cuando el catálogo inglés
+deje de estar vacío.
 """
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from string import Formatter
 import pytest
 
 RAIZ = Path(__file__).resolve().parents[1]
-INVENTARIO = json.loads((RAIZ / "docs" / "auditoria" / "inventario_i18n.json").read_text(encoding="utf-8"))
+INVENTARIO = json.loads((RAIZ / "docs" / "auditoria" / "inventario_i18n_base.json").read_text(encoding="utf-8"))
 TIPOS_SIN_CLAVE_DE_CATALOGO = {"nombre_arg", "acceso_columna"}  # nombres de argumento y lecturas: no son textos a traducir
 
 
@@ -58,10 +58,12 @@ def test_detecta_traduccion_sin_hacer_salvo_exentas():
     assert errores_de_paridad(ES, EN, exentas=frozenset({"a.error.x"})) == []
 
 
-# --- catálogos reales (se activan cuando exista walopy._i18n) --------------------------------------------------------
+# --- catálogos reales -------------------------------------------------------------------------------------------------------------
 @pytest.fixture(scope="module")
 def i18n():
-    return pytest.importorskip("walopy._i18n", reason="fase 1 de la internacionalización pendiente")
+    from walopy import _i18n
+
+    return _i18n
 
 
 def test_el_catalogo_es_contiene_todas_las_claves_del_inventario(i18n):
@@ -70,6 +72,9 @@ def test_el_catalogo_es_contiene_todas_las_claves_del_inventario(i18n):
 
 
 def test_los_idiomas_tienen_las_mismas_claves_y_marcadores(i18n):
+    """Se activa cuando el catálogo inglés deja de estar vacío (fase 2); mientras tanto ``t()`` recurre al español."""
+    if not i18n.CATALOGOS["en"]:
+        pytest.skip("catálogo en inglés pendiente (fase 2): t() recurre al español")
     exentas = frozenset(getattr(i18n, "EXENTAS_DE_TRADUCCION", ()))
     errores = errores_de_paridad(i18n.CATALOGOS["es"], i18n.CATALOGOS["en"], exentas)
     assert not errores, "\n".join(errores[:20])

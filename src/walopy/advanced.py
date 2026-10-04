@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from ._i18n import t as _t
 from ._utils import (
     MAX_CLIENTES,
     MAX_ESTADOS,
@@ -138,7 +139,7 @@ def mm1k(lam: float, mu: float, K: int) -> QueueResult:
     util        = 1 - Pn[0]    # fraction of time server is busy
 
     return QueueResult(
-        model=f"M/M/1/{K}",
+        model=_t("advanced.modelo.mm1k.texto", K=K),
         lam=lam,
         mu=mu,
         servers=1,
@@ -200,27 +201,20 @@ class SimulationResult:
             "λ": self.lam,
             "μ": self.mu,
             "ρ": self.rho,
-            "Wq medio": self.Wq_mean,
-            "W medio": self.W_mean,
+            _t("advanced.cabecera.to_frame.wq_medio"): self.Wq_mean,
+            _t("advanced.cabecera.to_frame.medio"): self.W_mean,
             "Lq": self.Lq,
             "L": self.L,
-            "Wq p50": self.Wq_p50,
-            "Wq p90": self.Wq_p90,
-            "Wq p95": self.Wq_p95,
-            "Wq p99": self.Wq_p99,
-            "N clientes": self.n_customers,
+            _t("advanced.cabecera.to_frame.wq_p50"): self.Wq_p50,
+            _t("advanced.cabecera.to_frame.wq_p90"): self.Wq_p90,
+            _t("advanced.cabecera.to_frame.wq_p95"): self.Wq_p95,
+            _t("advanced.cabecera.to_frame.wq_p99"): self.Wq_p99,
+            _t("advanced.cabecera.to_frame.clientes"): self.n_customers,
         }])
 
     def summary(self) -> str:
         return (
-            f"Modelo   : {self.model}\n"
-            f"N        : {self.n_customers:,}\n"
-            f"ρ        : {self.rho:.4f}\n"
-            f"Wq medio : {self.Wq_mean:.6g}  (p50={self.Wq_p50:.4g}  p90={self.Wq_p90:.4g}"
-            f"  p95={self.Wq_p95:.4g}  p99={self.Wq_p99:.4g})\n"
-            f"W medio  : {self.W_mean:.6g}\n"
-            f"Lq       : {self.Lq:.6g}\n"
-            f"L        : {self.L:.6g}"
+            _t("advanced.etiqueta.summary.modelo_wq_medio_p50_p90", model=self.model, n_customers=self.n_customers, rho=self.rho, Wq_mean=self.Wq_mean, Wq_p50=self.Wq_p50, Wq_p90=self.Wq_p90, Wq_p95=self.Wq_p95, Wq_p99=self.Wq_p99, W_mean=self.W_mean, Lq=self.Lq, L=self.L)
         )
 
     def __str__(self) -> str:
@@ -287,7 +281,7 @@ def monte_carlo_gg1(
     n_customers = as_int_positive(n_customers, "n_customers", max=MAX_CLIENTES)
     rho         = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(_t("advanced.error.monte_carlo_gg1.sistema_inestable", rho=rho))
 
     rng          = np.random.default_rng(seed)
     mean_ia      = 1.0 / lam
@@ -317,7 +311,7 @@ def monte_carlo_gg1(
     pct        = np.percentile(wait, [50, 90, 95, 99])
 
     return SimulationResult(
-        model=f"Simulación G/G/1 (ca²={ca2:.3g}, cs²={cs2:.3g})",
+        model=_t("advanced.modelo.monte_carlo_gg1.simulacion_ca2_cs2", ca2=ca2, cs2=cs2),
         lam=lam,
         mu=mu,
         rho=rho,
@@ -405,11 +399,7 @@ class LineBalanceResult:
 
     def summary(self) -> str:
         return (
-            f"Tiempo takt             : {self.takt:.6g}\n"
-            f"Estaciones              : {self.n_stations}\n"
-            f"Mínimo teórico          : {self.theoretical_min_stations}\n"
-            f"Eficiencia de balance   : {self.balance_efficiency:.2%}\n"
-            f"Estación cuello de botella: {self.bottleneck}\n"
+            _t("advanced.etiqueta.summary.tiempo_takt_estaciones_minimo_teorico", takt=self.takt, n_stations=self.n_stations, theoretical_min_stations=self.theoretical_min_stations, balance_efficiency=self.balance_efficiency, bottleneck=self.bottleneck)
         )
 
     def __str__(self) -> str:
@@ -461,7 +451,7 @@ def line_balance(
     n      = len(names)
 
     if len(cts) != n:
-        raise ValueError("'station_names' y 'cycle_times' deben tener la misma longitud.")
+        raise ValueError(_t("advanced.error.line_balance.station_names_cycle_times_deben"))
 
     idle        = [max(takt - ct, 0.0) for ct in cts]
     utils       = [ct / takt for ct in cts]
@@ -472,11 +462,11 @@ def line_balance(
     min_stat    = math.ceil(sum_ct / takt)
 
     df = pd.DataFrame({
-        "Estación":    names,
-        "Tiempo_ciclo":  cts,
-        "Tiempo_ocioso":   idle,
-        "Utilización": utils,
-        "Sobrecargada": overloaded,
+        _t("columnas.columna_df.global.estacion"):    names,
+        _t("columnas.columna_df.global.tiempo_ciclo"):  cts,
+        _t("columnas.columna_df.global.tiempo_ocioso"):   idle,
+        _t("columnas.columna_df.global.utilizacion"): utils,
+        _t("columnas.columna_df.global.sobrecargada"): overloaded,
     })
 
     return LineBalanceResult(
@@ -524,23 +514,23 @@ class BreakEvenResult:
 
     def to_frame(self) -> pd.DataFrame:
         return pd.DataFrame([{
-            "PE (unidades)": self.bep_units,
-            "PE (ingresos)": self.bep_revenue,
-            "Margen de contribución": self.contribution_margin,
-            "Razón MC": self.contribution_margin_ratio,
-            "Margen de seguridad (unidades)": self.margin_of_safety_units,
-            "Margen de seguridad (%)": self.margin_of_safety_pct,
+            _t("advanced.cabecera.to_frame.pe_unidades"): self.bep_units,
+            _t("advanced.cabecera.to_frame.pe_ingresos"): self.bep_revenue,
+            _t("advanced.cabecera.to_frame.margen_contribucion"): self.contribution_margin,
+            _t("advanced.cabecera.to_frame.razon_mc"): self.contribution_margin_ratio,
+            _t("advanced.cabecera.to_frame.margen_seguridad_unidades"): self.margin_of_safety_units,
+            _t("advanced.cabecera.to_frame.margen_seguridad"): self.margin_of_safety_pct,
         }])
 
     def summary(self) -> str:
         lines = [
-            f"Punto de equilibrio (unidades): {self.bep_units:.4g}",
-            f"Punto de equilibrio (ingresos): {self.bep_revenue:.4g}",
-            f"Margen de contribución        : {self.contribution_margin:.4g}",
-            f"Razón de contribución         : {self.contribution_margin_ratio:.2%}",
+            _t("advanced.etiqueta.summary.punto_equilibrio_unidades", bep_units=self.bep_units),
+            _t("advanced.etiqueta.summary.punto_equilibrio_ingresos", bep_revenue=self.bep_revenue),
+            _t("advanced.etiqueta.summary.margen_contribucion", contribution_margin=self.contribution_margin),
+            _t("advanced.etiqueta.summary.razon_contribucion", contribution_margin_ratio=self.contribution_margin_ratio),
         ]
         if self.margin_of_safety_units:
-            lines.append(f"Margen de seguridad           : {self.margin_of_safety_units:.4g} unidades ({self.margin_of_safety_pct:.2%})")
+            lines.append(_t("advanced.etiqueta.summary.margen_seguridad_unidades", margin_of_safety_units=self.margin_of_safety_units, margin_of_safety_pct=self.margin_of_safety_pct))
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -595,7 +585,7 @@ def break_even(
 
     cm  = price_per_unit - variable_cost_per_unit
     if cm <= 0:
-        raise ValueError("price_per_unit debe superar a variable_cost_per_unit para obtener un margen de contribución positivo.")
+        raise ValueError(_t("advanced.error.break_even.price_per_unit_debe_superar"))
 
     cmr       = cm / price_per_unit
     bep_units = fixed_cost / cm
@@ -661,18 +651,17 @@ class BreakEvenMultiResult:
 
     def summary(self) -> str:
         lines = [
-            f"Punto de equilibrio (unidades totales): {self.bep_units_total:.4g}",
-            f"Punto de equilibrio (ingresos totales): {self.bep_revenue_total:.4g}",
-            f"MC ponderado promedio                 : {self.weighted_avg_cm:.4g}",
-            f"Razón MC ponderada                    : {self.cm_ratio_weighted:.2%}",
+            _t("advanced.etiqueta.summary.punto_equilibrio_unidades_totales", bep_units_total=self.bep_units_total),
+            _t("advanced.etiqueta.summary.punto_equilibrio_ingresos_totales", bep_revenue_total=self.bep_revenue_total),
+            _t("advanced.etiqueta.summary.mc_ponderado_promedio", weighted_avg_cm=self.weighted_avg_cm),
+            _t("advanced.etiqueta.summary.razon_mc_ponderada", cm_ratio_weighted=self.cm_ratio_weighted),
             "",
-            f"{'Producto':<18} {'Precio':>8} {'CV':>8} {'MC':>8} {'Mezcla':>6} {'PE unid.':>10} {'PE ingr.':>10}",
+            f"{_t('advanced.texto_en_expresion.summary.producto'):<18} {_t('advanced.texto_en_expresion.summary.precio'):>8} {_t('advanced.texto_en_expresion.summary.cv'):>8} {_t('advanced.texto_en_expresion.summary.mc'):>8} {_t('advanced.texto_en_expresion.summary.mezcla'):>6} {_t('advanced.texto_en_expresion.summary.pe_unid'):>10} {_t('advanced.texto_en_expresion.summary.pe_ingr'):>10}",
             "-" * 72,
         ]
         for row in self.items:
             lines.append(
-                f"{row['Producto']:<18} {row['Precio']:>8.4g} {row['Costo variable']:>8.4g} "
-                f"{row['MC']:>8.4g} {row['Mezcla']:>6.2%} {row['PE unidades']:>10.4g} {row['PE ingresos']:>10.4g}"
+                f"{row[_t('columnas.columna_df.global.producto')]:<18} {row[_t('columnas.columna_df.global.precio')]:>8.4g} {row[_t('columnas.columna_df.global.costo_variable')]:>8.4g} {row['MC']:>8.4g} {row[_t('columnas.columna_df.global.mezcla')]:>6.2%} {row[_t('columnas.columna_df.global.pe_unidades')]:>10.4g} {row[_t('columnas.columna_df.global.pe_ingresos')]:>10.4g}"
             )
         return "\n".join(lines)
 
@@ -738,21 +727,21 @@ def break_even_multi(
     sales_mix      = as_float_list(sales_mix, "sales_mix", kind="nonneg")
     n = len(prices)
     if len(variable_costs) != n or len(sales_mix) != n:
-        raise ValueError("prices, variable_costs y sales_mix deben tener la misma longitud.")
+        raise ValueError(_t("advanced.error.break_even_multi.prices_variable_costs_sales_mix"))
     if names is None:
-        names = [f"Producto-{i+1}" for i in range(n)]
+        names = [_t("advanced.valor_por_defecto.break_even_multi.producto", expr=i + 1) for i in range(n)]
     elif len(list(names)) != n:
-        raise ValueError("'names' debe tener la misma longitud que prices.")
+        raise ValueError(_t("advanced.error.break_even_multi.names_debe_tener_misma_longitud"))
     fixed_cost = as_positive(fixed_cost, "fixed_cost")
 
     total_mix = sum(sales_mix)
     if total_mix <= 0:
-        raise ValueError("La suma de sales_mix debe ser positiva.")
+        raise ValueError(_t("advanced.error.break_even_multi.suma_sales_mix_debe_ser"))
     mix_frac = [m / total_mix for m in sales_mix]
 
     cms = [p - v for p, v in zip(prices, variable_costs)]
     if any(cm <= 0 for cm in cms):
-        raise ValueError("Todos los productos deben tener margen de contribución positivo (precio > costo variable).")
+        raise ValueError(_t("advanced.error.break_even_multi.todos_productos_deben_tener_margen"))
 
     wacm     = sum(cm * mf for cm, mf in zip(cms, mix_frac))
     avg_price = sum(p * mf for p, mf in zip(prices, mix_frac))
@@ -763,13 +752,13 @@ def break_even_multi(
     for i in range(n):
         bep_i = bep_total * mix_frac[i]
         items.append({
-            "Producto": names[i],
-            "Precio": prices[i],
-            "Costo variable": variable_costs[i],
+            _t("columnas.columna_df.global.producto"): names[i],
+            _t("columnas.columna_df.global.precio"): prices[i],
+            _t("columnas.columna_df.global.costo_variable"): variable_costs[i],
             "MC": cms[i],
-            "Mezcla": mix_frac[i],
-            "PE unidades": bep_i,
-            "PE ingresos": bep_i * prices[i],
+            _t("columnas.columna_df.global.mezcla"): mix_frac[i],
+            _t("columnas.columna_df.global.pe_unidades"): bep_i,
+            _t("columnas.columna_df.global.pe_ingresos"): bep_i * prices[i],
         })
 
     return BreakEvenMultiResult(
@@ -827,7 +816,7 @@ def break_even_sales(
     fc  = as_positive(fixed_cost, "fixed_cost")
     vcr = as_fraction(variable_cost_ratio, "variable_cost_ratio")
     if vcr == 0.0 or vcr == 1.0:
-        raise ValueError("'variable_cost_ratio' debe estar estrictamente entre 0 y 1.")
+        raise ValueError(_t("advanced.error.break_even_sales.variable_cost_ratio_debe_estar"))
 
     cmr       = 1.0 - vcr
     bep_sales = fc / cmr
@@ -894,14 +883,14 @@ def queue_length_pmf(lam: float, mu: float, n_max: int = 30) -> pd.DataFrame:
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(_t("advanced.error.monte_carlo_gg1.sistema_inestable", rho=rho))
     if isinstance(n_max, bool) or not isinstance(n_max, (int, np.integer)):
-        raise TypeError(f"'n_max' debe ser un entero >= 0, se recibió {type(n_max).__name__!r}.")
+        raise TypeError(_t("advanced.error.queue_length_pmf.max_debe_ser_entero_recibio", __name__=type(n_max).__name__))
     if not 0 <= n_max <= MAX_ESTADOS:
-        raise ValueError(f"'n_max' debe estar entre 0 y {MAX_ESTADOS}, se recibió {n_max!r}.")
+        raise ValueError(_t("advanced.error.queue_length_pmf.max_debe_estar_entre_recibio", MAX_ESTADOS=MAX_ESTADOS, n_max=n_max))
     ns    = np.arange(0, n_max + 1)
     pmf   = (1 - rho) * rho**ns
-    return pd.DataFrame({"n": ns, "P(N=n)": pmf, "P(N<=n)": np.cumsum(pmf)})
+    return pd.DataFrame({"n": ns, _t("columnas.columna_df.global.texto_2"): pmf, _t("columnas.columna_df.global.texto"): np.cumsum(pmf)})
 
 
 def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int = 200) -> pd.DataFrame:
@@ -944,7 +933,7 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     mu  = as_positive(mu, "mu")
     rho = lam / mu
     if rho >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ = {rho:.4g} ≥ 1.")
+        raise ValueError(_t("advanced.error.monte_carlo_gg1.sistema_inestable", rho=rho))
     n_points = as_int_positive(n_points, "n_points", max=MAX_ESTADOS)
     W_mean = 1.0 / (mu - lam)
     t_upper = as_positive(t_max, "t_max") if t_max is not None else 5.0 * W_mean
@@ -952,7 +941,7 @@ def sojourn_cdf(lam: float, mu: float, t_max: float | None = None, n_points: int
     rate    = mu - lam
     cdf     = 1.0 - np.exp(-rate * t)
     pdf     = rate * np.exp(-rate * t)
-    return pd.DataFrame({"t": t, "F(t)": cdf, "f(t)": pdf})
+    return pd.DataFrame({"t": t, _t("columnas.columna_df.global.texto_3"): cdf, _t("columnas.columna_df.global.texto_4"): pdf})
 
 
 # ---------------------------------------------------------------------------
@@ -1000,7 +989,7 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
     c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
     K   = as_int_positive(K, "K", max=MAX_ESTADOS)
     if K < c:
-        raise ValueError(f"'K' (capacidad del sistema) debe ser ≥ c (servidores); se recibió K={K}, c={c}.")
+        raise ValueError(_t("advanced.error.mmck.capacidad_sistema_debe_ser_servidores", K=K, c=c))
 
     a   = lam / mu           # offered load
 
@@ -1030,7 +1019,7 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
     util    = lam_eff / (c * mu)  # effective server utilization
 
     return QueueResult(
-        model=f"M/M/{c}/{K}",
+        model=_t("advanced.modelo.mmck.texto", c=c, K=K),
         lam=lam, mu=mu, servers=c,
         rho=util, L=L, Lq=Lq, W=W, Wq=Wq,
         params={
@@ -1070,13 +1059,13 @@ class PriorityQueueResult:
 
     def to_frame(self) -> pd.DataFrame:
         return pd.DataFrame(self.classes).rename(
-            columns={"class_id": "id_clase", "lam": "λ", "rho": "ρ"}
+            columns={"class_id": _t("advanced.cabecera.to_frame.id_clase"), "lam": "λ", "rho": "ρ"}
         )
 
     def summary(self) -> str:
         lines = [
-            f"M/M/1 con prioridad HOL no expropiativa  (μ={self.mu:.6g}, ρ={self.rho_total:.4g})",
-            f"{'Clase':>6}  {'λ':>10}  {'ρ':>8}  {'Wq':>12}  {'W':>12}  {'Lq':>10}  {'L':>10}",
+            _t("advanced.etiqueta.summary.prioridad_hol_expropiativa", mu=self.mu, rho_total=self.rho_total),
+            f"{_t('advanced.texto_en_expresion.summary.clase'):>6}  {'λ':>10}  {'ρ':>8}  {_t('advanced.texto_en_expresion.summary.wq'):>12}  {_t('advanced.texto_en_expresion.summary.texto_2'):>12}  {_t('advanced.texto_en_expresion.summary.lq'):>10}  {_t('advanced.texto_en_expresion.summary.texto'):>10}",
             "-" * 72,
         ]
         for cl in self.classes:
@@ -1142,15 +1131,15 @@ def mm1_priority(
     mu   = as_positive(mu, "mu")
     N    = len(lams)
     if N == 0:
-        raise ValueError("'lam_list' debe contener al menos una clase.")
+        raise ValueError(_t("advanced.error.mm1_priority.lam_list_debe_contener_menos"))
 
     rho_total = sum(lams) / mu
     if rho_total >= 1.0:
-        raise ValueError(f"Sistema inestable: ρ_total = {rho_total:.4g} ≥ 1.")
+        raise ValueError(_t("advanced.error.mm1_priority.sistema_inestable_total", rho_total=rho_total))
 
     names = list(class_names) if class_names else [str(i) for i in range(N)]
     if len(names) != N:
-        raise ValueError("'class_names' debe tener la misma longitud que 'lam_list'.")
+        raise ValueError(_t("advanced.error.mm1_priority.class_names_debe_tener_misma"))
 
     # Residual service time for M/M/1 (exponential, cv²=1): R = ρ/μ
     R = rho_total / mu

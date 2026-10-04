@@ -1,15 +1,21 @@
 # PLAN I18N — walopy en español (por defecto) e inglés
 
-> Estado: **Fase 0 terminada** (2026-10-04). Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**.
-> Evidencia: `docs/auditoria/inventario_i18n.json` (generado por `scripts/inventario_i18n.py`) y `INVENTARIO_I18N.md`. Todo número de este plan sale de ese inventario.
+> Estado: **Fases 0 y 1 terminadas** (2026-10-04); fases 2 y 3 pendientes. Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
+> Evidencia: `docs/auditoria/inventario_i18n_base.json` (línea base **congelada** de v0.3.0, generada con `scripts/inventario_i18n.py --src <código de v0.3.0>`) y `INVENTARIO_I18N.md`. Todo número de este plan sale de ese inventario.
+
+> **Corrección sobre la Fase 0 (hecha en la Fase 1).** El primer inventario contó **667** textos y afirmó cobertura del 100 %. Era incompleto: no veía los textos escondidos en
+> expresiones (`x or 'ninguna'`, `'ventas' if … else 'unidades'`), las claves de columna leídas dentro de f-strings (`row['Artículo']`) ni f-strings con solo marcadores, y
+> clasificaba como «nombre de argumento» ocho mensajes completos que empezaban por `items[{idx}]…`. El extractor se rehízo (AST con posiciones exactas) y el inventario
+> definitivo tiene **645 textos únicos** (762 usos), con un tipo nuevo `texto_en_expresion`. La cobertura ya no se afirma por el recuento sino por tres controles independientes
+> (ver «Verificación» abajo). Lección: un inventario se valida migrando de verdad, no solo contando.
 
 ## 1. Resultado de la Fase 0
 
 | Medida | Valor |
 |---|---|
-| Textos únicos en `src/walopy` | **667** (820 usos; los repetidos comparten clave) |
+| Textos únicos en `src/walopy` | ~~667~~ → **645** tras la corrección (762 usos; los repetidos comparten clave) |
 | Sin clasificar / mensajes construidos fuera del `raise` | **0 / 0** (lo comprueba un test) |
-| Cobertura medida con un método **independiente** del extractor | 261 cadenas con rasgos del español fuera de docstrings, **0 ausentes** del inventario |
+| Cobertura medida con un método **independiente** del extractor | (fase 0: 261 cadenas, 0 ausentes — insuficiente, ver la corrección). Fase 1: ver «Verificación» |
 | Plantillas con variables (grupos A+B, 536 textos) | 175 (361 son fijas); solo 19 con expresiones complejas (hay que precalcular el valor) |
 
 ### Los 667 textos, por grupo de riesgo
@@ -54,15 +60,23 @@ Si esos textos cambian con el idioma sin más, `result.params[...]` y `df["Estac
 | Fase | Qué | Criterio de aceptación | Esfuerzo |
 |---|---|---|---|
 | **0** ✅ | Inventario, claves, tests de paridad e inventario al día | hecho: 667 textos, 0 sin clasificar, cobertura independiente 100 % | 1 día |
-| **1** | `_i18n.py` + migración de A, B y C (según D1–D3) **solo en español**; fixture que fija `es` | los **1 288+ tests pasan sin cambiar uno**; la salida en español es **idéntica** a la de v0.3.0 (comparación contra el tag); `test_i18n_paridad` activo | 1–1,5 semanas |
+| **1** ✅ | `_i18n.py` + migración de A, B y C (según D1–D3) **solo en español**; fixture que fija `es` | hecho: los tests existentes pasan (solo se adaptó `test_idioma.py`, cuyo objeto —mensajes literales— ya no existe); salida en español **idéntica** a la de v0.3.0 (`tests/test_salida_identica.py`); `make check` verde; suites en Python 3.9 (mínimos y recientes), 3.10, 3.11 y 3.13 | 1 día |
 | **2** | Catálogo `en` + tests por idioma; `test_idioma.py` generalizado por catálogo | paridad total de claves y marcadores; cada mensaje comprobado en `en` | ~1 semana |
 | **3** | Documentación en inglés (README, Sphinx con `sphinx-intl`), CHANGELOG, release **0.4.0** | `sphinx -W` en ambos idiomas; `make check` en verde | ~1 semana |
 
-Riesgo conocido: durante las fases 1–3 el inventario se mantiene al día con `python scripts/inventario_i18n.py` (un test falla si se añade un texto sin regenerarlo).
+## 5b. Verificación de la Fase 1 (lo que demuestra que no se rompió nada)
+1. **Instantánea de salida** (`tests/golden/salida_es.json`, generada con el código de v0.3.0): resultado, `str`, `summary()`, `to_frame()`, gráficas, errores del contrato de entradas, escenarios, bloques del README y CLI. Control negativo: cambiar una letra de un mensaje la rompe.
+2. **Extractor** (`python scripts/inventario_i18n.py`): no quedan textos visibles literales en `src/` (salvo claves fijas de `params`, decisión D1).
+3. **Controles independientes** (`tests/test_inventario_i18n.py`): ningún `raise`/`warnings.warn` contiene prosa literal; todo literal con rasgos del español es una clave fija de `params`; cada `_t("clave", …)` pasa exactamente los marcadores de su plantilla; cada clave usada existe y ninguna clave del catálogo queda huérfana; el texto español del catálogo es idéntico al de v0.3.0.
+4. **Hallazgos durante la verificación** (ambos con la salida en español idéntica, es decir, invisibles para el control 1): (a) la migración había sustituido por error la clave de datos `o["covers_periods"]` por una etiqueta (`_t("…covers_periods")`, cuyo texto español es el mismo): habría roto el inglés; lo detectó la comparación entre el catálogo y la base regenerada y ahora lo vigila `test_el_catalogo_no_tiene_claves_que_no_estaban_en_v030`; (b) siete mensajes que empezaban por `items[{idx}]…`/`activities[{i}]…` seguían en español porque el extractor los tomaba por nombres de argumento; los encontró el control 3 (literales con rasgos del español). Lección: la identidad de la salida en español **no** basta para validar una migración; hacen falta los controles 2 y 3 y comparar el catálogo con la base.
 
-## 6. Cómo reproducir la Fase 0
+Riesgo conocido: al añadir un texto visible hay que ponerlo en ambos catálogos (`CLAUDE.md`, sección «Internacionalización»); los tests lo exigen.
+
+## 6. Cómo reproducir las fases 0 y 1
 ```bash
-python scripts/inventario_i18n.py             # regenera inventario_i18n.json e INVENTARIO_I18N.md
-python scripts/inventario_i18n.py --comprobar # falla si están desactualizados
-python -m pytest tests/test_inventario_i18n.py tests/test_i18n_paridad.py
+S=$(mktemp -d); git archive v0.3.0 src | tar -x -C $S    # código anterior a la migración
+python scripts/inventario_i18n.py --src $S/src/walopy --escribir docs/auditoria/inventario_i18n_base.json --informe docs/auditoria/INVENTARIO_I18N.md
+python scripts/inventario_i18n.py             # falla si quedan textos literales en src/ (make inventario-i18n)
+python scripts/instantanea_salida.py --comprobar tests/golden/salida_es.json
+python -m pytest tests/test_inventario_i18n.py tests/test_i18n_paridad.py tests/test_i18n.py tests/test_salida_identica.py
 ```

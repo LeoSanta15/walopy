@@ -38,7 +38,8 @@ pip install walopy
 21. [Gráficas](#21-gráficas)
 22. [CLI](#22-cli)
 23. [Referencia de módulos](#23-referencia-de-módulos)
-24. [Requisitos](#24-requisitos)
+24. [Idioma de los textos](#24-idioma-de-los-textos)
+25. [Requisitos](#25-requisitos)
 
 ---
 
@@ -1768,7 +1769,39 @@ Wq     : 0.3   (tiempo promedio de espera en cola)
 
 ---
 
-## 24. Requisitos
+## 24. Idioma de los textos
+
+Los mensajes de error, avisos, etiquetas de `summary()`, cabeceras de `to_frame()`, títulos de gráficas y la ayuda del CLI se muestran en el
+idioma activo. **El español es el idioma por defecto**; el inglés (`"en"`) está en preparación (0.4.0) y, mientras falte la traducción
+de un texto, se muestra en español: nunca falla por eso.
+
+El idioma se elige, de mayor a menor prioridad, con:
+
+1. `with walopy.language("en"):` — solo dentro del bloque (seguro con hilos y `asyncio`).
+2. `walopy.set_language("en")` — para todo el proceso.
+3. La variable de entorno `WALOPY_LANG=en` (también para el CLI). Un valor desconocido se ignora y se usa el español.
+
+```python
+import walopy as wl
+
+wl.get_language()                  # 'es' (por defecto)
+with wl.language("es"):            # cambia el idioma solo dentro del bloque
+    print(wl.mm1(2, 3).summary().splitlines()[0])
+wl.set_language("es")              # fija el idioma para todo el proceso
+try:
+    wl.set_language("fr")          # un idioma no admitido lanza ValueError
+except ValueError as e:
+    print(e)
+```
+
+Qué **no** cambia con el idioma: los nombres de funciones y argumentos, las claves de `result.params` (por ejemplo `"P0 (prob. de sistema vacío)"`;
+`summary()` sí muestra su etiqueta traducida) y los nombres de las claves de datos (`"Q*"`, `"name"`). Los nombres de las **columnas** de los
+`DataFrame` y los nombres por defecto (`Artículo1`) se crean en el idioma activo en ese momento; si cambias de idioma entre crear y usar
+una tabla, `walopy` sigue encontrando sus columnas, pero tu propio código debe usar el nombre que la tabla tenga.
+
+---
+
+## 25. Requisitos
 
 ```
 Python ≥ 3.9

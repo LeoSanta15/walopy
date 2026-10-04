@@ -42,7 +42,7 @@ obsoletas:
 regresion:
 	@if git describe --tags --abbrev=0 > /dev/null 2>&1; then $(PYTHON) scripts/verificar_regresion.py --manifiesto tests/regresiones.json; else echo "OMITIDO: no hay tags de git (git fetch --tags)"; fi
 
-# Inventario del texto visible (internacionalización): regenera docs/auditoria/inventario_i18n.json y INVENTARIO_I18N.md.
+# Internacionalización: falla si quedan textos visibles escritos directamente en src/ (deben ir en _catalogo_es.py y usarse con _t("clave")).
 inventario-i18n:
 	$(PYTHON) scripts/inventario_i18n.py
 

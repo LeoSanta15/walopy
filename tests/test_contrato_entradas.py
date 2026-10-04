@@ -41,6 +41,9 @@ PERT = [
 ]
 
 BASE = {
+    "set_language": dict(lang="es"),
+    "get_language": dict(),
+    "language": dict(lang="es"),
     "littles_law": dict(L=None, lam=2.0, W=3.0),
     "mm1": dict(lam=2.0, mu=3.0),
     "mmc": dict(lam=2.0, mu=3.0, c=2),

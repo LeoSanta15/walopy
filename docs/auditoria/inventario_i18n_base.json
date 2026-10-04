@@ -1,8 +1,8 @@
 {
  "version": 1,
  "idioma_base": "es",
- "total": 667,
- "usos": 820,
+ "total": 645,
+ "usos": 762,
  "entradas": [
   {
    "clave": "main.cli.add_lam_mu.tasa_llegadas",
@@ -593,6 +593,90 @@
    ]
   },
   {
+   "clave": "columnas.acceso_columna.global.costo_variable",
+   "tipo": "acceso_columna",
+   "modulo": "advanced",
+   "funcion": "advanced.BreakEvenMultiResult.summary",
+   "funciones": [
+    "advanced.BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Costo variable",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.costo_variable"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.mezcla",
+   "tipo": "acceso_columna",
+   "modulo": "advanced",
+   "funcion": "advanced.BreakEvenMultiResult.summary",
+   "funciones": [
+    "advanced.BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Mezcla",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.mezcla"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.pe_ingresos",
+   "tipo": "acceso_columna",
+   "modulo": "advanced",
+   "funcion": "advanced.BreakEvenMultiResult.summary",
+   "funciones": [
+    "advanced.BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "PE ingresos",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.pe_ingresos"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.pe_unidades",
+   "tipo": "acceso_columna",
+   "modulo": "advanced",
+   "funcion": "advanced.BreakEvenMultiResult.summary",
+   "funciones": [
+    "advanced.BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "PE unidades",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.pe_unidades"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.precio",
+   "tipo": "acceso_columna",
+   "modulo": "advanced",
+   "funcion": "advanced.BreakEvenMultiResult.summary",
+   "funciones": [
+    "advanced.BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Precio",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.precio"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.producto",
+   "tipo": "acceso_columna",
+   "modulo": "advanced",
+   "funcion": "advanced.BreakEvenMultiResult.summary",
+   "funciones": [
+    "advanced.BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Producto",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.producto"
+  },
+  {
    "clave": "advanced.cabecera.to_frame.margen_contribucion",
    "tipo": "cabecera",
    "modulo": "advanced",
@@ -922,12 +1006,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.break_even_multi.costo_variable",
+   "clave": "columnas.columna_df.global.costo_variable",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "break_even_multi",
+   "funcion": "advanced.break_even_multi",
    "funciones": [
-    "break_even_multi"
+    "advanced.break_even_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -935,12 +1019,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.break_even_multi.mezcla",
+   "clave": "columnas.columna_df.global.mezcla",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "break_even_multi",
+   "funcion": "advanced.break_even_multi",
    "funciones": [
-    "break_even_multi"
+    "advanced.break_even_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -948,12 +1032,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.break_even_multi.pe_ingresos",
+   "clave": "columnas.columna_df.global.pe_ingresos",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "break_even_multi",
+   "funcion": "advanced.break_even_multi",
    "funciones": [
-    "break_even_multi"
+    "advanced.break_even_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -961,12 +1045,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.break_even_multi.pe_unidades",
+   "clave": "columnas.columna_df.global.pe_unidades",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "break_even_multi",
+   "funcion": "advanced.break_even_multi",
    "funciones": [
-    "break_even_multi"
+    "advanced.break_even_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -974,12 +1058,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.break_even_multi.precio",
+   "clave": "columnas.columna_df.global.precio",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "break_even_multi",
+   "funcion": "advanced.break_even_multi",
    "funciones": [
-    "break_even_multi"
+    "advanced.break_even_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -987,12 +1071,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.break_even_multi.producto",
+   "clave": "columnas.columna_df.global.producto",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "break_even_multi",
+   "funcion": "advanced.break_even_multi",
    "funciones": [
-    "break_even_multi"
+    "advanced.break_even_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1000,12 +1084,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.line_balance.estacion",
+   "clave": "columnas.columna_df.global.estacion",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "line_balance",
+   "funcion": "advanced.line_balance",
    "funciones": [
-    "line_balance"
+    "advanced.line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1013,12 +1097,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.line_balance.sobrecargada",
+   "clave": "columnas.columna_df.global.sobrecargada",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "line_balance",
+   "funcion": "advanced.line_balance",
    "funciones": [
-    "line_balance"
+    "advanced.line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1026,12 +1110,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.line_balance.tiempo_ciclo",
+   "clave": "columnas.columna_df.global.tiempo_ciclo",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "line_balance",
+   "funcion": "advanced.line_balance",
    "funciones": [
-    "line_balance"
+    "advanced.line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1039,12 +1123,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.line_balance.tiempo_ocioso",
+   "clave": "columnas.columna_df.global.tiempo_ocioso",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "line_balance",
+   "funcion": "advanced.line_balance",
    "funciones": [
-    "line_balance"
+    "advanced.line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1052,12 +1136,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.line_balance.utilizacion",
+   "clave": "columnas.columna_df.global.utilizacion",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "line_balance",
+   "funcion": "advanced.line_balance",
    "funciones": [
-    "line_balance"
+    "advanced.line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1065,12 +1149,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.queue_length_pmf.texto",
+   "clave": "columnas.columna_df.global.texto",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "queue_length_pmf",
+   "funcion": "advanced.queue_length_pmf",
    "funciones": [
-    "queue_length_pmf"
+    "advanced.queue_length_pmf"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1078,12 +1162,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.queue_length_pmf.texto_2",
+   "clave": "columnas.columna_df.global.texto_2",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "queue_length_pmf",
+   "funcion": "advanced.queue_length_pmf",
    "funciones": [
-    "queue_length_pmf"
+    "advanced.queue_length_pmf"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1091,12 +1175,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.sojourn_cdf.texto",
+   "clave": "columnas.columna_df.global.texto_3",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "sojourn_cdf",
+   "funcion": "advanced.sojourn_cdf",
    "funciones": [
-    "sojourn_cdf"
+    "advanced.sojourn_cdf"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1104,12 +1188,12 @@
    "marcadores": []
   },
   {
-   "clave": "advanced.columna_df.sojourn_cdf.texto_2",
+   "clave": "columnas.columna_df.global.texto_4",
    "tipo": "columna_df",
    "modulo": "advanced",
-   "funcion": "sojourn_cdf",
+   "funcion": "advanced.sojourn_cdf",
    "funciones": [
-    "sojourn_cdf"
+    "advanced.sojourn_cdf"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -1355,72 +1439,6 @@
    ]
   },
   {
-   "clave": "advanced.etiqueta.summary.10_4g",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary",
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 5,
-   "complejidad": "fija",
-   "es": ">10.4g",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.4g",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 3,
-   "complejidad": "fija",
-   "es": ">8.4g",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.cv",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "CV",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.costo_variable",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Costo variable",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.mc",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "MC",
-   "marcadores": []
-  },
-  {
    "clave": "advanced.etiqueta.summary.mc_ponderado_promedio",
    "tipo": "etiqueta",
    "modulo": "advanced",
@@ -1440,97 +1458,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "advanced.etiqueta.summary.mezcla",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Mezcla",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.pe_ingr",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "PE ingr.",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.pe_ingresos",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "PE ingresos",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.pe_unid",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "PE unid.",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.pe_unidades",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "PE unidades",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.precio",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Precio",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.producto",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "BreakEvenMultiResult.summary",
-   "funciones": [
-    "BreakEvenMultiResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Producto",
-   "marcadores": []
   },
   {
    "clave": "advanced.etiqueta.summary.punto_equilibrio_ingresos_totales",
@@ -1757,71 +1684,6 @@
    ]
   },
   {
-   "clave": "advanced.etiqueta.summary.12_6g",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": ">12.6g",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.4f",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": ">8.4f",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.clase",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Clase",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.texto",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "L",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.lq",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Lq",
-   "marcadores": []
-  },
-  {
    "clave": "advanced.etiqueta.summary.prioridad_hol_expropiativa",
    "tipo": "etiqueta",
    "modulo": "advanced",
@@ -1848,71 +1710,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "advanced.etiqueta.summary.texto_2",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "W",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.wq",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Wq",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.class_id",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "class_id",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.lam",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "lam",
-   "marcadores": []
-  },
-  {
-   "clave": "advanced.etiqueta.summary.rho",
-   "tipo": "etiqueta",
-   "modulo": "advanced",
-   "funcion": "PriorityQueueResult.summary",
-   "funciones": [
-    "PriorityQueueResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "rho",
-   "marcadores": []
   },
   {
    "clave": "advanced.etiqueta.summary.modelo_wq_medio_p50_p90",
@@ -2128,6 +1925,174 @@
    ]
   },
   {
+   "clave": "advanced.texto_en_expresion.summary.cv",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "CV",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.mc",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "MC",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.mezcla",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Mezcla",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.pe_ingr",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "PE ingr.",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.pe_unid",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "PE unid.",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.precio",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Precio",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.producto",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "BreakEvenMultiResult.summary",
+   "funciones": [
+    "BreakEvenMultiResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Producto",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.clase",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "PriorityQueueResult.summary",
+   "funciones": [
+    "PriorityQueueResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Clase",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.texto",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "PriorityQueueResult.summary",
+   "funciones": [
+    "PriorityQueueResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "L",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.lq",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "PriorityQueueResult.summary",
+   "funciones": [
+    "PriorityQueueResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Lq",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.texto_2",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "PriorityQueueResult.summary",
+   "funciones": [
+    "PriorityQueueResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "W",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "advanced.texto_en_expresion.summary.wq",
+   "tipo": "texto_en_expresion",
+   "modulo": "advanced",
+   "funcion": "PriorityQueueResult.summary",
+   "funciones": [
+    "PriorityQueueResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Wq",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
    "clave": "advanced.valor_por_defecto.break_even_multi.producto",
    "tipo": "valor_por_defecto",
    "modulo": "advanced",
@@ -2266,58 +2231,6 @@
    "marcadores": []
   },
   {
-   "clave": "bottleneck.etiqueta.summary.10_4g",
-   "tipo": "etiqueta",
-   "modulo": "bottleneck",
-   "funcion": "BottleneckResult.summary",
-   "funciones": [
-    "BottleneckResult.summary"
-   ],
-   "usos": 3,
-   "complejidad": "fija",
-   "es": ">10.4g",
-   "marcadores": []
-  },
-  {
-   "clave": "bottleneck.etiqueta.summary.capacidad",
-   "tipo": "etiqueta",
-   "modulo": "bottleneck",
-   "funcion": "BottleneckResult.summary",
-   "funciones": [
-    "BottleneckResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Capacidad",
-   "marcadores": []
-  },
-  {
-   "clave": "bottleneck.etiqueta.summary.demanda",
-   "tipo": "etiqueta",
-   "modulo": "bottleneck",
-   "funcion": "BottleneckResult.summary",
-   "funciones": [
-    "BottleneckResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Demanda",
-   "marcadores": []
-  },
-  {
-   "clave": "bottleneck.etiqueta.summary.estacion",
-   "tipo": "etiqueta",
-   "modulo": "bottleneck",
-   "funcion": "BottleneckResult.summary",
-   "funciones": [
-    "BottleneckResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Estación",
-   "marcadores": []
-  },
-  {
    "clave": "bottleneck.etiqueta.summary.estacion_cuello_botella",
    "tipo": "etiqueta",
    "modulo": "bottleneck",
@@ -2337,19 +2250,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "bottleneck.etiqueta.summary.holgura",
-   "tipo": "etiqueta",
-   "modulo": "bottleneck",
-   "funcion": "BottleneckResult.summary",
-   "funciones": [
-    "BottleneckResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Holgura",
-   "marcadores": []
   },
   {
    "clave": "bottleneck.etiqueta.summary.tasa_demanda",
@@ -2394,19 +2294,6 @@
    ]
   },
   {
-   "clave": "bottleneck.etiqueta.summary.util",
-   "tipo": "etiqueta",
-   "modulo": "bottleneck",
-   "funcion": "BottleneckResult.summary",
-   "funciones": [
-    "BottleneckResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Util.",
-   "marcadores": []
-  },
-  {
    "clave": "bottleneck.nombre_arg.bottleneck_analysis.capacity",
    "tipo": "nombre_arg",
    "modulo": "bottleneck",
@@ -2447,6 +2334,76 @@
      "simple": true
     }
    ]
+  },
+  {
+   "clave": "bottleneck.texto_en_expresion.summary.capacidad",
+   "tipo": "texto_en_expresion",
+   "modulo": "bottleneck",
+   "funcion": "BottleneckResult.summary",
+   "funciones": [
+    "BottleneckResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Capacidad",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "bottleneck.texto_en_expresion.summary.demanda",
+   "tipo": "texto_en_expresion",
+   "modulo": "bottleneck",
+   "funcion": "BottleneckResult.summary",
+   "funciones": [
+    "BottleneckResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Demanda",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "bottleneck.texto_en_expresion.summary.estacion",
+   "tipo": "texto_en_expresion",
+   "modulo": "bottleneck",
+   "funcion": "BottleneckResult.summary",
+   "funciones": [
+    "BottleneckResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Estación",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "bottleneck.texto_en_expresion.summary.holgura",
+   "tipo": "texto_en_expresion",
+   "modulo": "bottleneck",
+   "funcion": "BottleneckResult.summary",
+   "funciones": [
+    "BottleneckResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Holgura",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "bottleneck.texto_en_expresion.summary.util",
+   "tipo": "texto_en_expresion",
+   "modulo": "bottleneck",
+   "funcion": "BottleneckResult.summary",
+   "funciones": [
+    "BottleneckResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Util.",
+   "marcadores": [],
+   "padre": "etiqueta"
   },
   {
    "clave": "fitting.cabecera.to_frame.ca2",
@@ -2764,108 +2721,117 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.costo_compra",
+   "clave": "columnas.acceso_columna.global.articulo",
    "tipo": "acceso_columna",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.ConstrainedMultiEOQResult.summary",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.ConstrainedMultiEOQResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Artículo",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.articulo"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.costo_total",
+   "tipo": "acceso_columna",
+   "modulo": "inventory",
+   "funcion": "inventory.ConstrainedMultiEOQResult.summary",
+   "funciones": [
+    "inventory.ConstrainedMultiEOQResult.summary",
+    "inventory.eoq_quantity_discount"
+   ],
+   "usos": 3,
+   "complejidad": "fija",
+   "es": "Costo total",
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.costo_total"
+  },
+  {
+   "clave": "columnas.acceso_columna.global.costo_compra",
+   "tipo": "acceso_columna",
+   "modulo": "inventory",
+   "funcion": "inventory.eoq_quantity_discount",
+   "funciones": [
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Costo de compra",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.costo_compra"
   },
   {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.costo_mantener",
+   "clave": "columnas.acceso_columna.global.costo_mantener",
    "tipo": "acceso_columna",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Costo de mantener",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.costo_mantener"
   },
   {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.costo_ordenar",
+   "clave": "columnas.acceso_columna.global.costo_ordenar",
    "tipo": "acceso_columna",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Costo de ordenar",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.costo_ordenar"
   },
   {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.costo_total",
+   "clave": "columnas.acceso_columna.global.precio_unitario",
    "tipo": "acceso_columna",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Costo total",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.precio_unitario",
-   "tipo": "acceso_columna",
-   "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
-   "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Precio unitario",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.precio_unitario"
   },
   {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.ajustada",
+   "clave": "columnas.acceso_columna.global.ajustada",
    "tipo": "acceso_columna",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Q ajustada",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.ajustada"
   },
   {
-   "clave": "inventory.acceso_columna.eoq_quantity_discount.indice_tramo",
+   "clave": "columnas.acceso_columna.global.indice_tramo",
    "tipo": "acceso_columna",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Índice de tramo",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.acceso_columna.exchange_curve.eoq",
-   "tipo": "acceso_columna",
-   "modulo": "inventory",
-   "funcion": "exchange_curve",
-   "funciones": [
-    "exchange_curve"
-   ],
-   "usos": 4,
-   "complejidad": "fija",
-   "es": "Q_eoq",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.indice_tramo"
   },
   {
    "clave": "inventory.aviso.mrp.unidades_planificadas_debieron_liberarse_antes",
@@ -3830,40 +3796,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.modulo.eoq",
+   "clave": "columnas.columna_df.global.costo_preparacion",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "<módulo>",
+   "funcion": "inventory.ebq_multi",
    "funciones": [
-    "<módulo>",
-    "exchange_curve"
-   ],
-   "usos": 3,
-   "complejidad": "fija",
-   "es": "Q_eoq",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.columna_df.modulo.optimal",
-   "tipo": "columna_df",
-   "modulo": "inventory",
-   "funcion": "<módulo>",
-   "funciones": [
-    "<módulo>",
-    "exchange_curve"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Q_optimal",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.columna_df.ebq_multi.costo_preparacion",
-   "tipo": "columna_df",
-   "modulo": "inventory",
-   "funcion": "ebq_multi",
-   "funciones": [
-    "ebq_multi"
+    "inventory.ebq_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -3871,12 +3809,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.ebq_multi.frecuencia_lotes",
+   "clave": "columnas.columna_df.global.frecuencia_lotes",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "ebq_multi",
+   "funcion": "inventory.ebq_multi",
    "funciones": [
-    "ebq_multi"
+    "inventory.ebq_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -3884,12 +3822,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.ebq_multi.inventario_maximo",
+   "clave": "columnas.columna_df.global.inventario_maximo",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "ebq_multi",
+   "funcion": "inventory.ebq_multi",
    "funciones": [
-    "ebq_multi"
+    "inventory.ebq_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -3897,12 +3835,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.ebq_multi.inventario_promedio",
+   "clave": "columnas.columna_df.global.inventario_promedio",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "ebq_multi",
+   "funcion": "inventory.ebq_multi",
    "funciones": [
-    "ebq_multi"
+    "inventory.ebq_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -3910,14 +3848,14 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_multi.articulo",
+   "clave": "columnas.columna_df.global.articulo",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_multi",
+   "funcion": "inventory.eoq_multi",
    "funciones": [
-    "ebq_multi",
-    "eoq_multi",
-    "eoq_multi_constrained"
+    "inventory.ebq_multi",
+    "inventory.eoq_multi",
+    "inventory.eoq_multi_constrained"
    ],
    "usos": 4,
    "complejidad": "fija",
@@ -3925,15 +3863,15 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_multi.costo_mantener",
+   "clave": "columnas.columna_df.global.costo_mantener",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_multi",
+   "funcion": "inventory.eoq_multi",
    "funciones": [
-    "ebq_multi",
-    "eoq_multi",
-    "eoq_multi_constrained",
-    "eoq_quantity_discount"
+    "inventory.ebq_multi",
+    "inventory.eoq_multi",
+    "inventory.eoq_multi_constrained",
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 5,
    "complejidad": "fija",
@@ -3941,14 +3879,14 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_multi.costo_ordenar",
+   "clave": "columnas.columna_df.global.costo_ordenar",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_multi",
+   "funcion": "inventory.eoq_multi",
    "funciones": [
-    "eoq_multi",
-    "eoq_multi_constrained",
-    "eoq_quantity_discount"
+    "inventory.eoq_multi",
+    "inventory.eoq_multi_constrained",
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 4,
    "complejidad": "fija",
@@ -3956,15 +3894,15 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_multi.costo_total",
+   "clave": "columnas.columna_df.global.costo_total",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_multi",
+   "funcion": "inventory.eoq_multi",
    "funciones": [
-    "ebq_multi",
-    "eoq_multi",
-    "eoq_multi_constrained",
-    "eoq_quantity_discount"
+    "inventory.ebq_multi",
+    "inventory.eoq_multi",
+    "inventory.eoq_multi_constrained",
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 5,
    "complejidad": "fija",
@@ -3972,12 +3910,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_multi.frecuencia_pedidos",
+   "clave": "columnas.columna_df.global.frecuencia_pedidos",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_multi",
+   "funcion": "inventory.eoq_multi",
    "funciones": [
-    "eoq_multi"
+    "inventory.eoq_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -3985,12 +3923,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_multi.tiempo_ciclo",
+   "clave": "columnas.columna_df.global.tiempo_ciclo_2",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_multi",
+   "funcion": "inventory.eoq_multi",
    "funciones": [
-    "eoq_multi"
+    "inventory.eoq_multi"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -3998,12 +3936,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_quantity_discount.cantidad_min",
+   "clave": "columnas.columna_df.global.cantidad_min",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -4011,12 +3949,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_quantity_discount.costo_compra",
+   "clave": "columnas.columna_df.global.costo_compra",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -4024,12 +3962,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_quantity_discount.factible",
+   "clave": "columnas.columna_df.global.factible",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -4037,12 +3975,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_quantity_discount.precio_unitario",
+   "clave": "columnas.columna_df.global.precio_unitario",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -4050,12 +3988,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_quantity_discount.ajustada",
+   "clave": "columnas.columna_df.global.ajustada",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -4063,12 +4001,12 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.columna_df.eoq_quantity_discount.indice_tramo",
+   "clave": "columnas.columna_df.global.indice_tramo",
    "tipo": "columna_df",
    "modulo": "inventory",
-   "funcion": "eoq_quantity_discount",
+   "funcion": "inventory.eoq_quantity_discount",
    "funciones": [
-    "eoq_quantity_discount"
+    "inventory.eoq_quantity_discount"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -4350,6 +4288,27 @@
    ]
   },
   {
+   "clave": "inventory.error.eoq_multi_constrained.constraints_debe_ser_diccionario_name",
+   "tipo": "error",
+   "modulo": "inventory",
+   "funcion": "eoq_multi_constrained",
+   "funciones": [
+    "eoq_multi_constrained"
+   ],
+   "usos": 1,
+   "complejidad": "simple",
+   "es": "constraints[{j}] debe ser un diccionario con 'name', 'weights' y 'bound'.",
+   "marcadores": [
+    {
+     "nombre": "j",
+     "expresion": "j",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    }
+   ]
+  },
+  {
    "clave": "inventory.error.eoq_quantity_discount.feasible_price_break_found",
    "tipo": "error",
    "modulo": "inventory",
@@ -4401,6 +4360,28 @@
    "complejidad": "fija",
    "es": "Indique como máximo uno de 'target_orders' o 'target_investment'.",
    "marcadores": []
+  },
+  {
+   "clave": "inventory.error.exchange_curve.items_unit_value_debe_ser",
+   "tipo": "error",
+   "modulo": "inventory",
+   "funcion": "exchange_curve",
+   "funciones": [
+    "exchange_curve",
+    "safety_stock_curve"
+   ],
+   "usos": 2,
+   "complejidad": "simple",
+   "es": "items[{idx}]['unit_value'] debe ser > 0.",
+   "marcadores": [
+    {
+     "nombre": "idx",
+     "expresion": "idx",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    }
+   ]
   },
   {
    "clave": "inventory.error.mrp.lead_time_debe_ser_entero",
@@ -4535,6 +4516,27 @@
    "marcadores": []
   },
   {
+   "clave": "inventory.error.safety_stock_curve.items_lead_time_std_debe",
+   "tipo": "error",
+   "modulo": "inventory",
+   "funcion": "safety_stock_curve",
+   "funciones": [
+    "safety_stock_curve"
+   ],
+   "usos": 1,
+   "complejidad": "simple",
+   "es": "items[{idx}]['lead_time_std'] debe ser ≥ 0.",
+   "marcadores": [
+    {
+     "nombre": "idx",
+     "expresion": "idx",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    }
+   ]
+  },
+  {
    "clave": "inventory.error.xyz_analysis.debe_cumplirse_threshold_threshold",
    "tipo": "error",
    "modulo": "inventory",
@@ -4548,31 +4550,25 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.etiqueta.summary.artic",
-   "tipo": "etiqueta",
+   "clave": "inventory.error.xyz_analysis.items_falta_cv_demand_std",
+   "tipo": "error",
    "modulo": "inventory",
-   "funcion": "ABCResult.summary",
+   "funcion": "xyz_analysis",
    "funciones": [
-    "ABCResult.summary",
-    "XYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "%Artíc.",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.valor",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCResult.summary",
-   "funciones": [
-    "ABCResult.summary"
+    "xyz_analysis"
    ],
    "usos": 1,
-   "complejidad": "fija",
-   "es": "%Valor",
-   "marcadores": []
+   "complejidad": "simple",
+   "es": "items[{i}]: falta 'cv' o ('demand_std' y 'demand_mean'/'demand_rate').",
+   "marcadores": [
+    {
+     "nombre": "i",
+     "expresion": "i",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    }
+   ]
   },
   {
    "clave": "inventory.etiqueta.summary.texto",
@@ -4586,20 +4582,6 @@
    "usos": 3,
    "complejidad": "fija",
    "es": "A",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.artic_2",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCResult.summary",
-   "funciones": [
-    "ABCResult.summary",
-    "XYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Artíc.",
    "marcadores": []
   },
   {
@@ -4631,20 +4613,6 @@
    "marcadores": []
   },
   {
-   "clave": "inventory.etiqueta.summary.clase",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCResult.summary",
-   "funciones": [
-    "ABCResult.summary",
-    "XYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Clase",
-   "marcadores": []
-  },
-  {
    "clave": "inventory.etiqueta.summary.valor_anual_total",
    "tipo": "etiqueta",
    "modulo": "inventory",
@@ -4664,73 +4632,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "inventory.etiqueta.summary.count",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCResult.summary",
-   "funciones": [
-    "ABCResult.summary",
-    "XYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "count",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.pct_items",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCResult.summary",
-   "funciones": [
-    "ABCResult.summary",
-    "XYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "pct_items",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.pct_value",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCResult.summary",
-   "funciones": [
-    "ABCResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "pct_value",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.3d",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCXYZResult.summary",
-   "funciones": [
-    "ABCXYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "3d",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.4d",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "ABCXYZResult.summary",
-   "funciones": [
-    "ABCXYZResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "4d",
-   "marcadores": []
   },
   {
    "clave": "inventory.etiqueta.summary.abc_xyz_total",
@@ -5158,32 +5059,6 @@
    ]
   },
   {
-   "clave": "inventory.etiqueta.summary.10_4g",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": ">10.4g",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.cantidad",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Cantidad",
-   "marcadores": []
-  },
-  {
    "clave": "inventory.etiqueta.summary.costo_total",
    "tipo": "etiqueta",
    "modulo": "inventory",
@@ -5203,19 +5078,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "inventory.etiqueta.summary.cubre",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Cubre",
-   "marcadores": []
   },
   {
    "clave": "inventory.etiqueta.summary.metodo",
@@ -5260,72 +5122,6 @@
    ]
   },
   {
-   "clave": "inventory.etiqueta.summary.periodo",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary",
-    "MRPResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "Periodo",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.covers_periods",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "covers_periods",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.order_qty",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "order_qty",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.period",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "LotSizingResult.summary",
-   "funciones": [
-    "LotSizingResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "period",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.2f",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 6,
-   "complejidad": "fija",
-   "es": ">8.2f",
-   "marcadores": []
-  },
-  {
    "clave": "inventory.etiqueta.summary.articulo",
    "tipo": "etiqueta",
    "modulo": "inventory",
@@ -5345,84 +5141,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "inventory.etiqueta.summary.ep",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "EP",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.lpl",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "LPl",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.rb",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "RB",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.rn",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "RN",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.rp",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "RP",
-   "marcadores": []
-  },
-  {
-   "clave": "inventory.etiqueta.summary.rpl",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "MRPResult.summary",
-   "funciones": [
-    "MRPResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "RPl",
-   "marcadores": []
   },
   {
    "clave": "inventory.etiqueta.summary.costo_total_2",
@@ -5866,19 +5584,6 @@
    ]
   },
   {
-   "clave": "inventory.etiqueta.summary.rango_cv",
-   "tipo": "etiqueta",
-   "modulo": "inventory",
-   "funcion": "XYZResult.summary",
-   "funciones": [
-    "XYZResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Rango CV",
-   "marcadores": []
-  },
-  {
    "clave": "inventory.etiqueta.summary.texto_5",
    "tipo": "etiqueta",
    "modulo": "inventory",
@@ -6143,27 +5848,6 @@
    ]
   },
   {
-   "clave": "inventory.nombre_arg.eoq_multi_constrained.constraints_debe_ser_diccionario_name",
-   "tipo": "nombre_arg",
-   "modulo": "inventory",
-   "funcion": "eoq_multi_constrained",
-   "funciones": [
-    "eoq_multi_constrained"
-   ],
-   "usos": 1,
-   "complejidad": "simple",
-   "es": "constraints[{j}] debe ser un diccionario con 'name', 'weights' y 'bound'.",
-   "marcadores": [
-    {
-     "nombre": "j",
-     "expresion": "j",
-     "conversion": "",
-     "formato": "",
-     "simple": true
-    }
-   ]
-  },
-  {
    "clave": "inventory.nombre_arg.eoq_multi_constrained.constraints_bound",
    "tipo": "nombre_arg",
    "modulo": "inventory",
@@ -6269,28 +5953,6 @@
    ]
   },
   {
-   "clave": "inventory.nombre_arg.exchange_curve.items_unit_value_debe_ser",
-   "tipo": "nombre_arg",
-   "modulo": "inventory",
-   "funcion": "exchange_curve",
-   "funciones": [
-    "exchange_curve",
-    "safety_stock_curve"
-   ],
-   "usos": 2,
-   "complejidad": "simple",
-   "es": "items[{idx}]['unit_value'] debe ser > 0.",
-   "marcadores": [
-    {
-     "nombre": "idx",
-     "expresion": "idx",
-     "conversion": "",
-     "formato": "",
-     "simple": true
-    }
-   ]
-  },
-  {
    "clave": "inventory.nombre_arg.safety_stock_curve.items_demand_std",
    "tipo": "nombre_arg",
    "modulo": "inventory",
@@ -6326,48 +5988,6 @@
     {
      "nombre": "idx",
      "expresion": "idx",
-     "conversion": "",
-     "formato": "",
-     "simple": true
-    }
-   ]
-  },
-  {
-   "clave": "inventory.nombre_arg.safety_stock_curve.items_lead_time_std_debe",
-   "tipo": "nombre_arg",
-   "modulo": "inventory",
-   "funcion": "safety_stock_curve",
-   "funciones": [
-    "safety_stock_curve"
-   ],
-   "usos": 1,
-   "complejidad": "simple",
-   "es": "items[{idx}]['lead_time_std'] debe ser ≥ 0.",
-   "marcadores": [
-    {
-     "nombre": "idx",
-     "expresion": "idx",
-     "conversion": "",
-     "formato": "",
-     "simple": true
-    }
-   ]
-  },
-  {
-   "clave": "inventory.nombre_arg.xyz_analysis.items_falta_cv_demand_std",
-   "tipo": "nombre_arg",
-   "modulo": "inventory",
-   "funcion": "xyz_analysis",
-   "funciones": [
-    "xyz_analysis"
-   ],
-   "usos": 1,
-   "complejidad": "simple",
-   "es": "items[{i}]: falta 'cv' o ('demand_std' y 'demand_mean'/'demand_rate').",
-   "marcadores": [
-    {
-     "nombre": "i",
-     "expresion": "i",
      "conversion": "",
      "formato": "",
      "simple": true
@@ -6436,6 +6056,220 @@
      "simple": true
     }
    ]
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.artic",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "ABCResult.summary",
+   "funciones": [
+    "ABCResult.summary",
+    "XYZResult.summary"
+   ],
+   "usos": 2,
+   "complejidad": "fija",
+   "es": "%Artíc.",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.valor",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "ABCResult.summary",
+   "funciones": [
+    "ABCResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "%Valor",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.artic_2",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "ABCResult.summary",
+   "funciones": [
+    "ABCResult.summary",
+    "XYZResult.summary"
+   ],
+   "usos": 2,
+   "complejidad": "fija",
+   "es": "Artíc.",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.clase",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "ABCResult.summary",
+   "funciones": [
+    "ABCResult.summary",
+    "XYZResult.summary"
+   ],
+   "usos": 2,
+   "complejidad": "fija",
+   "es": "Clase",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.ninguna",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "ConstrainedMultiEOQResult.summary",
+   "funciones": [
+    "ConstrainedMultiEOQResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "ninguna",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.cantidad",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "LotSizingResult.summary",
+   "funciones": [
+    "LotSizingResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Cantidad",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.cubre",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "LotSizingResult.summary",
+   "funciones": [
+    "LotSizingResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Cubre",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.periodo",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "LotSizingResult.summary",
+   "funciones": [
+    "LotSizingResult.summary",
+    "MRPResult.summary"
+   ],
+   "usos": 2,
+   "complejidad": "fija",
+   "es": "Periodo",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.ep",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "MRPResult.summary",
+   "funciones": [
+    "MRPResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "EP",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.lpl",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "MRPResult.summary",
+   "funciones": [
+    "MRPResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "LPl",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.rb",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "MRPResult.summary",
+   "funciones": [
+    "MRPResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "RB",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.rn",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "MRPResult.summary",
+   "funciones": [
+    "MRPResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "RN",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.rp",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "MRPResult.summary",
+   "funciones": [
+    "MRPResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "RP",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.rpl",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "MRPResult.summary",
+   "funciones": [
+    "MRPResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "RPl",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "inventory.texto_en_expresion.summary.rango_cv",
+   "tipo": "texto_en_expresion",
+   "modulo": "inventory",
+   "funcion": "XYZResult.summary",
+   "funciones": [
+    "XYZResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Rango CV",
+   "marcadores": [],
+   "padre": "etiqueta"
   },
   {
    "clave": "inventory.valor_por_defecto.abc_analysis.articulo",
@@ -6580,19 +6414,6 @@
    "usos": 1,
    "complejidad": "fija",
    "es": "valor",
-   "marcadores": []
-  },
-  {
-   "clave": "kpi.etiqueta.summary.6g",
-   "tipo": "etiqueta",
-   "modulo": "kpi",
-   "funcion": "KPINode.summary",
-   "funciones": [
-    "KPINode.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": ".6g",
    "marcadores": []
   },
   {
@@ -7253,84 +7074,6 @@
    "marcadores": []
   },
   {
-   "clave": "network.etiqueta.summary.10_4g",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": ">10.4g",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.4d",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": ">4d",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.3f",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": ">6.3f",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.4g",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 4,
-   "complejidad": "fija",
-   "es": ">8.4g",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.estacion",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Estación",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.texto",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "L",
-   "marcadores": []
-  },
-  {
    "clave": "network.etiqueta.summary.sistema_clientes_totales_red",
    "tipo": "etiqueta",
    "modulo": "network",
@@ -7352,32 +7095,6 @@
    ]
   },
   {
-   "clave": "network.etiqueta.summary.lq",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Lq",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.texto_2",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "W",
-   "marcadores": []
-  },
-  {
    "clave": "network.etiqueta.summary.sistema_tiempo_medio_permanencia_red",
    "tipo": "etiqueta",
    "modulo": "network",
@@ -7397,58 +7114,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "network.etiqueta.summary.wq",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "Wq",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.texto_3",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "c",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.ext",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "λ_ext",
-   "marcadores": []
-  },
-  {
-   "clave": "network.etiqueta.summary.tot",
-   "tipo": "etiqueta",
-   "modulo": "network",
-   "funcion": "JacksonResult.summary",
-   "funciones": [
-    "JacksonResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": "λ_tot",
-   "marcadores": []
   },
   {
    "clave": "network.nombre_arg.jackson_network.gamma",
@@ -7512,6 +7177,104 @@
      "simple": true
     }
    ]
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.estacion",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Estación",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.texto",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "L",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.lq",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Lq",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.texto_2",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "W",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.wq",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "Wq",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.ext",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "λ_ext",
+   "marcadores": [],
+   "padre": "etiqueta"
+  },
+  {
+   "clave": "network.texto_en_expresion.summary.tot",
+   "tipo": "texto_en_expresion",
+   "modulo": "network",
+   "funcion": "JacksonResult.summary",
+   "funciones": [
+    "JacksonResult.summary"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "λ_tot",
+   "marcadores": [],
+   "padre": "etiqueta"
   },
   {
    "clave": "operations.cabecera.to_frame.calidad",
@@ -7845,108 +7608,116 @@
    ]
   },
   {
-   "clave": "plotting.acceso_columna.plot_line_balance.estacion",
+   "clave": "columnas.acceso_columna.global.estacion",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_line_balance",
+   "funcion": "plotting.plot_line_balance",
    "funciones": [
-    "plot_line_balance"
+    "plotting.plot_line_balance"
    ],
    "usos": 2,
    "complejidad": "fija",
    "es": "Estación",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.estacion"
   },
   {
-   "clave": "plotting.acceso_columna.plot_line_balance.sobrecargada",
+   "clave": "columnas.acceso_columna.global.sobrecargada",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_line_balance",
+   "funcion": "plotting.plot_line_balance",
    "funciones": [
-    "plot_line_balance"
+    "plotting.plot_line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Sobrecargada",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.sobrecargada"
   },
   {
-   "clave": "plotting.acceso_columna.plot_line_balance.tiempo_ciclo",
+   "clave": "columnas.acceso_columna.global.tiempo_ciclo",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_line_balance",
+   "funcion": "plotting.plot_line_balance",
    "funciones": [
-    "plot_line_balance"
+    "plotting.plot_line_balance"
    ],
    "usos": 2,
    "complejidad": "fija",
    "es": "Tiempo_ciclo",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.tiempo_ciclo"
   },
   {
-   "clave": "plotting.acceso_columna.plot_line_balance.tiempo_ocioso",
+   "clave": "columnas.acceso_columna.global.tiempo_ocioso",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_line_balance",
+   "funcion": "plotting.plot_line_balance",
    "funciones": [
-    "plot_line_balance"
+    "plotting.plot_line_balance"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "Tiempo_ocioso",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.tiempo_ocioso"
   },
   {
-   "clave": "plotting.acceso_columna.plot_queue_distribution.texto",
+   "clave": "columnas.acceso_columna.global.texto",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_queue_distribution",
+   "funcion": "plotting.plot_queue_distribution",
    "funciones": [
-    "plot_queue_distribution"
+    "plotting.plot_queue_distribution"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "F(t)",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.texto_3"
   },
   {
-   "clave": "plotting.acceso_columna.plot_queue_distribution.texto_2",
+   "clave": "columnas.acceso_columna.global.texto_2",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_queue_distribution",
+   "funcion": "plotting.plot_queue_distribution",
    "funciones": [
-    "plot_queue_distribution"
+    "plotting.plot_queue_distribution"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "P(N<=n)",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.texto"
   },
   {
-   "clave": "plotting.acceso_columna.plot_queue_distribution.texto_3",
+   "clave": "columnas.acceso_columna.global.texto_3",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_queue_distribution",
+   "funcion": "plotting.plot_queue_distribution",
    "funciones": [
-    "plot_queue_distribution"
+    "plotting.plot_queue_distribution"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "P(N=n)",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.texto_2"
   },
   {
-   "clave": "plotting.acceso_columna.plot_queue_distribution.texto_4",
+   "clave": "columnas.acceso_columna.global.texto_4",
    "tipo": "acceso_columna",
    "modulo": "plotting",
-   "funcion": "plot_queue_distribution",
+   "funcion": "plotting.plot_queue_distribution",
    "funciones": [
-    "plot_queue_distribution"
+    "plotting.plot_queue_distribution"
    ],
    "usos": 1,
    "complejidad": "fija",
    "es": "f(t)",
-   "marcadores": []
+   "marcadores": [],
+   "usa_clave": "columnas.columna_df.global.texto_4"
   },
   {
    "clave": "plotting.grafica.plot_bottleneck.cuello_botella",
@@ -8987,6 +8758,34 @@
    "marcadores": []
   },
   {
+   "clave": "plotting.texto_en_expresion.plot_break_even.unidades",
+   "tipo": "texto_en_expresion",
+   "modulo": "plotting",
+   "funcion": "plot_break_even",
+   "funciones": [
+    "plot_break_even"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "unidades",
+   "marcadores": [],
+   "padre": "grafica"
+  },
+  {
+   "clave": "plotting.texto_en_expresion.plot_break_even.ventas",
+   "tipo": "texto_en_expresion",
+   "modulo": "plotting",
+   "funcion": "plot_break_even",
+   "funciones": [
+    "plot_break_even"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "ventas",
+   "marcadores": [],
+   "padre": "grafica"
+  },
+  {
    "clave": "project.cabecera.to_frame.actividad",
    "tipo": "cabecera",
    "modulo": "project",
@@ -9092,6 +8891,76 @@
     {
      "nombre": "nm",
      "expresion": "nm",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    }
+   ]
+  },
+  {
+   "clave": "project.error.leer_actividades.activities_debe_ser_diccionario_recibio",
+   "tipo": "error",
+   "modulo": "project",
+   "funcion": "_leer_actividades",
+   "funciones": [
+    "_leer_actividades"
+   ],
+   "usos": 1,
+   "complejidad": "formato",
+   "es": "activities[{i}] debe ser un diccionario, se recibió {__name__!r}.",
+   "marcadores": [
+    {
+     "nombre": "i",
+     "expresion": "i",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    },
+    {
+     "nombre": "__name__",
+     "expresion": "type(a).__name__",
+     "conversion": "r",
+     "formato": "",
+     "simple": true
+    }
+   ]
+  },
+  {
+   "clave": "project.error.leer_actividades.activities_falta_clave_name",
+   "tipo": "error",
+   "modulo": "project",
+   "funcion": "_leer_actividades",
+   "funciones": [
+    "_leer_actividades"
+   ],
+   "usos": 1,
+   "complejidad": "simple",
+   "es": "activities[{i}]: falta la clave 'name'.",
+   "marcadores": [
+    {
+     "nombre": "i",
+     "expresion": "i",
+     "conversion": "",
+     "formato": "",
+     "simple": true
+    }
+   ]
+  },
+  {
+   "clave": "project.error.leer_actividades.activities_predecessors_debe_ser_lista",
+   "tipo": "error",
+   "modulo": "project",
+   "funcion": "_leer_actividades",
+   "funciones": [
+    "_leer_actividades"
+   ],
+   "usos": 1,
+   "complejidad": "simple",
+   "es": "activities[{i}]['predecessors'] debe ser una lista de nombres.",
+   "marcadores": [
+    {
+     "nombre": "i",
+     "expresion": "i",
      "conversion": "",
      "formato": "",
      "simple": true
@@ -9310,76 +9179,6 @@
      "expresion": "self.project_std",
      "conversion": "",
      "formato": ".4g",
-     "simple": true
-    }
-   ]
-  },
-  {
-   "clave": "project.nombre_arg.leer_actividades.activities_debe_ser_diccionario_recibio",
-   "tipo": "nombre_arg",
-   "modulo": "project",
-   "funcion": "_leer_actividades",
-   "funciones": [
-    "_leer_actividades"
-   ],
-   "usos": 1,
-   "complejidad": "formato",
-   "es": "activities[{i}] debe ser un diccionario, se recibió {__name__!r}.",
-   "marcadores": [
-    {
-     "nombre": "i",
-     "expresion": "i",
-     "conversion": "",
-     "formato": "",
-     "simple": true
-    },
-    {
-     "nombre": "__name__",
-     "expresion": "type(a).__name__",
-     "conversion": "r",
-     "formato": "",
-     "simple": true
-    }
-   ]
-  },
-  {
-   "clave": "project.nombre_arg.leer_actividades.activities_falta_clave_name",
-   "tipo": "nombre_arg",
-   "modulo": "project",
-   "funcion": "_leer_actividades",
-   "funciones": [
-    "_leer_actividades"
-   ],
-   "usos": 1,
-   "complejidad": "simple",
-   "es": "activities[{i}]: falta la clave 'name'.",
-   "marcadores": [
-    {
-     "nombre": "i",
-     "expresion": "i",
-     "conversion": "",
-     "formato": "",
-     "simple": true
-    }
-   ]
-  },
-  {
-   "clave": "project.nombre_arg.leer_actividades.activities_predecessors_debe_ser_lista",
-   "tipo": "nombre_arg",
-   "modulo": "project",
-   "funcion": "_leer_actividades",
-   "funciones": [
-    "_leer_actividades"
-   ],
-   "usos": 1,
-   "complejidad": "simple",
-   "es": "activities[{i}]['predecessors'] debe ser una lista de nombres.",
-   "marcadores": [
-    {
-     "nombre": "i",
-     "expresion": "i",
-     "conversion": "",
-     "formato": "",
      "simple": true
     }
    ]
@@ -9743,32 +9542,6 @@
      "simple": true
     }
    ]
-  },
-  {
-   "clave": "queuing.etiqueta.summary.6g",
-   "tipo": "etiqueta",
-   "modulo": "queuing",
-   "funcion": "QueueResult.summary",
-   "funciones": [
-    "QueueResult.summary"
-   ],
-   "usos": 1,
-   "complejidad": "fija",
-   "es": ".6g",
-   "marcadores": []
-  },
-  {
-   "clave": "queuing.etiqueta.summary.8s",
-   "tipo": "etiqueta",
-   "modulo": "queuing",
-   "funcion": "QueueResult.summary",
-   "funciones": [
-    "QueueResult.summary"
-   ],
-   "usos": 2,
-   "complejidad": "fija",
-   "es": "8s",
-   "marcadores": []
   },
   {
    "clave": "queuing.etiqueta.summary.unidades_promedio_sistema",
@@ -11145,12 +10918,12 @@
    "marcadores": []
   },
   {
-   "clave": "solver.columna_df.solve_lam.lam",
+   "clave": "columnas.columna_df.global.lam",
    "tipo": "columna_df",
    "modulo": "solver",
-   "funcion": "solve_lam",
+   "funcion": "solver.solve_lam",
    "funciones": [
-    "solve_lam"
+    "solver.solve_lam"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -11158,12 +10931,12 @@
    "marcadores": []
   },
   {
-   "clave": "solver.columna_df.solve_mu.mu",
+   "clave": "columnas.columna_df.global.mu",
    "tipo": "columna_df",
    "modulo": "solver",
-   "funcion": "solve_mu",
+   "funcion": "solver.solve_mu",
    "funciones": [
-    "solve_mu"
+    "solver.solve_mu"
    ],
    "usos": 1,
    "complejidad": "fija",
@@ -11171,12 +10944,12 @@
    "marcadores": []
   },
   {
-   "clave": "solver.columna_df.solve_servers.servidores",
+   "clave": "columnas.columna_df.global.servidores",
    "tipo": "columna_df",
    "modulo": "solver",
-   "funcion": "solve_servers",
+   "funcion": "solver.solve_servers",
    "funciones": [
-    "solve_servers"
+    "solver.solve_servers"
    ],
    "usos": 1,
    "complejidad": "fija",

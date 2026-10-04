@@ -3,6 +3,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ._i18n import columna
+from ._i18n import t as _t
+
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
     import pandas as pd
@@ -54,18 +57,18 @@ def plot_queue_sensitivity(
         Lq_curve = rho_range**2 / (1 - rho_range)
 
     for ax, y_curve, y_point, ylabel, label in [
-        (axes[0], Wq_curve, result.Wq, "Wq (espera media en cola)", "Wq"),
-        (axes[1], Lq_curve, result.Lq, "Lq (longitud media de cola)", "Lq"),
+        (axes[0], Wq_curve, result.Wq, _t("plotting.grafica.plot_queue_sensitivity.wq_espera_media_cola"), "Wq"),
+        (axes[1], Lq_curve, result.Lq, _t("plotting.grafica.plot_queue_sensitivity.lq_longitud_media_cola"), "Lq"),
     ]:
-        ax.plot(rho_range, y_curve, color=BLUE, lw=2, label=f"curva de {label}")
+        ax.plot(rho_range, y_curve, color=BLUE, lw=2, label=_t("plotting.grafica.plot_queue_sensitivity.curva", label=label))
         ax.axvline(result.rho, color=ORANGE, ls="--", lw=1.5, label=f"ρ = {result.rho:.3f}")
         ax.scatter([result.rho], [y_point], color=RED, zorder=5, s=60)
-        ax.set_xlabel("Utilización ρ")
+        ax.set_xlabel(_t("plotting.grafica.plot_queue_sensitivity.utilizacion"))
         ax.set_ylabel(ylabel)
         ax.legend(fontsize=8)
         ax.grid(alpha=0.25)
 
-    fig.suptitle(title or f"{result.model} — Sensibilidad de la cola", fontweight="bold")
+    fig.suptitle(title or _t("plotting.grafica.plot_queue_sensitivity.sensibilidad_cola", model=result.model), fontweight="bold")
     fig.tight_layout()
     return fig
 
@@ -96,8 +99,8 @@ def plot_queue_metrics(
             f"{val:.4g}",
             ha="center", va="bottom", fontsize=9,
         )
-    ax.set_ylabel("Valor")
-    ax.set_title(title or f"{result.model} — Resumen de KPI", fontweight="bold")
+    ax.set_ylabel(_t("plotting.grafica.plot_queue_metrics.valor"))
+    ax.set_title(title or _t("plotting.grafica.plot_queue_metrics.resumen_kpi", model=result.model), fontweight="bold")
     ax.grid(axis="y", alpha=0.25)
     fig.tight_layout()
     return fig
@@ -116,7 +119,7 @@ def plot_oee(
     """Gráfico de barras horizontales con la descomposición del OEE."""
     import matplotlib.pyplot as plt
 
-    labels = ["Disponibilidad", "Rendimiento", "Calidad", "OEE"]
+    labels = [_t("plotting.grafica.plot_oee.disponibilidad"), _t("plotting.grafica.plot_oee.rendimiento"), _t("plotting.grafica.plot_oee.calidad"), "OEE"]
     values = [
         result.availability,
         result.performance,
@@ -135,10 +138,10 @@ def plot_oee(
             f"{val:.1%}",
             va="center", fontsize=10,
         )
-    ax.axvline(0.85, color=GRAY, ls="--", lw=1, label="Clase mundial (85%)")
-    ax.set_xlabel("Valor del factor")
+    ax.axvline(0.85, color=GRAY, ls="--", lw=1, label=_t("plotting.grafica.plot_oee.clase_mundial_85"))
+    ax.set_xlabel(_t("plotting.grafica.plot_oee.valor_factor"))
     ax.legend(fontsize=8)
-    ax.set_title(title or "Descomposición del OEE", fontweight="bold")
+    ax.set_title(title or _t("plotting.grafica.plot_oee.descomposicion_oee"), fontweight="bold")
     fig.tight_layout()
     return fig
 
@@ -169,11 +172,11 @@ def plot_bottleneck(
             f"{u:.1%}",
             ha="center", va="bottom", fontsize=9,
         )
-    ax.axhline(1.0, color=RED, ls="--", lw=1.2, label="Límite de capacidad")
+    ax.axhline(1.0, color=RED, ls="--", lw=1.2, label=_t("plotting.grafica.plot_bottleneck.limite_capacidad"))
     ax.set_ylim(0, max(1.1, max(utils) * 1.1))
-    ax.set_ylabel("Utilización")
+    ax.set_ylabel(_t("plotting.grafica.plot_bottleneck.utilizacion"))
     ax.legend(fontsize=8)
-    ax.set_title(title or f"Cuello de botella: {result.bottleneck}", fontweight="bold")
+    ax.set_title(title or _t("plotting.grafica.plot_bottleneck.cuello_botella", bottleneck=result.bottleneck), fontweight="bold")
     fig.tight_layout()
     return fig
 
@@ -221,14 +224,14 @@ def plot_kpi_tree(
         # Use absolute value for area sizing; zero would collapse the tile
         values.append(max(abs(node.value), 1e-9))
         unit_str    = f" {node.unit}" if node.unit else ""
-        formula_str = f"<br><i>{node.formula}</i>" if node.formula else ""
-        hover.append(f"<b>{node.name}</b><br>{node.value:.6g}{unit_str}{formula_str}")
+        formula_str = _t("plotting.grafica.collect.br_2", formula=node.formula) if node.formula else ""
+        hover.append(_t("plotting.grafica.collect.br", name=node.name, value=node.value, unit_str=unit_str, formula_str=formula_str))
         for child in node.children:
             _collect(child, node_id)
 
     _collect(root)
 
-    chart_title = title or f"Árbol de KPI — {root.name}"
+    chart_title = title or _t("plotting.grafica.plot_kpi_tree.arbol_kpi", name=root.name)
 
     if kind == "sunburst":
         trace = go.Sunburst(
@@ -237,7 +240,7 @@ def plot_kpi_tree(
             parents=parents,
             values=values,
             customdata=hover,
-            hovertemplate="%{customdata}<extra></extra>",
+            hovertemplate=_t("plotting.grafica.plot_kpi_tree.customdata_extra_extra"),
             branchvalues="total",
             textinfo="label+value",
             insidetextorientation="radial",
@@ -254,7 +257,7 @@ def plot_kpi_tree(
             parents=parents,
             values=values,
             customdata=hover,
-            hovertemplate="%{customdata}<extra></extra>",
+            hovertemplate=_t("plotting.grafica.plot_kpi_tree.customdata_extra_extra"),
             branchvalues="total",
             texttemplate="<b>%{label}</b><br>%{value:.4g}",
             textfont=dict(size=13),
@@ -315,9 +318,9 @@ def plot_sensitivity(
         ))
 
     fig.update_layout(
-        title=dict(text=title or f"Sensibilidad: {param}", font=dict(size=16)),
+        title=dict(text=title or _t("plotting.grafica.plot_sensitivity.sensibilidad", param=param), font=dict(size=16)),
         xaxis_title=param,
-        yaxis_title="Valor",
+        yaxis_title=_t("plotting.grafica.plot_queue_metrics.valor"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
@@ -342,30 +345,30 @@ def plot_optimize_servers(
 
     fig.add_trace(go.Bar(
         x=df["c"], y=df["server_cost"],
-        name="Costo de servidores", marker_color=BLUE, opacity=0.8,
+        name=_t("plotting.grafica.plot_optimize_servers.costo_servidores"), marker_color=BLUE, opacity=0.8,
     ))
     fig.add_trace(go.Bar(
         x=df["c"], y=df["wait_cost"],
-        name="Costo de espera", marker_color=ORANGE, opacity=0.8,
+        name=_t("plotting.grafica.plot_optimize_servers.costo_espera"), marker_color=ORANGE, opacity=0.8,
     ))
     fig.add_trace(go.Scatter(
         x=df["c"], y=df["total_cost"],
-        mode="lines+markers", name="Costo total",
+        mode="lines+markers", name=_t("plotting.grafica.plot_optimize_servers.costo_total"),
         line=dict(color=RED, width=2.5),
         marker=dict(size=7),
     ))
     fig.add_vline(
         x=result.optimal_servers,
         line=dict(color=GREEN, width=2, dash="dash"),
-        annotation_text=f"c óptimo = {result.optimal_servers}",
+        annotation_text=_t("plotting.grafica.plot_optimize_servers.optimo", optimal_servers=result.optimal_servers),
         annotation_position="top right",
     )
 
     fig.update_layout(
         barmode="stack",
-        title=dict(text=title or "Optimización del costo de servidores", font=dict(size=16)),
-        xaxis_title="Número de servidores (c)",
-        yaxis_title="Costo por unidad de tiempo",
+        title=dict(text=title or _t("plotting.grafica.plot_optimize_servers.optimizacion_costo_servidores"), font=dict(size=16)),
+        xaxis_title=_t("plotting.grafica.plot_optimize_servers.numero_servidores"),
+        yaxis_title=_t("plotting.grafica.plot_optimize_servers.costo_unidad_tiempo"),
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
     )
@@ -387,12 +390,12 @@ def plot_simulation(
     from plotly.subplots import make_subplots
 
     Wq   = result._Wq_array
-    fig  = make_subplots(rows=1, cols=2, subplot_titles=["Distribución de Wq", "FDA de Wq"])
+    fig  = make_subplots(rows=1, cols=2, subplot_titles=[_t("plotting.grafica.plot_simulation.distribucion_wq"), _t("plotting.grafica.plot_simulation.fda_wq")])
 
     # Histogram
     counts, edges = __import__("numpy").histogram(Wq, bins=n_bins)
     midpoints = 0.5 * (edges[:-1] + edges[1:])
-    fig.add_trace(go.Bar(x=midpoints, y=counts, name="Wq",
+    fig.add_trace(go.Bar(x=midpoints, y=counts, name=_t("plotting.grafica.plot_simulation.wq"),
                          marker_color=BLUE, opacity=0.75), row=1, col=1)
 
     for pct_val, pct_label, color in [
@@ -407,7 +410,7 @@ def plot_simulation(
     sorted_Wq = __import__("numpy").sort(Wq)
     cdf        = __import__("numpy").arange(1, len(sorted_Wq) + 1) / len(sorted_Wq)
     fig.add_trace(go.Scatter(x=sorted_Wq, y=cdf, mode="lines",
-                              name="FDA empírica",
+                              name=_t("plotting.grafica.plot_simulation.fda_empirica"),
                               line=dict(color=BLUE, width=2)), row=1, col=2)
     for pct_val, pct_label, color in [
         (result.Wq_p90, "p90=90%", ORANGE),
@@ -426,10 +429,10 @@ def plot_simulation(
         showlegend=False,
         margin=dict(t=80, l=60, r=20, b=60),
     )
-    fig.update_xaxes(title_text="Wq (tiempo de espera)", row=1, col=1)
-    fig.update_xaxes(title_text="Wq (tiempo de espera)", row=1, col=2)
-    fig.update_yaxes(title_text="Frecuencia", row=1, col=1)
-    fig.update_yaxes(title_text="Probabilidad acumulada", row=1, col=2)
+    fig.update_xaxes(title_text=_t("plotting.grafica.plot_simulation.wq_tiempo_espera"), row=1, col=1)
+    fig.update_xaxes(title_text=_t("plotting.grafica.plot_simulation.wq_tiempo_espera"), row=1, col=2)
+    fig.update_yaxes(title_text=_t("plotting.grafica.plot_simulation.frecuencia"), row=1, col=1)
+    fig.update_yaxes(title_text=_t("plotting.grafica.plot_simulation.probabilidad_acumulada"), row=1, col=2)
     return fig
 
 
@@ -446,36 +449,36 @@ def plot_line_balance(
     import plotly.graph_objects as go
 
     df     = result.stations
-    colors = [RED if ov else BLUE for ov in df["Sobrecargada"]]
+    colors = [RED if ov else BLUE for ov in df[columna(df, "columnas.columna_df.global.sobrecargada")]]
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=df["Estación"], y=df["Tiempo_ciclo"],
-        name="Tiempo de ciclo",
+        x=df[columna(df, "columnas.columna_df.global.estacion")], y=df[columna(df, "columnas.columna_df.global.tiempo_ciclo")],
+        name=_t("plotting.grafica.plot_line_balance.tiempo_ciclo"),
         marker_color=colors,
-        text=[f"{ct:.3g}" for ct in df["Tiempo_ciclo"]],
+        text=[f"{ct:.3g}" for ct in df[columna(df, "columnas.columna_df.global.tiempo_ciclo")]],
         textposition="outside",
     ))
     fig.add_hline(
         y=result.takt,
         line=dict(color=GREEN, width=2.5, dash="dash"),
-        annotation_text=f"Takt = {result.takt:.4g}",
+        annotation_text=_t("plotting.grafica.plot_line_balance.takt", takt=result.takt),
         annotation_position="top right",
     )
     fig.add_trace(go.Bar(
-        x=df["Estación"], y=df["Tiempo_ocioso"],
-        name="Tiempo ocioso",
+        x=df[columna(df, "columnas.columna_df.global.estacion")], y=df[columna(df, "columnas.columna_df.global.tiempo_ocioso")],
+        name=_t("plotting.grafica.plot_line_balance.tiempo_ocioso"),
         marker_color=GRAY, opacity=0.45,
     ))
 
     fig.update_layout(
         barmode="stack",
         title=dict(
-            text=title or f"Balance de línea — efic. {result.balance_efficiency:.1%}",
+            text=title or _t("plotting.grafica.plot_line_balance.balance_linea_efic", balance_efficiency=result.balance_efficiency),
             font=dict(size=16),
         ),
-        xaxis_title="Estación",
-        yaxis_title="Tiempo",
+        xaxis_title=_t("plotting.grafica.plot_line_balance.estacion"),
+        yaxis_title=_t("plotting.grafica.plot_line_balance.tiempo"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02),
         margin=dict(t=80, l=60, r=20, b=60),
     )
@@ -512,17 +515,17 @@ def plot_break_even(
     cost  = fc + vcu * units
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=units, y=rev,  mode="lines", name="Ingresos",
+    fig.add_trace(go.Scatter(x=units, y=rev,  mode="lines", name=_t("plotting.grafica.plot_break_even.ingresos"),
                               line=dict(color=GREEN, width=2.5)))
-    fig.add_trace(go.Scatter(x=units, y=cost, mode="lines", name="Costo total",
+    fig.add_trace(go.Scatter(x=units, y=cost, mode="lines", name=_t("plotting.grafica.plot_optimize_servers.costo_total"),
                               line=dict(color=RED, width=2.5)))
     fig.add_trace(go.Scatter(
         x=[bep], y=[result.bep_revenue],
         mode="markers+text",
-        text=[f"PE ({bep:.0f} {'ventas' if en_ventas else 'unidades'})"],
+        text=[_t("plotting.grafica.plot_break_even.pe", bep=bep, expr=_t('plotting.texto_en_expresion.plot_break_even.ventas') if en_ventas else _t('plotting.texto_en_expresion.plot_break_even.unidades'))],
         textposition="top right",
         marker=dict(color=ORANGE, size=12, symbol="star"),
-        name="Punto de equilibrio",
+        name=_t("plotting.grafica.plot_break_even.punto_equilibrio"),
     ))
 
     # Shade profit / loss regions
@@ -531,17 +534,17 @@ def plot_break_even(
         y=np.concatenate([np.where(rev > cost, rev, cost),
                           np.where(rev > cost, cost, cost)[::-1]]),
         fill="toself", fillcolor="rgba(46,139,87,0.12)",
-        line=dict(color="rgba(0,0,0,0)"), name="Zona de utilidad",
+        line=dict(color="rgba(0,0,0,0)"), name=_t("plotting.grafica.plot_break_even.zona_utilidad"),
     ))
 
     if actual is not None:
         fig.add_vline(x=actual, line=dict(color=BLUE, width=1.5, dash="dot"),
-                      annotation_text=f"Real ({actual:.0f})", annotation_position="top left")
+                      annotation_text=_t("plotting.grafica.plot_break_even.real", actual=actual), annotation_position="top left")
 
     fig.update_layout(
-        title=dict(text=title or "Análisis de punto de equilibrio", font=dict(size=16)),
-        xaxis_title="Ventas" if en_ventas else "Unidades",
-        yaxis_title="Monto",
+        title=dict(text=title or _t("plotting.grafica.plot_break_even.analisis_punto_equilibrio"), font=dict(size=16)),
+        xaxis_title=_t("plotting.grafica.plot_break_even.ventas") if en_ventas else _t("plotting.grafica.plot_break_even.unidades"),
+        yaxis_title=_t("plotting.grafica.plot_break_even.monto"),
         hovermode="x unified",
         margin=dict(t=80, l=60, r=20, b=60),
     )
@@ -574,15 +577,15 @@ def plot_eoq(
     total    = holding + ordering
 
     fig, ax = plt.subplots(figsize=figsize or (8, 5))
-    ax.plot(Q_range, holding,  color=BLUE,   lw=2, label="Costo de mantener (hQ/2)")
-    ax.plot(Q_range, ordering, color=ORANGE, lw=2, label="Costo de ordenar (KD/Q)")
-    ax.plot(Q_range, total,    color=RED,    lw=2.5, label="Costo total")
+    ax.plot(Q_range, holding,  color=BLUE,   lw=2, label=_t("plotting.grafica.plot_eoq.costo_mantener_hq"))
+    ax.plot(Q_range, ordering, color=ORANGE, lw=2, label=_t("plotting.grafica.plot_eoq.costo_ordenar_kd"))
+    ax.plot(Q_range, total,    color=RED,    lw=2.5, label=_t("plotting.grafica.plot_optimize_servers.costo_total"))
     ax.axvline(Q_star, color=GREEN, ls="--", lw=1.5,
-               label=f"EOQ = {Q_star:.4g}")
+               label=_t("plotting.grafica.plot_eoq.eoq", Q_star=Q_star))
     ax.scatter([Q_star], [result.total_cost], color=GREEN, zorder=5, s=70)
-    ax.set_xlabel("Cantidad de pedido Q")
-    ax.set_ylabel("Costo por unidad de tiempo")
-    ax.set_title(title or "EOQ — Curvas de costo", fontweight="bold")
+    ax.set_xlabel(_t("plotting.grafica.plot_eoq.cantidad_pedido"))
+    ax.set_ylabel(_t("plotting.grafica.plot_optimize_servers.costo_unidad_tiempo"))
+    ax.set_title(title or _t("plotting.grafica.plot_eoq.eoq_curvas_costo"), fontweight="bold")
     ax.legend(fontsize=9)
     ax.grid(alpha=0.25)
     fig.tight_layout()
@@ -604,28 +607,28 @@ def plot_queue_distribution(
     from plotly.subplots import make_subplots
 
     fig = make_subplots(rows=1, cols=2,
-                        subplot_titles=["P(N = n) — Longitud de la cola", "F(t) — FDA del tiempo de permanencia"])
+                        subplot_titles=[_t("plotting.grafica.plot_queue_distribution.longitud_cola"), _t("plotting.grafica.plot_queue_distribution.fda_tiempo_permanencia")])
 
-    fig.add_trace(go.Bar(x=pmf_df["n"], y=pmf_df["P(N=n)"],
-                          name="P(N=n)", marker_color=BLUE, opacity=0.8), row=1, col=1)
-    fig.add_trace(go.Scatter(x=pmf_df["n"], y=pmf_df["P(N<=n)"],
-                              mode="lines+markers", name="P(N≤n)",
+    fig.add_trace(go.Bar(x=pmf_df["n"], y=pmf_df[columna(pmf_df, "columnas.columna_df.global.texto_2")],
+                          name=_t("plotting.grafica.plot_queue_distribution.texto_3"), marker_color=BLUE, opacity=0.8), row=1, col=1)
+    fig.add_trace(go.Scatter(x=pmf_df["n"], y=pmf_df[columna(pmf_df, "columnas.columna_df.global.texto")],
+                              mode="lines+markers", name=_t("plotting.grafica.plot_queue_distribution.nn"),
                               line=dict(color=ORANGE, width=2)), row=1, col=1)
 
-    fig.add_trace(go.Scatter(x=cdf_df["t"], y=cdf_df["F(t)"],
-                              mode="lines", name="F(t)",
+    fig.add_trace(go.Scatter(x=cdf_df["t"], y=cdf_df[columna(cdf_df, "columnas.columna_df.global.texto_3")],
+                              mode="lines", name=_t("plotting.grafica.plot_queue_distribution.texto"),
                               line=dict(color=GREEN, width=2.5)), row=1, col=2)
-    fig.add_trace(go.Scatter(x=cdf_df["t"], y=cdf_df["f(t)"],
-                              mode="lines", name="f(t)",
+    fig.add_trace(go.Scatter(x=cdf_df["t"], y=cdf_df[columna(cdf_df, "columnas.columna_df.global.texto_4")],
+                              mode="lines", name=_t("plotting.grafica.plot_queue_distribution.texto_4"),
                               line=dict(color=TEAL, width=1.5, dash="dot"),
                               yaxis="y3"), row=1, col=2)
 
     fig.update_layout(
-        title=dict(text=title or "Distribuciones M/M/1", font=dict(size=16)),
+        title=dict(text=title or _t("plotting.grafica.plot_queue_distribution.distribuciones"), font=dict(size=16)),
         margin=dict(t=80, l=60, r=20, b=60),
     )
-    fig.update_xaxes(title_text="n (clientes)", row=1, col=1)
-    fig.update_xaxes(title_text="t (tiempo)", row=1, col=2)
-    fig.update_yaxes(title_text="Probabilidad", row=1, col=1)
-    fig.update_yaxes(title_text="F(t) / f(t)", row=1, col=2)
+    fig.update_xaxes(title_text=_t("plotting.grafica.plot_queue_distribution.clientes"), row=1, col=1)
+    fig.update_xaxes(title_text=_t("plotting.grafica.plot_queue_distribution.tiempo"), row=1, col=2)
+    fig.update_yaxes(title_text=_t("plotting.grafica.plot_queue_distribution.probabilidad"), row=1, col=1)
+    fig.update_yaxes(title_text=_t("plotting.grafica.plot_queue_distribution.texto_2"), row=1, col=2)
     return fig

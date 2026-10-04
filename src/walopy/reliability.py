@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from ._i18n import t as _t
 from ._utils import as_float_list, as_int_positive, as_nonneg, as_positive
 
 if TYPE_CHECKING:
@@ -73,15 +74,15 @@ class ReliabilityResult:
 
     def summary(self) -> str:
         lines = [
-            f"Topología       : {self.topology}",
-            f"Componentes     : {self.n_components}",
-            f"Tasas de falla λ: {[f'{l:.4g}' for l in self.failure_rates]}",
-            f"MTBF            : {self.mtbf:.6g}",
+            _t("reliability.etiqueta.summary.topologia", topology=self.topology),
+            _t("reliability.etiqueta.summary.componentes", n_components=self.n_components),
+            _t("reliability.etiqueta.summary.tasas_falla", expr=[f'{l:.4g}' for l in self.failure_rates]),
+            _t("reliability.etiqueta.summary.mtbf", mtbf=self.mtbf),
         ]
         if self.t is not None:
-            lines.append(f"R(t={self.t:.4g})       : {self.R_t:.6g}")
+            lines.append(_t("reliability.etiqueta.summary.texto", t=self.t, R_t=self.R_t))
         if self.availability is not None:
-            lines.append(f"Disponibilidad  : {self.availability:.4%}")
+            lines.append(_t("reliability.etiqueta.summary.disponibilidad", availability=self.availability))
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -90,14 +91,14 @@ class ReliabilityResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         row: dict = {
-            "Topología": self.topology,
-            "Componentes": self.n_components,
+            _t("reliability.cabecera.to_frame.topologia"): self.topology,
+            _t("reliability.cabecera.to_frame.componentes"): self.n_components,
             "MTBF": self.mtbf,
         }
         if self.t is not None:
-            row[f"R(t={self.t})"] = self.R_t
+            row[_t("reliability.cabecera.to_frame.texto", t=self.t)] = self.R_t
         if self.availability is not None:
-            row["Disponibilidad"] = self.availability
+            row[_t("reliability.cabecera.to_frame.disponibilidad")] = self.availability
         return pd.DataFrame([row])
 
 
@@ -123,7 +124,7 @@ def _r_system(topology: str, lams: list, k, t: float) -> float:
             c = math.comb(n, j)
             total += c * (R_i ** j) * (F_i ** (n - j))
         return total
-    raise ValueError(f"Topología desconocida: {topology!r}")
+    raise ValueError(_t("reliability.error.r_system.topologia_desconocida", topology=topology))
 
 
 # ---------------------------------------------------------------------------
@@ -348,7 +349,7 @@ def koon_system(
     n = as_int_positive(n, "n")
     k = as_int_positive(k, "k")
     if k > n:
-        raise ValueError(f"Debe cumplirse 1 ≤ k ≤ n (k={k}, n={n}).")
+        raise ValueError(_t("reliability.error.koon_system.debe_cumplirse", k=k, n=n))
     lam = as_positive(failure_rate, "failure_rate")
     t, mttr = _validar_t_mttr(t, mttr)
     lams = [lam] * n
@@ -430,17 +431,12 @@ class WeibullResult:
         """
         p = pct / 100.0
         if not (0.0 < p < 1.0):
-            raise ValueError("'pct' debe estar estrictamente entre 0 y 100.")
+            raise ValueError(_t("reliability.error.b_life.pct_debe_estar_estrictamente_entre"))
         return self.scale * (-math.log(1.0 - p)) ** (1.0 / self.shape)
 
     def summary(self) -> str:
         return (
-            f"Método       : {self.method} (n={self.n})\n"
-            f"Forma β      : {self.shape:.4f}\n"
-            f"Escala η     : {self.scale:.4g}\n"
-            f"MTTF         : {self.mttf:.4g}\n"
-            f"Vida B10     : {self.b10:.4g}\n"
-            f"B50 (mediana): {self.b50:.4g}"
+            _t("reliability.etiqueta.summary.metodo_forma_escala_mttf_vida", method=self.method, n=self.n, shape=self.shape, scale=self.scale, mttf=self.mttf, b10=self.b10, b50=self.b50)
         )
 
     def __str__(self) -> str:
@@ -449,12 +445,12 @@ class WeibullResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "β (forma)":  self.shape,
-            "η (escala)": self.scale,
+            _t("reliability.cabecera.to_frame.forma"):  self.shape,
+            _t("reliability.cabecera.to_frame.escala"): self.scale,
             "MTTF":       self.mttf,
             "B10":        self.b10,
             "B50":        self.b50,
-            "método":     self.method,
+            _t("reliability.cabecera.to_frame.metodo"):     self.method,
             "n":          self.n,
         }])
 
@@ -481,15 +477,13 @@ def _weibull_mle_beta(failure_times: list) -> float:
     lo, hi = 1e-4, 100.0
     if g(lo) <= 0.0:
         warnings.warn(
-            f"La forma β estimada es menor o igual que la cota inferior {lo:g}; el resultado es el límite del intervalo "
-            "de búsqueda, no un máximo de verosimilitud exacto.",
+            _t("reliability.aviso.weibull_mle_beta.forma_estimada_menor_igual_cota", lo=lo),
             UserWarning, stacklevel=3,
         )
         return lo
     if g(hi) >= 0.0:
         warnings.warn(
-            f"Los tiempos de falla casi no tienen dispersión: la forma β supera la cota {hi:g}; "
-            "el resultado es el límite del intervalo de búsqueda, no el estimador exacto.",
+            _t("reliability.aviso.weibull_mle_beta.tiempos_falla_casi_tienen_dispersion", hi=hi),
             UserWarning, stacklevel=3,
         )
         return hi
@@ -564,12 +558,12 @@ def weibull_analysis(
     t_list = as_float_list(failure_times, "failure_times", min_len=2)
     if max(t_list) == min(t_list):
         raise ValueError(
-            "Todos los tiempos de falla son iguales: la dispersión es nula y la forma β no es estimable."
+            _t("reliability.error.weibull_analysis.todos_tiempos_falla_son_iguales")
         )
 
     m = method.upper()
     if m not in ("MLE", "RRY"):
-        raise ValueError("'method' debe ser 'MLE' o 'RRY'.")
+        raise ValueError(_t("reliability.error.weibull_analysis.method_debe_ser_mle_rry"))
 
     if m == "MLE":
         beta  = _weibull_mle_beta(t_list)

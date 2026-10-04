@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from ._i18n import t as _t
 from ._utils import as_int_positive, as_nonempty, as_nonneg, as_positive
 
 if TYPE_CHECKING:
@@ -69,9 +70,9 @@ class JacksonResult:
     def to_frame(self) -> pd.DataFrame:
         import pandas as pd
         return pd.DataFrame([{
-            "Estación":   s.name,
-            "λ_ext":     s.lam_external,
-            "λ_total":   s.lam_total,
+            _t("network.cabecera.to_frame.estacion"):   s.name,
+            _t("network.cabecera.to_frame.ext"):     s.lam_external,
+            _t("network.cabecera.to_frame.total"):   s.lam_total,
             "μ":         s.mu,
             "c":         s.servers,
             "ρ":         s.rho,
@@ -83,8 +84,7 @@ class JacksonResult:
 
     def summary(self) -> str:
         hdr = (
-            f"{'Estación':<20} {'λ_ext':>8} {'λ_tot':>8} {'c':>4} "
-            f"{'ρ':>6} {'L':>8} {'Lq':>8} {'W':>10} {'Wq':>10}"
+            f"{_t('network.texto_en_expresion.summary.estacion'):<20} {_t('network.texto_en_expresion.summary.ext'):>8} {_t('network.texto_en_expresion.summary.tot'):>8} {'c':>4} {'ρ':>6} {_t('network.texto_en_expresion.summary.texto'):>8} {_t('network.texto_en_expresion.summary.lq'):>8} {_t('network.texto_en_expresion.summary.texto_2'):>10} {_t('network.texto_en_expresion.summary.wq'):>10}"
         )
         sep = "-" * len(hdr)
         lines = [hdr, sep]
@@ -96,8 +96,8 @@ class JacksonResult:
             )
         lines += [
             sep,
-            f"L_sistema : {self.L_system:.6g}  (clientes totales en la red)",
-            f"W_sistema : {self.W_system:.6g}  (tiempo medio de permanencia en la red)",
+            _t("network.etiqueta.summary.sistema_clientes_totales_red", L_system=self.L_system),
+            _t("network.etiqueta.summary.sistema_tiempo_medio_permanencia_red", W_system=self.W_system),
         ]
         return "\n".join(lines)
 
@@ -165,30 +165,30 @@ def jackson_network(
     gamma_arr = np.array([as_nonneg(g, f"gamma[{i}]") for i, g in enumerate(gamma)], dtype=float)
 
     if len(mu_arr) != J or len(gamma_arr) != J:
-        raise ValueError("'mu', 'gamma' y 'station_names' deben tener la misma longitud.")
+        raise ValueError(_t("network.error.jackson_network.mu_gamma_station_names_deben"))
 
     P = np.array(routing, dtype=float)
     if P.shape != (J, J):
-        raise ValueError(f"'routing' debe ser una matriz ({J}×{J}), se recibió forma {P.shape}.")
+        raise ValueError(_t("network.error.jackson_network.routing_debe_ser_matriz_recibio", J=J, J2=J, shape=P.shape))
     if np.any(P < 0):
-        raise ValueError("Todas las probabilidades de ruteo deben ser ≥ 0.")
+        raise ValueError(_t("network.error.jackson_network.todas_probabilidades_ruteo_deben_ser"))
     row_sums = P.sum(axis=1)
     if np.any(row_sums > 1.0 + 1e-10):
-        raise ValueError("Las filas de la matriz de ruteo deben sumar ≤ 1.")
+        raise ValueError(_t("network.error.jackson_network.filas_matriz_ruteo_deben_sumar"))
 
     if servers is None:
         c_arr = np.ones(J, dtype=int)
     else:
         c_arr = np.array([as_int_positive(c, f"servers[{i}]") for i, c in enumerate(servers)], dtype=int)
         if len(c_arr) != J:
-            raise ValueError("'servers' debe tener la misma longitud que 'station_names'.")
+            raise ValueError(_t("network.error.jackson_network.servers_debe_tener_misma_longitud"))
 
     # Traffic equations: λ = γ + P^T λ  →  (I − P^T) λ = γ
     A   = np.eye(J) - P.T
     lam = np.linalg.solve(A, gamma_arr)
 
     if np.any(lam < 0):
-        raise ValueError("Tasas de llegada efectivas negativas: revise la matriz de ruteo (¿lazos cerrados?).")
+        raise ValueError(_t("network.error.jackson_network.tasas_llegada_efectivas_negativas_revise"))
 
     # Analyse each station as M/M/c
     from .queuing import mm1, mmc
@@ -201,8 +201,7 @@ def jackson_network(
         rho_j = lj / (cj * muj)
         if rho_j >= 1.0:
             raise ValueError(
-                f"La estación '{names[j]}' es inestable: ρ = {rho_j:.4g} ≥ 1. "
-                "Aumente la capacidad o reduzca las tasas de llegada."
+                _t("network.error.jackson_network.estacion_inestable_aumente_capacidad_reduzca", expr=names[j], rho_j=rho_j)
             )
         res = mm1(lj, muj) if cj == 1 else mmc(lj, muj, cj)
         station_list.append(StationMetrics(

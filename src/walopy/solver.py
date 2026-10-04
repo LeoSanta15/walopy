@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable
 import numpy as np
 import pandas as pd
 
+from ._i18n import t as _t
 from ._utils import as_positive
 
 if TYPE_CHECKING:
@@ -23,8 +24,7 @@ def _bisect(f: Callable[[float], float], a: float, b: float,
     fa, fb = f(a), f(b)
     if fa * fb > 0:
         raise ValueError(
-            f"La raíz no está acotada: f({a:.6g})={fa:.4g}, f({b:.6g})={fb:.4g}. "
-            "El objetivo puede estar fuera del rango factible."
+            _t("solver.error.bisect.raiz_esta_acotada_objetivo_puede", a=a, fa=fa, b=b, fb=fb)
         )
     for _ in range(max_iter):
         mid = 0.5 * (a + b)
@@ -42,7 +42,7 @@ def _get_metric(result: Any, metric: str) -> float:
     """Extrae una métrica por nombre de cualquier dataclass de resultado."""
     if not hasattr(result, metric):
         valid = [k for k in vars(result) if not k.startswith("_")]
-        raise ValueError(f"Métrica desconocida '{metric}'. Opciones válidas: {valid}")
+        raise ValueError(_t("solver.error.get_metric.metrica_desconocida_opciones_validas", metric=metric, valid=valid))
     return float(getattr(result, metric))
 
 
@@ -82,12 +82,9 @@ class SolverResult:
     params: dict = field(default_factory=dict)
 
     def summary(self) -> str:
-        status = "convergió" if self.converged else "NO convergió"
+        status = _t("solver.etiqueta.summary.convergio_2") if self.converged else _t("solver.etiqueta.summary.convergio")
         return (
-            f"Solver [{status}]\n"
-            f"  Parámetro resuelto : {self.param} = {self.value:.6g}\n"
-            f"  Métrica objetivo   : {self.target_metric} ≤ {self.target_value:.6g}\n"
-            f"  Logrado            : {self.target_metric} = {self.achieved_value:.6g}"
+            _t("solver.etiqueta.summary.solver_parametro_resuelto_metrica_objetivo", status=status, param=self.param, value=self.value, target_metric=self.target_metric, target_value=self.target_value, target_metric2=self.target_metric, achieved_value=self.achieved_value)
         )
 
     def __str__(self) -> str:
@@ -119,8 +116,7 @@ class OptimizeResult:
 
     def summary(self) -> str:
         return (
-            f"Servidores óptimos : {self.optimal_servers}\n"
-            f"Costo mínimo       : {self.min_cost:.6g} por unidad de tiempo\n"
+            _t("solver.etiqueta.summary.servidores_optimos_costo_minimo_unidad", optimal_servers=self.optimal_servers, min_cost=self.min_cost)
         )
 
     def __str__(self) -> str:
@@ -192,7 +188,7 @@ def solve_lam(
         "gg1":  lambda lam: kingman(lam, mu, ca2, cs2),
     }
     if model not in _models:
-        raise ValueError(f"Modelo desconocido '{model}'. Elija entre {list(_models)}.")
+        raise ValueError(_t("solver.error.solve_lam.modelo_desconocido_elija_entre", model=model, expr=list(_models)))
 
     fn = _models[model]
 
@@ -208,14 +204,13 @@ def solve_lam(
     # Check feasibility: even at lam_min the metric might exceed target
     if residual(lam_min) > 0:
         raise ValueError(
-            f"{target_metric} supera {target_value} incluso con λ muy baja. "
-            "El objetivo puede ser infactible para este modelo / μ."
+            _t("solver.error.solve_lam.supera_incluso_muy_baja_objetivo", target_metric=target_metric, target_value=target_value)
         )
 
     lam_sol = _bisect(residual, lam_min, lam_max)
     result   = fn(lam_sol)
     return SolverResult(
-        param="lam",
+        param=_t("columnas.columna_df.global.lam"),
         value=lam_sol,
         target_metric=target_metric,
         target_value=target_value,
@@ -285,7 +280,7 @@ def solve_mu(
         "gg1": lambda mu: kingman(lam, mu, ca2, cs2),
     }
     if model not in _models:
-        raise ValueError(f"Modelo desconocido '{model}'. Elija entre {list(_models)}.")
+        raise ValueError(_t("solver.error.solve_lam.modelo_desconocido_elija_entre", model=model, expr=list(_models)))
 
     fn = _models[model]
 
@@ -301,14 +296,13 @@ def solve_mu(
     # Ensure the bracket is valid
     if residual(mu_max) > 0:
         raise ValueError(
-            f"{target_metric} sigue superando {target_value} con μ = {mu_max:.4g}. "
-            "El objetivo puede ser numéricamente infactible."
+            _t("solver.error.solve_mu.sigue_superando_objetivo_puede_ser", target_metric=target_metric, target_value=target_value, mu_max=mu_max)
         )
 
     mu_sol  = _bisect(residual, mu_min, mu_max)
     result  = fn(mu_sol)
     return SolverResult(
-        param="mu",
+        param=_t("columnas.columna_df.global.mu"),
         value=mu_sol,
         target_metric=target_metric,
         target_value=target_value,
@@ -376,7 +370,7 @@ def solve_servers(
         achieved = _get_metric(result, target_metric)
         if achieved <= target_value:
             return SolverResult(
-                param="c (servidores)",
+                param=_t("columnas.columna_df.global.servidores"),
                 value=float(c),
                 target_metric=target_metric,
                 target_value=target_value,
@@ -386,8 +380,7 @@ def solve_servers(
             )
 
     raise ValueError(
-        f"No se pudo cumplir {target_metric} ≤ {target_value} con hasta {c_max} servidores. "
-        "Considere aumentar μ o relajar el objetivo."
+        _t("solver.error.solve_servers.pudo_cumplir_hasta_servidores_considere", target_metric=target_metric, target_value=target_value, c_max=c_max)
     )
 
 
@@ -602,7 +595,7 @@ def batch_model(
     [0.2, 0.4, 0.6, 0.8]
     """
     if errors not in ("collect", "raise"):
-        raise ValueError("'errors' debe ser 'collect' o 'raise'.")
+        raise ValueError(_t("solver.error.batch_model.errors_debe_ser_collect_raise"))
     rows: list[dict] = []
     has_errors = False
 
@@ -689,7 +682,7 @@ def compare(
     """
     rows: list[dict[str, Any]] = []
     for i, r in enumerate(results):
-        label = labels[i] if (labels and i < len(labels)) else f"escenario_{i + 1}"
+        label = labels[i] if (labels and i < len(labels)) else _t("solver.etiqueta.compare.escenario", expr=i + 1)
         if hasattr(r, "to_frame"):
             row = r.to_frame().iloc[0].to_dict()
         elif isinstance(r, dict):

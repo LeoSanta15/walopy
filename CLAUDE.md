@@ -36,6 +36,9 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 - `plotting.py`    — todas las gráficas (matplotlib y plotly, importación perezosa)
 - `__main__.py`    — CLI (`python -m walopy`)
 - `_utils.py`      — validadores compartidos (única capa de ingesta numérica) y cotas de tamaño
+- `_i18n.py`       — idioma activo (`set_language`, `language`, `get_language`, `WALOPY_LANG`) y `t("clave", **datos)`; los textos viven en los catálogos
+- `_catalogo_es.py` — catálogo de textos en español (idioma por defecto); claves `modulo.tipo.funcion.resumen`
+- `_catalogo_en.py` — catálogo de textos en inglés (fase 2 de la internacionalización; mientras falte una clave se usa el español)
 - `__init__.py`    — API pública (`__all__`) y **fuente única de la versión** (`__version__`, literal)
 
 Otras carpetas: `tests/` (pytest; incluye doctests de `src/` y los ejemplos del README), `examples/` (scripts ejecutables),
@@ -54,7 +57,7 @@ make test | cov | lint | types | build | docs | examples | obsoletas | regresion
 Equivalentes directos: `python -m pytest` · `python -m ruff check src/ tests/ benchmarks/ scripts/ examples/` ·
 `python -m mypy src/walopy --ignore-missing-imports` · `python -m build && python -m twine check dist/*` ·
 `python -m sphinx -b html -W docs/source docs/build`.
-**Internacionalización en curso** (`docs/auditoria/PLAN_I18N.md`): al añadir o cambiar un texto visible en `src/`, regenera el inventario con `make inventario-i18n` y revisa el diff (un test falla si está desactualizado).
+**Internacionalización** (`docs/auditoria/PLAN_I18N.md`): los textos que ve la persona usuaria no se escriben en el código sino en `_catalogo_es.py` (y su traducción en `_catalogo_en.py`) y se usan con `_t("modulo.tipo.funcion.resumen", dato=valor)` (`from ._i18n import t as _t`). Para un texto nuevo: añade la clave al catálogo español (marcadores `str.format` nombrados, p. ej. `{name}`, `{value!r}`), la misma clave con los mismos marcadores en el inglés, y llámalo con `_t`. `make inventario-i18n` falla si queda un texto literal visible en `src/`; una clave nueva (que no estaba en v0.3.0) se declara además en `AÑADIDAS_TRAS_V030` de `tests/test_inventario_i18n.py`. Las claves de `result.params` se mantienen fijas; las columnas de DataFrame se leen con `columna(df, "clave")`.
 `make regresion` y `make mutaciones` necesitan `pytest-timeout` (extra `dev`) y, la primera, los tags de git (`git fetch --tags`).
 
 ## Definición de «terminado»
@@ -75,7 +78,7 @@ Etiqueta de cada regla: `[test]` la comprueba la suite · `[CI]` la comprueba un
 Estado de la prueba de cada regla contra este repo: `docs/retrospectiva/CLAUDE_MD_RULES.md`.
 - **R-01 Cambios quirúrgicos.** `[guía]` No reescribas módulos para añadir una función; sigue el patrón de los módulos vecinos.
 - **R-02 Validar contra referencia independiente.** `[test]` Todo resultado numérico se contrasta con una fuente externa (publicación, cálculo manual, otra librería, fuerza bruta, simulación con ≥ 20 semillas). Nunca contra el propio código. (`tests/test_referencias_externas.py`)
-- **R-03 Español en lo que ve el usuario.** `[test]` Docstrings, mensajes de `ValueError`/`TypeError`/`UserWarning`, columnas de DataFrame, textos de gráficas, README, CHANGELOG y commits van en español. Identificadores y claves de datos en inglés (snake_case; clases en PascalCase); las cabeceras que se muestran (`to_frame()`, `summary()`) se traducen con `.rename(columns=…)` sin tocar las claves. Lo comprueba `tests/test_idioma.py`.
+- **R-03 Español en lo que ve el usuario.** `[test]` Docstrings, mensajes de `ValueError`/`TypeError`/`UserWarning`, columnas de DataFrame, textos de gráficas, README, CHANGELOG y commits van en español. Identificadores y claves de datos en inglés (snake_case; clases en PascalCase); las cabeceras que se muestran (`to_frame()`, `summary()`) se traducen con `.rename(columns=…)` sin tocar las claves. Desde 0.4.0 esos textos viven en el catálogo (`_catalogo_es.py` es el idioma por defecto; ver «Internacionalización») y el español sigue siendo lo que se ve por defecto. Lo comprueban `tests/test_idioma.py` y `tests/test_inventario_i18n.py`.
 - **R-04 Avances incrementales.** `[comando]` Cada versión: construir, probar (suite + wheel en venv limpio), commit, tag `vX.Y.Z` **después** de subir la versión (un tag creado antes produce artefactos viejos y PyPI responde `400 File exists`).
 - **R-05 Una sola fuente de verdad para la versión: el literal `__version__` de `src/walopy/__init__.py`.** `[test]` `pyproject.toml` la lee con `[tool.setuptools.dynamic] version = {attr = "walopy.__version__"}`. **No uses `importlib.metadata.version()` en `__init__.py`:** los metadatos se congelan al instalar y tras subir la versión `__version__` seguiría mostrando la anterior (comprobado). Tras subirla, `make install` refresca los metadatos. Lo comprueba `tests/test_version.py`.
 - **R-06 Dependencias opcionales con mensaje orientativo** `[guía]` (`try/except ImportError` con `pip install walopy[extra]`). Hoy no hay extras: matplotlib y plotly son obligatorias; si se declara un extra, añadir el mensaje y el test con `monkeypatch.setitem(sys.modules, "<dep>", None)`.

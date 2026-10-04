@@ -5,59 +5,60 @@ import argparse
 import sys
 
 from . import __version__
+from ._i18n import t as _t
 
 
 def _add_lam_mu(p: argparse.ArgumentParser) -> None:
     p.add_argument("--lam", type=float, required=True, metavar="LAM",
-                   help="Tasa de llegadas λ")
+                   help=_t("main.cli.add_lam_mu.tasa_llegadas"))
     p.add_argument("--mu", type=float, required=True, metavar="MU",
-                   help="Tasa de servicio μ por servidor")
+                   help=_t("main.cli.add_lam_mu.tasa_servicio_servidor"))
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="walopy",
-        description="Herramientas de teoría de colas e investigación de operaciones.",
+        description=_t("main.cli.main.herramientas_teoria_colas_investigacion_operaciones"),
     )
-    parser.add_argument("--version", action="version", version=f"walopy {__version__}")
+    parser.add_argument("--version", action="version", version=_t("main.cli.main.walopy", __version__=__version__))
 
     sub = parser.add_subparsers(dest="model", metavar="MODELO")
 
     # --- mm1 ---
-    p1 = sub.add_parser("mm1", help="Cola M/M/1 de un servidor")
+    p1 = sub.add_parser("mm1", help=_t("main.cli.main.cola_servidor"))
     _add_lam_mu(p1)
 
     # --- mmc ---
-    pc = sub.add_parser("mmc", help="Cola M/M/c de varios servidores")
+    pc = sub.add_parser("mmc", help=_t("main.cli.main.cola_varios_servidores"))
     _add_lam_mu(pc)
-    pc.add_argument("--c", type=int, required=True, metavar="C", help="Número de servidores")
+    pc.add_argument("--c", type=int, required=True, metavar="C", help=_t("main.cli.main.numero_servidores"))
 
     # --- md1 ---
-    pd1 = sub.add_parser("md1", help="Cola M/D/1 con servicio determinístico")
+    pd1 = sub.add_parser("md1", help=_t("main.cli.main.cola_servicio_deterministico"))
     _add_lam_mu(pd1)
 
     # --- gg1 ---
-    pg = sub.add_parser("gg1", help="Aproximación de Kingman para G/G/1")
+    pg = sub.add_parser("gg1", help=_t("main.cli.main.aproximacion_kingman"))
     _add_lam_mu(pg)
     pg.add_argument("--ca2", type=float, required=True, metavar="CA2",
-                    help="CV² de los tiempos entre llegadas")
+                    help=_t("main.cli.main.cv2_tiempos_entre_llegadas"))
     pg.add_argument("--cs2", type=float, required=True, metavar="CS2",
-                    help="CV² de los tiempos de servicio")
+                    help=_t("main.cli.main.cv2_tiempos_servicio"))
 
     # --- littles ---
-    pl = sub.add_parser("littles", help="Resuelve la ley de Little para la variable faltante")
+    pl = sub.add_parser("littles", help=_t("main.cli.main.resuelve_ley_little_variable_faltante"))
     pl.add_argument("--L",   type=float, default=None, metavar="L")
     pl.add_argument("--lam", type=float, default=None, metavar="LAM")
     pl.add_argument("--W",   type=float, default=None, metavar="W")
 
     # --- eoq ---
-    pe = sub.add_parser("eoq", help="Cantidad económica de pedido (EOQ)")
+    pe = sub.add_parser("eoq", help=_t("main.cli.main.cantidad_economica_pedido_eoq"))
     pe.add_argument("--demand",   type=float, required=True, metavar="D",
-                    help="Tasa de demanda (unidades/periodo)")
+                    help=_t("main.cli.main.tasa_demanda_unidades_periodo"))
     pe.add_argument("--ordering", type=float, required=True, metavar="K",
-                    help="Costo fijo por pedido")
+                    help=_t("main.cli.main.costo_fijo_pedido"))
     pe.add_argument("--holding",  type=float, required=True, metavar="H",
-                    help="Costo de mantener por unidad y periodo")
+                    help=_t("main.cli.main.costo_mantener_unidad_periodo"))
 
     args = parser.parse_args(argv)
 
@@ -93,7 +94,7 @@ def main(argv: list[str] | None = None) -> None:
             print(eoq(args.demand, args.ordering, args.holding).summary())
 
     except (ValueError, TypeError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+        print(_t("main.cli.main.error", exc=exc), file=sys.stderr)
         sys.exit(1)
 
 
