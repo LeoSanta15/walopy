@@ -3,10 +3,10 @@
 PYTHON ?= python
 MINIMO_COBERTURA_MODULO ?= 70
 
-.PHONY: help install test cov lint types build docs examples obsoletas regresion mutaciones notas-release check-fast check release-check clean
+.PHONY: help install test cov lint types build docs examples obsoletas regresion mutaciones inventario-i18n notas-release check-fast check release-check clean
 
 help:
-	@echo "Objetivos: install test cov lint types build docs examples obsoletas regresion mutaciones notas-release VERSION=X.Y.Z check-fast check release-check TAG=vX.Y.Z clean"
+	@echo "Objetivos: install test cov lint types build docs examples obsoletas regresion mutaciones inventario-i18n notas-release VERSION=X.Y.Z check-fast check release-check TAG=vX.Y.Z clean"
 
 install:
 	$(PYTHON) -m pip install -e ".[dev,release,docs]"
@@ -41,6 +41,10 @@ obsoletas:
 # Los tests de regresión deben FALLAR en el tag anterior (necesita los tags de git).
 regresion:
 	@if git describe --tags --abbrev=0 > /dev/null 2>&1; then $(PYTHON) scripts/verificar_regresion.py --manifiesto tests/regresiones.json; else echo "OMITIDO: no hay tags de git (git fetch --tags)"; fi
+
+# Inventario del texto visible (internacionalización): regenera docs/auditoria/inventario_i18n.json y INVENTARIO_I18N.md.
+inventario-i18n:
+	$(PYTHON) scripts/inventario_i18n.py
 
 # Mutación de una línea: cada test de regresión debe fallar si el bug vuelve.
 mutaciones:

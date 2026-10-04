@@ -49,11 +49,12 @@ make check-fast    # lint + tipos + tests   ← iterar con esto
 make check         # lint + tipos + cobertura (global y por módulo) + build + docs + ejemplos + obsoletas + regresion
 make release-check TAG=vX.Y.Z   # construye y comprueba que el wheel tiene la versión del tag
 
-make test | cov | lint | types | build | docs | examples | obsoletas | regresion | mutaciones | clean
+make test | cov | lint | types | build | docs | examples | obsoletas | regresion | mutaciones | inventario-i18n | clean
 ```
 Equivalentes directos: `python -m pytest` · `python -m ruff check src/ tests/ benchmarks/ scripts/ examples/` ·
 `python -m mypy src/walopy --ignore-missing-imports` · `python -m build && python -m twine check dist/*` ·
 `python -m sphinx -b html -W docs/source docs/build`.
+**Internacionalización en curso** (`docs/auditoria/PLAN_I18N.md`): al añadir o cambiar un texto visible en `src/`, regenera el inventario con `make inventario-i18n` y revisa el diff (un test falla si está desactualizado).
 `make regresion` y `make mutaciones` necesitan `pytest-timeout` (extra `dev`) y, la primera, los tags de git (`git fetch --tags`).
 
 ## Definición de «terminado»

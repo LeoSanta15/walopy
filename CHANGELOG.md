@@ -15,6 +15,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 - La nota de `[0.3.0]` decía que las versiones `0.2.4` y `0.2.6` se publicaron sin tag. Comprobado en PyPI (2026-10-02): `0.2.6` sí está publicada y le falta el tag; `0.2.4` **no existe** en PyPI (su publicación falló y se saltó a `0.2.5`).
 
 ### Añadido
+- **Fase 0 de la internacionalización (español por defecto e inglés):** `scripts/inventario_i18n.py` (`make inventario-i18n`) inventaría los 667 textos visibles de `src/` con sus marcadores, clasificados en 13 tipos; `docs/auditoria/inventario_i18n.json`, `INVENTARIO_I18N.md` y `PLAN_I18N.md` (plan por fases y decisiones D1–D4). `tests/test_inventario_i18n.py` mantiene el inventario al día y comprueba su cobertura con un método independiente; `tests/test_i18n_paridad.py` trae los verificadores de paridad entre idiomas (los tests sobre los catálogos reales se activan en la fase 1). No hay cambios de comportamiento.
 - `Makefile` (`make check-fast`, `make check`, `make release-check TAG=vX.Y.Z`, …), `AGENTS.md`, `.claude/` (permisos y hooks `SessionStart` y `Stop` para agentes), `.github/CODEOWNERS`, `scripts/notas_release.py` (`make notas-release VERSION=X.Y.Z` imprime el cuerpo del release desde este archivo).
 - `scripts/verificar_mutaciones.py`: mutación de una línea; cada test de regresión debe fallar si el bug vuelve (17 mutantes).
 - `docs/retrospectiva/`: lecciones, catálogo de bugs, scorecard, playbook, reglas de `CLAUDE.md` y resumen ejecutivo.
