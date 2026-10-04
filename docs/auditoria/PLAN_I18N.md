@@ -1,6 +1,6 @@
 # PLAN I18N — walopy en español (por defecto) e inglés
 
-> Estado: **Fases 0, 1 y 2 terminadas** (2026-10-04); fase 3 pendiente (documentación en inglés y release). **El catálogo inglés lo redactó Claude y está pendiente de revisión por una persona nativa antes de publicar.** Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
+> Estado: **Fases 0, 1, 2 y 3 terminadas** (2026-10-04); versión **0.4.0 preparada** (falta la revisión nativa del inglés y crear el tag/release, que lo hace una persona). **El catálogo inglés, `README.en.md` y las traducciones de Sphinx los redactó Claude y están pendientes de revisión por una persona nativa antes de publicar.** Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
 > Evidencia: `docs/auditoria/inventario_i18n_base.json` (línea base **congelada** de v0.3.0, generada con `scripts/inventario_i18n.py --src <código de v0.3.0>`) y `INVENTARIO_I18N.md`. Todo número de este plan sale de ese inventario.
 
 > **Corrección sobre la Fase 0 (hecha en la Fase 1).** El primer inventario contó **667** textos y afirmó cobertura del 100 %. Era incompleto: no veía los textos escondidos en
@@ -62,7 +62,7 @@ Si esos textos cambian con el idioma sin más, `result.params[...]` y `df["Estac
 | **0** ✅ | Inventario, claves, tests de paridad e inventario al día | hecho: 667 textos, 0 sin clasificar, cobertura independiente 100 % | 1 día |
 | **1** ✅ | `_i18n.py` + migración de A, B y C (según D1–D3) **solo en español**; fixture que fija `es` | hecho: los tests existentes pasan (solo se adaptó `test_idioma.py`, cuyo objeto —mensajes literales— ya no existe); salida en español **idéntica** a la de v0.3.0 (`tests/test_salida_identica.py`); `make check` verde; suites en Python 3.9 (mínimos y recientes), 3.10, 3.11 y 3.13 | 1 día |
 | **2** ✅ | Catálogo `en` (597 claves) + tests por idioma; `test_idioma.py` generalizado por catálogo | hecho: paridad total de claves y marcadores; con `language("en")` todo el recorrido de funciones, errores, escenarios y CLI no contiene vocabulario español; los números no cambian con el idioma; `make check` verde | 1 día |
-| **3** | Documentación en inglés (README, Sphinx con `sphinx-intl`), CHANGELOG, release **0.4.0** | `sphinx -W` en ambos idiomas; `make check` en verde | ~1 semana |
+| **3** ✅ | Documentación en inglés (README, Sphinx con `sphinx-intl`), CHANGELOG, versión 0.4.0 | hecho: `README.en.md` (mismos 25 apartados y bloques de código ejecutados por `test_readme`), 924 mensajes de Sphinx traducidos (excepto el registro de cambios) (`docs/source/locale/en`), `make docs` construye ambos idiomas con `-W`, enlaces cruzados entre los README, `make check` y `make release-check TAG=v0.4.0` en verde | 1 día |
 
 ## 5b. Verificación de la Fase 1 (lo que demuestra que no se rompió nada)
 1. **Instantánea de salida** (`tests/golden/salida_es.json`, generada con el código de v0.3.0): resultado, `str`, `summary()`, `to_frame()`, gráficas, errores del contrato de entradas, escenarios, bloques del README y CLI. Control negativo: cambiar una letra de un mensaje la rompe.
@@ -75,6 +75,13 @@ Si esos textos cambian con el idioma sin más, `result.params[...]` y `df["Estac
 - **Bug de v0.3.0 (R-03):** el mensaje de `eoq_quantity_discount` «No feasible price break found.» estaba en inglés; ahora es «No se encontró ningún tramo de precio factible.» en español (`CORREGIDAS_TRAS_V030`).
 - **Claves de datos:** las clases `A/B/C/X/Y/Z` de ABC-XYZ pasan por el catálogo pero son idénticas en todos los idiomas (un test lo exige: `DATOS_INVARIABLES`).
 - **Cuidado al traducir:** `.method` de `lot_for_lot` («Lote por lote» → «Lot-for-lot») y los nombres por defecto son datos visibles que cambian con el idioma; está documentado en el README.
+
+## 5d. Hallazgos de la Fase 3
+- El extractor no veía acrónimos españoles sueltos (`HT`/`HL`, holgura total/libre, columnas de `ProjectResult.to_frame()`): ahora son `project.cabecera.to_frame.ht/hl` (en inglés `TF`/`FF`).
+- Las columnas de varias tablas imprimían desalineados algunos rótulos del español (`z`, `R(t=…)`): es el comportamiento de v0.3.0 (se conserva en español); en inglés se alinearon salvo `R(t=…)`, cuyo ancho depende de `t`.
+- El registro de cambios (`CHANGELOG.md`) **no** se traduce (convención del repositorio: español) y queda fuera de la comprobación de traducciones de Sphinx.
+- Los ejemplos `>>>` de los docstrings muestran la salida en español también en la documentación en inglés (son doctests y se ejecutan en español).
+- Mantenimiento: tras cambiar un docstring, `make docs-i18n` y traducir lo nuevo (`test_las_traducciones_de_sphinx_estan_al_dia` falla si se olvida).
 
 Riesgo conocido: al añadir un texto visible hay que ponerlo en ambos catálogos (`CLAUDE.md`, sección «Internacionalización»); los tests lo exigen.
 

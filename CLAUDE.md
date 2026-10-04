@@ -56,7 +56,7 @@ make test | cov | lint | types | build | docs | examples | obsoletas | regresion
 ```
 Equivalentes directos: `python -m pytest` · `python -m ruff check src/ tests/ benchmarks/ scripts/ examples/` ·
 `python -m mypy src/walopy --ignore-missing-imports` · `python -m build && python -m twine check dist/*` ·
-`python -m sphinx -b html -W docs/source docs/build`.
+`python -m sphinx -b html -W docs/source docs/build/es` y `... -W -D language=en docs/source docs/build/en` (la documentación en inglés sale de `docs/source/locale/en`; tras cambiar un docstring ejecuta `make docs-i18n` y traduce lo nuevo).
 **Internacionalización** (`docs/auditoria/PLAN_I18N.md`): los textos que ve la persona usuaria no se escriben en el código sino en `_catalogo_es.py` (y su traducción en `_catalogo_en.py`) y se usan con `_t("modulo.tipo.funcion.resumen", dato=valor)` (`from ._i18n import t as _t`). Para un texto nuevo: añade la clave al catálogo español (marcadores `str.format` nombrados, p. ej. `{name}`, `{value!r}`), la misma clave con los mismos marcadores en el inglés, y llámalo con `_t`. `make inventario-i18n` falla si queda un texto literal visible en `src/`; una clave nueva (que no estaba en v0.3.0) se declara además en `AÑADIDAS_TRAS_V030` de `tests/test_inventario_i18n.py`. Las claves de `result.params` se mantienen fijas; las columnas de DataFrame se leen con `columna(df, "clave")`.
 `make regresion` y `make mutaciones` necesitan `pytest-timeout` (extra `dev`) y, la primera, los tags de git (`git fetch --tags`).
 

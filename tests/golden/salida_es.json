@@ -13,7 +13,7 @@
   "--version": {
    "codigo": 0,
    "stderr": "",
-   "stdout": "walopy 0.3.0\n"
+   "stdout": "walopy <versión>\n"
   },
   "eoq --demand -1 --ordering 50 --holding 2": {
    "codigo": 1,

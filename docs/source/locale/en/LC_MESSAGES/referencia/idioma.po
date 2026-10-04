@@ -1,0 +1,82 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/idioma.rst:2
+msgid "Idioma de los textos (i18n)"
+msgstr "Language of the texts (i18n)"
+
+#: ../../source/referencia/idioma.rst:4
+msgid "Los mensajes, etiquetas, cabeceras y títulos se muestran en el idioma activo: español (``\"es\"``, por defecto) o inglés (``\"en\"``). Orden de prioridad: ``with language(...)`` → ``set_language(...)`` → variable de entorno ``WALOPY_LANG`` → español. Todos los símbolos se importan también desde ``walopy``."
+msgstr "The messages, labels, headers and titles are shown in the active language: Spanish (``\"es\"``, the default) or English (``\"en\"``). Priority order: ``with language(...)`` → ``set_language(...)`` → the ``WALOPY_LANG`` environment variable → Spanish. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/idioma.rst:9
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy._i18n.set_language:1
+msgid "Fija el idioma de los textos para todo el proceso."
+msgstr "Sets the language of the texts for the whole process."
+
+#: of walopy._i18n.language walopy._i18n.set_language
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy._i18n.language:3 walopy._i18n.set_language:3
+msgid "``'es'`` o ``'en'``."
+msgstr "``'es'`` or ``'en'``."
+
+#: of walopy._i18n.language walopy._i18n.set_language
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy._i18n.language:9 walopy._i18n.set_language:6
+msgid "Si el idioma no está admitido."
+msgstr "If the language is not supported."
+
+#: of walopy._i18n.get_language:8 walopy._i18n.language:12
+#: walopy._i18n.set_language:9
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy._i18n.get_language:1
+msgid "Devuelve el idioma activo: ``'es'`` (por defecto) o ``'en'``."
+msgstr "Returns the active language: ``'es'`` (default) or ``'en'``."
+
+#: of walopy._i18n.get_language walopy._i18n.language
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy._i18n.get_language:3
+msgid "El idioma con el que se muestran los textos: el del contexto ``language()``, si no el de ``set_language()``, si no el de la variable de entorno ``WALOPY_LANG`` y, por último, ``'es'``."
+msgstr "The language the texts are shown in: that of the ``language()`` context, otherwise that of ``set_language()``, otherwise that of the ``WALOPY_LANG`` environment variable and, lastly, ``'es'``."
+
+#: of walopy._i18n.get_language walopy._i18n.language
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy._i18n.language:1
+msgid "Cambia el idioma solo dentro de un bloque ``with`` (seguro con hilos y ``asyncio``)."
+msgstr "Changes the language only inside a ``with`` block (safe with threads and ``asyncio``)."
+
+#: of walopy._i18n.language:6
+msgid "Administrador de contexto; al salir del bloque se restablece el idioma anterior."
+msgstr "Context manager; when the block exits the previous language is restored."
+

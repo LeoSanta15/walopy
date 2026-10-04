@@ -4,25 +4,48 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
+Sin cambios todavía.
+
+---
+
+## [0.4.0] — 2026-10-04
+
+**Versión multilenguaje:** los textos y la documentación están en **español (por defecto) e inglés**. La salida en español es idéntica a la de v0.3.0
+(comprobada con una instantánea de toda la salida visible), salvo el mensaje corregido de `eoq_quantity_discount`. **La traducción al inglés la redactó
+Claude y debe revisarla una persona nativa antes de publicar.**
+
+### Añadido
+- **Idioma de los textos:** `walopy.set_language("en")`, `with walopy.language("en"):` (seguro con hilos y `asyncio`), `walopy.get_language()` y la variable de
+  entorno `WALOPY_LANG` (también para el CLI). Orden de prioridad: contexto → global → entorno → español. Un idioma no admitido lanza `ValueError`; un texto sin
+  traducir se muestra en español. Se aplica a mensajes de error, avisos, etiquetas de `summary()`, cabeceras de `to_frame()`, títulos de gráficas y ayuda del CLI.
+  Las claves de `result.params` no cambian con el idioma (`summary()` muestra su etiqueta traducida); los nombres de las columnas de los `DataFrame` y los nombres
+  por defecto (`Artículo-1` → `Item-1`) se crean en el idioma activo.
+- **Catálogos de textos:** los 646 textos visibles de `src/` pasaron del código a `_catalogo_es.py` y `_catalogo_en.py` (claves `modulo.tipo.funcion.resumen`,
+  marcadores `str.format` nombrados) y se usan con `_t("clave", ...)`. Infraestructura de verificación: `scripts/inventario_i18n.py` (`make inventario-i18n`),
+  `scripts/instantanea_salida.py` y los tests `test_inventario_i18n`, `test_i18n_paridad`, `test_i18n`, `test_salida_identica` y `test_salida_por_idioma`.
+  Plan y decisiones en `docs/auditoria/PLAN_I18N.md`.
+- **Documentación en inglés:** `README.en.md` (enlazado desde `README.md` y desde los metadatos de PyPI) y la documentación Sphinx en inglés
+  (`sphinx-build -D language=en`, traducciones en `docs/source/locale/en`, `make docs` construye ambos idiomas; `make docs-i18n` actualiza las plantillas).
+  El registro de cambios sigue en español. `tests/test_documentacion_ingles.py` comprueba que ambos README tienen la misma estructura, que todos los mensajes de
+  Sphinx están traducidos y que no hay mensajes nuevos sin traducir.
+- `Makefile` (`make check-fast`, `make check`, `make release-check TAG=vX.Y.Z`, …), `AGENTS.md`, `.claude/` (permisos y hooks `SessionStart` y `Stop` para agentes), `.github/CODEOWNERS`, `scripts/notas_release.py` (`make notas-release VERSION=X.Y.Z` imprime el cuerpo del release desde este archivo).
+- `scripts/verificar_mutaciones.py`: mutación de una línea; cada test de regresión debe fallar si el bug vuelve (17 mutantes).
+- `docs/retrospectiva/`: lecciones, catálogo de bugs, scorecard, playbook, reglas de `CLAUDE.md` y resumen ejecutivo.
+- Los tests de `rcParams` cubren las 19 gráficas (15 con `.plot()` y 4 de llamada directa; antes solo 2).
+- Clasificadores `Natural Language :: Spanish` y `Natural Language :: English` y la URL «README (English)» en los metadatos.
+
 ### Cambiado
 - **La versión tiene una sola fuente de verdad: el literal `__version__` de `src/walopy/__init__.py`**; `pyproject.toml` la lee con
   `[tool.setuptools.dynamic]`. Antes `__init__.py` la leía de `importlib.metadata`, que se congela al instalar: tras subir la versión,
   `walopy.__version__` mostraba la anterior hasta reinstalar.
 - La publicación (`publish.yml`) comprueba que el wheel construido tiene la versión del tag (`scripts/comprobar_version_release.py`) y usa el mismo
   comando de `ruff` que el CI.
+- El CI construye la documentación en español y en inglés (`-W` en ambos).
 
 ### Corregido
 - `eoq_quantity_discount`: el mensaje «No feasible price break found.» estaba en inglés en la versión en español; ahora dice «No se encontró ningún tramo de precio factible.».
 - Un resultado creado con un idioma y mostrado con otro (`with language("en")` + `print(r)` fuera del bloque) ya no falla con `KeyError` en `break_even_multi` y `eoq_multi_constrained`.
 - La nota de `[0.3.0]` decía que las versiones `0.2.4` y `0.2.6` se publicaron sin tag. Comprobado en PyPI (2026-10-02): `0.2.6` sí está publicada y le falta el tag; `0.2.4` **no existe** en PyPI (su publicación falló y se saltó a `0.2.5`).
-
-### Añadido
-- **Inglés (fase 2 de la internacionalización):** `_catalogo_en.py` traduce los 597 textos (errores, avisos, etiquetas de `summary()`, cabeceras de `to_frame()`, gráficas, ayuda del CLI); se activa con `walopy.set_language("en")`, `with walopy.language("en"):` o `WALOPY_LANG=en`. **La traducción la redactó Claude y debe revisarla una persona nativa antes de publicar.** Tests: `tests/test_salida_por_idioma.py` (con el idioma en inglés no se cuela español en funciones, errores, escenarios ni CLI, y los números no cambian), paridad de claves y marcadores entre idiomas, ausencia de español en el catálogo inglés.
-- **Internacionalización (fases 0 y 1; español por defecto, inglés en preparación):** los 646 textos visibles de `src/` (mensajes de error, avisos, etiquetas de `summary()`, cabeceras de `to_frame()`, títulos de gráficas y ayuda del CLI) pasaron de estar escritos en el código a un catálogo (`_catalogo_es.py`, claves `modulo.tipo.funcion.resumen`) que se usa con `_t("clave", ...)`. Nueva API pública: `set_language()`, `get_language()` y `language()` (contexto, seguro con hilos y `asyncio`), más la variable de entorno `WALOPY_LANG`; un idioma no admitido lanza `ValueError`. **La salida en español es idéntica a la de v0.3.0** (comprobada con una instantánea de toda la salida visible: `tests/golden/salida_es.json`, `tests/test_salida_identica.py`). Las claves de `result.params` no cambian; las columnas de los `DataFrame` y los nombres por defecto (`Artículo1`) se crean en el idioma activo. Infraestructura de verificación: `scripts/inventario_i18n.py` (`make inventario-i18n`), `scripts/instantanea_salida.py`, `tests/test_inventario_i18n.py` (coherencia código ↔ catálogo ↔ línea base de v0.3.0, con comprobación independiente de los `raise`/`warn`), `tests/test_i18n_paridad.py` (paridad de claves y marcadores entre idiomas, activa cuando exista el catálogo inglés) y `tests/test_i18n.py`. Plan y decisiones en `docs/auditoria/PLAN_I18N.md`.
-- `Makefile` (`make check-fast`, `make check`, `make release-check TAG=vX.Y.Z`, …), `AGENTS.md`, `.claude/` (permisos y hooks `SessionStart` y `Stop` para agentes), `.github/CODEOWNERS`, `scripts/notas_release.py` (`make notas-release VERSION=X.Y.Z` imprime el cuerpo del release desde este archivo).
-- `scripts/verificar_mutaciones.py`: mutación de una línea; cada test de regresión debe fallar si el bug vuelve (17 mutantes).
-- `docs/retrospectiva/`: lecciones, catálogo de bugs, scorecard, playbook, reglas de `CLAUDE.md` y resumen ejecutivo.
-- Los tests de `rcParams` cubren las 19 gráficas (15 con `.plot()` y 4 de llamada directa; antes solo 2).
 
 ---
 

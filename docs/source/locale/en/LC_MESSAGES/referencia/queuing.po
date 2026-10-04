@@ -1,0 +1,290 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/queuing.rst:2
+msgid "Colas (queuing)"
+msgstr "Queues (queuing)"
+
+#: ../../source/referencia/queuing.rst:4
+msgid "Módulo ``walopy.queuing``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.queuing``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/queuing.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.queuing.littles_law:1
+msgid "Resuelve la ley de Little  L = λ · W  para la variable faltante."
+msgstr "Solves Little's law  L = λ · W  for the missing variable."
+
+#: of walopy.queuing.cv2_erlang walopy.queuing.cv2_gamma
+#: walopy.queuing.cv2_lognormal walopy.queuing.cv2_normal
+#: walopy.queuing.cv2_triangular walopy.queuing.cv2_uniform
+#: walopy.queuing.cv2_weibull walopy.queuing.kingman walopy.queuing.littles_law
+#: walopy.queuing.md1 walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.queuing.littles_law:3
+msgid "Número promedio de elementos en el sistema."
+msgstr "Average number of items in the system."
+
+#: of walopy.queuing.littles_law:4
+msgid "Tasa promedio de llegadas."
+msgstr "Average arrival rate."
+
+#: of walopy.queuing.littles_law:5
+msgid "Tiempo promedio que un elemento pasa en el sistema."
+msgstr "Average time an item spends in the system."
+
+#: of walopy.queuing.littles_law
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.queuing.littles_law:7
+msgid "Valor de la variable faltante."
+msgstr "Value of the missing variable."
+
+#: of walopy.queuing.kingman walopy.queuing.littles_law walopy.queuing.md1
+#: walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.queuing.cv2_erlang walopy.queuing.cv2_gamma
+#: walopy.queuing.cv2_lognormal walopy.queuing.cv2_normal
+#: walopy.queuing.cv2_triangular walopy.queuing.cv2_uniform
+#: walopy.queuing.cv2_weibull walopy.queuing.kingman walopy.queuing.littles_law
+#: walopy.queuing.md1 walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.queuing.littles_law:10
+msgid "Si hay cero o más de una variable igual a ``None``."
+msgstr "If zero or more than one variable is ``None``."
+
+#: of walopy.queuing.cv2_erlang:10 walopy.queuing.cv2_gamma:10
+#: walopy.queuing.cv2_lognormal:12 walopy.queuing.cv2_normal:12
+#: walopy.queuing.cv2_triangular:14 walopy.queuing.cv2_uniform:12
+#: walopy.queuing.cv2_weibull:12 walopy.queuing.kingman:22
+#: walopy.queuing.littles_law:13 walopy.queuing.md1:14 walopy.queuing.mg1:26
+#: walopy.queuing.mm1:14 walopy.queuing.mmc:16
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.queuing.mm1:1
+msgid "Modelo de colas M/M/1."
+msgstr "M/M/1 queueing model."
+
+#: of walopy.queuing.mm1:3
+msgid "Tasa de llegadas λ (debe ser < μ para que el sistema sea estable)."
+msgstr "Arrival rate λ (must be < μ for the system to be stable)."
+
+#: of walopy.queuing.mm1:5 walopy.queuing.mmc:5
+msgid "Tasa de servicio μ por servidor."
+msgstr "Service rate μ per server."
+
+#: of walopy.queuing.kingman:18 walopy.queuing.md1:10 walopy.queuing.mg1:22
+#: walopy.queuing.mm1:10
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1)."
+
+#: of walopy.queuing.cv2_erlang:7 walopy.queuing.cv2_gamma:7
+#: walopy.queuing.cv2_lognormal:9 walopy.queuing.cv2_normal:9
+#: walopy.queuing.cv2_triangular:11 walopy.queuing.cv2_uniform:9
+#: walopy.queuing.cv2_weibull:9 walopy.queuing.kingman:19 walopy.queuing.md1:11
+#: walopy.queuing.mg1:23 walopy.queuing.mm1:11 walopy.queuing.mmc:13
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.queuing.mmc:1
+msgid "Modelo de colas M/M/c de varios servidores."
+msgstr "M/M/c multi-server queueing model."
+
+#: of walopy.queuing.kingman:7 walopy.queuing.md1:3 walopy.queuing.mg1:7
+#: walopy.queuing.mmc:3
+msgid "Tasa de llegadas λ."
+msgstr "Arrival rate λ."
+
+#: of walopy.queuing.mmc:7
+msgid "Número de servidores (≥ 1)."
+msgstr "Number of servers (≥ 1)."
+
+#: of walopy.queuing.mmc:12
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``c`` supera 10⁶."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``c`` exceeds 10⁶."
+
+#: of walopy.queuing.md1:1
+msgid "Modelo M/D/1: llegadas de Poisson y tiempo de servicio determinístico (constante)."
+msgstr "M/D/1 model: Poisson arrivals and deterministic (constant) service time."
+
+#: of walopy.queuing.md1:5
+msgid "Tasa de servicio μ = 1 / tiempo_de_servicio."
+msgstr "Service rate μ = 1 / service_time."
+
+#: of walopy.queuing.kingman:1
+msgid "Modelo de colas G/G/1 mediante la aproximación de Kingman (VUT)."
+msgstr "G/G/1 queueing model using the Kingman approximation (VUT)."
+
+#: of walopy.queuing.kingman:3
+msgid "El tiempo medio de espera en cola se aproxima como::"
+msgstr "The mean waiting time in the queue is approximated as::"
+
+#: of walopy.queuing.kingman:9
+msgid "Tasa de servicio μ (= 1 / tiempo_medio_de_servicio)."
+msgstr "Service rate μ (= 1 / mean_service_time)."
+
+#: of walopy.queuing.kingman:11
+msgid "Coeficiente de variación al cuadrado de los tiempos entre llegadas (≥ 0)."
+msgstr "Squared coefficient of variation of the interarrival times (≥ 0)."
+
+#: of walopy.queuing.kingman:13
+msgid "Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0)."
+msgstr "Squared coefficient of variation of the service times (≥ 0)."
+
+#: of walopy.queuing.mg1:1
+msgid "Modelo de colas M/G/1: fórmula exacta de valores medios de Pollaczek-Khinchine (P-K)."
+msgstr "M/G/1 queueing model: exact Pollaczek-Khinchine (P-K) mean-value formula."
+
+#: of walopy.queuing.mg1:3
+msgid "Llegadas de Poisson con tasa λ y distribución general del tiempo de servicio con media 1/μ y coeficiente de variación al cuadrado cs². El resultado es exacto (no una aproximación) para cualquier distribución de servicio que comparta esos dos momentos."
+msgstr "Poisson arrivals with rate λ and a general service-time distribution with mean 1/μ and squared coefficient of variation cs². The result is exact (not an approximation) for any service distribution that shares those two moments."
+
+#: of walopy.queuing.mg1:9
+msgid "Tasa de servicio μ = 1 / E[S]."
+msgstr "Service rate μ = 1 / E[S]."
+
+#: of walopy.queuing.mg1:11
+msgid "Coeficiente de variación al cuadrado del servicio  cs² = Var[S] / E[S]². Use las funciones ``cv2_*`` para calcularlo a partir de los parámetros de la distribución."
+msgstr "Squared coefficient of variation of the service  cs² = Var[S] / E[S]². Use the ``cv2_*`` functions to compute it from the distribution parameters."
+
+#: of walopy.queuing.mg1:18
+msgid "Notes"
+msgstr "Notes"
+
+#: of walopy.queuing.mg1:19
+msgid "Fórmula P-K:  Wq = λ · E[S²] / (2 · (1 − ρ)) donde  E[S²] = (1 + cs²) / μ²."
+msgstr "P-K formula:  Wq = λ · E[S²] / (2 · (1 − ρ)) where  E[S²] = (1 + cs²) / μ²."
+
+#: of walopy.queuing.cv2_triangular:1
+msgid "CV² de una distribución Triangular(a, m, b)."
+msgstr "CV² of a Triangular(a, m, b) distribution."
+
+#: of walopy.queuing.cv2_triangular:10
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si no se cumple a ≤ m ≤ b o la media de la distribución es 0."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a ≤ m ≤ b does not hold or the mean of the distribution is 0."
+
+#: of walopy.queuing.cv2_uniform:1
+msgid "CV² de una distribución Uniforme(a, b)."
+msgstr "CV² of a Uniform(a, b) distribution."
+
+#: of walopy.queuing.cv2_uniform:8
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si b ≤ a o la media de la distribución es 0."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If b ≤ a or the mean of the distribution is 0."
+
+#: of walopy.queuing.cv2_normal:1
+msgid "CV² de una distribución Normal(media, desviación)."
+msgstr "CV² of a Normal(mean, deviation) distribution."
+
+#: of walopy.queuing.cv2_gamma:6 walopy.queuing.cv2_lognormal:8
+#: walopy.queuing.cv2_normal:8 walopy.queuing.cv2_weibull:8
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+
+#: of walopy.queuing.cv2_erlang:1
+msgid "CV² de una distribución Erlang-k.  cv² = 1/k."
+msgstr "CV² of an Erlang-k distribution.  cv² = 1/k."
+
+#: of walopy.queuing.cv2_erlang:6
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``k`` no es un entero ≥ 1."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``k`` is not an integer ≥ 1."
+
+#: of walopy.queuing.cv2_gamma:1
+msgid "CV² de una distribución Gamma(forma, escala).  cv² = 1/forma."
+msgstr "CV² of a Gamma(shape, scale) distribution.  cv² = 1/shape."
+
+#: of walopy.queuing.cv2_lognormal:1
+msgid "CV² de una distribución Lognormal parametrizada por su media y desviación *reales*."
+msgstr "CV² of a Lognormal distribution parameterized by its *actual* mean and deviation."
+
+#: of walopy.queuing.cv2_weibull:1
+msgid "CV² de una distribución Weibull(forma, escala)."
+msgstr "CV² of a Weibull(shape, scale) distribution."
+
+#: of walopy.queuing.cv2_weibull:3
+msgid "cv² = Γ(1 + 2/k) / Γ(1 + 1/k)² − 1"
+msgstr "cv² = Γ(1 + 2/k) / Γ(1 + 1/k)² − 1"
+
+#: ../../source/referencia/queuing.rst:36
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.queuing.QueueResult:1
+msgid "Resultado del cálculo de un modelo de colas."
+msgstr "Result of computing a queueing model."
+
+#: ../../source/referencia/queuing.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.queuing.QueueResult:3
+msgid "Nombre del modelo (p. ej. 'M/M/1')."
+msgstr "Model name (e.g. 'M/M/1')."
+
+#: of walopy.queuing.QueueResult:5
+msgid "Tasa de llegadas (unidades/tiempo)."
+msgstr "Arrival rate (units/time)."
+
+#: of walopy.queuing.QueueResult:7
+msgid "Tasa de servicio por servidor (unidades/tiempo)."
+msgstr "Service rate per server (units/time)."
+
+#: of walopy.queuing.QueueResult:9
+msgid "Número de servidores *c*."
+msgstr "Number of servers *c*."
+
+#: of walopy.queuing.QueueResult:11
+msgid "Utilización del servidor (intensidad de tráfico por servidor)."
+msgstr "Server utilization (traffic intensity per server)."
+
+#: of walopy.queuing.QueueResult:13
+msgid "Número promedio de unidades en el sistema (ley de Little)."
+msgstr "Average number of units in the system (Little's law)."
+
+#: of walopy.queuing.QueueResult:15
+msgid "Número promedio de unidades en cola."
+msgstr "Average number of units in the queue."
+
+#: of walopy.queuing.QueueResult:17
+msgid "Tiempo promedio en el sistema."
+msgstr "Average time in the system."
+
+#: of walopy.queuing.QueueResult:19
+msgid "Tiempo promedio en cola (tiempo de espera)."
+msgstr "Average time in the queue (waiting time)."
+
+#: of walopy.queuing.QueueResult:21
+msgid "Parámetros adicionales propios del modelo."
+msgstr "Additional model-specific parameters."
+
+#: of walopy.queuing.QueueResult.to_frame:1
+msgid "Exporta los KPI principales como un DataFrame de una fila."
+msgstr "Exports the main KPIs as a one-row DataFrame."
+

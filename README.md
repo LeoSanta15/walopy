@@ -2,6 +2,8 @@
 
 **Teoría de colas, análisis de operaciones, modelos de inventario, árboles de KPI y más para Python.**
 
+🇬🇧 [English version of this document](https://github.com/LeoSanta15/walopy/blob/main/README.en.md)
+
 [![PyPI version](https://img.shields.io/pypi/v/walopy.svg)](https://pypi.org/project/walopy/)
 [![Python](https://img.shields.io/pypi/pyversions/walopy.svg)](https://pypi.org/project/walopy/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

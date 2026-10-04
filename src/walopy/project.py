@@ -115,8 +115,8 @@ class ProjectResult:
             _t("project.cabecera.to_frame.predecesoras"): ", ".join(str(p) for p in a.predecessors),
             "ES": a.es,  "EF": a.ef,
             "LS": a.ls,  "LF": a.lf,
-            "HT": a.total_float,
-            "HL": a.free_float,
+            _t("project.cabecera.to_frame.ht"): a.total_float,
+            _t("project.cabecera.to_frame.hl"): a.free_float,
             _t("project.cabecera.to_frame.critica"): a.is_critical,
         } for a in self.activities])
 

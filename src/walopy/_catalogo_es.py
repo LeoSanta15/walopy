@@ -472,6 +472,8 @@ ES: dict[str, str] = {
     "project.cabecera.to_frame.actividad": "Actividad",
     "project.cabecera.to_frame.critica": "Crítica",
     "project.cabecera.to_frame.duracion": "Duración",
+    "project.cabecera.to_frame.hl": "HL",
+    "project.cabecera.to_frame.ht": "HT",
     "project.cabecera.to_frame.predecesoras": "Predecesoras",
     "project.error.cpm.actividad_falta_clave_duration": "Actividad '{nm}': falta la clave 'duration'.",
     "project.error.leer_actividades.activities_debe_contener_menos_actividad": "'activities' debe contener al menos una actividad.",

@@ -1,0 +1,133 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/network.rst:2
+msgid "Redes de Jackson (network)"
+msgstr "Jackson networks (network)"
+
+#: ../../source/referencia/network.rst:4
+msgid "Módulo ``walopy.network``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.network``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/network.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.network.jackson_network:1
+msgid "Analiza una red abierta de colas de Jackson."
+msgstr "Analyzes an open Jackson queueing network."
+
+#: of walopy.network.jackson_network:3
+msgid "En una red abierta de Jackson los clientes llegan desde fuera según procesos de Poisson (tasas *gamma*), reciben servicio exponencial en cada estación que visitan y se enrutan de forma probabilística entre estaciones hasta salir del sistema. Por el teorema de Jackson cada estación se comporta como una cola M/M/c independiente con la tasa de llegada efectiva obtenida de las ecuaciones de tráfico."
+msgstr "In an open Jackson network customers arrive from outside according to Poisson processes (rates *gamma*), receive exponential service at each station they visit and are routed probabilistically between stations until they leave the system. By Jackson's theorem each station behaves as an independent M/M/c queue with the effective arrival rate obtained from the traffic equations."
+
+#: of walopy.network.jackson_network
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.network.jackson_network:9
+msgid "Nombres de las J estaciones."
+msgstr "Names of the J stations."
+
+#: of walopy.network.jackson_network:11
+msgid "Tasa de servicio μ_j por servidor en cada estación."
+msgstr "Service rate μ_j per server at each station."
+
+#: of walopy.network.jackson_network:13
+msgid "Tasa de llegadas externas (Poisson) γ_j en cada estación (0 si no hay)."
+msgstr "External (Poisson) arrival rate γ_j at each station (0 if there is none)."
+
+#: of walopy.network.jackson_network:15
+msgid "Matriz de ruteo P donde P[i][j] = probabilidad de ir de la estación *i* a la estación *j* tras el servicio en *i*. Las filas deben sumar ≤ 1; la fracción restante sale del sistema."
+msgstr "Routing matrix P where P[i][j] = probability of going from station *i* to station *j* after service at *i*. The rows must sum to ≤ 1; the remaining fraction leaves the system."
+
+#: of walopy.network.jackson_network:19
+msgid "Número de servidores c_j en cada estación. Por defecto 1 en todas."
+msgstr "Number of servers c_j at each station. Defaults to 1 for all."
+
+#: of walopy.network.jackson_network
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.network.jackson_network
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.network.jackson_network:24
+msgid "Si el sistema es inestable (ρ_j ≥ 1 en alguna estación)."
+msgstr "If the system is unstable (ρ_j ≥ 1 at some station)."
+
+#: of walopy.network.jackson_network:27
+msgid "Examples"
+msgstr "Examples"
+
+#: ../../source/referencia/network.rst:12
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.network.StationMetrics:1
+msgid "Métricas por estación en una red de Jackson."
+msgstr "Per-station metrics in a Jackson network."
+
+#: ../../source/referencia/network.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.network.StationMetrics:5
+msgid "Tasa total de llegadas (externas + ruteadas desde otras estaciones)."
+msgstr "Total arrival rate (external + routed from other stations)."
+
+#: of walopy.network.StationMetrics:7
+msgid "Tasa de llegadas externas (Poisson)."
+msgstr "External (Poisson) arrival rate."
+
+#: of walopy.network.StationMetrics:9
+msgid "Tasa de servicio por servidor."
+msgstr "Service rate per server."
+
+#: of walopy.network.StationMetrics:11
+msgid "Número de servidores."
+msgstr "Number of servers."
+
+#: of walopy.network.StationMetrics:13
+msgid "Utilización = lam_total / (servidores × mu)."
+msgstr "Utilization = lam_total / (servers × mu)."
+
+#: of walopy.network.StationMetrics:15
+msgid "Métricas M/M/c estándar."
+msgstr "Standard M/M/c metrics."
+
+#: of walopy.network.JacksonResult:1
+msgid "Resultado del análisis de una red abierta de Jackson."
+msgstr "Result of the analysis of an open Jackson network."
+
+#: of walopy.network.JacksonResult:3
+msgid "Métricas por estación."
+msgstr "Per-station metrics."
+
+#: of walopy.network.JacksonResult:5
+msgid "Total esperado de clientes en todas las estaciones (suma de L_j)."
+msgstr "Expected total number of customers in all the stations (sum of L_j)."
+
+#: of walopy.network.JacksonResult:7
+msgid "Tiempo medio de permanencia en la red = L_system / tasa total de llegadas externas."
+msgstr "Mean time in the network = L_system / total external arrival rate."
+

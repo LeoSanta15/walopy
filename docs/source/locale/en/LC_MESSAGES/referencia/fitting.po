@@ -1,0 +1,133 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/fitting.rst:2
+msgid "Ajuste desde datos (fitting)"
+msgstr "Fitting from data (fitting)"
+
+#: ../../source/referencia/fitting.rst:4
+msgid "Módulo ``walopy.fitting``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.fitting``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/fitting.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.fitting.fit_from_data:1
+msgid "Estima los parámetros de un modelo de colas a partir de datos observados."
+msgstr "Estimates the parameters of a queueing model from observed data."
+
+#: of walopy.fitting.fit_from_data:3
+msgid "Indique los tiempos entre llegadas **o** las marcas de tiempo de llegada (no ambos). Debe proporcionarse al menos uno de los arreglos de llegadas o de servicio."
+msgstr "Provide the interarrival times **or** the arrival timestamps (not both). At least one of the arrival or service arrays must be given."
+
+#: of walopy.fitting.fit_from_data
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.fitting.fit_from_data:6
+msgid "Intervalos observados entre llegadas (todos estrictamente positivos)."
+msgstr "Observed intervals between arrivals (all strictly positive)."
+
+#: of walopy.fitting.fit_from_data:8
+msgid "Duraciones de servicio observadas (todas estrictamente positivas)."
+msgstr "Observed service durations (all strictly positive)."
+
+#: of walopy.fitting.fit_from_data:10
+msgid "Marcas de tiempo absolutas de llegada en orden ascendente; los tiempos entre llegadas se obtienen como diferencias consecutivas."
+msgstr "Absolute arrival timestamps in ascending order; the interarrival times are obtained as consecutive differences."
+
+#: of walopy.fitting.fit_from_data
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.fitting.fit_from_data:14
+msgid "λ, μ, ca², cs² estimados y estadísticos muestrales."
+msgstr "Estimated λ, μ, ca², cs² and sample statistics."
+
+#: of walopy.fitting.fit_from_data
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.fitting.fit_from_data
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.fitting.fit_from_data:17
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si no se indica ninguna muestra, si se indican ``inter_arrivals`` y ``arrival_timestamps`` a la vez, o si hay menos de 2 observaciones."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If no sample is given, if ``inter_arrivals`` and ``arrival_timestamps`` are both given, or if there are fewer than 2 observations."
+
+#: of walopy.fitting.fit_from_data:18
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.fitting.fit_from_data:21
+msgid "Examples"
+msgstr "Examples"
+
+#: ../../source/referencia/fitting.rst:12
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.fitting.FitResult:1
+msgid "Parámetros estimados a partir de tiempos entre llegadas y/o de servicio observados."
+msgstr "Parameters estimated from observed interarrival and/or service times."
+
+#: ../../source/referencia/fitting.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.fitting.FitResult:3
+msgid "Tasa de llegadas estimada λ = 1 / media(tiempos entre llegadas)."
+msgstr "Estimated arrival rate λ = 1 / mean(interarrival times)."
+
+#: of walopy.fitting.FitResult:5
+msgid "Tasa de servicio estimada μ = 1 / media(service_times)."
+msgstr "Estimated service rate μ = 1 / mean(service_times)."
+
+#: of walopy.fitting.FitResult:7
+msgid "CV² estimado de los tiempos entre llegadas."
+msgstr "Estimated CV² of the interarrival times."
+
+#: of walopy.fitting.FitResult:9
+msgid "CV² estimado de los tiempos de servicio."
+msgstr "Estimated CV² of the service times."
+
+#: of walopy.fitting.FitResult:11
+msgid "Número de intervalos entre llegadas utilizados."
+msgstr "Number of interarrival intervals used."
+
+#: of walopy.fitting.FitResult:13
+msgid "Número de observaciones de tiempo de servicio utilizadas."
+msgstr "Number of service-time observations used."
+
+#: of walopy.fitting.FitResult:15
+msgid "Media y desviación muestrales de los tiempos entre llegadas."
+msgstr "Sample mean and deviation of the interarrival times."
+
+#: of walopy.fitting.FitResult:17
+msgid "Media y desviación muestrales de los tiempos de servicio."
+msgstr "Sample mean and deviation of the service times."
+
+#: of walopy.fitting.FitResult.to_model_kwargs:1
+msgid "Devuelve un diccionario listo para desempaquetar en ``mm1()``, ``kingman()``, etc."
+msgstr "Returns a dictionary ready to unpack into ``mm1()``, ``kingman()``, etc."
+

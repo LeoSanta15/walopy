@@ -1,0 +1,173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/rendimiento.md:1
+msgid "Rendimiento"
+msgstr "Performance"
+
+#: ../../source/rendimiento.md:3
+msgid "Línea base de las operaciones más costosas, medida con `benchmarks/bench_core.py` (semillas fijas; mediana de 3 ejecuciones)."
+msgstr "Baseline of the most expensive operations, measured with `benchmarks/bench_core.py` (fixed seeds; median of 3 runs)."
+
+#: ../../source/rendimiento.md
+msgid "Operación"
+msgstr "Operation"
+
+#: ../../source/rendimiento.md
+msgid "Mediana de 3 ejecuciones (s)"
+msgstr "Median of 3 runs (s)"
+
+#: ../../source/rendimiento.md
+msgid "neh_flowshop n=100, m=10"
+msgstr "neh_flowshop n=100, m=10"
+
+#: ../../source/rendimiento.md
+msgid "0.034"
+msgstr "0.034"
+
+#: ../../source/rendimiento.md
+msgid "neh_flowshop n=200, m=10"
+msgstr "neh_flowshop n=200, m=10"
+
+#: ../../source/rendimiento.md
+msgid "0.146"
+msgstr "0.146"
+
+#: ../../source/rendimiento.md
+msgid "wagner_whitin n=1000"
+msgstr "wagner_whitin n=1000"
+
+#: ../../source/rendimiento.md
+msgid "0.055"
+msgstr "0.055"
+
+#: ../../source/rendimiento.md
+msgid "wagner_whitin n=2000"
+msgstr "wagner_whitin n=2000"
+
+#: ../../source/rendimiento.md
+msgid "0.226"
+msgstr "0.226"
+
+#: ../../source/rendimiento.md
+msgid "mmc c=1000 (ρ=0.95)"
+msgstr "mmc c=1000 (ρ=0.95)"
+
+#: ../../source/rendimiento.md
+msgid "0.000"
+msgstr "0.000"
+
+#: ../../source/rendimiento.md
+msgid "monte_carlo_gg1 n=1e6"
+msgstr "monte_carlo_gg1 n=1e6"
+
+#: ../../source/rendimiento.md
+msgid "0.561"
+msgstr "0.561"
+
+#: ../../source/rendimiento.md
+msgid "abc_xyz n=2000"
+msgstr "abc_xyz n=2000"
+
+#: ../../source/rendimiento.md
+msgid "0.011"
+msgstr "0.011"
+
+#: ../../source/rendimiento.md
+msgid "cpm n=1000"
+msgstr "cpm n=1000"
+
+#: ../../source/rendimiento.md
+msgid "0.007"
+msgstr "0.007"
+
+#: ../../source/rendimiento.md
+msgid "weibull_analysis n=5000 (MLE)"
+msgstr "weibull_analysis n=5000 (MLE)"
+
+#: ../../source/rendimiento.md
+msgid "0.151"
+msgstr "0.151"
+
+#: ../../source/rendimiento.md:18
+msgid "Entorno de referencia: Python 3.11.15, x86_64, walopy 0.3.0."
+msgstr "Reference environment: Python 3.11.15, x86_64, walopy 0.3.0."
+
+#: ../../source/rendimiento.md ../../source/rendimiento.md:20
+msgid "Complejidad"
+msgstr "Complexity"
+
+#: ../../source/rendimiento.md
+msgid "Algoritmo"
+msgstr "Algorithm"
+
+#: ../../source/rendimiento.md
+msgid "Verificación"
+msgstr "Verification"
+
+#: ../../source/rendimiento.md
+msgid "`wagner_whitin`"
+msgstr "`wagner_whitin`"
+
+#: ../../source/rendimiento.md
+msgid "O(n²)"
+msgstr "O(n²)"
+
+#: ../../source/rendimiento.md
+msgid "`tests/test_complejidad.py` (equivalente a fuerza bruta; n=1000 en < 2 s)"
+msgstr "`tests/test_complejidad.py` (equivalent to brute force; n=1000 in < 2 s)"
+
+#: ../../source/rendimiento.md
+msgid "`neh_flowshop`"
+msgstr "`neh_flowshop`"
+
+#: ../../source/rendimiento.md
+msgid "O(n²·m) (aceleración de Taillard)"
+msgstr "O(n²·m) (Taillard acceleration)"
+
+#: ../../source/rendimiento.md
+msgid "`tests/test_complejidad.py` (equivalente a la versión directa; n=200, m=10 en < 2 s)"
+msgstr "`tests/test_complejidad.py` (equivalent to the direct version; n=200, m=10 in < 2 s)"
+
+#: ../../source/rendimiento.md
+msgid "`mmc`"
+msgstr "`mmc`"
+
+#: ../../source/rendimiento.md
+msgid "O(c) (recurrencia de Erlang-B)"
+msgstr "O(c) (Erlang-B recurrence)"
+
+#: ../../source/rendimiento.md
+msgid "`tests/test_mmc_estable.py` (contraste con balance de nacimiento-muerte hasta c = 1000)"
+msgstr "`tests/test_mmc_estable.py` (checked against the birth-death balance up to c = 1000)"
+
+#: ../../source/rendimiento.md:28
+msgid "Cotas de tamaño"
+msgstr "Size bounds"
+
+#: ../../source/rendimiento.md:30
+msgid "Para evitar cálculos de duración prácticamente infinita, algunos parámetros de tamaño tienen un máximo: número de servidores (`c`, 10⁶), capacidad del sistema y puntos de las tablas (`K`, `n_max`, `n_points`, 10⁶) y clientes simulados (`n_customers`, 10⁷). Superarlos lanza `ValueError`."
+msgstr "To avoid computations of practically infinite duration, some size parameters have a maximum: number of servers (`c`, 10⁶), system capacity and table points (`K`, `n_max`, `n_points`, 10⁶) and simulated customers (`n_customers`, 10⁷). Exceeding them raises `ValueError`."
+
+#: ../../source/rendimiento.md:34
+msgid "Reproducir"
+msgstr "Reproduce"
+

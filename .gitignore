@@ -20,3 +20,4 @@ docs/_build/
 venv/
 .tox/
 .nox/
+*.mo

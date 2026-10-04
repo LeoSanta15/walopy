@@ -129,7 +129,11 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 
 
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
-AÑADIDAS_TRAS_V030 = {"i18n.error.validar.idioma_no_admitido"}
+AÑADIDAS_TRAS_V030 = {
+    "i18n.error.validar.idioma_no_admitido",
+    "project.cabecera.to_frame.ht",    # «HT»/«HL» (holgura total/libre): acrónimos españoles que el extractor no veía; ya existían en v0.3.0
+    "project.cabecera.to_frame.hl",
+}
 
 
 def test_el_catalogo_no_tiene_claves_que_no_estaban_en_v030():

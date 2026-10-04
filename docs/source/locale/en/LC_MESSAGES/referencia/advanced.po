@@ -1,0 +1,501 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/advanced.rst:2
+msgid "Modelos avanzados (advanced)"
+msgstr "Advanced models (advanced)"
+
+#: ../../source/referencia/advanced.rst:4
+msgid "Módulo ``walopy.advanced``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.advanced``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/advanced.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.advanced.erlang_b:1
+msgid "Fórmula Erlang B: probabilidad de bloqueo de un sistema de pérdida M/M/c/c."
+msgstr "Erlang B formula: blocking probability of an M/M/c/c loss system."
+
+#: of walopy.advanced.erlang_b:3
+msgid "En un sistema de pérdida no hay sala de espera: los clientes que llegan y encuentran los *c* servidores ocupados se pierden (se bloquean)."
+msgstr "In a loss system there is no waiting room: customers who arrive and find all *c* servers busy are lost (blocked)."
+
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi
+#: walopy.advanced.break_even_sales walopy.advanced.erlang_b
+#: walopy.advanced.line_balance walopy.advanced.mm1_priority
+#: walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1
+#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
+#: walopy.advanced.takt_time
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.advanced.erlang_b:6 walopy.advanced.mm1k:6 walopy.advanced.mmck:6
+#: walopy.advanced.monte_carlo_gg1:7 walopy.advanced.queue_length_pmf:5
+#: walopy.advanced.sojourn_cdf:5
+msgid "Tasa de llegadas λ."
+msgstr "Arrival rate λ."
+
+#: of walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
+msgid "Tasa de servicio μ por servidor."
+msgstr "Service rate μ per server."
+
+#: of walopy.advanced.erlang_b:10
+msgid "Número de servidores (= capacidad del sistema)."
+msgstr "Number of servers (= system capacity)."
+
+#: of walopy.advanced.erlang_b walopy.advanced.mm1k walopy.advanced.mmck
+#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
+#: walopy.advanced.takt_time
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.advanced.erlang_b:13
+msgid "Probabilidad de bloqueo B(c, a) ∈ [0, 1]."
+msgstr "Blocking probability B(c, a) ∈ [0, 1]."
+
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi
+#: walopy.advanced.break_even_sales walopy.advanced.erlang_b
+#: walopy.advanced.line_balance walopy.advanced.mm1_priority
+#: walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1
+#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
+#: walopy.advanced.takt_time
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi
+#: walopy.advanced.break_even_sales walopy.advanced.erlang_b
+#: walopy.advanced.line_balance walopy.advanced.mm1_priority
+#: walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1
+#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
+#: walopy.advanced.takt_time
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.advanced.erlang_b:16
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``c`` supera 10⁶."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``c`` exceeds 10⁶."
+
+#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23
+#: walopy.advanced.break_even_sales:19 walopy.advanced.erlang_b:17
+#: walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24
+#: walopy.advanced.mm1k:18 walopy.advanced.mmck:19
+#: walopy.advanced.monte_carlo_gg1:23 walopy.advanced.queue_length_pmf:16
+#: walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26
+#: walopy.advanced.break_even_sales:22 walopy.advanced.erlang_b:20
+#: walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27
+#: walopy.advanced.mm1k:21 walopy.advanced.mmck:22
+#: walopy.advanced.monte_carlo_gg1:26 walopy.advanced.queue_length_pmf:19
+#: walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.advanced.mm1k:1
+msgid "Cola M/M/1/K: un servidor con sala de espera finita."
+msgstr "M/M/1/K queue: a single server with a finite waiting room."
+
+#: of walopy.advanced.mm1k:3
+msgid "La capacidad del sistema es *K* (servidor + cola). Los clientes que llegan cuando el sistema está lleno se pierden."
+msgstr "The system capacity is *K* (server + queue). Customers who arrive when the system is full are lost."
+
+#: of walopy.advanced.mm1k:8 walopy.advanced.queue_length_pmf:7
+#: walopy.advanced.sojourn_cdf:7
+msgid "Tasa de servicio μ."
+msgstr "Service rate μ."
+
+#: of walopy.advanced.mm1k:10
+msgid "Capacidad del sistema (máximo de clientes en el sistema, ≥ 1)."
+msgstr "System capacity (maximum number of customers in the system, ≥ 1)."
+
+#: of walopy.advanced.mm1k:13
+msgid "Nota: aquí ``rho`` es la intensidad de tráfico λ/μ (puede ser ≥ 1); el sistema siempre es estable por su capacidad finita."
+msgstr "Note: here ``rho`` is the traffic intensity λ/μ (it may be ≥ 1); the system is always stable because of its finite capacity."
+
+#: of walopy.advanced.mm1k:17
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``K`` supera 10⁶."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``K`` exceeds 10⁶."
+
+#: of walopy.advanced.mmck:1
+msgid "Cola M/M/c/K: *c* servidores y capacidad del sistema *K* (incluidos los servidores)."
+msgstr "M/M/c/K queue: *c* servers and system capacity *K* (including the servers)."
+
+#: of walopy.advanced.mmck:3
+msgid "Los clientes que llegan cuando el sistema está lleno se bloquean (se pierden). El sistema siempre es estable, sea cual sea ρ, por su capacidad finita."
+msgstr "Customers who arrive when the system is full are blocked (lost). The system is always stable, whatever ρ is, because of its finite capacity."
+
+#: of walopy.advanced.mmck:10
+msgid "Número de servidores (≥ 1)."
+msgstr "Number of servers (≥ 1)."
+
+#: of walopy.advanced.mmck:12
+msgid "Capacidad del sistema (máximo de clientes en el sistema, ≥ c)."
+msgstr "System capacity (maximum number of customers in the system, ≥ c)."
+
+#: of walopy.advanced.mmck:15
+msgid "``rho`` es la utilización del servidor λ_eff / (c · μ)."
+msgstr "``rho`` is the server utilization λ_eff / (c · μ)."
+
+#: of walopy.advanced.mmck:18
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``K < c`` o ``c``/``K`` superan 10⁶."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``K < c`` or ``c``/``K`` exceed 10⁶."
+
+#: of walopy.advanced.mm1_priority:1
+msgid "Cola M/M/1 con prioridades Head-of-Line (HOL) no expropiativas."
+msgstr "M/M/1 queue with non-preemptive Head-of-Line (HOL) priorities."
+
+#: of walopy.advanced.mm1_priority:3
+msgid "La clase 0 tiene la mayor prioridad; la clase N−1 la menor. El servicio es FCFS dentro de cada clase y no expropiativo (un cliente de menor prioridad en servicio no se interrumpe)."
+msgstr "Class 0 has the highest priority; class N−1 the lowest. Service is FCFS within each class and non-preemptive (a lower-priority customer in service is not interrupted)."
+
+#: of walopy.advanced.mm1_priority:6
+msgid "La fórmula (Kleinrock, 1975):"
+msgstr "The formula (Kleinrock, 1975):"
+
+#: of walopy.advanced.mm1_priority:13
+msgid "Tasas de llegada λ_k de cada clase en orden *descendente* de prioridad (índice 0 = mayor prioridad)."
+msgstr "Arrival rates λ_k of each class in *descending* order of priority (index 0 = highest priority)."
+
+#: of walopy.advanced.mm1_priority:16
+msgid "Tasa de servicio μ (el mismo servidor exponencial para todas las clases)."
+msgstr "Service rate μ (the same exponential server for all classes)."
+
+#: of walopy.advanced.mm1_priority:18
+msgid "Etiquetas de las clases de prioridad. Por defecto '0', '1', …"
+msgstr "Labels of the priority classes. By default '0', '1', …"
+
+#: of walopy.advanced.mm1_priority:23
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si una secuencia está vacía o las secuencias tienen longitudes distintas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If a sequence is empty or the sequences have different lengths."
+
+#: of walopy.advanced.monte_carlo_gg1:1
+msgid "Simulación Monte Carlo de una cola G/G/1 de un servidor."
+msgstr "Monte Carlo simulation of a single-server G/G/1 queue."
+
+#: of walopy.advanced.monte_carlo_gg1:3
+msgid "Los tiempos entre llegadas y de servicio se extraen de distribuciones Gamma ajustadas a la media y al coeficiente de variación al cuadrado dados. Con CV² = 0 los tiempos son determinísticos; con CV² = 1 son exponenciales (se recupera el caso M/M/1)."
+msgstr "The interarrival and service times are drawn from Gamma distributions fitted to the given mean and squared coefficient of variation. With CV² = 0 the times are deterministic; with CV² = 1 they are exponential (the M/M/1 case is recovered)."
+
+#: of walopy.advanced.monte_carlo_gg1:9
+msgid "Tasa de servicio μ (= 1 / tiempo medio de servicio)."
+msgstr "Service rate μ (= 1 / mean service time)."
+
+#: of walopy.advanced.monte_carlo_gg1:11
+msgid "Coeficiente de variación al cuadrado de los tiempos entre llegadas (≥ 0)."
+msgstr "Squared coefficient of variation of the interarrival times (≥ 0)."
+
+#: of walopy.advanced.monte_carlo_gg1:13
+msgid "Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0)."
+msgstr "Squared coefficient of variation of the service times (≥ 0)."
+
+#: of walopy.advanced.monte_carlo_gg1:15
+msgid "Número de clientes a simular (por defecto 20 000)."
+msgstr "Number of customers to simulate (default 20 000)."
+
+#: of walopy.advanced.monte_carlo_gg1:17
+msgid "Semilla aleatoria para reproducibilidad."
+msgstr "Random seed for reproducibility."
+
+#: of walopy.advanced.monte_carlo_gg1:22
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_customers`` supera 10⁷."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_customers`` exceeds 10⁷."
+
+#: of walopy.advanced.takt_time:1
+msgid "Calcula el tiempo takt = tiempo de producción disponible / demanda del cliente."
+msgstr "Computes the takt time = available production time / customer demand."
+
+#: of walopy.advanced.takt_time:3
+msgid "Tiempo neto de producción disponible en el periodo (mismas unidades que el resultado, p. ej. segundos o minutos)."
+msgstr "Net production time available in the period (same units as the result, e.g. seconds or minutes)."
+
+#: of walopy.advanced.takt_time:6
+msgid "Número de unidades (o clientes) demandadas en el mismo periodo."
+msgstr "Number of units (or customers) demanded in the same period."
+
+#: of walopy.advanced.takt_time:9
+msgid "Tiempo takt (tiempo por unidad)."
+msgstr "Takt time (time per unit)."
+
+#: of walopy.advanced.takt_time:12
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+
+#: of walopy.advanced.line_balance:1
+msgid "Analiza el balance de una línea de producción o de servicio."
+msgstr "Analyzes the balance of a production or service line."
+
+#: of walopy.advanced.line_balance:3
+msgid "Nombres de las estaciones."
+msgstr "Station names."
+
+#: of walopy.advanced.line_balance:5
+msgid "Tiempo de ciclo real por estación."
+msgstr "Actual cycle time per station."
+
+#: of walopy.advanced.line_balance:7
+msgid "Tiempo takt (tiempo disponible / demanda)."
+msgstr "Takt time (available time / demand)."
+
+#: of walopy.advanced.line_balance:12
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si una secuencia está vacía o las secuencias tienen longitudes distintas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a sequence is empty or the sequences have different lengths."
+
+#: of walopy.advanced.break_even:1
+msgid "Calcula el punto de equilibrio y el margen de contribución."
+msgstr "Computes the break-even point and the contribution margin."
+
+#: of walopy.advanced.break_even:3 walopy.advanced.break_even_multi:9
+#: walopy.advanced.break_even_sales:8
+msgid "Costo fijo total del periodo."
+msgstr "Total fixed cost of the period."
+
+#: of walopy.advanced.break_even:5
+msgid "Precio de venta por unidad."
+msgstr "Selling price per unit."
+
+#: of walopy.advanced.break_even:7
+msgid "Costo variable por unidad."
+msgstr "Variable cost per unit."
+
+#: of walopy.advanced.break_even:9
+msgid "Volumen real de producción o ventas (para calcular el margen de seguridad)."
+msgstr "Actual production or sales volume (to compute the margin of safety)."
+
+#: of walopy.advanced.break_even:14
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el precio no supera al costo variable unitario."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the price does not exceed the unit variable cost."
+
+#: of walopy.advanced.break_even_multi:1
+msgid "Punto de equilibrio con varios productos y mezcla de ventas."
+msgstr "Break-even point with several products and a sales mix."
+
+#: of walopy.advanced.break_even_multi:3
+msgid "Usa el margen de contribución promedio ponderado (MCP) para hallar el volumen de equilibrio total y luego lo reparte según la mezcla de ventas."
+msgstr "Uses the weighted average contribution margin (WACM) to find the total break-even volume and then splits it according to the sales mix."
+
+#: of walopy.advanced.break_even_multi:6
+msgid "PE_total = CF / MCP PE_i     = PE_total × mezcla_i"
+msgstr "BEP_total = FC / WACM BEP_i     = BEP_total × mix_i"
+
+#: of walopy.advanced.break_even_multi:11
+msgid "Precio de venta por unidad de cada producto."
+msgstr "Selling price per unit of each product."
+
+#: of walopy.advanced.break_even_multi:13
+msgid "Costo variable por unidad de cada producto."
+msgstr "Variable cost per unit of each product."
+
+#: of walopy.advanced.break_even_multi:15
+msgid "Proporciones relativas de venta (no necesitan sumar 1; se normalizan internamente)."
+msgstr "Relative sales proportions (they do not need to sum to 1; they are normalized internally)."
+
+#: of walopy.advanced.break_even_multi:17
+msgid "Nombres de los productos."
+msgstr "Product names."
+
+#: of walopy.advanced.break_even_multi:22
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si algún producto tiene margen de contribución no positivo o una secuencia está vacía o las secuencias tienen longitudes distintas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If any product has a non-positive contribution margin or a sequence is empty or the sequences have different lengths."
+
+#: of walopy.advanced.break_even_sales:1
+msgid "Punto de equilibrio expresado como ingresos por ventas."
+msgstr "Break-even point expressed as sales revenue."
+
+#: of walopy.advanced.break_even_sales:3
+msgid "Usa la razón de margen de contribución (RMC) cuando los costos se dan como fracción de los ingresos y no por unidad."
+msgstr "Uses the contribution margin ratio (CMR) when the costs are given as a fraction of revenue rather than per unit."
+
+#: of walopy.advanced.break_even_sales:6
+msgid "PE_ventas = CF / RMC = CF / (1 − variable_cost_ratio)"
+msgstr "BEP_sales = FC / CMR = FC / (1 − variable_cost_ratio)"
+
+#: of walopy.advanced.break_even_sales:10
+#, python-format
+msgid "Costos variables como fracción de los ingresos ∈ (0, 1)  (p. ej. 0.60 significa que los costos variables son el 60 % de cada peso vendido)."
+msgstr "Variable costs as a fraction of revenue ∈ (0, 1)  (e.g. 0.60 means that variable costs are 60 % of every dollar sold)."
+
+#: of walopy.advanced.break_even_sales:13
+msgid "Ingresos reales para calcular el margen de seguridad."
+msgstr "Actual revenue to compute the margin of safety."
+
+#: of walopy.advanced.break_even_sales:18
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``variable_cost_ratio`` no está estrictamente entre 0 y 1."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``variable_cost_ratio`` is not strictly between 0 and 1."
+
+#: of walopy.advanced.queue_length_pmf:1
+msgid "Función de masa de probabilidad del número de clientes en un sistema M/M/1."
+msgstr "Probability mass function of the number of customers in an M/M/1 system."
+
+#: of walopy.advanced.queue_length_pmf:3
+msgid "P(N = n) = (1 − ρ) · ρ^n"
+msgstr "P(N = n) = (1 − ρ) · ρ^n"
+
+#: of walopy.advanced.queue_length_pmf:9
+msgid "Longitud máxima de cola a calcular (por defecto 30)."
+msgstr "Maximum queue length to compute (default 30)."
+
+#: of walopy.advanced.queue_length_pmf:12
+msgid "Columnas: ``n``, ``P(N=n)``, ``P(N<=n)``."
+msgstr "Columns: ``n``, ``P(N=n)``, ``P(N<=n)``."
+
+#: of walopy.advanced.queue_length_pmf:15
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_max`` no es un entero entre 0 y 10⁶."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_max`` is not an integer between 0 and 10⁶."
+
+#: of walopy.advanced.sojourn_cdf:1
+msgid "FDA del tiempo de permanencia (tiempo en el sistema) de una cola M/M/1."
+msgstr "CDF of the sojourn time (time in the system) of an M/M/1 queue."
+
+#: of walopy.advanced.sojourn_cdf:3
+msgid "F(t) = 1 − exp(−(μ − λ)·t)"
+msgstr "F(t) = 1 − exp(−(μ − λ)·t)"
+
+#: of walopy.advanced.sojourn_cdf:9
+msgid "Cota superior del eje de tiempo (por defecto 5 × tiempo medio de permanencia)."
+msgstr "Upper bound of the time axis (default 5 × mean sojourn time)."
+
+#: of walopy.advanced.sojourn_cdf:11
+msgid "Número de puntos de evaluación."
+msgstr "Number of evaluation points."
+
+#: of walopy.advanced.sojourn_cdf:14
+msgid "Columnas: ``t``, ``F(t)`` (FDA), ``f(t)`` (densidad)."
+msgstr "Columns: ``t``, ``F(t)`` (CDF), ``f(t)`` (density)."
+
+#: of walopy.advanced.sojourn_cdf:17
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_points`` supera 10⁶ o ``t_max`` no es positivo."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_points`` exceeds 10⁶ or ``t_max`` is not positive."
+
+#: ../../source/referencia/advanced.rst:34
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.advanced.SimulationResult:1
+msgid "Resultado de una simulación Monte Carlo G/G/1."
+msgstr "Result of a G/G/1 Monte Carlo simulation."
+
+#: ../../source/referencia/advanced.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.advanced.LineBalanceResult:1
+msgid "Resultado del análisis de balance de una línea de producción."
+msgstr "Result of the balance analysis of a production line."
+
+#: of walopy.advanced.LineBalanceResult:3
+msgid "Tiempo takt."
+msgstr "Takt time."
+
+#: of walopy.advanced.LineBalanceResult:5
+msgid "Número de estaciones analizadas."
+msgstr "Number of stations analyzed."
+
+#: of walopy.advanced.LineBalanceResult:7
+msgid "Suma de tiempos de ciclo / (n_stations × takt)."
+msgstr "Sum of cycle times / (n_stations × takt)."
+
+#: of walopy.advanced.LineBalanceResult:9
+msgid "ceil(suma(tiempos de ciclo) / takt)."
+msgstr "ceil(sum(cycle times) / takt)."
+
+#: of walopy.advanced.LineBalanceResult:11
+msgid "Métricas por estación: Estación, Tiempo_ciclo, Tiempo_ocioso, Utilización, Sobrecargada."
+msgstr "Per-station metrics: Station, Cycle_time, Idle_time, Utilization, Overloaded (column names in the active language)."
+
+#: of walopy.advanced.LineBalanceResult:13
+msgid "Estación con el mayor tiempo de ciclo."
+msgstr "Station with the longest cycle time."
+
+#: of walopy.advanced.BreakEvenResult:1
+msgid "Resultado del análisis de punto de equilibrio."
+msgstr "Result of the break-even analysis."
+
+#: of walopy.advanced.BreakEvenResult:3
+msgid "Volumen de equilibrio en unidades."
+msgstr "Break-even volume in units."
+
+#: of walopy.advanced.BreakEvenResult:5
+msgid "Ingresos en el punto de equilibrio."
+msgstr "Revenue at the break-even point."
+
+#: of walopy.advanced.BreakEvenResult:7
+msgid "Precio − costo variable por unidad."
+msgstr "Price − variable cost per unit."
+
+#: of walopy.advanced.BreakEvenResult:9
+msgid "Margen de contribución / precio."
+msgstr "Contribution margin / price."
+
+#: of walopy.advanced.BreakEvenResult:11
+msgid "Unidades reales − unidades de equilibrio (si se indica actual_units)."
+msgstr "Actual units − break-even units (if actual_units is given)."
+
+#: of walopy.advanced.BreakEvenResult:13
+msgid "Margen de seguridad como fracción de las unidades reales."
+msgstr "Margin of safety as a fraction of the actual units."
+
+#: of walopy.advanced.BreakEvenMultiResult:1
+msgid "Resultado del punto de equilibrio con varios productos."
+msgstr "Result of the multi-product break-even."
+
+#: of walopy.advanced.BreakEvenMultiResult:3
+msgid "Volumen de equilibrio total (todos los productos combinados)."
+msgstr "Total break-even volume (all products combined)."
+
+#: of walopy.advanced.BreakEvenMultiResult:5
+msgid "Ingresos de equilibrio totales."
+msgstr "Total break-even revenue."
+
+#: of walopy.advanced.BreakEvenMultiResult:7
+msgid "Margen de contribución promedio ponderado por unidad."
+msgstr "Weighted average contribution margin per unit."
+
+#: of walopy.advanced.BreakEvenMultiResult:9
+msgid "Razón de MC ponderada = MCP / precio promedio ponderado."
+msgstr "Weighted CM ratio = WACM / weighted average price."
+
+#: of walopy.advanced.BreakEvenMultiResult:11
+msgid "Por producto: Producto, Precio, Costo variable, MC, Mezcla, PE unidades, PE ingresos."
+msgstr "Per product: Product, Price, Variable cost, CM, Mix, BEP units, BEP revenue (column names in the active language)."
+
+#: of walopy.advanced.PriorityQueueResult:1
+msgid "Resultado del análisis de una cola con prioridades HOL no expropiativas."
+msgstr "Result of the analysis of a queue with non-preemptive HOL priorities."
+
+#: of walopy.advanced.PriorityQueueResult:3
+msgid "Cada entrada de *classes* es un diccionario con las claves: ``class_id``, ``lam``, ``rho``, ``Wq``, ``W``, ``Lq``, ``L``."
+msgstr "Each entry of *classes* is a dictionary with the keys: ``class_id``, ``lam``, ``rho``, ``Wq``, ``W``, ``Lq``, ``L``."
+
+#: of walopy.advanced.PriorityQueueResult:6
+msgid "Métricas por clase en orden de prioridad (clase 0 = mayor prioridad)."
+msgstr "Per-class metrics in priority order (class 0 = highest priority)."
+
+#: of walopy.advanced.PriorityQueueResult:8
+msgid "Utilización total del servidor = suma(λ_k) / μ."
+msgstr "Total server utilization = sum(λ_k) / μ."
+
+#: of walopy.advanced.PriorityQueueResult:10
+msgid "Tasa de servicio."
+msgstr "Service rate."
+

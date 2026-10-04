@@ -3,10 +3,10 @@
 PYTHON ?= python
 MINIMO_COBERTURA_MODULO ?= 70
 
-.PHONY: help install test cov lint types build docs examples obsoletas regresion mutaciones inventario-i18n notas-release check-fast check release-check clean
+.PHONY: help install test cov lint types build docs docs-i18n examples obsoletas regresion mutaciones inventario-i18n notas-release check-fast check release-check clean
 
 help:
-	@echo "Objetivos: install test cov lint types build docs examples obsoletas regresion mutaciones inventario-i18n notas-release VERSION=X.Y.Z check-fast check release-check TAG=vX.Y.Z clean"
+	@echo "Objetivos: install test cov lint types build docs docs-i18n examples obsoletas regresion mutaciones inventario-i18n notas-release VERSION=X.Y.Z check-fast check release-check TAG=vX.Y.Z clean"
 
 install:
 	$(PYTHON) -m pip install -e ".[dev,release,docs]"
@@ -30,7 +30,13 @@ build:
 	$(PYTHON) -m twine check dist/*
 
 docs:
-	$(PYTHON) -m sphinx -b html -W docs/source docs/build
+	$(PYTHON) -m sphinx -b html -W docs/source docs/build/es
+	$(PYTHON) -m sphinx -b html -W -D language=en docs/source docs/build/en
+
+# Traducciones de la documentación: regenera las plantillas (.pot) y actualiza docs/source/locale/en/LC_MESSAGES/*.po (luego hay que traducir lo nuevo).
+docs-i18n:
+	$(PYTHON) -m sphinx -b gettext -D language=en docs/source docs/build/gettext
+	$(PYTHON) -m sphinx_intl update -p docs/build/gettext -d docs/source/locale -l en
 
 examples:
 	@for f in examples/*.py; do echo "== $$f"; MPLBACKEND=Agg PYTHONWARNINGS=error $(PYTHON) $$f > /dev/null || exit 1; done

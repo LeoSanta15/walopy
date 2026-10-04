@@ -290,7 +290,8 @@ def capturar_cli() -> dict:
     for argv in llamadas:
         r = subprocess.run([sys.executable, "-m", "walopy", *argv], capture_output=True, text=True, env=env, check=False, timeout=60)  # noqa: S603
         norm = lambda t: t.replace("optional arguments:", "options:")  # noqa: E731 - argparse cambió el título en Python 3.10
-        salida[" ".join(argv) or "(sin argumentos)"] = {"codigo": r.returncode, "stdout": _redondear_flotantes(norm(r.stdout)), "stderr": norm(r.stderr)}
+        version = lambda t: re.sub(r"walopy \d+\.\d+\.\d+\S*", "walopy <versión>", t)  # noqa: E731 - la versión cambia en cada release
+        salida[" ".join(argv) or "(sin argumentos)"] = {"codigo": r.returncode, "stdout": _redondear_flotantes(version(norm(r.stdout))), "stderr": norm(r.stderr)}
     return salida
 
 

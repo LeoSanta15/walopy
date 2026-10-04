@@ -1,0 +1,190 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/kpi.rst:2
+msgid "Árboles de KPI (kpi)"
+msgstr "KPI trees (kpi)"
+
+#: ../../source/referencia/kpi.rst:4
+msgid "Módulo ``walopy.kpi``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.kpi``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/kpi.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.kpi.oee_kpi_tree:1
+msgid "Construye un árbol de KPI con raíz en el OEE."
+msgstr "Builds a KPI tree rooted at the OEE."
+
+#: ../../source/referencia/kpi.rst of walopy.kpi.oee_kpi_tree
+#: walopy.kpi.roi_kpi_tree walopy.kpi.throughput_kpi_tree
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.kpi.oee_kpi_tree:3
+msgid "Factor A [0, 1]."
+msgstr "Factor A [0, 1]."
+
+#: of walopy.kpi.oee_kpi_tree:5
+msgid "Factor P [0, 1]."
+msgstr "Factor P [0, 1]."
+
+#: of walopy.kpi.oee_kpi_tree:7
+msgid "Factor Q [0, 1]."
+msgstr "Factor Q [0, 1]."
+
+#: of walopy.kpi.oee_kpi_tree walopy.kpi.roi_kpi_tree
+msgid "Returns"
+msgstr "Returns"
+
+#: of walopy.kpi.oee_kpi_tree:10
+msgid "Nodo raíz con el OEE y sus tres sub-KPI."
+msgstr "Root node with the OEE and its three sub-KPIs."
+
+#: of walopy.kpi.oee_kpi_tree walopy.kpi.roi_kpi_tree
+#: walopy.kpi.throughput_kpi_tree
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.kpi.oee_kpi_tree walopy.kpi.roi_kpi_tree
+#: walopy.kpi.throughput_kpi_tree
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.kpi.oee_kpi_tree:13 walopy.kpi.roi_kpi_tree:23
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+
+#: of walopy.kpi.oee_kpi_tree:14 walopy.kpi.roi_kpi_tree:24
+#: walopy.kpi.throughput_kpi_tree:15
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.kpi.oee_kpi_tree:17 walopy.kpi.roi_kpi_tree:27
+#: walopy.kpi.throughput_kpi_tree:18
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.kpi.throughput_kpi_tree:1
+msgid "Construye un árbol de KPI con raíz en el throughput efectivo."
+msgstr "Builds a KPI tree rooted at the effective throughput."
+
+#: of walopy.kpi.throughput_kpi_tree:3
+msgid "Unidades buenas reales por ``time_unit``."
+msgstr "Actual good units per ``time_unit``."
+
+#: of walopy.kpi.throughput_kpi_tree:5
+msgid "Capacidad instalada por ``time_unit``."
+msgstr "Installed capacity per ``time_unit``."
+
+#: of walopy.kpi.throughput_kpi_tree:7
+msgid "Fracción de unidades defectuosas [0, 1)."
+msgstr "Fraction of defective units [0, 1)."
+
+#: of walopy.kpi.throughput_kpi_tree:9
+msgid "Etiqueta de la unidad de tiempo (por defecto 'h')."
+msgstr "Label of the time unit (default 'h')."
+
+#: of walopy.kpi.throughput_kpi_tree:14
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``defect_rate`` no está en [0, 1]."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``defect_rate`` is not in [0, 1]."
+
+#: of walopy.kpi.roi_kpi_tree:1
+msgid "Construye un árbol de KPI con raíz en el ROI (retorno sobre la inversión)."
+msgstr "Builds a KPI tree rooted at the ROI (return on investment)."
+
+#: of walopy.kpi.roi_kpi_tree:3
+msgid "ROI = Utilidad neta / Inversión,  donde Utilidad neta = Ingresos − Costo total, Costo total = Costo fijo + Costo variable por unidad × Unidades vendidas."
+msgstr "ROI = Net profit / Investment,  where Net profit = Revenue − Total cost, Total cost = Fixed cost + Variable cost per unit × Units sold."
+
+#: of walopy.kpi.roi_kpi_tree:7
+msgid "Ingresos totales del periodo."
+msgstr "Total revenue of the period."
+
+#: of walopy.kpi.roi_kpi_tree:9
+msgid "Costo fijo total del periodo."
+msgstr "Total fixed cost of the period."
+
+#: of walopy.kpi.roi_kpi_tree:11
+msgid "Costo variable por unidad vendida."
+msgstr "Variable cost per unit sold."
+
+#: of walopy.kpi.roi_kpi_tree:13
+msgid "Unidades vendidas en el periodo."
+msgstr "Units sold in the period."
+
+#: of walopy.kpi.roi_kpi_tree:15
+msgid "Capital total invertido."
+msgstr "Total capital invested."
+
+#: of walopy.kpi.roi_kpi_tree:17
+msgid "Etiqueta de la moneda para mostrar (por defecto '$')."
+msgstr "Currency label to display (default '$')."
+
+#: of walopy.kpi.roi_kpi_tree:20
+msgid "Nodo raíz con el ROI y toda su descomposición."
+msgstr "Root node with the ROI and its whole breakdown."
+
+#: ../../source/referencia/kpi.rst:16
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.kpi.KPINode:1
+msgid "Un nodo de un árbol de KPI."
+msgstr "A node of a KPI tree."
+
+#: of walopy.kpi.KPINode:3
+msgid "Nombre del KPI."
+msgstr "Name of the KPI."
+
+#: of walopy.kpi.KPINode:5
+msgid "Valor calculado o proporcionado."
+msgstr "Computed or provided value."
+
+#: of walopy.kpi.KPINode:7
+msgid "Unidad de medida (p. ej. '%', 'unidades/h', '$')."
+msgstr "Unit of measure (e.g. '%', 'units/h', '$')."
+
+#: of walopy.kpi.KPINode:9
+msgid "Fórmula legible (para mostrar)."
+msgstr "Readable formula (for display)."
+
+#: of walopy.kpi.KPINode:11
+msgid "Sub-KPI que alimentan a este nodo."
+msgstr "Sub-KPIs that feed this node."
+
+#: of walopy.kpi.KPINode.find:1
+msgid "Búsqueda en profundidad por nombre."
+msgstr "Depth-first search by name."
+
+#: of walopy.kpi.KPINode.leaves:1
+msgid "Devuelve todos los nodos hoja (nodos sin hijos)."
+msgstr "Returns all the leaf nodes (nodes without children)."
+
+#: of walopy.kpi.KPINode.to_frame:1
+msgid "Aplana el árbol en un DataFrame (en profundidad)."
+msgstr "Flattens the tree into a DataFrame (depth-first)."
+
+#: of walopy.kpi.KPINode.plot:1
+msgid "Genera un treemap interactivo de Plotly (o un sunburst con ``kind='sunburst'``)."
+msgstr "Generates an interactive Plotly treemap (or a sunburst with ``kind='sunburst'``)."
+

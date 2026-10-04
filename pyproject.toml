@@ -26,6 +26,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Operating System :: OS Independent",
+    "Natural Language :: Spanish",
+    "Natural Language :: English",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
@@ -35,12 +37,13 @@ dependencies = ["numpy>=1.22", "pandas>=1.4", "matplotlib>=3.5", "plotly>=5.0"]
 [project.optional-dependencies]
 dev     = ["pytest>=7", "pytest-cov>=4", "pytest-timeout>=2", "ruff~=0.16.10", "mypy>=1.10,<3"]
 release = ["build", "twine", "pip-audit"]
-docs    = ["sphinx>=7", "sphinx-rtd-theme>=2", "myst-parser>=2"]
+docs    = ["sphinx>=7", "sphinx-rtd-theme>=2", "myst-parser>=2", "sphinx-intl>=2.1"]
 
 [project.urls]
 Homepage  = "https://github.com/LeoSanta15/walopy"
 Issues    = "https://github.com/LeoSanta15/walopy/issues"
 Changelog = "https://github.com/LeoSanta15/walopy/blob/main/CHANGELOG.md"
+"README (English)" = "https://github.com/LeoSanta15/walopy/blob/main/README.en.md"
 
 [tool.setuptools.dynamic]
 version = {attr = "walopy.__version__"}

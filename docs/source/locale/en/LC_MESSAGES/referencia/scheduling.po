@@ -1,0 +1,220 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the walopy package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: walopy \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-04 19:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/referencia/scheduling.rst:2
+msgid "Programación de producción (scheduling)"
+msgstr "Production scheduling (scheduling)"
+
+#: ../../source/referencia/scheduling.rst:4
+msgid "Módulo ``walopy.scheduling``. Todos los símbolos se importan también desde ``walopy``."
+msgstr "Module ``walopy.scheduling``. All the symbols are also importable from ``walopy``."
+
+#: ../../source/referencia/scheduling.rst:7
+msgid "Funciones"
+msgstr "Functions"
+
+#: of walopy.scheduling.schedule_single:1
+msgid "Programación de una máquina con reglas clásicas de despacho por prioridad."
+msgstr "Single-machine scheduling with classic priority dispatching rules."
+
+#: of walopy.scheduling.johnson_flowshop walopy.scheduling.neh_flowshop
+#: walopy.scheduling.schedule_single
+msgid "Parameters"
+msgstr "Parameters"
+
+#: of walopy.scheduling.schedule_single:3
+msgid "Tiempo de proceso pj de cada trabajo (> 0)."
+msgstr "Processing time pj of each job (> 0)."
+
+#: of walopy.scheduling.schedule_single:5
+msgid "Regla de despacho:  - ``'SPT'``  Menor tiempo de proceso primero — minimiza ΣCj. - ``'EDD'``  Fecha de entrega más próxima primero — minimiza el retraso máximo. - ``'WSPT'`` SPT ponderado (regla de Smith) — minimiza ΣwjCj. - ``'CR'``   Razón crítica — trabajos ordenados por dj / pj. - ``'FIFO'`` Orden de llegada (referencia)."
+msgstr "Dispatching rule:  - ``'SPT'``  Shortest processing time first — minimizes ΣCj. - ``'EDD'``  Earliest due date first — minimizes the maximum lateness. - ``'WSPT'`` Weighted SPT (Smith's rule) — minimizes ΣwjCj. - ``'CR'``   Critical ratio — jobs sorted by dj / pj. - ``'FIFO'`` Arrival order (baseline)."
+
+#: of walopy.scheduling.schedule_single:13
+msgid "Fecha de entrega dj de cada trabajo. Obligatoria para EDD y CR."
+msgstr "Due date dj of each job. Required for EDD and CR."
+
+#: of walopy.scheduling.schedule_single:15
+msgid "Peso de importancia wj (> 0). Obligatorio para WSPT. Por defecto 1."
+msgstr "Importance weight wj (> 0). Required for WSPT. Defaults to 1."
+
+#: of walopy.scheduling.johnson_flowshop:10
+#: walopy.scheduling.schedule_single:17
+msgid "Etiquetas de los trabajos. Por defecto 'J1', 'J2', …"
+msgstr "Labels of the jobs. Defaults to 'J1', 'J2', …"
+
+#: of walopy.scheduling.johnson_flowshop walopy.scheduling.neh_flowshop
+#: walopy.scheduling.schedule_single
+msgid "Return type"
+msgstr "Return type"
+
+#: of walopy.scheduling.johnson_flowshop walopy.scheduling.neh_flowshop
+#: walopy.scheduling.schedule_single
+msgid "Raises"
+msgstr "Raises"
+
+#: of walopy.scheduling.schedule_single:22
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si una secuencia está vacía o las secuencias tienen longitudes distintas.     Si ``rule`` no es una de SPT, EDD, WSPT, CR, FIFO, o falta ``due_dates`` para EDD/CR."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a sequence is empty or the sequences have different lengths.     If ``rule`` is not one of SPT, EDD, WSPT, CR, FIFO, or ``due_dates`` is missing for EDD/CR."
+
+#: of walopy.scheduling.johnson_flowshop:16 walopy.scheduling.neh_flowshop:17
+#: walopy.scheduling.schedule_single:23
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: of walopy.scheduling.johnson_flowshop:19 walopy.scheduling.neh_flowshop:20
+#: walopy.scheduling.schedule_single:26
+msgid "Examples"
+msgstr "Examples"
+
+#: of walopy.scheduling.johnson_flowshop:1
+msgid "Algoritmo de Johnson para el flow-shop de dos máquinas."
+msgstr "Johnson's algorithm for the two-machine flow shop."
+
+#: of walopy.scheduling.johnson_flowshop:3
+msgid "Todos los trabajos se procesan primero en la máquina 1 y luego en la máquina 2 en la **misma** secuencia. El algoritmo encuentra la secuencia que minimiza el makespan."
+msgstr "All jobs are processed first on machine 1 and then on machine 2 in the **same** sequence. The algorithm finds the sequence that minimizes the makespan."
+
+#: of walopy.scheduling.johnson_flowshop:6
+msgid "Tiempo de proceso en la máquina 1 de cada trabajo (aj > 0)."
+msgstr "Processing time on machine 1 of each job (aj > 0)."
+
+#: of walopy.scheduling.johnson_flowshop:8
+msgid "Tiempo de proceso en la máquina 2 de cada trabajo (bj > 0)."
+msgstr "Processing time on machine 2 of each job (bj > 0)."
+
+#: of walopy.scheduling.johnson_flowshop:15
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si una secuencia está vacía o las secuencias tienen longitudes distintas."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If a sequence is empty or the sequences have different lengths."
+
+#: of walopy.scheduling.neh_flowshop:1
+msgid "Heurística NEH para el flow-shop de permutación con *m* máquinas."
+msgstr "NEH heuristic for the permutation flow shop with *m* machines."
+
+#: of walopy.scheduling.neh_flowshop:3
+msgid "Nawaz, Enscore y Ham (1983) construyen una permutación de alta calidad insertando cada trabajo en su mejor posición. Con la aceleración de Taillard corre en O(n²·m); es la heurística estándar del flow-shop de permutación. Con *m = 2* obtiene soluciones óptimas o casi óptimas, comparables al algoritmo de Johnson."
+msgstr "Nawaz, Enscore and Ham (1983) build a high-quality permutation by inserting each job in its best position. With Taillard's acceleration it runs in O(n²·m); it is the standard heuristic for the permutation flow shop. With *m = 2* it obtains optimal or near-optimal solutions, comparable to Johnson's algorithm."
+
+#: of walopy.scheduling.neh_flowshop:8
+msgid "``times_matrix[i][j]``: tiempo de proceso del trabajo *i* en la máquina *j*. Todos los valores deben ser > 0; todas las filas deben tener el mismo número de columnas."
+msgstr "``times_matrix[i][j]``: processing time of job *i* on machine *j*. All values must be > 0; all rows must have the same number of columns."
+
+#: of walopy.scheduling.neh_flowshop:11
+msgid "Etiquetas de los trabajos. Por defecto ``'J1', 'J2', …``."
+msgstr "Labels of the jobs. Defaults to ``'J1', 'J2', …``."
+
+#: of walopy.scheduling.neh_flowshop:16
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si la matriz está vacía, es irregular o ``names`` tiene otra longitud."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the matrix is empty, ragged or ``names`` has a different length."
+
+#: ../../source/referencia/scheduling.rst:16
+msgid "Clases de resultado"
+msgstr "Result classes"
+
+#: of walopy.scheduling.JobSchedule:1
+msgid "Resultado por trabajo tras la programación."
+msgstr "Per-job result after scheduling."
+
+#: of walopy.scheduling.ScheduleResult:1
+msgid "Resultado de la programación de una máquina."
+msgstr "Result of single-machine scheduling."
+
+#: ../../source/referencia/scheduling.rst
+msgid "Variables"
+msgstr "Variables"
+
+#: of walopy.scheduling.ScheduleResult:3
+msgid "Regla de despacho utilizada."
+msgstr "Dispatching rule used."
+
+#: of walopy.scheduling.ScheduleResult:5
+msgid "Nombres de los trabajos en orden de procesamiento."
+msgstr "Names of the jobs in processing order."
+
+#: of walopy.scheduling.ScheduleResult:7
+msgid "Detalle de la programación por trabajo."
+msgstr "Per-job scheduling detail."
+
+#: of walopy.scheduling.ScheduleResult:9
+msgid "Tiempo total transcurrido (suma de todos los tiempos de proceso)."
+msgstr "Total elapsed time (sum of all processing times)."
+
+#: of walopy.scheduling.ScheduleResult:11
+msgid "Suma de los tiempos de finalización ΣCj."
+msgstr "Sum of the completion times ΣCj."
+
+#: of walopy.scheduling.ScheduleResult:13
+msgid "Suma ponderada de los tiempos de finalización ΣwjCj."
+msgstr "Weighted sum of the completion times ΣwjCj."
+
+#: of walopy.scheduling.ScheduleResult:15
+msgid "Retraso máximo max(Lj)."
+msgstr "Maximum lateness max(Lj)."
+
+#: of walopy.scheduling.ScheduleResult:17
+msgid "Suma de las tardanzas ΣTj."
+msgstr "Sum of the tardiness ΣTj."
+
+#: of walopy.scheduling.ScheduleResult:19
+msgid "Número de trabajos con retraso."
+msgstr "Number of tardy jobs."
+
+#: of walopy.scheduling.FlowShopResult:1
+msgid "Resultado del flow-shop de dos máquinas de Johnson."
+msgstr "Result of Johnson's two-machine flow shop."
+
+#: of walopy.scheduling.FlowShopResult:3
+msgid "Secuencia óptima de procesamiento de los trabajos."
+msgstr "Optimal processing sequence of the jobs."
+
+#: of walopy.scheduling.FlowShopResult:5
+msgid "Tiempo total transcurrido (finalización del último trabajo en la máquina 2)."
+msgstr "Total elapsed time (completion of the last job on machine 2)."
+
+#: of walopy.scheduling.FlowShopResult:7 walopy.scheduling.FlowShopResult:9
+msgid "Un diccionario por trabajo con las claves ``name``, ``start``, ``end``."
+msgstr "One dictionary per job with the keys ``name``, ``start``, ``end``."
+
+#: of walopy.scheduling.NEHResult:1
+msgid "Resultado de la heurística NEH para el flow-shop de permutación con m máquinas."
+msgstr "Result of the NEH heuristic for the permutation flow shop with m machines."
+
+#: of walopy.scheduling.NEHResult:3
+msgid "Orden de procesamiento de los trabajos encontrado por NEH."
+msgstr "Processing order of the jobs found by NEH."
+
+#: of walopy.scheduling.NEHResult:5
+msgid "Mejor makespan (Cmax) alcanzado."
+msgstr "Best makespan (Cmax) achieved."
+
+#: of walopy.scheduling.NEHResult:7
+msgid "Número de máquinas."
+msgstr "Number of machines."
+
+#: of walopy.scheduling.NEHResult:9
+#, python-brace-format
+msgid "``machine_schedules[m_idx][j]``: diccionario ``{name, start, end}`` del *j*-ésimo trabajo (en orden de secuencia) en la máquina *m_idx*."
+msgstr "``machine_schedules[m_idx][j]``: dictionary ``{name, start, end}`` of the *j*-th job (in sequence order) on machine *m_idx*."
+
+#: of walopy.scheduling.NEHResult.to_frame:1
+msgid "Devuelve un DataFrame de Gantt con inicio y fin por máquina para cada trabajo."
+msgstr "Returns a Gantt DataFrame with the start and finish per machine for each job."
+
