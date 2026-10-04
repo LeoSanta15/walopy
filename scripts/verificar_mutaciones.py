@@ -67,7 +67,7 @@ MUTANTES = [
      'c   = as_int_positive(c, "c", max=MAX_SERVIDORES)', 'c   = as_int_positive(c, "c")',
      "tests/test_mmc_estable.py -k rechaza_demasiados"),
     ("MU-15", "H-07 exchange_curve acepta lista vacía", "inventory.py",
-     "    if len(items) == 0:\n        raise ValueError(\"'items' debe contener al menos un elemento.\")\n\n    parsed: list[dict[str, Any]] = []",
+     "    if len(items) == 0:\n        raise ValueError(_t(\"inventory.error.exchange_curve.items_debe_contener_menos_elemento\"))\n\n    parsed: list[dict[str, Any]] = []",
      "    parsed: list[dict[str, Any]] = []",
      "tests/test_exchange_curve.py -k vacios"),
     ("MU-16", "H-07 exchange_curve no acepta números como texto", "inventory.py",
