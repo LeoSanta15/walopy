@@ -290,11 +290,13 @@ class Extractor(ast.NodeVisitor):
                 if kw.arg == "columns" and isinstance(kw.value, (ast.List, ast.Tuple)):
                     for e in kw.value.elts:
                         self._registrar("cabecera", e)
-        elif nombre in {"add_argument", "add_parser", "ArgumentParser"}:
+        elif nombre in {"add_argument", "add_parser", "add_subparsers", "ArgumentParser"}:
             for kw in nodo.keywords:
                 if kw.arg in {"help", "description", "epilog", "version"}:
                     for c in _cadenas_de(kw.value):
                         self._registrar("cli", c)
+                elif kw.arg == "metavar" and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, str) and len(kw.value.value) >= 4:
+                    self._registrar("cli", kw.value)      # «MODELO» se ve en la ayuda; los símbolos cortos (LAM, MU, D) no se traducen
         elif nombre == "print" and self.modulo == "__main__":
             for a in nodo.args:
                 for c in _cadenas_de(a):

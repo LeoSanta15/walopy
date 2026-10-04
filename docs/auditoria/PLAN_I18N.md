@@ -1,19 +1,19 @@
 # PLAN I18N — walopy en español (por defecto) e inglés
 
-> Estado: **Fases 0 y 1 terminadas** (2026-10-04); fases 2 y 3 pendientes. Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
+> Estado: **Fases 0, 1 y 2 terminadas** (2026-10-04); fase 3 pendiente (documentación en inglés y release). **El catálogo inglés lo redactó Claude y está pendiente de revisión por una persona nativa antes de publicar.** Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
 > Evidencia: `docs/auditoria/inventario_i18n_base.json` (línea base **congelada** de v0.3.0, generada con `scripts/inventario_i18n.py --src <código de v0.3.0>`) y `INVENTARIO_I18N.md`. Todo número de este plan sale de ese inventario.
 
 > **Corrección sobre la Fase 0 (hecha en la Fase 1).** El primer inventario contó **667** textos y afirmó cobertura del 100 %. Era incompleto: no veía los textos escondidos en
 > expresiones (`x or 'ninguna'`, `'ventas' if … else 'unidades'`), las claves de columna leídas dentro de f-strings (`row['Artículo']`) ni f-strings con solo marcadores, y
-> clasificaba como «nombre de argumento» ocho mensajes completos que empezaban por `items[{idx}]…`. El extractor se rehízo (AST con posiciones exactas) y el inventario
-> definitivo tiene **645 textos únicos** (762 usos), con un tipo nuevo `texto_en_expresion`. La cobertura ya no se afirma por el recuento sino por tres controles independientes
+> clasificaba como «nombre de argumento» siete mensajes completos que empezaban por `items[{idx}]…`/`activities[{i}]…` y no veía el `metavar="MODELO"` de la ayuda del CLI (lo encontró la Fase 2). El extractor se rehízo (AST con posiciones exactas) y el inventario
+> definitivo tiene **646 textos únicos** (763 usos), con un tipo nuevo `texto_en_expresion`. La cobertura ya no se afirma por el recuento sino por tres controles independientes
 > (ver «Verificación» abajo). Lección: un inventario se valida migrando de verdad, no solo contando.
 
 ## 1. Resultado de la Fase 0
 
 | Medida | Valor |
 |---|---|
-| Textos únicos en `src/walopy` | ~~667~~ → **645** tras la corrección (762 usos; los repetidos comparten clave) |
+| Textos únicos en `src/walopy` | ~~667~~ → **646** tras la corrección (763 usos; los repetidos comparten clave) |
 | Sin clasificar / mensajes construidos fuera del `raise` | **0 / 0** (lo comprueba un test) |
 | Cobertura medida con un método **independiente** del extractor | (fase 0: 261 cadenas, 0 ausentes — insuficiente, ver la corrección). Fase 1: ver «Verificación» |
 | Plantillas con variables (grupos A+B, 536 textos) | 175 (361 son fijas); solo 19 con expresiones complejas (hay que precalcular el valor) |
@@ -61,7 +61,7 @@ Si esos textos cambian con el idioma sin más, `result.params[...]` y `df["Estac
 |---|---|---|---|
 | **0** ✅ | Inventario, claves, tests de paridad e inventario al día | hecho: 667 textos, 0 sin clasificar, cobertura independiente 100 % | 1 día |
 | **1** ✅ | `_i18n.py` + migración de A, B y C (según D1–D3) **solo en español**; fixture que fija `es` | hecho: los tests existentes pasan (solo se adaptó `test_idioma.py`, cuyo objeto —mensajes literales— ya no existe); salida en español **idéntica** a la de v0.3.0 (`tests/test_salida_identica.py`); `make check` verde; suites en Python 3.9 (mínimos y recientes), 3.10, 3.11 y 3.13 | 1 día |
-| **2** | Catálogo `en` + tests por idioma; `test_idioma.py` generalizado por catálogo | paridad total de claves y marcadores; cada mensaje comprobado en `en` | ~1 semana |
+| **2** ✅ | Catálogo `en` (597 claves) + tests por idioma; `test_idioma.py` generalizado por catálogo | hecho: paridad total de claves y marcadores; con `language("en")` todo el recorrido de funciones, errores, escenarios y CLI no contiene vocabulario español; los números no cambian con el idioma; `make check` verde | 1 día |
 | **3** | Documentación en inglés (README, Sphinx con `sphinx-intl`), CHANGELOG, release **0.4.0** | `sphinx -W` en ambos idiomas; `make check` en verde | ~1 semana |
 
 ## 5b. Verificación de la Fase 1 (lo que demuestra que no se rompió nada)
@@ -69,6 +69,12 @@ Si esos textos cambian con el idioma sin más, `result.params[...]` y `df["Estac
 2. **Extractor** (`python scripts/inventario_i18n.py`): no quedan textos visibles literales en `src/` (salvo claves fijas de `params`, decisión D1).
 3. **Controles independientes** (`tests/test_inventario_i18n.py`): ningún `raise`/`warnings.warn` contiene prosa literal; todo literal con rasgos del español es una clave fija de `params`; cada `_t("clave", …)` pasa exactamente los marcadores de su plantilla; cada clave usada existe y ninguna clave del catálogo queda huérfana; el texto español del catálogo es idéntico al de v0.3.0.
 4. **Hallazgos durante la verificación** (ambos con la salida en español idéntica, es decir, invisibles para el control 1): (a) la migración había sustituido por error la clave de datos `o["covers_periods"]` por una etiqueta (`_t("…covers_periods")`, cuyo texto español es el mismo): habría roto el inglés; lo detectó la comparación entre el catálogo y la base regenerada y ahora lo vigila `test_el_catalogo_no_tiene_claves_que_no_estaban_en_v030`; (b) siete mensajes que empezaban por `items[{idx}]…`/`activities[{i}]…` seguían en español porque el extractor los tomaba por nombres de argumento; los encontró el control 3 (literales con rasgos del español). Lección: la identidad de la salida en español **no** basta para validar una migración; hacen falta los controles 2 y 3 y comparar el catálogo con la base.
+
+## 5c. Hallazgos de la Fase 2
+- **Robustez:** un resultado creado dentro de `with language("en")` y mostrado fuera (p. ej. `print(r)` de `break_even_multi`) lanzaba `KeyError`, porque `summary()` buscaba claves traducidas en el idioma de ese momento. Ahora esos accesos usan `columna()`, que busca en cualquier idioma (`tests/test_salida_por_idioma.py::test_el_idioma_no_cambia_ningun_numero` lo cubre).
+- **Bug de v0.3.0 (R-03):** el mensaje de `eoq_quantity_discount` «No feasible price break found.» estaba en inglés; ahora es «No se encontró ningún tramo de precio factible.» en español (`CORREGIDAS_TRAS_V030`).
+- **Claves de datos:** las clases `A/B/C/X/Y/Z` de ABC-XYZ pasan por el catálogo pero son idénticas en todos los idiomas (un test lo exige: `DATOS_INVARIABLES`).
+- **Cuidado al traducir:** `.method` de `lot_for_lot` («Lote por lote» → «Lot-for-lot») y los nombres por defecto son datos visibles que cambian con el idioma; está documentado en el README.
 
 Riesgo conocido: al añadir un texto visible hay que ponerlo en ambos catálogos (`CLAUDE.md`, sección «Internacionalización»); los tests lo exigen.
 

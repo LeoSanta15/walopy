@@ -102,6 +102,37 @@ def test_el_catalogo_en_espanol_no_tiene_ingles():
     assert not hallazgos, "Texto en inglés en el catálogo español:\n" + "\n".join(hallazgos)
 
 
+ESPANOL = re.compile(
+    r"[áéíóúñÁÉÍÓÚÑ¿¡]|\b(de|la|el|los|las|con|para|por|sin|debe|deben|valor|tiempo|costo|tasa|demanda|modelo|sistema|unidades|pedido"
+    r"|artículo|estación|cola|se recibió)\b",
+    re.IGNORECASE,
+)
+
+
+def encontrar_espanol_en_catalogo(catalogo: dict[str, str]) -> list[str]:
+    """Valores del catálogo inglés con vocabulario español (sin marcadores ``{...}`` ni código entre comillas invertidas)."""
+    hallazgos = []
+    for clave, texto in catalogo.items():
+        sin_codigo = re.sub(r"\{[^{}]*\}", " ", CODIGO.sub(" ", texto))
+        m = ESPANOL.search(sin_codigo)
+        if m:
+            hallazgos.append(f"{clave} [{m.group()}] → {texto[:70]!r}")
+    return hallazgos
+
+
+def test_el_catalogo_en_ingles_no_tiene_espanol():
+    from walopy._catalogo_en import EN
+
+    hallazgos = encontrar_espanol_en_catalogo(EN)
+    assert not hallazgos, "Texto en español en el catálogo inglés:\n" + "\n".join(hallazgos)
+
+
+def test_el_detector_de_catalogo_encuentra_espanol():
+    assert encontrar_espanol_en_catalogo({"a.error.x": "x debe ser positivo", "a.error.y": "x must be positive"}) == [
+        "a.error.x [debe] → 'x debe ser positivo'"
+    ]
+
+
 def test_el_detector_de_catalogo_encuentra_ingles():
     assert encontrar_ingles_en_catalogo({"a.error.x": "x must be positive", "a.error.y": "x debe ser positivo"}) == [
         "a.error.x ['must'] → 'x must be positive'"

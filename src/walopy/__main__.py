@@ -22,7 +22,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument("--version", action="version", version=_t("main.cli.main.walopy", __version__=__version__))
 
-    sub = parser.add_subparsers(dest="model", metavar="MODELO")
+    sub = parser.add_subparsers(dest="model", metavar=_t("main.cli.main.modelo"))
 
     # --- mm1 ---
     p1 = sub.add_parser("mm1", help=_t("main.cli.main.cola_servidor"))

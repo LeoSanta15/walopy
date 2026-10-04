@@ -115,10 +115,16 @@ def test_el_verificador_independiente_detecta_un_texto_literal(tmp_path):
 
 
 # --- el catálogo en español es consistente con el código y con la línea base ------------------------------------------------------
+# Textos de v0.3.0 corregidos a propósito después (cada uno es un bug de v0.3.0, no un cambio de estilo).
+CORREGIDAS_TRAS_V030 = {
+    "inventory.error.eoq_quantity_discount.feasible_price_break_found",   # estaba en inglés dentro del catálogo español (R-03)
+}
+
+
 def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
     esperadas = {e["clave"]: e["es"] for e in ENTRADAS if e["tipo"] not in SIN_CLAVE_DE_CATALOGO}
     assert {k for k in esperadas if k not in ES} == set()
-    cambiadas = [k for k, v in esperadas.items() if ES[k] != v]
+    cambiadas = [k for k, v in esperadas.items() if ES[k] != v and k not in CORREGIDAS_TRAS_V030]
     assert not cambiadas, f"el texto en español cambió respecto a v0.3.0 (¿intencionado? regenera la base): {cambiadas[:5]}"
 
 

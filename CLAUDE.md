@@ -38,7 +38,7 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 - `_utils.py`      — validadores compartidos (única capa de ingesta numérica) y cotas de tamaño
 - `_i18n.py`       — idioma activo (`set_language`, `language`, `get_language`, `WALOPY_LANG`) y `t("clave", **datos)`; los textos viven en los catálogos
 - `_catalogo_es.py` — catálogo de textos en español (idioma por defecto); claves `modulo.tipo.funcion.resumen`
-- `_catalogo_en.py` — catálogo de textos en inglés (fase 2 de la internacionalización; mientras falte una clave se usa el español)
+- `_catalogo_en.py` — catálogo de textos en inglés (mismas claves y marcadores que el español) y `EXENTAS_DE_TRADUCCION` (textos iguales en ambos idiomas a propósito)
 - `__init__.py`    — API pública (`__all__`) y **fuente única de la versión** (`__version__`, literal)
 
 Otras carpetas: `tests/` (pytest; incluye doctests de `src/` y los ejemplos del README), `examples/` (scripts ejecutables),

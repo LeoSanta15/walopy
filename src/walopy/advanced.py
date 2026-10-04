@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 
+from ._i18n import columna
 from ._i18n import t as _t
 from ._utils import (
     MAX_CLIENTES,
@@ -661,7 +662,7 @@ class BreakEvenMultiResult:
         ]
         for row in self.items:
             lines.append(
-                f"{row[_t('columnas.columna_df.global.producto')]:<18} {row[_t('columnas.columna_df.global.precio')]:>8.4g} {row[_t('columnas.columna_df.global.costo_variable')]:>8.4g} {row['MC']:>8.4g} {row[_t('columnas.columna_df.global.mezcla')]:>6.2%} {row[_t('columnas.columna_df.global.pe_unidades')]:>10.4g} {row[_t('columnas.columna_df.global.pe_ingresos')]:>10.4g}"
+                f"{row[columna(row, 'columnas.columna_df.global.producto')]:<18} {row[columna(row, 'columnas.columna_df.global.precio')]:>8.4g} {row[columna(row, 'columnas.columna_df.global.costo_variable')]:>8.4g} {row['MC']:>8.4g} {row[columna(row, 'columnas.columna_df.global.mezcla')]:>6.2%} {row[columna(row, 'columnas.columna_df.global.pe_unidades')]:>10.4g} {row[columna(row, 'columnas.columna_df.global.pe_ingresos')]:>10.4g}"
             )
         return "\n".join(lines)
 

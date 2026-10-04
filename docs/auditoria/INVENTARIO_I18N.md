@@ -1,14 +1,14 @@
 # INVENTARIO I18N — texto visible de walopy (generado)
 
 > Generado por `python scripts/inventario_i18n.py`; **no editar a mano**. Línea base **congelada** de los textos de v0.3.0 (antes de pasar al catálogo): `docs/auditoria/inventario_i18n_base.json`.
-> 645 textos únicos, 762 usos en el código. Idioma base: `es`.
+> 646 textos únicos, 763 usos en el código. Idioma base: `es`.
 > Un texto repetido en un módulo cuenta una vez (clave única) y aparece con su número de usos.
 
 ## Por tipo y módulo (textos únicos)
 
 | módulo | acceso_columna | aviso | cabecera | clave_params | cli | columna_df | error | etiqueta | grafica | kpi | modelo | nombre_arg | texto_en_expresion | valor_por_defecto | total |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `__main__` |  |  |  |  | 17 |  |  |  |  |  |  |  |  |  | 17 |
+| `__main__` |  |  |  |  | 18 |  |  |  |  |  |  |  |  |  | 18 |
 | `_utils` |  |  |  |  |  |  | 12 |  |  |  |  |  |  |  | 12 |
 | `advanced` | 6 |  | 14 | 11 |  | 15 | 14 | 12 |  |  | 3 | 2 | 12 | 1 | 90 |
 | `bottleneck` |  |  | 6 |  |  |  | 2 | 4 |  |  |  | 2 | 5 |  | 19 |
@@ -23,7 +23,7 @@
 | `reliability` |  | 2 | 7 | 1 |  |  | 5 | 7 |  |  |  |  |  |  | 22 |
 | `scheduling` |  |  | 9 |  |  |  | 8 | 10 |  |  |  | 5 |  | 1 | 33 |
 | `solver` |  |  |  | 5 |  | 3 | 7 | 5 |  |  |  |  |  |  | 20 |
-| **total** | 22 | 3 | 122 | 38 | 17 | 34 | 113 | 115 | 66 | 32 | 8 | 28 | 41 | 6 | **645** |
+| **total** | 22 | 3 | 122 | 38 | 18 | 34 | 113 | 115 | 66 | 32 | 8 | 28 | 41 | 6 | **646** |
 
 ## Complejidad de la plantilla
 
@@ -35,7 +35,7 @@
 | aviso |  |  | 3 |  |
 | cabecera | 119 | 1 |  | 2 |
 | clave_params | 38 |  |  |  |
-| cli | 15 | 2 |  |  |
+| cli | 16 | 2 |  |  |
 | columna_df | 34 |  |  |  |
 | error | 60 | 25 | 23 | 5 |
 | etiqueta | 14 | 13 | 77 | 11 |

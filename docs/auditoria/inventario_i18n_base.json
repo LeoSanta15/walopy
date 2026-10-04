@@ -1,8 +1,8 @@
 {
  "version": 1,
  "idioma_base": "es",
- "total": 645,
- "usos": 762,
+ "total": 646,
+ "usos": 763,
  "entradas": [
   {
    "clave": "main.cli.add_lam_mu.tasa_llegadas",
@@ -179,6 +179,19 @@
    "usos": 1,
    "complejidad": "fija",
    "es": "Herramientas de teoría de colas e investigación de operaciones.",
+   "marcadores": []
+  },
+  {
+   "clave": "main.cli.main.modelo",
+   "tipo": "cli",
+   "modulo": "__main__",
+   "funcion": "main",
+   "funciones": [
+    "main"
+   ],
+   "usos": 1,
+   "complejidad": "fija",
+   "es": "MODELO",
    "marcadores": []
   },
   {

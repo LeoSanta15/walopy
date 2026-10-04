@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from statistics import NormalDist
 from typing import TYPE_CHECKING, Any
 
+from ._i18n import columna
 from ._i18n import t as _t
 from ._utils import as_float_list, as_fraction, as_nonneg, as_positive
 
@@ -866,7 +867,7 @@ class ConstrainedMultiEOQResult:
         ]
         for row in self.items:
             lines.append(
-                _t("inventory.etiqueta.summary.ct", expr=row[_t('columnas.columna_df.global.articulo')], expr2=row['Q*'], expr3=row[_t('columnas.columna_df.global.costo_total')])
+                _t("inventory.etiqueta.summary.ct", expr=row[columna(row, 'columnas.columna_df.global.articulo')], expr2=row['Q*'], expr3=row[columna(row, 'columnas.columna_df.global.costo_total')])
             )
         return "\n".join(lines)
 

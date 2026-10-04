@@ -13,7 +13,7 @@ from contextvars import ContextVar, Token
 from types import TracebackType
 from typing import Any
 
-from ._catalogo_en import EN
+from ._catalogo_en import EN, EXENTAS_DE_TRADUCCION  # noqa: F401 - se reexporta para los tests de paridad
 from ._catalogo_es import ES
 
 IDIOMAS = ("es", "en")
@@ -144,16 +144,18 @@ def etiqueta_param(clave_es: str) -> str:
 
 
 def columna(tabla: Any, clave: str) -> str:
-    """Nombre de la columna ``clave`` que ``tabla`` realmente tiene (uso interno).
+    """Nombre de la columna (o clave de diccionario) ``clave`` que ``tabla`` realmente tiene (uso interno).
 
-    Las columnas se crean con el idioma activo en ese momento; si el idioma cambió entre crear la tabla y leerla, se busca la columna
-    en cualquiera de los idiomas en lugar de fallar.
+    Las columnas se crean con el idioma activo en ese momento; si el idioma cambió entre crear la tabla y leerla (por ejemplo, un resultado creado
+    dentro de ``with language("en")`` y mostrado fuera), se busca la columna en cualquiera de los idiomas en lugar de fallar.
+    ``tabla`` es un ``DataFrame`` o un diccionario.
     """
+    existentes = getattr(tabla, "columns", tabla)
     actual = t(clave)
-    if actual in tabla.columns:
+    if actual in existentes:
         return actual
     for catalogo in CATALOGOS.values():
         texto = catalogo.get(clave)
-        if texto is not None and texto in tabla.columns:
+        if texto is not None and texto in existentes:
             return texto
     return actual

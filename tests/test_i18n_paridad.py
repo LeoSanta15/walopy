@@ -78,3 +78,30 @@ def test_los_idiomas_tienen_las_mismas_claves_y_marcadores(i18n):
     exentas = frozenset(getattr(i18n, "EXENTAS_DE_TRADUCCION", ()))
     errores = errores_de_paridad(i18n.CATALOGOS["es"], i18n.CATALOGOS["en"], exentas)
     assert not errores, "\n".join(errores[:20])
+
+
+# Textos que el código usa como CLAVES DE DATOS (diccionarios, matrices): deben ser idénticos en todos los idiomas o el resultado cambiaría con el idioma.
+DATOS_INVARIABLES = [
+    f"inventory.etiqueta.summary.texto{sufijo}" for sufijo in ("", "_2", "_3", "_5", "_6", "_7")       # clases A/B/C y X/Y/Z
+] + [
+    "columnas.columna_df.global.lam", "columnas.columna_df.global.mu",                              # nombres de los parámetros de batch_model
+]
+
+
+def test_los_textos_que_son_claves_de_datos_son_iguales_en_todos_los_idiomas(i18n):
+    for clave in DATOS_INVARIABLES:
+        textos = {lang: cat[clave] for lang, cat in i18n.CATALOGOS.items() if clave in cat}
+        assert len(set(textos.values())) == 1, f"{clave} cambia con el idioma: {textos}"
+
+
+def test_las_excepciones_de_traduccion_existen_y_son_realmente_iguales(i18n):
+    es, en = i18n.CATALOGOS["es"], i18n.CATALOGOS["en"]
+    assert i18n.EXENTAS_DE_TRADUCCION <= set(es)
+    desiguales = sorted(k for k in i18n.EXENTAS_DE_TRADUCCION if es[k] != en.get(k))
+    assert not desiguales, f"están en EXENTAS_DE_TRADUCCION pero sí difieren (quítalas): {desiguales[:5]}"
+
+
+def test_la_clave_es_traducible_pero_el_texto_ingles_difiere_del_espanol_si_no_es_exenta(i18n):
+    es, en = i18n.CATALOGOS["es"], i18n.CATALOGOS["en"]
+    iguales = sorted(k for k in en if en[k] == es[k] and k not in i18n.EXENTAS_DE_TRADUCCION)
+    assert not iguales, f"sin traducir: {iguales[:5]}"
