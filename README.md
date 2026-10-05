@@ -1515,6 +1515,9 @@ tree.plot()
 
 ### `KPINode` — árbol personalizado
 
+El rótulo de cada rectángulo es el valor real del nodo; su **tamaño** es el mayor entre ese valor y la suma de sus hijos (un KPI como EBITDA = Ingresos − Costos no
+es la suma de sus hijos, y Plotly dibuja en blanco un padre menor que ellos).
+
 ```python
 rev = wl.KPINode("Revenue", value=200_000, unit="€", children=[
     wl.KPINode("Product A", value=120_000, unit="€"),

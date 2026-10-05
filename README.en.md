@@ -1528,6 +1528,9 @@ tree.plot()
 
 ### `KPINode` — custom tree
 
+The label of each rectangle is the node's actual value; its **size** is the larger of that value and the sum of its children (a KPI such as EBITDA = Revenue − Costs
+is not the sum of its children, and Plotly draws a blank figure when a parent is smaller than they are).
+
 ```python
 rev = wl.KPINode("Revenue", value=200_000, unit="€", children=[
     wl.KPINode("Product A", value=120_000, unit="€"),

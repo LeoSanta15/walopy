@@ -6890,6 +6890,10 @@
     ".data[0].parents[1]=OEE",
     ".data[0].parents[2]=OEE",
     ".data[0].parents[3]=OEE",
+    ".data[0].text[0]=0.729",
+    ".data[0].text[1]=0.9",
+    ".data[0].text[2]=0.9",
+    ".data[0].text[3]=0.9",
     ".layout.title.text=Árbol de KPI — OEE"
    ],
    "resultado": {
@@ -7236,6 +7240,15 @@
     ".data[0].parents[6]=ROI/Utilidad neta/Costo total/Costo variable",
     ".data[0].parents[7]=ROI/Utilidad neta/Costo total/Costo variable",
     ".data[0].parents[8]=ROI",
+    ".data[0].text[0]=1",
+    ".data[0].text[1]=500",
+    ".data[0].text[2]=1,000",
+    ".data[0].text[3]=500",
+    ".data[0].text[4]=200",
+    ".data[0].text[5]=300",
+    ".data[0].text[6]=3",
+    ".data[0].text[7]=100",
+    ".data[0].text[8]=500",
     ".layout.title.text=Árbol de KPI — ROI"
    ],
    "resultado": {
@@ -8936,6 +8949,11 @@
     ".data[0].parents[2]=Throughput efectivo/Throughput real",
     ".data[0].parents[3]=Throughput efectivo/Throughput real",
     ".data[0].parents[4]=Throughput efectivo",
+    ".data[0].text[0]=76",
+    ".data[0].text[1]=80",
+    ".data[0].text[2]=100",
+    ".data[0].text[3]=0.8",
+    ".data[0].text[4]=0.95",
     ".layout.title.text=Árbol de KPI — Throughput efectivo"
    ],
    "resultado": {
