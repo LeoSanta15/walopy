@@ -193,6 +193,9 @@ def plot_kpi_tree(
 ) -> go.Figure:
     """Árbol de KPI interactivo con Plotly.
 
+    El rectángulo de cada nodo rotula su valor real; su tamaño es el mayor entre ese valor y la suma de los tamaños de sus hijos (un KPI como
+    EBITDA = Ingresos − Costos no es la suma de sus hijos, y Plotly no dibuja un padre menor que ellos).
+
     Parameters
     ----------
     root : KPINode
@@ -214,20 +217,26 @@ def plot_kpi_tree(
     labels: list[str]     = []
     parents: list[str]    = []
     values: list[float]   = []
+    shown: list[str]      = []     # valor real de cada nodo (el que se rotula)
     hover: list[str]      = []
 
-    def _collect(node: KPINode, parent_id: str = "") -> None:
+    def _collect(node: KPINode, parent_id: str = "") -> float:
         node_id = f"{parent_id}/{node.name}" if parent_id else node.name
+        pos = len(ids)
         ids.append(node_id)
         labels.append(node.name)
         parents.append(parent_id)
-        # Use absolute value for area sizing; zero would collapse the tile
-        values.append(max(abs(node.value), 1e-9))
+        values.append(0.0)
+        shown.append(f"{node.value:,.8g}")
         unit_str    = f" {node.unit}" if node.unit else ""
         formula_str = _t("plotting.grafica.collect.br_2", formula=node.formula) if node.formula else ""
         hover.append(_t("plotting.grafica.collect.br", name=node.name, value=node.value, unit_str=unit_str, formula_str=formula_str))
-        for child in node.children:
-            _collect(child, node_id)
+        children_size = sum(_collect(child, node_id) for child in node.children)
+        # Tamaño del rectángulo: con branchvalues="total" Plotly exige que el padre valga al menos la suma de sus hijos, y si no lo
+        # cumple dibuja la figura en blanco. Un KPI no es la suma de sus hijos (EBITDA = Ingresos − Costos; OEE = A × P × Q), así que
+        # el tamaño del padre es max(su valor, la suma de los tamaños de sus hijos); el valor rotulado sigue siendo el del nodo.
+        values[pos] = max(abs(node.value), children_size, 1e-9)
+        return values[pos]
 
     _collect(root)
 
@@ -239,10 +248,11 @@ def plot_kpi_tree(
             labels=labels,
             parents=parents,
             values=values,
+            text=shown,
             customdata=hover,
             hovertemplate=_t("plotting.grafica.plot_kpi_tree.customdata_extra_extra"),
             branchvalues="total",
-            textinfo="label+value",
+            texttemplate="%{label}<br>%{text}",
             insidetextorientation="radial",
             marker=dict(colorscale="Blues"),
         )
@@ -256,10 +266,11 @@ def plot_kpi_tree(
             labels=labels,
             parents=parents,
             values=values,
+            text=shown,
             customdata=hover,
             hovertemplate=_t("plotting.grafica.plot_kpi_tree.customdata_extra_extra"),
             branchvalues="total",
-            texttemplate="<b>%{label}</b><br>%{value:.4g}",
+            texttemplate="<b>%{label}</b><br>%{text}",
             textfont=dict(size=13),
             marker=dict(
                 colorscale="Blues",

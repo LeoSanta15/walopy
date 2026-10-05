@@ -4,7 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
-Sin cambios todavía.
+### Corregido
+- **Los gráficos de árboles de KPI salían en blanco** (`KPINode.plot()`, `oee_kpi_tree`, `throughput_kpi_tree` y `roi_kpi_tree`, en `treemap` y en `sunburst`). Plotly, con
+  `branchvalues="total"`, no dibuja la figura si un padre vale menos que la suma de sus hijos, y un KPI casi nunca es esa suma (EBITDA = Ingresos − Costos; OEE = A × P × Q).
+  Ahora el tamaño de cada rectángulo es el mayor entre su valor y la suma de sus hijos, y el rótulo muestra el valor real del nodo (con separador de miles). Los árboles que ya
+  cumplían la condición conservan sus tamaños. Bug `W-26`: `tests/test_kpi_grafica.py` (falla en v0.4.0) y mutante `MU-18`. Reportado por una persona usuaria.
 
 ---
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-05 20:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -51,19 +51,23 @@ msgstr "Bar chart of utilization per station with the bottleneck highlighted."
 msgid "Árbol de KPI interactivo con Plotly."
 msgstr "Interactive KPI tree with Plotly."
 
+#: of walopy.plotting.plot_kpi_tree:3
+msgid "El rectángulo de cada nodo rotula su valor real; su tamaño es el mayor entre ese valor y la suma de los tamaños de sus hijos (un KPI como EBITDA = Ingresos − Costos no es la suma de sus hijos, y Plotly no dibuja un padre menor que ellos)."
+msgstr "Each node's rectangle is labeled with its actual value; its size is the larger of that value and the sum of the sizes of its children (a KPI such as EBITDA = Revenue − Costs is not the sum of its children, and Plotly does not draw a parent that is smaller than they are)."
+
 #: ../../source/referencia/plotting.rst
 msgid "Parameters"
 msgstr "Parameters"
 
-#: of walopy.plotting.plot_kpi_tree:3
+#: of walopy.plotting.plot_kpi_tree:6
 msgid "Raíz de la jerarquía de KPI."
 msgstr "Root of the KPI hierarchy."
 
-#: of walopy.plotting.plot_kpi_tree:5
+#: of walopy.plotting.plot_kpi_tree:8
 msgid "Título de la figura. Por defecto \"Árbol de KPI — <root.name>\"."
 msgstr "Title of the figure. Defaults to \"KPI tree — <root.name>\"."
 
-#: of walopy.plotting.plot_kpi_tree:7
+#: of walopy.plotting.plot_kpi_tree:10
 msgid "Tipo de gráfico. 'treemap' (por defecto) codifica el valor con el área; 'sunburst' usa una disposición radial."
 msgstr "Chart type. 'treemap' (default) encodes the value with the area; 'sunburst' uses a radial layout."
 
@@ -71,7 +75,7 @@ msgstr "Chart type. 'treemap' (default) encodes the value with the area; 'sunbur
 msgid "Returns"
 msgstr "Returns"
 
-#: of walopy.plotting.plot_kpi_tree:11
+#: of walopy.plotting.plot_kpi_tree:14
 msgid "Llame a ``.show()`` para mostrarla o a ``.write_html()`` para guardarla."
 msgstr "Call ``.show()`` to display it or ``.write_html()`` to save it."
 

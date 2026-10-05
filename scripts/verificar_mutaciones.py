@@ -78,6 +78,9 @@ MUTANTES = [
      "fig, ax = plt.subplots(figsize=figsize or (8, 4))",
      'plt.rcParams["font.size"] = 99; fig, ax = plt.subplots(figsize=figsize or (8, 4))',
      "tests/test_plotting.py -k rcparams"),
+    ("MU-18", "W-26 árbol de KPI en blanco (el padre vale menos que la suma de sus hijos)", "plotting.py",
+     "values[pos] = max(abs(node.value), children_size, 1e-9)", "values[pos] = max(abs(node.value), 1e-9)",
+     "tests/test_kpi_grafica.py -k ningun_padre"),
 ]
 
 

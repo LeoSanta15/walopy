@@ -239,5 +239,21 @@
     "guardas": [
       "[__main__.py]"
     ]
+  },
+  {
+    "id": "W-26",
+    "titulo": "Los árboles de KPI se dibujan en blanco (el padre vale menos que la suma de sus hijos con branchvalues=\"total\")",
+    "ref": "v0.4.0",
+    "selectores": [
+      "tests/test_kpi_grafica.py"
+    ],
+    "guardas": [
+      "suma_exacta",
+      "una_hoja",
+      "con_cero",
+      "negativo",
+      "conserva_los_tamanos",
+      "texto_emergente"
+    ]
   }
 ]

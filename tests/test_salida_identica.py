@@ -3,6 +3,9 @@
 ``tests/golden/salida_es.json`` se generó con ``python scripts/instantanea_salida.py --escribir`` sobre el código de v0.3.0, ANTES de
 mover los textos a un catálogo. Cubre resultados, tablas, mensajes de error, avisos, gráficas, README y CLI, con el idioma por defecto.
 Si cambia a propósito un texto en español, regenera la instantánea y revisa el diff como parte del PR.
+
+Excepción deliberada (W-26): la ``grafica`` de ``oee_kpi_tree``, ``throughput_kpi_tree`` y ``roi_kpi_tree`` se actualizó a mano en la instantánea: ahora
+rotula el valor real de cada nodo en ``text`` (los árboles salían en blanco en el navegador, ver ``tests/test_kpi_grafica.py``).
 """
 from __future__ import annotations
 
