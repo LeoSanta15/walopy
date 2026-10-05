@@ -8,16 +8,16 @@ matplotlib y plotly se importan de forma perezosa dentro de las funciones de gr�
 
 Python ≥ 3.9 · layout `src/` · versión actual: ver `src/walopy/__init__.py` (`__version__`).
 
-## Estado verificado (2026-10-02, sobre `e89f285` + infraestructura de agentes)
+## Estado verificado (2026-10-05, v0.4.0: `51303e8`)
 Cifras medidas con `make check`; si cambian, actualiza esta sección con la salida real (no de memoria).
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 1 288 pasan (incluye 70 doctests, 61 bloques del README y 5 ejemplos); mismo resultado en 3.9, 3.11 y 3.9 con dependencias mínimas |
-| Cobertura | global 94,7 %; el módulo menor (`solver.py`) 86,3 % |
-| Lint / tipos | `ruff` y `mypy` sin errores (16 archivos) |
+| Tests (`make test`) | 2 014 pasan (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Cobertura | global 97,2 %; el módulo menor (`solver.py`) 89,1 % |
+| Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |
-| Docs | `sphinx -W` sin avisos, 13 páginas de referencia |
+| Docs | `sphinx -W` sin avisos en español y en inglés, 14 páginas de referencia |
 | Regresiones | 25 bugs (`W-01`…`W-25`) en `tests/regresiones.json`; 23 con selectores que fallan en `v0.2.8` |
 
 ## Mapa del código (`src/walopy/`)
