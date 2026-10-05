@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-05 17:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -40,32 +40,32 @@ msgid "neh_flowshop n=100, m=10"
 msgstr "neh_flowshop n=100, m=10"
 
 #: ../../source/rendimiento.md
-msgid "0.034"
-msgstr "0.034"
+msgid "0.037"
+msgstr "0.037"
 
 #: ../../source/rendimiento.md
 msgid "neh_flowshop n=200, m=10"
 msgstr "neh_flowshop n=200, m=10"
 
 #: ../../source/rendimiento.md
-msgid "0.146"
-msgstr "0.146"
+msgid "0.165"
+msgstr "0.165"
 
 #: ../../source/rendimiento.md
 msgid "wagner_whitin n=1000"
 msgstr "wagner_whitin n=1000"
 
 #: ../../source/rendimiento.md
-msgid "0.055"
-msgstr "0.055"
+msgid "0.069"
+msgstr "0.069"
 
 #: ../../source/rendimiento.md
 msgid "wagner_whitin n=2000"
 msgstr "wagner_whitin n=2000"
 
 #: ../../source/rendimiento.md
-msgid "0.226"
-msgstr "0.226"
+msgid "0.285"
+msgstr "0.285"
 
 #: ../../source/rendimiento.md
 msgid "mmc c=1000 (ρ=0.95)"
@@ -80,36 +80,36 @@ msgid "monte_carlo_gg1 n=1e6"
 msgstr "monte_carlo_gg1 n=1e6"
 
 #: ../../source/rendimiento.md
-msgid "0.561"
-msgstr "0.561"
+msgid "0.778"
+msgstr "0.778"
 
 #: ../../source/rendimiento.md
 msgid "abc_xyz n=2000"
 msgstr "abc_xyz n=2000"
 
 #: ../../source/rendimiento.md
-msgid "0.011"
-msgstr "0.011"
+msgid "0.034"
+msgstr "0.034"
 
 #: ../../source/rendimiento.md
 msgid "cpm n=1000"
 msgstr "cpm n=1000"
 
 #: ../../source/rendimiento.md
-msgid "0.007"
-msgstr "0.007"
+msgid "0.009"
+msgstr "0.009"
 
 #: ../../source/rendimiento.md
 msgid "weibull_analysis n=5000 (MLE)"
 msgstr "weibull_analysis n=5000 (MLE)"
 
 #: ../../source/rendimiento.md
-msgid "0.151"
-msgstr "0.151"
+msgid "0.164"
+msgstr "0.164"
 
 #: ../../source/rendimiento.md:18
-msgid "Entorno de referencia: Python 3.11.15, x86_64, walopy 0.3.0."
-msgstr "Reference environment: Python 3.11.15, x86_64, walopy 0.3.0."
+msgid "Entorno de referencia: Python 3.11.15, x86_64, walopy 0.4.0."
+msgstr "Reference environment: Python 3.11.15, x86_64, walopy 0.4.0."
 
 #: ../../source/rendimiento.md ../../source/rendimiento.md:20
 msgid "Complejidad"
