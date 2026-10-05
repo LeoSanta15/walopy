@@ -4,6 +4,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
+Sin cambios todavía.
+
+---
+
+## [0.4.1] — 2026-10-05
+
+Versión de corrección: los gráficos de árboles de KPI salían en blanco en 0.4.0 y en las anteriores (0.2.7, 0.2.8 y 0.3.0 tienen el mismo código).
+
 ### Corregido
 - **Los gráficos de árboles de KPI salían en blanco** (`KPINode.plot()`, `oee_kpi_tree`, `throughput_kpi_tree` y `roi_kpi_tree`, en `treemap` y en `sunburst`). Plotly, con
   `branchvalues="total"`, no dibuja la figura si un padre vale menos que la suma de sus hijos, y un KPI casi nunca es esa suma (EBITDA = Ingresos − Costos; OEE = A × P × Q).
