@@ -131,6 +131,10 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
     "i18n.error.validar.idioma_no_admitido",
+    "solver.error.optimize_servers.sin_servidores_estables_hasta_c_max",   # W-29
+    "solver.error.sensitivity.values_no_puede_estar_vacio",   # W-32
+    "solver.error.sensitivity.param_no_es_parametro_modelo",
+    "solver.error.compare.sin_resultados",   # W-31
     "project.cabecera.to_frame.ht",    # «HT»/«HL» (holgura total/libre): acrónimos españoles que el extractor no veía; ya existían en v0.3.0
     "project.cabecera.to_frame.hl",
 }

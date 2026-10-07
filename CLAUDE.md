@@ -13,12 +13,12 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 2 365 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
-| Cobertura | global 97,3 %; el módulo menor (`solver.py`) 89,9 % |
+| Tests (`make test`) | 2 414 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Cobertura | global 97,4 %; el módulo menor (`solver.py`) 91,9 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |
 | Docs | `sphinx -W` sin avisos en español y en inglés, 14 páginas de referencia |
-| Regresiones | 28 bugs (`W-01`…`W-28`) en `tests/regresiones.json`; 26 con selectores que fallan en `v0.2.8` |
+| Regresiones | 32 bugs (`W-01`…`W-32`) en `tests/regresiones.json`; cada entrada trae su `ref` (v0.2.8 para W-01…W-25; el tag anterior a la corrección para W-26…W-32) |
 
 ## Mapa del código (`src/walopy/`)
 - `queuing.py`     — M/M/1, M/M/c, M/D/1, M/G/1, G/G/1 (Kingman), ley de Little, helpers `cv2_*`

@@ -279,5 +279,54 @@
       "razon_entera",
       "por_enumeracion"
     ]
+  },
+  {
+    "id": "W-29",
+    "titulo": "solve_servers y optimize_servers no validan c_max (error opaco «min() arg is an empty sequence», bool/nan aceptados)",
+    "ref": "v0.4.2",
+    "selectores": [
+      "tests/test_servidores_cmax.py"
+    ],
+    "guardas": [
+      "valido_sigue_funcionando",
+      "sigue_siendo_value_error"
+    ]
+  },
+  {
+    "id": "W-30",
+    "titulo": "batch_model con un DataFrame disperso rechaza los parámetros enteros (c, k…) porque pandas los convierte a float",
+    "ref": "v0.4.2",
+    "selectores": [
+      "tests/test_solver_contratos.py -k batch_model"
+    ],
+    "guardas": [
+      "parametro_flotante_no_cambia",
+      "entero_sin_nan_sigue_igual",
+      "cada_fila_es_el_modelo"
+    ]
+  },
+  {
+    "id": "W-31",
+    "titulo": "compare() sin resultados devuelve una tabla vacía y con resultados de varias filas descarta todas menos la primera",
+    "ref": "v0.4.2",
+    "selectores": [
+      "tests/test_solver_contratos.py -k compare"
+    ],
+    "guardas": [
+      "una_fila_no_cambia"
+    ]
+  },
+  {
+    "id": "W-32",
+    "titulo": "sensitivity con un parámetro inexistente lanza TypeError y con values vacío devuelve una tabla vacía (la documentación dice ValueError)",
+    "ref": "v0.4.2",
+    "selectores": [
+      "tests/test_solver_contratos.py -k sensitivity"
+    ],
+    "guardas": [
+      "valida_sigue_igual",
+      "admite_modelos_con_kwargs",
+      "cada_fila_es_el_modelo"
+    ]
   }
 ]

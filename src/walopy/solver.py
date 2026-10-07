@@ -1,6 +1,7 @@
 """Solvers: encuentran parámetros óptimos o metas definidas por la persona usuaria en modelos de colas y operaciones."""
 from __future__ import annotations
 
+import inspect
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable
@@ -9,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from ._i18n import t as _t
-from ._utils import as_positive
+from ._utils import MAX_SERVIDORES, as_int_positive, as_positive
 
 if TYPE_CHECKING:
     import plotly.graph_objects as go
@@ -370,6 +371,7 @@ def solve_servers(
     lam = as_positive(lam, "lam")
     mu  = as_positive(mu, "mu")
     target_value = as_positive(target_value, "target_value")
+    c_max = as_int_positive(c_max, "c_max", max=MAX_SERVIDORES)
 
     c_min_stable = _min_servidores_estables(lam, mu)
 
@@ -444,8 +446,11 @@ def optimize_servers(
     mu              = as_positive(mu, "mu")
     cost_per_server = as_positive(cost_per_server, "cost_per_server")
     cost_per_wait   = as_positive(cost_per_wait, "cost_per_wait")
+    c_max           = as_int_positive(c_max, "c_max", max=MAX_SERVIDORES)
 
     c_min = _min_servidores_estables(lam, mu)
+    if c_min > c_max:
+        raise ValueError(_t("solver.error.optimize_servers.sin_servidores_estables_hasta_c_max", lam=lam, mu=mu, c_min=c_min, c_max=c_max))
     rows: list[dict[str, Any]] = []
 
     for c in range(c_min, c_max + 1):
@@ -526,6 +531,15 @@ def sensitivity(
     >>> import numpy as np
     >>> df = sensitivity(mm1, "lam", np.linspace(0.5, 4.5, 20), mu=5.0)
     """
+    if len(values) == 0:
+        raise ValueError(_t("solver.error.sensitivity.values_no_puede_estar_vacio"))
+    try:
+        parametros = inspect.signature(model_fn).parameters
+    except (TypeError, ValueError):   # callables sin firma inspeccionable: se intenta igualmente
+        parametros = None
+    if parametros is not None and param not in parametros and not any(p.kind is p.VAR_KEYWORD for p in parametros.values()):
+        nombre_modelo = repr(model_fn) if not hasattr(model_fn, "__name__") else model_fn.__name__
+        raise ValueError(_t("solver.error.sensitivity.param_no_es_parametro_modelo", param=param, modelo=nombre_modelo))
     rows: list[dict[str, Any]] = []
     for v in values:
         try:
@@ -609,6 +623,8 @@ def batch_model(
 
     # Pre-compute integer columns so iterrows() float-upcast can be reversed
     int_cols = {col for col in df.columns if pd.api.types.is_integer_dtype(df[col].dtype)}
+    # Una columna entera con NaN (DataFrame disperso) pasa a float64: sus valores enteros vuelven a ser int al llamar al modelo
+    sparse_int_cols = {col for col in df.columns if pd.api.types.is_float_dtype(df[col].dtype) and df[col].isna().any()}
 
     for _, row_series in df.iterrows():
         # Merge: fixed_kwargs as base, row values (non-NaN) take precedence
@@ -617,7 +633,10 @@ def batch_model(
             if isinstance(v, float) and np.isnan(v):
                 continue
             # iterrows() upcasts int64 columns to float64; reverse that cast
-            kwargs[k] = int(v) if k in int_cols else v
+            if k in int_cols or (k in sparse_int_cols and isinstance(v, (float, np.floating)) and float(v).is_integer()):
+                kwargs[k] = int(v)
+            else:
+                kwargs[k] = v
 
         try:
             result = model_fn(**kwargs)
@@ -663,7 +682,8 @@ def compare(
     ----------
     *results
         Cualquier objeto de resultado de walopy (``QueueResult``, ``SimulationResult``,
-        ``EOQResult``, etc.) o diccionarios simples.
+        ``EOQResult``, etc.) o diccionarios simples. Si la tabla ``to_frame()`` de un resultado tiene varias filas
+        (pedidos, actividades…), se comparan sus campos escalares (costo total, duración del proyecto…).
     labels : sequence of str, optional
         Etiquetas de las filas. Por defecto ``'escenario_1'``, ``'escenario_2'``, …
 
@@ -688,11 +708,14 @@ def compare(
     >>> tabla["c (servidores)"].tolist()
     [1, 2]
     """
+    if len(results) == 0:
+        raise ValueError(_t("solver.error.compare.sin_resultados"))
     rows: list[dict[str, Any]] = []
     for i, r in enumerate(results):
         label = labels[i] if (labels and i < len(labels)) else _t("solver.etiqueta.compare.escenario", expr=i + 1)
-        if hasattr(r, "to_frame"):
-            row = r.to_frame().iloc[0].to_dict()
+        tabla = r.to_frame() if hasattr(r, "to_frame") else None
+        if tabla is not None and len(tabla) == 1:
+            row = tabla.iloc[0].to_dict()
         elif isinstance(r, dict):
             row = dict(r)
         elif hasattr(r, "__dict__"):
