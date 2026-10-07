@@ -13,7 +13,7 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 2 206 pasan (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Tests (`make test`) | 2 215 pasan (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
 | Cobertura | global 97,3 %; el módulo menor (`solver.py`) 89,1 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |

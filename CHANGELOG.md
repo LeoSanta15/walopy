@@ -4,6 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
+### Pruebas
+- Nuevo `tests/test_propiedades_algoritmos.py`: `neh_flowshop`, `johnson_flowshop`, `schedule_single` (SPT, EDD, WSPT), `cpm`, `mmck`/`mm1k`, `mm1_priority`,
+  `newsvendor`, `silver_meal`, `lot_for_lot` y `mrp` contra oráculos independientes (fuerza bruta, camino más largo, ecuaciones de balance, fórmula cerrada) sobre
+  escenarios aleatorios con semilla fija. No hallaron defectos nuevos; protegen contra regresiones.
+
 ### Documentación
 - `CONTRIBUTING.md` incluye «Cómo añadir una función pública», con los siete pasos que exige la batería (código, textos en los dos catálogos, test de contrato,
   referencia Sphinx, los dos README, traducción de la referencia y cierre).
