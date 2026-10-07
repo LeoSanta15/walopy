@@ -4,7 +4,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
-Sin cambios todavía.
+### Documentación
+- `CONTRIBUTING.md` incluye «Cómo añadir una función pública», con los siete pasos que exige la batería (código, textos en los dos catálogos, test de contrato,
+  referencia Sphinx, los dos README, traducción de la referencia y cierre).
+- Política del inglés: no se exige revisión por una persona nativa; la paridad entre español e inglés sigue siendo obligatoria y comprobada por tests
+  (`docs/auditoria/PLAN_I18N.md` §7).
 
 ---
 
