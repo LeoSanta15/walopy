@@ -8,6 +8,23 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.2] — 2026-10-07
+
+Versión de corrección: `wagner_whitin` no devolvía el costo óptimo cuando la demanda tenía periodos en cero (0.4.1 y anteriores).
+
+### Corregido
+- **`wagner_whitin` con periodos de demanda nula** devolvía un plan más caro que el óptimo: cobraba la preparación en bloques sin demanda y obligaba a pedir en el
+  periodo 1. Ejemplos con `setup_cost=100`, `holding_cost=1`: `[0, 0, 100, 0, 0]` costaba 200 (ahora 100, un solo pedido en el periodo 3) y `[0, 50, 0, 100]`
+  costaba 250 (ahora 200); `[0, 0, 0]` devolvía un pedido de cantidad 0 y costo 100 (ahora ningún pedido y costo 0). Con demanda positiva en todos los periodos el
+  resultado no cambia. Bug `W-27`: `tests/test_wagner_whitin_ceros.py` (falla en v0.4.1) y mutante `MU-19`. Hallado con propiedades diferenciales entre funciones
+  relacionadas.
+
+### Pruebas
+- El test de fuerza bruta de `wagner_whitin` compartía el defecto del código (obligaba a pedir en el periodo 1 y evitaba `d[0] = 0`); se reescribió con un oráculo
+  independiente y ceros en cualquier posición.
+- Nuevo `tests/test_propiedades_diferenciales.py`: relaciones que deben cumplir funciones distintas del mismo modelo (M/G/1 con cs²=1 = M/M/1, M/M/c con c=1 = M/M/1,
+  Erlang-B decreciente, serie ≤ mínimo, paralelo ≥ máximo, EOQ mínimo, etc.) sobre escenarios aleatorios con semilla fija.
+
 ## [0.4.1] — 2026-10-05
 
 Versión de corrección: los gráficos de árboles de KPI salían en blanco en 0.4.0 y en las anteriores (0.2.7, 0.2.8 y 0.3.0 tienen el mismo código).

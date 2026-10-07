@@ -55,7 +55,7 @@ MUTANTES = [
      'mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")', "mttr_v = mttr",
      "tests/test_regresion_validacion.py -k 'mtbf_rechaza or sistemas_rechazan_t'"),
     ("MU-11", "W-20 versión desincronizada de los metadatos", "__init__.py",
-     '__version__ = "0.4.1"', '__version__ = "0.4.2"',
+     '__version__ = "0.4.2"', '__version__ = "0.4.3"',
      "tests/test_version.py"),
     ("MU-12", "H-02 EOQResult.plot() roto (plot_eoq)", "inventory.py",
      "return plot_eoq(self, **kwargs)", 'raise ImportError("plot_eoq")',
@@ -81,6 +81,9 @@ MUTANTES = [
     ("MU-18", "W-26 árbol de KPI en blanco (el padre vale menos que la suma de sus hijos)", "plotting.py",
      "values[pos] = max(abs(node.value), children_size, 1e-9)", "values[pos] = max(abs(node.value), 1e-9)",
      "tests/test_kpi_grafica.py -k ningun_padre"),
+    ("MU-19", "W-27 wagner_whitin paga preparación en periodos sin demanda", "inventory.py",
+     "        if demands_v[i - 1] == 0:\n            # Sin demanda no hay pedido", "        if False:\n            # Sin demanda no hay pedido",
+     "tests/test_wagner_whitin_ceros.py"),
 ]
 
 

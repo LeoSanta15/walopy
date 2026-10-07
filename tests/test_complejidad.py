@@ -77,10 +77,18 @@ def test_neh_n200_m10_es_rapido():
 
 
 def _ww_fuerza_bruta(d, S, h):
+    """Óptimo por enumeración, independiente de la programación dinámica.
+
+    Un pedido solo se coloca en un periodo con demanda positiva (no hay nada que cubrir en uno nulo) y el primero
+    de ellos debe tener pedido. Un horizonte sin demanda cuesta 0.
+    """
+    positivos = [t for t, x in enumerate(d) if x > 0]
+    if not positivos:
+        return 0.0
     n = len(d)
     mejor = math.inf
-    for mascara in range(1 << (n - 1)):
-        inicios = [0] + [i + 1 for i in range(n - 1) if mascara >> i & 1]
+    for mascara in range(1 << (len(positivos) - 1)):
+        inicios = [positivos[0]] + [positivos[i + 1] for i in range(len(positivos) - 1) if mascara >> i & 1]
         costo = 0.0
         for si, a in enumerate(inicios):
             fin = inicios[si + 1] if si + 1 < len(inicios) else n
@@ -93,8 +101,7 @@ def _ww_fuerza_bruta(d, S, h):
 def test_wagner_whitin_coincide_con_fuerza_bruta(semilla):
     r = random.Random(semilla)
     n = r.randint(2, 9)
-    d = [r.randint(0, 40) for _ in range(n)]
-    d[0] = d[0] or 1
+    d = [r.choice([0, 0, r.randint(1, 40)]) for _ in range(n)]  # ceros en cualquier posición (W-27)
     S, h = r.randint(10, 100), r.choice([0.5, 1, 2])
     assert wl.wagner_whitin(d, S, h).total_cost == pytest.approx(_ww_fuerza_bruta(d, S, h), abs=1e-9)
 
