@@ -5,6 +5,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 ## [Sin publicar]
 
 ### Pruebas
+- Nuevo `tests/test_dibujo_plotly.py` (`make dibujo`, job «Dibujo» del CI): renderiza las figuras de Plotly en Chromium sin interfaz y comprueba que la zona del
+  gráfico difiere de la misma figura con las trazas invisibles; reintroducir el defecto W-26 (árbol de KPI en blanco) lo hace fallar en las cuatro figuras de KPI.
+  Sin navegador (o sin `WALOPY_DIBUJO=1`) solo se ejecuta la capa de datos finitos por traza.
 - Nuevo `tests/test_propiedades_algoritmos.py`: `neh_flowshop`, `johnson_flowshop`, `schedule_single` (SPT, EDD, WSPT), `cpm`, `mmck`/`mm1k`, `mm1_priority`,
   `newsvendor`, `silver_meal`, `lot_for_lot` y `mrp` contra oráculos independientes (fuerza bruta, camino más largo, ecuaciones de balance, fórmula cerrada) sobre
   escenarios aleatorios con semilla fija. No hallaron defectos nuevos; protegen contra regresiones.

@@ -3,10 +3,10 @@
 PYTHON ?= python
 MINIMO_COBERTURA_MODULO ?= 70
 
-.PHONY: help install test cov lint types build docs docs-i18n examples obsoletas regresion mutaciones inventario-i18n notas-release check-fast check release-check clean
+.PHONY: help install test cov lint types build docs docs-i18n examples obsoletas regresion mutaciones inventario-i18n dibujo notas-release check-fast check release-check clean
 
 help:
-	@echo "Objetivos: install test cov lint types build docs docs-i18n examples obsoletas regresion mutaciones inventario-i18n notas-release VERSION=X.Y.Z check-fast check release-check TAG=vX.Y.Z clean"
+	@echo "Objetivos: install test cov lint types build docs docs-i18n examples obsoletas regresion mutaciones inventario-i18n dibujo notas-release VERSION=X.Y.Z check-fast check release-check TAG=vX.Y.Z clean"
 
 install:
 	$(PYTHON) -m pip install -e ".[dev,release,docs]"
@@ -55,6 +55,10 @@ inventario-i18n:
 # Mutación de una línea: cada test de regresión debe fallar si el bug vuelve.
 mutaciones:
 	$(PYTHON) scripts/verificar_mutaciones.py
+
+# Las figuras de Plotly se renderizan en Chromium sin interfaz (tarda ~30 s; necesita Chrome/Chromium o WALOPY_CHROME=/ruta). No forma parte de `check`.
+dibujo:
+	WALOPY_DIBUJO=1 $(PYTHON) -m pytest tests/test_dibujo_plotly.py
 
 check-fast: lint types test
 

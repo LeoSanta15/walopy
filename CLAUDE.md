@@ -13,7 +13,7 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 2 215 pasan (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Tests (`make test`) | 2 226 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
 | Cobertura | global 97,3 %; el módulo menor (`solver.py`) 89,1 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |
@@ -52,7 +52,7 @@ make check-fast    # lint + tipos + tests   ← iterar con esto
 make check         # lint + tipos + cobertura (global y por módulo) + build + docs + ejemplos + obsoletas + regresion
 make release-check TAG=vX.Y.Z   # construye y comprueba que el wheel tiene la versión del tag
 
-make test | cov | lint | types | build | docs | examples | obsoletas | regresion | mutaciones | inventario-i18n | clean
+make test | cov | lint | types | build | docs | examples | obsoletas | regresion | mutaciones | inventario-i18n | dibujo | clean
 ```
 Equivalentes directos: `python -m pytest` · `python -m ruff check src/ tests/ benchmarks/ scripts/ examples/` ·
 `python -m mypy src/walopy --ignore-missing-imports` · `python -m build && python -m twine check dist/*` ·
