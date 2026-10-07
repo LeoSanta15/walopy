@@ -13,7 +13,7 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 2 206 pasan (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Tests (`make test`) | 2 226 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
 | Cobertura | global 97,3 %; el módulo menor (`solver.py`) 89,1 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |
@@ -52,12 +52,12 @@ make check-fast    # lint + tipos + tests   ← iterar con esto
 make check         # lint + tipos + cobertura (global y por módulo) + build + docs + ejemplos + obsoletas + regresion
 make release-check TAG=vX.Y.Z   # construye y comprueba que el wheel tiene la versión del tag
 
-make test | cov | lint | types | build | docs | examples | obsoletas | regresion | mutaciones | inventario-i18n | clean
+make test | cov | lint | types | build | docs | examples | obsoletas | regresion | mutaciones | inventario-i18n | dibujo | clean
 ```
 Equivalentes directos: `python -m pytest` · `python -m ruff check src/ tests/ benchmarks/ scripts/ examples/` ·
 `python -m mypy src/walopy --ignore-missing-imports` · `python -m build && python -m twine check dist/*` ·
 `python -m sphinx -b html -W docs/source docs/build/es` y `... -W -D language=en docs/source docs/build/en` (la documentación en inglés sale de `docs/source/locale/en`; tras cambiar un docstring ejecuta `make docs-i18n` y traduce lo nuevo).
-**Internacionalización** (`docs/auditoria/PLAN_I18N.md`): los textos que ve la persona usuaria no se escriben en el código sino en `_catalogo_es.py` (y su traducción en `_catalogo_en.py`) y se usan con `_t("modulo.tipo.funcion.resumen", dato=valor)` (`from ._i18n import t as _t`). Para un texto nuevo: añade la clave al catálogo español (marcadores `str.format` nombrados, p. ej. `{name}`, `{value!r}`), la misma clave con los mismos marcadores en el inglés, y llámalo con `_t`. `make inventario-i18n` falla si queda un texto literal visible en `src/`; una clave nueva (que no estaba en v0.3.0) se declara además en `AÑADIDAS_TRAS_V030` de `tests/test_inventario_i18n.py`. Las claves de `result.params` se mantienen fijas; las columnas de DataFrame se leen con `columna(df, "clave")`.
+**Internacionalización** (`docs/auditoria/PLAN_I18N.md`; el inglés no pasa por revisión nativa y la paridad es obligatoria, §7; pasos de una función nueva en `CONTRIBUTING.md`): los textos que ve la persona usuaria no se escriben en el código sino en `_catalogo_es.py` (y su traducción en `_catalogo_en.py`) y se usan con `_t("modulo.tipo.funcion.resumen", dato=valor)` (`from ._i18n import t as _t`). Para un texto nuevo: añade la clave al catálogo español (marcadores `str.format` nombrados, p. ej. `{name}`, `{value!r}`), la misma clave con los mismos marcadores en el inglés, y llámalo con `_t`. `make inventario-i18n` falla si queda un texto literal visible en `src/`; una clave nueva (que no estaba en v0.3.0) se declara además en `AÑADIDAS_TRAS_V030` de `tests/test_inventario_i18n.py`. Las claves de `result.params` se mantienen fijas; las columnas de DataFrame se leen con `columna(df, "clave")`.
 `make regresion` y `make mutaciones` necesitan `pytest-timeout` (extra `dev`) y, la primera, los tags de git (`git fetch --tags`).
 
 ## Definición de «terminado»

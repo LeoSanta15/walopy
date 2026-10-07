@@ -1,6 +1,6 @@
 # PLAN I18N — walopy en español (por defecto) e inglés
 
-> Estado: **Fases 0, 1, 2 y 3 terminadas** (2026-10-04); versión **0.4.0 preparada** (falta la revisión nativa del inglés y crear el tag/release, que lo hace una persona). **El catálogo inglés, `README.en.md` y las traducciones de Sphinx los redactó Claude y están pendientes de revisión por una persona nativa antes de publicar.** Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
+> Estado: **Fases 0, 1, 2 y 3 terminadas** (2026-10-04); versión **0.4.0 preparada** (publicada). **El catálogo inglés, `README.en.md` y las traducciones de Sphinx los redactó Claude. Decisión del 2026-10-07: no habrá revisión por una persona nativa, ni ahora ni en adelante** (ver «Política del inglés» al final). Decisiones tomadas: idiomas `es` e `en`; **el español sigue por defecto**; D1 a, D2 a, D3 sí, D4 español con enlace al inglés.
 > Evidencia: `docs/auditoria/inventario_i18n_base.json` (línea base **congelada** de v0.3.0, generada con `scripts/inventario_i18n.py --src <código de v0.3.0>`) y `INVENTARIO_I18N.md`. Todo número de este plan sale de ese inventario.
 
 > **Corrección sobre la Fase 0 (hecha en la Fase 1).** El primer inventario contó **667** textos y afirmó cobertura del 100 %. Era incompleto: no veía los textos escondidos en
@@ -93,3 +93,12 @@ python scripts/inventario_i18n.py             # falla si quedan textos literales
 python scripts/instantanea_salida.py --comprobar tests/golden/salida_es.json
 python -m pytest tests/test_inventario_i18n.py tests/test_i18n_paridad.py tests/test_i18n.py tests/test_salida_identica.py
 ```
+
+## 7. Política del inglés (decidida el 2026-10-07)
+
+- **No se exige revisión por una persona nativa**, ni para lo ya publicado ni para lo nuevo. El inglés lo redacta quien añade el cambio (Claude o una persona) y lo comprueban las mismas pruebas automáticas.
+- **La paridad sigue siendo obligatoria**: toda clave nueva lleva su texto español **y** su texto inglés con los mismos marcadores; toda función pública figura en `README.en.md`; todo docstring nuevo se traduce en `docs/source/locale/en`. Lo comprueban `tests/test_i18n_paridad.py`, `tests/test_inventario_i18n.py` y `tests/test_documentacion_ingles.py`. No se admite una lista de «pendientes de traducir»: hoy la deuda de traducción es cero y se mantiene así.
+- **Los errores de redacción en inglés se tratan como cualquier otro defecto**: se corrigen cuando alguien los reporta (un issue o un PR sobre `_catalogo_en.py`, `README.en.md` o los `.po`), sin esperar a una revisión previa. Un reporte de ese tipo no necesita test de regresión salvo que cambie el significado de un marcador o una clave.
+- **El español sigue siendo el idioma de referencia**: ante una discrepancia entre ambos, manda el español.
+- Se reconsiderará si el proyecto tiene personas usuarias o contribuyentes que usen el inglés de forma habitual.
+
