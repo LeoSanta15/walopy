@@ -55,7 +55,7 @@ MUTANTES = [
      'mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")', "mttr_v = mttr",
      "tests/test_regresion_validacion.py -k 'mtbf_rechaza or sistemas_rechazan_t'"),
     ("MU-11", "W-20 versión desincronizada de los metadatos", "__init__.py",
-     '__version__ = "0.4.2"', '__version__ = "0.4.3"',
+     '__version__ = "0.4.3"', '__version__ = "0.4.4"',
      "tests/test_version.py"),
     ("MU-12", "H-02 EOQResult.plot() roto (plot_eoq)", "inventory.py",
      "return plot_eoq(self, **kwargs)", 'raise ImportError("plot_eoq")',
@@ -84,6 +84,10 @@ MUTANTES = [
     ("MU-19", "W-27 wagner_whitin paga preparación en periodos sin demanda", "inventory.py",
      "        if demands_v[i - 1] == 0:\n            # Sin demanda no hay pedido", "        if False:\n            # Sin demanda no hay pedido",
      "tests/test_wagner_whitin_ceros.py"),
+    ("MU-20", "W-28 solve_servers/optimize_servers saltan el mínimo estable", "solver.py",
+     "    c = max(1, int(lam / mu))\n    while lam / (c * mu) >= 1.0:\n        c += 1\n    return c",
+     "    return int(np.ceil(lam / mu)) + 1",
+     "tests/test_servidores_minimos.py"),
 ]
 
 

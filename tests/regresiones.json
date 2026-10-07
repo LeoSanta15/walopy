@@ -267,5 +267,17 @@
       "con_demanda_positiva",
       "costo_optimo_exacto"
     ]
+  },
+  {
+    "id": "W-28",
+    "titulo": "solve_servers y optimize_servers empiezan a buscar un servidor después del mínimo estable (devuelven más servidores de los necesarios)",
+    "ref": "v0.4.2",
+    "selectores": [
+      "tests/test_servidores_minimos.py"
+    ],
+    "guardas": [
+      "razon_entera",
+      "por_enumeracion"
+    ]
   }
 ]

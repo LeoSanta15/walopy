@@ -316,6 +316,14 @@ def solve_mu(
 # solve_servers — minimum c to meet a target
 # ---------------------------------------------------------------------------
 
+def _min_servidores_estables(lam: float, mu: float) -> int:
+    """Menor número de servidores *c* con ρ = λ/(c·μ) < 1 (la misma condición que exige ``mmc``)."""
+    c = max(1, int(lam / mu))
+    while lam / (c * mu) >= 1.0:
+        c += 1
+    return c
+
+
 def solve_servers(
     target_metric: str,
     target_value: float,
@@ -355,7 +363,7 @@ def solve_servers(
     --------
     >>> r = solve_servers(target_metric='Wq', target_value=0.5, lam=4.0, mu=3.0)
     >>> round(r.value, 4)
-    3.0
+    2.0
     """
     from .queuing import mmc
 
@@ -363,7 +371,7 @@ def solve_servers(
     mu  = as_positive(mu, "mu")
     target_value = as_positive(target_value, "target_value")
 
-    c_min_stable = int(np.ceil(lam / mu)) + 1  # min c for stability
+    c_min_stable = _min_servidores_estables(lam, mu)
 
     for c in range(c_min_stable, c_max + 1):
         result = mmc(lam, mu, c)
@@ -428,7 +436,7 @@ def optimize_servers(
     --------
     >>> r = optimize_servers(lam=4.0, mu=3.0, cost_per_server=10.0, cost_per_wait=5.0)
     >>> round(r.min_cost, 4)
-    30.7232
+    25.3333
     """
     from .queuing import mmc
 
@@ -437,7 +445,7 @@ def optimize_servers(
     cost_per_server = as_positive(cost_per_server, "cost_per_server")
     cost_per_wait   = as_positive(cost_per_wait, "cost_per_wait")
 
-    c_min = int(np.ceil(lam / mu)) + 1
+    c_min = _min_servidores_estables(lam, mu)
     rows: list[dict[str, Any]] = []
 
     for c in range(c_min, c_max + 1):

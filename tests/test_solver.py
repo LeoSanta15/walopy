@@ -49,6 +49,7 @@ def test_solve_servers_low_load():
     # With lam << mu the minimum stable c (=1) should achieve the target easily
     r = solve_servers("Wq", 10.0, lam=1.0, mu=5.0)
     assert r.achieved_value <= 10.0
+    assert r.value == 1.0
 
 
 def test_optimize_servers_basic():

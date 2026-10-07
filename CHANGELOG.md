@@ -4,7 +4,25 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
+Sin cambios todavía.
+
+---
+
+## [0.4.3] — 2026-10-07
+
+Versión de corrección: `solve_servers` y `optimize_servers` no consideraban el menor número de servidores estable (0.4.2 y anteriores).
+
+### Corregido
+- **`solve_servers` y `optimize_servers` empezaban a buscar un servidor después del mínimo estable.** La búsqueda partía de `ceil(λ/μ) + 1`, que solo es el menor `c` con
+  ρ < 1 cuando λ/μ es entero. En los demás casos, `solve_servers` podía devolver más servidores de los necesarios (`solve_servers("Wq", 0.5, lam=4, mu=3)` daba 3 y
+  ahora da 2, con Wq = 0,267) y `optimize_servers` no evaluaba el plan más barato (`optimize_servers(lam=4, mu=3, cost_per_server=10, cost_per_wait=5)` costaba
+  30,7232 con 3 servidores y ahora cuesta 25,3333 con 2; con λ=1, μ=5 nunca consideraba un solo servidor). Cuando λ/μ es entero el resultado no cambia. Los ejemplos de
+  los docstrings se actualizaron. Bug `W-28`: `tests/test_servidores_minimos.py` (falla en v0.4.2) y mutante `MU-20`. Hallado con propiedades diferenciales (comparación con una enumeración).
+
 ### Pruebas
+- Nuevo `tests/test_propiedades_inventario_fiabilidad.py`: `weibull_analysis`, `mtbf_analysis`, `fit_from_data`, `reorder_point`, `rq_policy`, `rs_policy`, `eoq_multi`, `ebq`,
+  `eoq_multi_constrained`, `eoq_quantity_discount`, `exchange_curve`, `safety_stock_curve`, `jackson_network`, `break_even_multi`, `abc_analysis`, `bottleneck_analysis`,
+  `unit_cost` y `utilization_efficiency` contra fórmulas y enumeraciones independientes. Esta tanda de propiedades encontró `W-28`.
 - Nuevo `tests/test_dibujo_plotly.py` (`make dibujo`, job «Dibujo» del CI): renderiza las figuras de Plotly en Chromium sin interfaz y comprueba que la zona del
   gráfico difiere de la misma figura con las trazas invisibles; reintroducir el defecto W-26 (árbol de KPI en blanco) lo hace fallar en las cuatro figuras de KPI.
   Sin navegador (o sin `WALOPY_DIBUJO=1`) solo se ejecuta la capa de datos finitos por traza.
