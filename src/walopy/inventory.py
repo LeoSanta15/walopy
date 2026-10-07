@@ -1455,13 +1455,21 @@ def wagner_whitin(
     n = len(demands_v)
 
     INF = float("inf")
-    dp = [INF] * (n + 1)   # dp[j] = min cost to satisfy demands 0..j-1
+    dp = [INF] * (n + 1)   # dp[j] = costo mínimo de satisfacer las demandas 1..j
     dp[0] = 0.0
-    last = [-1] * (n + 1)  # last[j] = period i where order was placed
+    last = [-1] * (n + 1)  # last[j] = periodo del último pedido (0 = ninguno: demanda nula)
 
     # Recursión hacia adelante: el costo de mantener se acumula de forma incremental
     # (O(n²) en total; antes se recalculaba la suma completa para cada par (i, j): O(n³)).
+    # Solo se pide en periodos con demanda positiva: pedir antes de que haga falta nunca
+    # abarata el plan, y un periodo de demanda nula no justifica pagar la preparación.
     for i in range(1, n + 1):
+        if demands_v[i - 1] == 0:
+            # Sin demanda no hay pedido: se arrastra el costo del periodo anterior.
+            if dp[i - 1] < dp[i]:
+                dp[i] = dp[i - 1]
+                last[i] = 0
+            continue
         acum = 0.0  # Σ_{k=i..j} (k - i) · d_k
         for j in range(i, n + 1):
             acum += (j - i) * demands_v[j - 1]
@@ -1476,6 +1484,9 @@ def wagner_whitin(
     j = n
     while j > 0:
         i = last[j]
+        if i == 0:  # periodo sin demanda ni pedido
+            j -= 1
+            continue
         qty = sum(demands_v[k - 1] for k in range(i, j + 1))
         orders.append({
             "period": i,

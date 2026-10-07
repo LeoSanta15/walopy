@@ -255,5 +255,17 @@
       "conserva_los_tamanos",
       "texto_emergente"
     ]
+  },
+  {
+    "id": "W-27",
+    "titulo": "wagner_whitin cobra preparación en periodos sin demanda y obliga a pedir en el periodo 1 (costo no óptimo con ceros)",
+    "ref": "v0.4.1",
+    "selectores": [
+      "tests/test_wagner_whitin_ceros.py"
+    ],
+    "guardas": [
+      "con_demanda_positiva",
+      "costo_optimo_exacto"
+    ]
   }
 ]
