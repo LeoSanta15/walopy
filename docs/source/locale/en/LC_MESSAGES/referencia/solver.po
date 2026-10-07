@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-07 21:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -24,16 +24,24 @@ msgid "Solvers y escenarios (solver)"
 msgstr "Solvers and scenarios (solver)"
 
 #: ../../source/referencia/solver.rst:4
-msgid "Módulo ``walopy.solver``. Todos los símbolos se importan también desde ``walopy``."
-msgstr "Module ``walopy.solver``. All the symbols are also importable from ``walopy``."
+msgid ""
+"Módulo ``walopy.solver``. Todos los símbolos se importan también desde "
+"``walopy``."
+msgstr ""
+"Module ``walopy.solver``. All the symbols are also importable from "
+"``walopy``."
 
 #: ../../source/referencia/solver.rst:7
 msgid "Funciones"
 msgstr "Functions"
 
 #: of walopy.solver.solve_lam:1
-msgid "Encuentra la máxima tasa de llegadas λ tal que *target_metric* ≤ *target_value*."
-msgstr "Finds the maximum arrival rate λ such that *target_metric* ≤ *target_value*."
+msgid ""
+"Encuentra la máxima tasa de llegadas λ tal que *target_metric* ≤ "
+"*target_value*."
+msgstr ""
+"Finds the maximum arrival rate λ such that *target_metric* ≤ "
+"*target_value*."
 
 #: of walopy.solver.batch_model walopy.solver.compare
 #: walopy.solver.optimize_servers walopy.solver.sensitivity
@@ -79,17 +87,25 @@ msgid "Raises"
 msgstr "Raises"
 
 #: of walopy.solver.solve_lam:20 walopy.solver.solve_mu:20
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si la métrica o el modelo son desconocidos, o si el objetivo es infactible para el modelo."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the metric or the model is unknown, or if the target is infeasible for the model."
+msgid ""
+"Si algún argumento numérico no es finito o está fuera de su dominio (por "
+"ejemplo, no positivo).     Si la métrica o el modelo son desconocidos, o "
+"si el objetivo es infactible para el modelo."
+msgstr ""
+"If any numeric argument is not finite or is outside its domain (for "
+"example, not positive).     If the metric or the model is unknown, or if "
+"the target is infeasible for the model."
 
-#: of walopy.solver.batch_model:27 walopy.solver.compare:12
+#: of walopy.solver.batch_model:27 walopy.solver.compare:13
 #: walopy.solver.optimize_servers:19 walopy.solver.sensitivity:15
 #: walopy.solver.solve_lam:21 walopy.solver.solve_mu:21
 #: walopy.solver.solve_servers:17
-msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgid ""
+"Si un argumento no es numérico o una secuencia contiene valores que no lo"
+" son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.solver.batch_model:30 walopy.solver.compare:15
+#: of walopy.solver.batch_model:30 walopy.solver.compare:16
 #: walopy.solver.optimize_servers:22 walopy.solver.sensitivity:18
 #: walopy.solver.solve_lam:24 walopy.solver.solve_mu:24
 #: walopy.solver.solve_servers:20
@@ -97,8 +113,12 @@ msgid "Examples"
 msgstr "Examples"
 
 #: of walopy.solver.solve_mu:1
-msgid "Encuentra la mínima tasa de servicio μ tal que *target_metric* ≤ *target_value*."
-msgstr "Finds the minimum service rate μ such that *target_metric* ≤ *target_value*."
+msgid ""
+"Encuentra la mínima tasa de servicio μ tal que *target_metric* ≤ "
+"*target_value*."
+msgstr ""
+"Finds the minimum service rate μ such that *target_metric* ≤ "
+"*target_value*."
 
 #: of walopy.solver.solve_mu:7
 msgid "Tasa de llegadas (fija)."
@@ -113,8 +133,12 @@ msgid "CV² (solo para ``'gg1'``)."
 msgstr "CV² (only for ``'gg1'``)."
 
 #: of walopy.solver.solve_servers:1
-msgid "Encuentra el mínimo número de servidores *c* tal que *target_metric* ≤ *target_value*."
-msgstr "Finds the minimum number of servers *c* such that *target_metric* ≤ *target_value*."
+msgid ""
+"Encuentra el mínimo número de servidores *c* tal que *target_metric* ≤ "
+"*target_value*."
+msgstr ""
+"Finds the minimum number of servers *c* such that *target_metric* ≤ "
+"*target_value*."
 
 #: of walopy.solver.solve_servers:5
 msgid "Cota superior deseada."
@@ -133,12 +157,22 @@ msgid "Máximo de servidores a probar (por defecto 100)."
 msgstr "Maximum number of servers to try (default 100)."
 
 #: of walopy.solver.solve_servers:16
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el objetivo no se alcanza con ``c_max`` servidores."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the target is not reached with ``c_max`` servers."
+msgid ""
+"Si algún argumento numérico no es finito o está fuera de su dominio (por "
+"ejemplo, no positivo).     Si el objetivo no se alcanza con ``c_max`` "
+"servidores."
+msgstr ""
+"If any numeric argument is not finite or is outside its domain (for "
+"example, not positive).     If the target is not reached with ``c_max`` "
+"servers."
 
 #: of walopy.solver.optimize_servers:1
-msgid "Encuentra el número de servidores *c* que minimiza el costo total por unidad de tiempo."
-msgstr "Finds the number of servers *c* that minimizes the total cost per unit of time."
+msgid ""
+"Encuentra el número de servidores *c* que minimiza el costo total por "
+"unidad de tiempo."
+msgstr ""
+"Finds the number of servers *c* that minimizes the total cost per unit of"
+" time."
 
 #: of walopy.solver.optimize_servers:3
 msgid "Costo total = c × cost_per_server + Lq × cost_per_wait"
@@ -157,19 +191,27 @@ msgid "Máximo de servidores a evaluar (por defecto 50)."
 msgstr "Maximum number of servers to evaluate (default 50)."
 
 #: of walopy.solver.optimize_servers:18
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
+msgid ""
+"Si algún argumento numérico no es finito o está fuera de su dominio (por "
+"ejemplo, no positivo)."
+msgstr ""
+"If any numeric argument is not finite or is outside its domain (for "
+"example, not positive)."
 
 #: of walopy.solver.sensitivity:1
 msgid "Varía un parámetro del modelo y devuelve un DataFrame con todos los KPI."
 msgstr "Varies a model parameter and returns a DataFrame with all the KPIs."
 
 #: of walopy.solver.sensitivity:3
-msgid "Cualquier función de modelo de walopy (p. ej. ``mm1``, ``mmc``, ``kingman``)."
+msgid ""
+"Cualquier función de modelo de walopy (p. ej. ``mm1``, ``mmc``, "
+"``kingman``)."
 msgstr "Any walopy model function (e.g. ``mm1``, ``mmc``, ``kingman``)."
 
 #: of walopy.solver.sensitivity:5
-msgid "Nombre del parámetro a variar (debe coincidir con el argumento de la función)."
+msgid ""
+"Nombre del parámetro a variar (debe coincidir con el argumento de la "
+"función)."
 msgstr "Name of the parameter to vary (must match the function argument)."
 
 #: of walopy.solver.sensitivity:7
@@ -185,64 +227,137 @@ msgid "Returns"
 msgstr "Returns"
 
 #: of walopy.solver.sensitivity:11
-msgid "Una fila por valor con el parámetro barrido y todos los campos del resultado."
-msgstr "One row per value with the swept parameter and all the fields of the result."
+msgid ""
+"Una fila por valor con el parámetro barrido y todos los campos del "
+"resultado."
+msgstr ""
+"One row per value with the swept parameter and all the fields of the "
+"result."
 
 #: of walopy.solver.sensitivity:14
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``param`` no es un parámetro de ``model_fn`` o ``values`` está vacío."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``param`` is not a parameter of ``model_fn`` or ``values`` is empty."
+msgid ""
+"Si algún argumento numérico no es finito o está fuera de su dominio (por "
+"ejemplo, no positivo).     Si ``param`` no es un parámetro de "
+"``model_fn`` o ``values`` está vacío."
+msgstr ""
+"If any numeric argument is not finite or is outside its domain (for "
+"example, not positive).     If ``param`` is not a parameter of "
+"``model_fn`` or ``values`` is empty."
 
 #: of walopy.solver.batch_model:1
 msgid "Aplica un modelo de walopy a cada fila de un DataFrame."
 msgstr "Applies a walopy model to each row of a DataFrame."
 
 #: of walopy.solver.batch_model:3
-msgid "Los valores de las columnas de cada fila se pasan como argumentos con nombre a *model_fn*. Los valores de *fixed_kwargs* sirven como predeterminados; los valores de la fila siempre los reemplazan. Las celdas NaN de la fila de entrada se descartan antes de la llamada, de modo que un DataFrame disperso puede representar varias configuraciones del modelo en una tabla."
-msgstr "The values of the columns of each row are passed as keyword arguments to *model_fn*. The values of *fixed_kwargs* act as defaults; the row values always replace them. NaN cells of the input row are dropped before the call, so a sparse DataFrame can represent several model configurations in one table."
+msgid ""
+"Los valores de las columnas de cada fila se pasan como argumentos con "
+"nombre a *model_fn*. Los valores de *fixed_kwargs* sirven como "
+"predeterminados; los valores de la fila siempre los reemplazan. Las "
+"celdas NaN de la fila de entrada se descartan antes de la llamada, de "
+"modo que un DataFrame disperso puede representar varias configuraciones "
+"del modelo en una tabla."
+msgstr ""
+"The values of the columns of each row are passed as keyword arguments to "
+"*model_fn*. The values of *fixed_kwargs* act as defaults; the row values "
+"always replace them. NaN cells of the input row are dropped before the "
+"call, so a sparse DataFrame can represent several model configurations in"
+" one table."
 
 #: of walopy.solver.batch_model:8
-msgid "Cualquier función de modelo de walopy (p. ej. ``mm1``, ``mmc``, ``kingman``, ``oee``, ``break_even``)."
-msgstr "Any walopy model function (e.g. ``mm1``, ``mmc``, ``kingman``, ``oee``, ``break_even``)."
+msgid ""
+"Cualquier función de modelo de walopy (p. ej. ``mm1``, ``mmc``, "
+"``kingman``, ``oee``, ``break_even``)."
+msgstr ""
+"Any walopy model function (e.g. ``mm1``, ``mmc``, ``kingman``, ``oee``, "
+"``break_even``)."
 
 #: of walopy.solver.batch_model:11
-msgid "Una fila por escenario. Los nombres de columna deben coincidir con los parámetros de *model_fn*."
-msgstr "One row per scenario. The column names must match the parameters of *model_fn*."
+msgid ""
+"Una fila por escenario. Los nombres de columna deben coincidir con los "
+"parámetros de *model_fn*."
+msgstr ""
+"One row per scenario. The column names must match the parameters of "
+"*model_fn*."
 
 #: of walopy.solver.batch_model:14
-msgid "``'collect'`` (por defecto): una fila que falla no detiene el lote; su mensaje queda en la columna ``_error``. ``'raise'``: la primera excepción se propaga."
-msgstr "``'collect'`` (default): a row that fails does not stop the batch; its message is left in the ``_error`` column. ``'raise'``: the first exception propagates."
+msgid ""
+"``'collect'`` (por defecto): una fila que falla no detiene el lote; su "
+"mensaje queda en la columna ``_error``. ``'raise'``: la primera excepción"
+" se propaga."
+msgstr ""
+"``'collect'`` (default): a row that fails does not stop the batch; its "
+"message is left in the ``_error`` column. ``'raise'``: the first "
+"exception propagates."
 
 #: of walopy.solver.batch_model:17
-msgid "Parámetros adicionales compartidos por todas las filas (p. ej. ``mu=5.0``). Una columna de *df* con el mismo nombre tiene precedencia."
-msgstr "Additional parameters shared by all the rows (e.g. ``mu=5.0``). A column of *df* with the same name takes precedence."
+msgid ""
+"Parámetros adicionales compartidos por todas las filas (p. ej. "
+"``mu=5.0``). Una columna de *df* con el mismo nombre tiene precedencia."
+msgstr ""
+"Additional parameters shared by all the rows (e.g. ``mu=5.0``). A column "
+"of *df* with the same name takes precedence."
 
 #: of walopy.solver.batch_model:20
-msgid "Una fila por cada fila de entrada con todas las columnas originales más los campos escalares de salida del modelo. Se conserva el índice del DataFrame de entrada. Si alguna fila lanza una excepción se agrega una columna ``_error`` con el mensaje de las filas fallidas y ``None`` en las exitosas."
-msgstr "One row per input row with all the original columns plus the scalar output fields of the model. The index of the input DataFrame is kept. If some row raises an exception, an ``_error`` column is added with the message of the failed rows and ``None`` in the successful ones."
+msgid ""
+"Una fila por cada fila de entrada con todas las columnas originales más "
+"los campos escalares de salida del modelo. Se conserva el índice del "
+"DataFrame de entrada. Si alguna fila lanza una excepción se agrega una "
+"columna ``_error`` con el mensaje de las filas fallidas y ``None`` en las"
+" exitosas."
+msgstr ""
+"One row per input row with all the original columns plus the scalar "
+"output fields of the model. The index of the input DataFrame is kept. If "
+"some row raises an exception, an ``_error`` column is added with the "
+"message of the failed rows and ``None`` in the successful ones."
 
 #: of walopy.solver.batch_model:26
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``errors`` no es ``'collect'`` ni ``'raise'``; con ``errors='raise'``, la excepción de la primera fila que falle."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``errors`` is neither ``'collect'`` nor ``'raise'``; with ``errors='raise'``, the exception of the first row that fails."
+msgid ""
+"Si algún argumento numérico no es finito o está fuera de su dominio (por "
+"ejemplo, no positivo).     Si ``errors`` no es ``'collect'`` ni "
+"``'raise'``; con ``errors='raise'``, la excepción de la primera fila que "
+"falle."
+msgstr ""
+"If any numeric argument is not finite or is outside its domain (for "
+"example, not positive).     If ``errors`` is neither ``'collect'`` nor "
+"``'raise'``; with ``errors='raise'``, the exception of the first row that"
+" fails."
 
 #: of walopy.solver.compare:1
 msgid "Compara varios resultados de modelos de walopy lado a lado."
 msgstr "Compares several walopy model results side by side."
 
 #: of walopy.solver.compare:3
-msgid "Cualquier objeto de resultado de walopy (``QueueResult``, ``SimulationResult``, ``EOQResult``, etc.) o diccionarios simples."
-msgstr "Any walopy result object (``QueueResult``, ``SimulationResult``, ``EOQResult``, etc.) or plain dictionaries."
+msgid ""
+"Cualquier objeto de resultado de walopy (``QueueResult``, "
+"``SimulationResult``, ``EOQResult``, etc.) o diccionarios simples. Si la "
+"tabla ``to_frame()`` de un resultado tiene varias filas (pedidos, "
+"actividades…), se comparan sus campos escalares (costo total, duración "
+"del proyecto…)."
+msgstr ""
+"Any walopy result object (``QueueResult``, ``SimulationResult``, "
+"``EOQResult``, etc.) or plain dictionaries. If a result's ``to_frame()`` "
+"table has several rows (orders, activities…), its scalar fields (total "
+"cost, project duration…) are compared instead."
 
-#: of walopy.solver.compare:5
-msgid "Etiquetas de las filas. Por defecto ``'escenario_1'``, ``'escenario_2'``, …"
-msgstr "Labels of the rows. Defaults to ``'scenario_1'``, ``'scenario_2'``, … (``'escenario_1'``, … in Spanish)."
+#: of walopy.solver.compare:6
+msgid ""
+"Etiquetas de las filas. Por defecto ``'escenario_1'``, ``'escenario_2'``,"
+" …"
+msgstr ""
+"Labels of the rows. Defaults to ``'scenario_1'``, ``'scenario_2'``, … "
+"(``'escenario_1'``, … in Spanish)."
 
-#: of walopy.solver.compare:8
+#: of walopy.solver.compare:9
 msgid "Una fila por resultado con una columna ``label`` al inicio."
 msgstr "One row per result with a ``label`` column at the start."
 
-#: of walopy.solver.compare:11
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si no se recibe ningún resultado."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If no result is received."
+#: of walopy.solver.compare:12
+msgid ""
+"Si algún argumento numérico no es finito o está fuera de su dominio (por "
+"ejemplo, no positivo).     Si no se recibe ningún resultado."
+msgstr ""
+"If any numeric argument is not finite or is outside its domain (for "
+"example, not positive).     If no result is received."
 
 #: ../../source/referencia/solver.rst:24
 msgid "Clases de resultado"

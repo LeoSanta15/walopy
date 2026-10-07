@@ -4,7 +4,38 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
+Sin cambios todavía.
+
+---
+
+## [0.4.3] — 2026-10-07
+
+Versión de corrección en `solver`: `solve_servers` y `optimize_servers` no consideraban el menor número de servidores estable, y `batch_model`, `compare` y `sensitivity`
+no cumplían lo que documentan (0.4.2 y anteriores).
+
+### Corregido
+- **`solve_servers` y `optimize_servers` empezaban a buscar un servidor después del mínimo estable.** La búsqueda partía de `ceil(λ/μ) + 1`, que solo es el menor `c` con
+  ρ < 1 cuando λ/μ es entero. En los demás casos, `solve_servers` podía devolver más servidores de los necesarios (`solve_servers("Wq", 0.5, lam=4, mu=3)` daba 3 y
+  ahora da 2, con Wq = 0,267) y `optimize_servers` no evaluaba el plan más barato (`optimize_servers(lam=4, mu=3, cost_per_server=10, cost_per_wait=5)` costaba
+  30,7232 con 3 servidores y ahora cuesta 25,3333 con 2; con λ=1, μ=5 nunca consideraba un solo servidor). Cuando λ/μ es entero el resultado no cambia. Los ejemplos de
+  los docstrings se actualizaron. Bug `W-28`: `tests/test_servidores_minimos.py` (falla en v0.4.2) y mutante `MU-20`. Hallado con propiedades diferenciales (comparación con una enumeración).
+
+- **`solve_servers` y `optimize_servers` no validaban `c_max`.** Con `c_max` menor que el mínimo estable, `optimize_servers` fallaba con `min() arg is an empty sequence`;
+  un `c_max` no entero, `bool`, `nan` o `None` daba `TypeError` opacos o se aceptaba. Ahora `c_max` debe ser un entero positivo (máximo `MAX_SERVIDORES`) y, si no alcanza
+  para el mínimo estable, el `ValueError` dice cuántos servidores hacen falta. Bug `W-29`: `tests/test_servidores_cmax.py` y mutante `MU-21`.
+- **`batch_model` con un DataFrame disperso rechazaba los parámetros enteros** (`c`, `k`…): pandas convierte a `float64` una columna entera con NaN y el modelo exige `int`,
+  así que todas las filas fallaban. Ahora los valores enteros de una columna flotante con NaN se pasan como `int`. Bug `W-30`: `tests/test_solver_contratos.py` y mutante `MU-22`.
+- **`compare` sin resultados devolvía una tabla vacía** (la documentación dice `ValueError`) y, con un resultado de varias filas (`wagner_whitin`, `silver_meal`, `cpm`,
+  `pert`, `schedule_single`…), conservaba solo la primera orden o actividad. Ahora lanza `ValueError` y, para esos resultados, compara sus campos escalares (`total_cost`,
+  `n_orders`, `project_duration`…); los de una fila (colas, EOQ…) no cambian. Un resultado de una sola fila de elementos (un único pedido) sigue mostrando esa fila.
+  Bug `W-31`: `tests/test_solver_contratos.py` y mutantes `MU-23` y `MU-24`.
+- **`sensitivity` no lanzaba los `ValueError` que documenta**: con un parámetro que el modelo no tiene daba `TypeError` y con `values` vacío devolvía una tabla vacía. Ahora ambos
+  casos lanzan `ValueError` (los modelos con `**kwargs` siguen admitidos). Bug `W-32`: `tests/test_solver_contratos.py` y mutantes `MU-25` y `MU-26`.
+
 ### Pruebas
+- Nuevo `tests/test_propiedades_inventario_fiabilidad.py`: `weibull_analysis`, `mtbf_analysis`, `fit_from_data`, `reorder_point`, `rq_policy`, `rs_policy`, `eoq_multi`, `ebq`,
+  `eoq_multi_constrained`, `eoq_quantity_discount`, `exchange_curve`, `safety_stock_curve`, `jackson_network`, `break_even_multi`, `abc_analysis`, `bottleneck_analysis`,
+  `unit_cost` y `utilization_efficiency` contra fórmulas y enumeraciones independientes. Esta tanda de propiedades encontró `W-28`.
 - Nuevo `tests/test_dibujo_plotly.py` (`make dibujo`, job «Dibujo» del CI): renderiza las figuras de Plotly en Chromium sin interfaz y comprueba que la zona del
   gráfico difiere de la misma figura con las trazas invisibles; reintroducir el defecto W-26 (árbol de KPI en blanco) lo hace fallar en las cuatro figuras de KPI.
   Sin navegador (o sin `WALOPY_DIBUJO=1`) solo se ejecuta la capa de datos finitos por traza.

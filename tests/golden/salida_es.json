@@ -2772,31 +2772,31 @@
    "avisos": [],
    "resultado": {
     "__clase__": "SolverResult",
-    "achieved_value": "0.0361581921",
+    "achieved_value": "0.266666667",
     "converged": true,
     "model_result": {
-     "L": "1.4779661",
-     "Lq": "0.144632768",
-     "W": "0.369491525",
-     "Wq": "0.0361581921",
+     "L": "2.4",
+     "Lq": "1.06666667",
+     "W": "0.6",
+     "Wq": "0.266666667",
      "__clase__": "QueueResult",
      "lam": "4",
-     "model": "M/M/3",
+     "model": "M/M/2",
      "mu": "3",
      "params": {
       "__dict__": [
        [
         "P0 (prob. de sistema vacío)",
-        "0.254237288"
+        "0.2"
        ],
        [
         "C(c,a) Erlang-C",
-        "0.18079096"
+        "0.533333333"
        ]
       ]
      },
-     "rho": "0.444444444",
-     "servers": 3
+     "rho": "0.666666667",
+     "servers": 2
     },
     "param": "c (servidores)",
     "params": {
@@ -2813,9 +2813,9 @@
     },
     "target_metric": "Wq",
     "target_value": "0.5",
-    "value": "3"
+    "value": "2"
    },
-   "str": "Solver [convergió]\n  Parámetro resuelto : c (servidores) = 3\n  Métrica objetivo   : Wq ≤ 0.5\n  Logrado            : Wq = 0.0361582"
+   "str": "Solver [convergió]\n  Parámetro resuelto : c (servidores) = 2\n  Métrica objetivo   : Wq ≤ 0.5\n  Logrado            : Wq = 0.266667"
   },
   "weibull_constante": {
    "avisos": [],
@@ -6955,7 +6955,7 @@
     ".data[0].name=Costo de servidores",
     ".data[1].name=Costo de espera",
     ".data[2].name=Costo total",
-    ".layout.annotations[0].text=c óptimo = 3",
+    ".layout.annotations[0].text=c óptimo = 2",
     ".layout.title.text=Optimización del costo de servidores",
     ".layout.xaxis.title.text=Número de servidores (c)",
     ".layout.yaxis.title.text=Costo por unidad de tiempo"
@@ -6973,39 +6973,39 @@
       "wait_cost",
       "total_cost"
      ],
-     "csv": ",c,rho,Lq,Wq,server_cost,wait_cost,total_cost\n0,3,0.444444444,0.144632768,0.0361581921,30,0.723163842,30.7231638\n1,4,0.333333333,0.0258899676,0.00647249191,40,0.129449838,40.1294498\n2,5,0.266666667,0.00458621091,0.00114655273,50,0.0229310546,50.0229311\n",
+     "csv": ",c,rho,Lq,Wq,server_cost,wait_cost,total_cost\n0,2,0.666666667,1.06666667,0.266666667,20,5.33333333,25.3333333\n1,3,0.444444444,0.144632768,0.0361581921,30,0.723163842,30.7231638\n2,4,0.333333333,0.0258899676,0.00647249191,40,0.129449838,40.1294498\n",
      "indice": [
       "0",
       "1",
       "2"
      ]
     },
-    "min_cost": "30.7231638",
+    "min_cost": "25.3333333",
     "model_result": {
-     "L": "1.4779661",
-     "Lq": "0.144632768",
-     "W": "0.369491525",
-     "Wq": "0.0361581921",
+     "L": "2.4",
+     "Lq": "1.06666667",
+     "W": "0.6",
+     "Wq": "0.266666667",
      "__clase__": "QueueResult",
      "lam": "4",
-     "model": "M/M/3",
+     "model": "M/M/2",
      "mu": "3",
      "params": {
       "__dict__": [
        [
         "P0 (prob. de sistema vacío)",
-        "0.254237288"
+        "0.2"
        ],
        [
         "C(c,a) Erlang-C",
-        "0.18079096"
+        "0.533333333"
        ]
       ]
      },
-     "rho": "0.444444444",
-     "servers": 3
+     "rho": "0.666666667",
+     "servers": 2
     },
-    "optimal_servers": 3,
+    "optimal_servers": 2,
     "params": {
      "__dict__": [
       [
@@ -7019,8 +7019,8 @@
      ]
     }
    },
-   "str": "Servidores óptimos : 3\nCosto mínimo       : 30.7232 por unidad de tiempo\n",
-   "summary": "Servidores óptimos : 3\nCosto mínimo       : 30.7232 por unidad de tiempo\n"
+   "str": "Servidores óptimos : 2\nCosto mínimo       : 25.3333 por unidad de tiempo\n",
+   "summary": "Servidores óptimos : 2\nCosto mínimo       : 25.3333 por unidad de tiempo\n"
   },
   "parallel_system": {
    "avisos": [],
@@ -8879,31 +8879,31 @@
    "grafica": null,
    "resultado": {
     "__clase__": "SolverResult",
-    "achieved_value": "0.0361581921",
+    "achieved_value": "0.266666667",
     "converged": true,
     "model_result": {
-     "L": "1.4779661",
-     "Lq": "0.144632768",
-     "W": "0.369491525",
-     "Wq": "0.0361581921",
+     "L": "2.4",
+     "Lq": "1.06666667",
+     "W": "0.6",
+     "Wq": "0.266666667",
      "__clase__": "QueueResult",
      "lam": "4",
-     "model": "M/M/3",
+     "model": "M/M/2",
      "mu": "3",
      "params": {
       "__dict__": [
        [
         "P0 (prob. de sistema vacío)",
-        "0.254237288"
+        "0.2"
        ],
        [
         "C(c,a) Erlang-C",
-        "0.18079096"
+        "0.533333333"
        ]
       ]
      },
-     "rho": "0.444444444",
-     "servers": 3
+     "rho": "0.666666667",
+     "servers": 2
     },
     "param": "c (servidores)",
     "params": {
@@ -8920,10 +8920,10 @@
     },
     "target_metric": "Wq",
     "target_value": "0.5",
-    "value": "3"
+    "value": "2"
    },
-   "str": "Solver [convergió]\n  Parámetro resuelto : c (servidores) = 3\n  Métrica objetivo   : Wq ≤ 0.5\n  Logrado            : Wq = 0.0361582",
-   "summary": "Solver [convergió]\n  Parámetro resuelto : c (servidores) = 3\n  Métrica objetivo   : Wq ≤ 0.5\n  Logrado            : Wq = 0.0361582"
+   "str": "Solver [convergió]\n  Parámetro resuelto : c (servidores) = 2\n  Métrica objetivo   : Wq ≤ 0.5\n  Logrado            : Wq = 0.266667",
+   "summary": "Solver [convergió]\n  Parámetro resuelto : c (servidores) = 2\n  Métrica objetivo   : Wq ≤ 0.5\n  Logrado            : Wq = 0.266667"
   },
   "takt_time": {
    "avisos": [],
@@ -9382,7 +9382,7 @@
   "README.md[5]": "",
   "README.md[60]": "5\n",
   "README.md[61]": "3.0\nModelo : M/M/3\nλ      : 8  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 3  (servidores)\nρ      : 0.533333  (utilización por servidor)\nL      : 1.91291  (unidades promedio en el sistema)\nLq     : 0.312911  (unidades promedio en cola)\nW      : 0.239114  (tiempo promedio en el sistema)\nWq     : 0.0391138  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.187166\n  C(c,a) Erlang-C: 0.273797\n",
-  "README.md[62]": "3\n30.4705882\n",
+  "README.md[62]": "2\n23.375\n",
   "README.md[63]": "['lam', 'mu', 'servers', 'rho', 'L', 'Lq', 'W', 'Wq']\n",
   "README.md[64]": "   lam  rho        Wq         L\n0  1.0  0.2  0.050000  0.250000\n1  2.0  0.4  0.133333  0.666667\n2  3.0  0.6  0.300000  1.500000\n3  4.0  0.8  0.800000  4.000000\n   c                                             _error  lam  ...  Lq   W  Wq\n0  1  Sistema inestable: ρ = 1.6 ≥ 1. Se requiere λ ...  NaN  ... NaN NaN NaN\n\n[1 rows x 10 columns]\n",
   "README.md[65]": "   label  ρ (utilización)  Wq (tiempo de espera)  L (en el sistema)\n0  M/M/1              0.6                0.30000           1.500000\n1  M/M/2              0.3                0.01978           0.659341\n2  M/D/1              0.6                0.15000           1.050000\n",
