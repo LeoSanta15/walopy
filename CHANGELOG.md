@@ -7,6 +7,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 ### Mantenimiento
 - Los workflows de GitHub Actions usan versiones que ejecutan Node 24 (Node 20 está obsoleto y GitHub lo retira de los runners): `actions/checkout@v6`, `actions/setup-python@v6`,
   `actions/upload-artifact@v6` y `actions/download-artifact@v7`. Sin cambios en el paquete.
+- Los jobs de Python 3.9 del CI (la entrada 3.9 de la matriz y el de dependencias mínimas) se fijan a `ubuntu-24.04`: `ubuntu-latest` pasa a Ubuntu 26.04 de forma gradual hasta el
+  19 de noviembre de 2026 y esa imagen puede no ofrecer Python 3.9. El resto de los jobs sigue en `ubuntu-latest`.
 
 ---
 

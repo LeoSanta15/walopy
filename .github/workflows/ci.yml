@@ -15,7 +15,8 @@ permissions:
 jobs:
   test:
     name: Tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    # ubuntu-latest pasa a Ubuntu 26.04 (hasta el 19-nov-2026), que puede no ofrecer Python 3.9: ese job se fija a 24.04
+    runs-on: ${{ matrix.python-version == '3.9' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +37,7 @@ jobs:
 
   minimos:
     name: Tests con dependencias mínimas (Python 3.9)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Python 3.9: ver el comentario del job «test»
     steps:
       - uses: actions/checkout@v6
 
