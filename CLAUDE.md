@@ -104,7 +104,7 @@ Estado de la prueba de cada regla contra este repo: `docs/retrospectiva/CLAUDE_M
 | Deuda | Evidencia | Estado |
 |---|---|---|
 | `attestations: false` en la publicación | `.github/workflows/publish.yml` | Activarlo exige probar con TestPyPI (su activación sin probar rompió v0.2.7) |
-| Acciones fijadas por tag, no por SHA; sin Dependabot | `uses: actions/...@v6` en los workflows | Pendiente |
+| Acciones fijadas por tag, no por SHA | `uses: actions/...@v6` en los workflows | Pendiente (el tag se mantiene; Dependabot propone las subidas desde 2026-10-19, ver `.github/dependabot.yml`) |
 | Aviso de Node.js 20 en `actions/checkout@v4` y `setup-python@v5` | logs del CI del PR #15 | Resuelto (2026-10-19): `checkout@v6`, `setup-python@v6`, `upload-artifact@v6` y `download-artifact@v7` ejecutan Node 24; `publish.yml` solo se prueba con el siguiente release |
 | `ubuntu-latest` migra a Ubuntu 26.04 (hasta el 19-nov-2026), que puede no ofrecer Python 3.9 | aviso del CI y `actions/runner-images#14748` | Los jobs de Python 3.9 están fijados a `ubuntu-24.04` (2026-10-19); el resto usa `ubuntu-latest` |
 | K-08: magnitudes extremas (1e308, 1e-320) no se rechazan explícitamente | `docs/auditoria/HALLAZGOS.md` | Fuera del contrato; impacto bajo |

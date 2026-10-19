@@ -1,0 +1,16 @@
+# Dependabot: abre un PR cuando sale una versión nueva de las acciones de GitHub que usan los workflows
+# (el aviso de Node 20 de checkout@v4 y setup-python@v5 se habría visto así, como PR, y no por casualidad en un log).
+# Cada PR pasa por el CI completo antes de fusionarse. Solo `github-actions`: las dependencias de Python se revisan con `pip-audit` en el CI.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+    groups:
+      acciones:
+        patterns: ["*"]
