@@ -4,7 +4,9 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
-Sin cambios todavía.
+### Mantenimiento
+- Los workflows de GitHub Actions usan versiones que ejecutan Node 24 (Node 20 está obsoleto y GitHub lo retira de los runners): `actions/checkout@v6`, `actions/setup-python@v6`,
+  `actions/upload-artifact@v6` y `actions/download-artifact@v7`. Sin cambios en el paquete.
 
 ---
 
