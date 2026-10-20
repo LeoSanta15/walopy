@@ -8,17 +8,17 @@ matplotlib y plotly se importan de forma perezosa dentro de las funciones de gr�
 
 Python ≥ 3.9 · layout `src/` · versión actual: ver `src/walopy/__init__.py` (`__version__`).
 
-## Estado verificado (2026-10-07, v0.4.3)
+## Estado verificado (2026-10-20, v0.4.4)
 Cifras medidas con `make check`; si cambian, actualiza esta sección con la salida real (no de memoria).
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 2 414 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Tests (`make test`) | 2 478 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
 | Cobertura | global 97,4 %; el módulo menor (`solver.py`) 91,9 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |
 | Docs | `sphinx -W` sin avisos en español y en inglés, 14 páginas de referencia |
-| Regresiones | 32 bugs (`W-01`…`W-32`) en `tests/regresiones.json`; cada entrada trae su `ref` (v0.2.8 para W-01…W-25; el tag anterior a la corrección para W-26…W-32) |
+| Regresiones | 34 bugs (`W-01`…`W-34`) en `tests/regresiones.json`; cada entrada trae su `ref` (v0.2.8 para W-01…W-25; el tag anterior a la corrección para W-26…W-34) |
 
 ## Mapa del código (`src/walopy/`)
 - `queuing.py`     — M/M/1, M/M/c, M/D/1, M/G/1, G/G/1 (Kingman), ley de Little, helpers `cv2_*`
@@ -103,7 +103,7 @@ Estado de la prueba de cada regla contra este repo: `docs/retrospectiva/CLAUDE_M
 ## Pendientes y deuda técnica (solo lo verificado)
 | Deuda | Evidencia | Estado |
 |---|---|---|
-| `attestations: false` en la publicación | `.github/workflows/publish.yml` | Activarlo exige probar con TestPyPI (su activación sin probar rompió v0.2.7) |
+| Atestaciones de procedencia (PEP 740) en la publicación | `.github/workflows/publish.yml` | Reactivadas (`attestations: true`) para 0.4.4: PyPI marcaba «pérdida de procedencia» desde 0.2.7 (se desactivaron tras el fallo de v0.2.7, causa no registrada). Se comprueba en el release; si falla, `false` y relanzar |
 | Acciones fijadas por tag, no por SHA | `uses: actions/...@v6` en los workflows | Pendiente (el tag se mantiene; Dependabot propone las subidas desde 2026-10-19, ver `.github/dependabot.yml`) |
 | Aviso de Node.js 20 en `actions/checkout@v4` y `setup-python@v5` | logs del CI del PR #15 | Resuelto (2026-10-19): `checkout@v6`, `setup-python@v6`, `upload-artifact@v6` y `download-artifact@v7` ejecutan Node 24; `publish.yml` solo se prueba con el siguiente release |
 | `ubuntu-latest` migra a Ubuntu 26.04 (hasta el 19-nov-2026), que puede no ofrecer Python 3.9 | aviso del CI y `actions/runner-images#14748` | Los jobs de Python 3.9 están fijados a `ubuntu-24.04` (2026-10-19); el resto usa `ubuntu-latest` |

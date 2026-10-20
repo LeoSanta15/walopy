@@ -119,34 +119,40 @@ def test_cpm_empty_raises():
 
 # ─── PERT ─────────────────────────────────────────────────────────────────────
 
+def _pert_red_de_prueba():
+    # A→C y B→D duran lo mismo (5): dos rutas críticas empatadas, así que pert avisa de rutas casi críticas
+    with pytest.warns(UserWarning):
+        return wl.pert(PERT_ACTS)
+
+
 def test_pert_returns_result():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert isinstance(r, wl.ProjectResult)
 
 
 def test_pert_method():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert r.method == "PERT"
 
 
 def test_pert_expected_duration():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert r.project_duration == pytest.approx(5.0, abs=1e-9)
 
 
 def test_pert_has_variance():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert r.project_variance is not None
     assert r.project_variance > 0
 
 
 def test_pert_std_is_sqrt_variance():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert r.project_std == pytest.approx(math.sqrt(r.project_variance), rel=1e-9)
 
 
 def test_pert_activity_variance_formula():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     for a in r.activities:
         if a.variance is not None:
             expected = ((a.pessimistic - a.optimistic) / 6.0) ** 2
@@ -154,12 +160,12 @@ def test_pert_activity_variance_formula():
 
 
 def test_pert_probability_below_mean_is_50pct():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert r.probability(r.project_duration) == pytest.approx(0.5, abs=1e-6)
 
 
 def test_pert_probability_increases_with_target():
-    r = wl.pert(PERT_ACTS)
+    r = _pert_red_de_prueba()
     assert r.probability(r.project_duration + 1) > r.probability(r.project_duration)
 
 

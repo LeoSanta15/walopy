@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:22+0000\n"
+"POT-Creation-Date: 2026-10-20 20:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -97,9 +97,9 @@ msgstr "If any numeric argument is not finite or is outside its domain (for exam
 #: walopy.inventory.eoq_multi_constrained:44
 #: walopy.inventory.eoq_quantity_discount:19 walopy.inventory.exchange_curve:39
 #: walopy.inventory.lot_for_lot:16 walopy.inventory.mrp:27
-#: walopy.inventory.newsvendor:21 walopy.inventory.reorder_point:23
-#: walopy.inventory.rq_policy:24 walopy.inventory.rs_policy:26
-#: walopy.inventory.safety_stock_curve:38 walopy.inventory.silver_meal:16
+#: walopy.inventory.newsvendor:21 walopy.inventory.reorder_point:25
+#: walopy.inventory.rq_policy:27 walopy.inventory.rs_policy:29
+#: walopy.inventory.safety_stock_curve:39 walopy.inventory.silver_meal:16
 #: walopy.inventory.wagner_whitin:17 walopy.inventory.xyz_analysis:22
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
@@ -110,9 +110,9 @@ msgstr "If an argument is not numeric or a sequence contains values that are not
 #: walopy.inventory.eoq_multi_constrained:47
 #: walopy.inventory.eoq_quantity_discount:22 walopy.inventory.exchange_curve:42
 #: walopy.inventory.lot_for_lot:19 walopy.inventory.mrp:30
-#: walopy.inventory.newsvendor:24 walopy.inventory.reorder_point:26
-#: walopy.inventory.rq_policy:27 walopy.inventory.rs_policy:29
-#: walopy.inventory.safety_stock_curve:41 walopy.inventory.silver_meal:19
+#: walopy.inventory.newsvendor:24 walopy.inventory.reorder_point:28
+#: walopy.inventory.rq_policy:30 walopy.inventory.rs_policy:32
+#: walopy.inventory.safety_stock_curve:42 walopy.inventory.silver_meal:19
 #: walopy.inventory.wagner_whitin:20 walopy.inventory.xyz_analysis:25
 msgid "Examples"
 msgstr "Examples"
@@ -425,20 +425,21 @@ msgstr "Mean lead time L̄ (in the same time units as demand_rate)."
 
 #: of walopy.inventory.reorder_point:12 walopy.inventory.rq_policy:14
 #: walopy.inventory.rs_policy:16
-msgid "Desviación estándar de la demanda por periodo σ_D (por defecto 0)."
-msgstr "Standard deviation of demand per period σ_D (default 0)."
+msgid "Desviación estándar de la demanda por periodo σ_D (por defecto 0). Si la demanda se pronostica, use la desviación del error de pronóstico por periodo (p. ej. el RMSE), que es la incertidumbre que cubre el stock de seguridad."
+msgstr "Standard deviation of demand per period σ_D (default 0). If demand is forecast, use the standard deviation of the forecast error per period (e.g. the RMSE), which is the uncertainty the safety stock covers."
 
-#: of walopy.inventory.reorder_point:14 walopy.inventory.rq_policy:16
-#: walopy.inventory.rs_policy:18
+#: of walopy.inventory.reorder_point:16 walopy.inventory.rq_policy:18
+#: walopy.inventory.rs_policy:20
 msgid "Desviación estándar del tiempo de entrega σ_L (por defecto 0)."
 msgstr "Standard deviation of the lead time σ_L (default 0)."
 
-#: of walopy.inventory.reorder_point:16
-msgid "Probabilidad de no tener faltante por ciclo de reposición ∈ (0, 1). Por defecto 0.95."
-msgstr "Probability of not having a stockout per replenishment cycle ∈ (0, 1). Defaults to 0.95."
+#: of walopy.inventory.reorder_point:18 walopy.inventory.rq_policy:20
+#: walopy.inventory.rs_policy:22
+msgid "Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1). No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95."
+msgstr "Cycle service level (type 1): probability of no stockout in a replenishment cycle ∈ (0, 1). It is not the fill rate (fraction of demand served from stock), which is usually higher. Default 0.95."
 
-#: of walopy.inventory.reorder_point:22 walopy.inventory.rq_policy:23
-#: walopy.inventory.rs_policy:25
+#: of walopy.inventory.reorder_point:24 walopy.inventory.rq_policy:26
+#: walopy.inventory.rs_policy:28
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``service_level`` no está estrictamente entre 0 y 1."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``service_level`` is not strictly between 0 and 1."
 
@@ -494,10 +495,6 @@ msgstr "Fixed ordering cost K per order."
 #: of walopy.inventory.rq_policy:12 walopy.inventory.rs_policy:12
 msgid "Tiempo de entrega medio de reposición L̄."
 msgstr "Mean replenishment lead time L̄."
-
-#: of walopy.inventory.rq_policy:18 walopy.inventory.rs_policy:20
-msgid "Nivel de servicio por ciclo ∈ (0, 1). Por defecto 0.95."
-msgstr "Cycle service level ∈ (0, 1). Defaults to 0.95."
 
 #: of walopy.inventory.rs_policy:1
 msgid "Política de inventario (R, S) de revisión periódica."
@@ -563,7 +560,7 @@ msgstr "Desired total average inventory investment. Solves k = target / I*."
 msgid "Número de puntos de la hipérbola graficada (por defecto 50)."
 msgstr "Number of points of the plotted hyperbola (default 50)."
 
-#: of walopy.inventory.exchange_curve:34 walopy.inventory.safety_stock_curve:32
+#: of walopy.inventory.exchange_curve:34 walopy.inventory.safety_stock_curve:33
 msgid "Notes"
 msgstr "Notes"
 
@@ -588,26 +585,58 @@ msgid "Inversión_SS(z) = z · Σ σᵢ_DLT · vᵢ"
 msgstr "SS_Investment(z) = z · Σ σᵢ_DLT · vᵢ"
 
 #: of walopy.inventory.safety_stock_curve:9
-msgid "Cada diccionario debe contener:  - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo. - ``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo).  Claves opcionales:  - ``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0). - ``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para   calcular el punto de reorden r = D·L + SS (por defecto: se omite). - ``unit_value`` (float) — valor unitario para la inversión (por defecto 1). - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
-msgstr "Each dictionary must contain:  - ``demand_std`` (float) — standard deviation of demand per unit of time. - ``lead_time`` (float) — replenishment lead time (same time unit).  Optional keys:  - ``lead_time_std`` (float) — standard deviation of the lead time (default 0). - ``demand_rate`` (float) — mean demand per unit of time; used to   compute the reorder point r = D·L + SS (default: omitted). - ``unit_value`` (float) — unit value for the investment (default 1). - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
+msgid "Cada diccionario debe contener:  - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo (o del error de   pronóstico, si la demanda se pronostica). - ``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo).  Claves opcionales:  - ``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0). - ``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para   calcular el punto de reorden r = D·L + SS (por defecto: se omite). - ``unit_value`` (float) — valor unitario para la inversión (por defecto 1). - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
+msgstr "Each dictionary must contain:  - ``demand_std`` (float) — standard deviation of demand per unit of time (or of the forecast   error, if demand is forecast). - ``lead_time`` (float) — replenishment lead time (same time unit).  Optional keys:  - ``lead_time_std`` (float) — standard deviation of the lead time (default 0). - ``demand_rate`` (float) — mean demand per unit of time; used to   compute the reorder point r = D·L + SS (default: omitted). - ``unit_value`` (float) — unit value for the investment (default 1). - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
 
-#: of walopy.inventory.safety_stock_curve:22
+#: of walopy.inventory.safety_stock_curve:9
+msgid "Cada diccionario debe contener:"
+msgstr "Each dictionary must contain:"
+
+#: of walopy.inventory.safety_stock_curve:11
+msgid "``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo (o del error de pronóstico, si la demanda se pronostica)."
+msgstr "``demand_std`` (float) — standard deviation of demand per unit of time (or of the forecast error, if demand is forecast)."
+
+#: of walopy.inventory.safety_stock_curve:13
+msgid "``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo)."
+msgstr "``lead_time`` (float) — replenishment lead time (same time unit)."
+
+#: of walopy.inventory.safety_stock_curve:15
+msgid "Claves opcionales:"
+msgstr "Optional keys:"
+
+#: of walopy.inventory.safety_stock_curve:17
+msgid "``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0)."
+msgstr "``lead_time_std`` (float) — standard deviation of the lead time (default 0)."
+
+#: of walopy.inventory.safety_stock_curve:18
+msgid "``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para calcular el punto de reorden r = D·L + SS (por defecto: se omite)."
+msgstr "``demand_rate`` (float) — mean demand per unit of time; used to compute the reorder point r = D·L + SS (default: omitted)."
+
+#: of walopy.inventory.safety_stock_curve:20
+msgid "``unit_value`` (float) — valor unitario para la inversión (por defecto 1)."
+msgstr "``unit_value`` (float) — unit value for the investment (default 1)."
+
+#: of walopy.inventory.safety_stock_curve:21
+msgid "``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
+msgstr "``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
+
+#: of walopy.inventory.safety_stock_curve:23
 msgid "Nivel de servicio por ciclo deseado ∈ (0, 1). Resuelve z = Φ⁻¹(NS)."
 msgstr "Desired cycle service level ∈ (0, 1). Solves z = Φ⁻¹(SL)."
 
-#: of walopy.inventory.safety_stock_curve:24
+#: of walopy.inventory.safety_stock_curve:25
 msgid "Inversión total en SS deseada. Resuelve z = objetivo / (Σ σᵢ_DLT · vᵢ)."
 msgstr "Desired total SS investment. Solves z = target / (Σ σᵢ_DLT · vᵢ)."
 
-#: of walopy.inventory.safety_stock_curve:26
+#: of walopy.inventory.safety_stock_curve:27
 msgid "Número de puntos de la curva graficada (por defecto 60, z de −2 a 4)."
 msgstr "Number of points of the plotted curve (default 60, z from −2 to 4)."
 
-#: of walopy.inventory.safety_stock_curve:33
+#: of walopy.inventory.safety_stock_curve:34
 msgid "Solo se puede indicar uno de *target_service_level* o *target_ss_investment*. Si no se da ninguno se usa z = 0 (nivel de servicio del 50 %) como línea base; indique ``target_service_level=0.95`` para el valor típico."
 msgstr "Only one of *target_service_level* or *target_ss_investment* can be given. If neither is given, z = 0 (50 % service level) is used as the baseline; give ``target_service_level=0.95`` for the typical value."
 
-#: of walopy.inventory.safety_stock_curve:37
+#: of walopy.inventory.safety_stock_curve:38
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``items`` está vacío o algún elemento no es un diccionario con las claves requeridas.     Si ``target_service_level`` no está estrictamente entre 0 y 1."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``items`` is empty or some element is not a dictionary with the required keys.     If ``target_service_level`` is not strictly between 0 and 1."
 

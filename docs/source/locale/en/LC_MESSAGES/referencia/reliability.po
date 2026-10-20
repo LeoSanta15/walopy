@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-20 20:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -70,14 +70,14 @@ msgstr "Raises"
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
 
-#: of walopy.reliability.koon_system:25 walopy.reliability.mtbf_analysis:13
-#: walopy.reliability.parallel_system:17 walopy.reliability.series_system:15
+#: of walopy.reliability.koon_system:28 walopy.reliability.mtbf_analysis:13
+#: walopy.reliability.parallel_system:19 walopy.reliability.series_system:16
 #: walopy.reliability.weibull_analysis:14
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.reliability.koon_system:28 walopy.reliability.mtbf_analysis:16
-#: walopy.reliability.parallel_system:20 walopy.reliability.series_system:18
+#: of walopy.reliability.koon_system:31 walopy.reliability.mtbf_analysis:16
+#: walopy.reliability.parallel_system:22 walopy.reliability.series_system:19
 #: walopy.reliability.weibull_analysis:17
 msgid "Examples"
 msgstr "Examples"
@@ -100,12 +100,11 @@ msgstr "Failure rates λi of the components."
 msgid "Tiempo para evaluar R(t)."
 msgstr "Time at which to evaluate R(t)."
 
-#: of walopy.reliability.koon_system:19 walopy.reliability.parallel_system:11
-#: walopy.reliability.series_system:9
-msgid "Tiempo medio de reparación para calcular la disponibilidad."
-msgstr "Mean time to repair to compute the availability."
+#: of walopy.reliability.series_system:9
+msgid "Tiempo medio de reparación. Disponibilidad A = MTBF / (MTBF + MTTR) del sistema: mientras se repara el componente que falló el sistema está detenido y los demás no fallan."
+msgstr "Mean time to repair. Availability A = MTBF / (MTBF + MTTR) of the system: while the failed component is repaired the system is down and the other components do not fail."
 
-#: of walopy.reliability.parallel_system:16 walopy.reliability.series_system:14
+#: of walopy.reliability.parallel_system:18 walopy.reliability.series_system:15
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``failure_rates`` está vacío."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``failure_rates`` is empty."
 
@@ -121,6 +120,10 @@ msgstr "R_sys(t) = 1 − ∏(1 − e^{−λi·t})"
 #: of walopy.reliability.parallel_system:5
 msgid "El MTBF se calcula numéricamente (∫₀^∞ R_sys(t) dt)."
 msgstr "The MTBF is computed numerically (∫₀^∞ R_sys(t) dt)."
+
+#: of walopy.reliability.parallel_system:11
+msgid "Tiempo medio de reparación de cada componente. La disponibilidad supone que cada componente se repara en cuanto falla, de forma independiente: A = 1 − ∏(1 − Aᵢ), con Aᵢ = MTBFᵢ / (MTBFᵢ + MTTR). El MTBF del resultado es el tiempo medio hasta la falla del sistema sin reparación."
+msgstr "Mean time to repair of each component. Availability assumes each component is repaired as soon as it fails, independently: A = 1 − ∏(1 − Aᵢ), with Aᵢ = MTBFᵢ / (MTBFᵢ + MTTR). The MTBF of the result is the mean time to system failure without repair."
 
 #: of walopy.reliability.koon_system:1
 msgid "Confiabilidad de un sistema k-de-n (funcionan al menos k de n componentes idénticos)."
@@ -152,7 +155,12 @@ msgstr "Minimum number of components that must work (1 ≤ k ≤ n)."
 msgid "Tasa de falla λ de los componentes."
 msgstr "Failure rate λ of the components."
 
-#: of walopy.reliability.koon_system:24
+#: of walopy.reliability.koon_system:19
+#, python-brace-format
+msgid "Tiempo medio de reparación de cada componente. La disponibilidad supone reparación independiente de cada componente: A = Σ_{j=k}^{n} C(n,j)·aʲ·(1 − a)ⁿ⁻ʲ, con a = MTBF / (MTBF + MTTR) de un componente. El MTBF del resultado es el tiempo medio hasta la falla del sistema sin reparación. Con k = n, ``series_system`` supone en cambio que los demás componentes no fallan mientras el sistema está detenido."
+msgstr "Mean time to repair of each component. Availability assumes independent repair of each component: A = Σ_{j=k}^{n} C(n,j)·aʲ·(1 − a)ⁿ⁻ʲ, with a = MTBF / (MTBF + MTTR) of one component. The MTBF of the result is the mean time to system failure without repair. With k = n, ``series_system`` instead assumes the other components do not fail while the system is down."
+
+#: of walopy.reliability.koon_system:27
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si no se cumple 1 ≤ k ≤ n."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If 1 ≤ k ≤ n does not hold."
 

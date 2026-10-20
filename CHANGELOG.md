@@ -4,9 +4,45 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/).
 
 ## [Sin publicar]
 
+Sin cambios todavía.
+
+---
+
+## [0.4.4] — 2026-10-20
+
+Versión de corrección tras una auditoría de dominio: la disponibilidad de los sistemas redundantes y la varianza PERT con rutas críticas empatadas daban
+resultados engañosos, y tres modelos avisan ahora cuando se usan fuera del rango en que su resultado es fiable.
+
+### Corregido
+- **Disponibilidad de `parallel_system` y `koon_system`.** Con `mttr` calculaban `MTTF_sistema / (MTTF_sistema + MTTR)`, que supone que nada se repara hasta que cae
+  todo el sistema. Con dos componentes en paralelo (λ = 0,01, MTTR = 10) daba 0,9375; con reparación independiente de cada componente, el supuesto habitual,
+  es 0,9917 (8 veces menos indisponibilidad). Ahora `parallel_system` usa `1 − ∏(1 − Aᵢ)` y `koon_system` la binomial de la disponibilidad de cada componente;
+  el supuesto queda documentado. `series_system` no cambia (el sistema está detenido mientras se repara). El MTBF de los resultados sigue siendo el tiempo medio
+  hasta la falla del sistema sin reparación. Bug `W-33`: `tests/test_disponibilidad_redundante.py` y mutante `MU-27`.
+- **Varianza de `pert` con varias rutas críticas empatadas.** Sumaba las varianzas de todas las actividades críticas en lugar de las de una ruta: con 5 rutas
+  idénticas de 3 actividades, σ salía 3,23 en lugar de 1,44. Ahora es la varianza de la ruta crítica de mayor varianza (la convención con empates); con una
+  sola ruta crítica no cambia. `critical_path` sigue listando todas las actividades críticas. Bug `W-34`: `tests/test_pert_varianza.py` y mutante `MU-28`.
+
+### Añadido
+- **Avisos de validez (`UserWarning`)** cuando el resultado de un modelo no es fiable; el resultado no cambia:
+  - `pert`: hay actividades fuera de la ruta crítica usada con holgura ≤ σ del proyecto. La probabilidad PERT considera una sola ruta y es optimista cuando
+    convergen rutas casi críticas (con 5 rutas paralelas, P(T ≤ 17,5) = 0,50 según PERT y 0,04 por simulación).
+  - `newsvendor`: demanda normal con CV > 0,5; el aviso indica P(D < 0) del modelo y sugiere una distribución no negativa.
+  - `monte_carlo_gg1`: el semiancho al 95 % de Wq (medias de 20 lotes) supera el 10 %; con ρ = 0,95 y 20 000 clientes, 20 réplicas dieron Wq entre 11,3 y
+    26,6 (exacto: 19).
+
+### Documentación
+- `reorder_point`, `rq_policy`, `rs_policy` y `safety_stock_curve`: si la demanda se pronostica, `demand_std` debe ser la desviación del error de pronóstico;
+  `service_level` es el nivel de servicio por ciclo (tipo 1), no la tasa de llenado.
+- Supuestos de disponibilidad de `series_system`, `parallel_system` y `koon_system`.
+
+### Seguridad
+- La publicación vuelve a generar **atestaciones de procedencia** (PEP 740, `attestations: true`). PyPI mostraba «pérdida de procedencia» porque se habían
+  desactivado tras el fallo de publicación de v0.2.7; los archivos de 0.4.3 coinciden con el commit del tag `v0.4.3` (comprobado).
+
 ### Mantenimiento
-- Los workflows de GitHub Actions usan versiones que ejecutan Node 24 (Node 20 está obsoleto y GitHub lo retira de los runners): `actions/checkout@v6`, `actions/setup-python@v6`,
-  `actions/upload-artifact@v6` y `actions/download-artifact@v7`. Sin cambios en el paquete.
+- Los workflows de GitHub Actions usan versiones que ejecutan Node 24 (Node 20 está obsoleto y GitHub lo retira de los runners): `actions/checkout@v7`, `actions/setup-python@v7`,
+  `actions/upload-artifact@v7` y `actions/download-artifact@v8` (primero a v6/v7 a mano y después con el primer PR de Dependabot). Sin cambios en el paquete.
 - Los jobs de Python 3.9 del CI (la entrada 3.9 de la matriz y el de dependencias mínimas) se fijan a `ubuntu-24.04`: `ubuntu-latest` pasa a Ubuntu 26.04 de forma gradual hasta el
   19 de noviembre de 2026 y esa imagen puede no ofrecer Python 3.9. El resto de los jobs sigue en `ubuntu-latest`.
 - Nuevo `.github/dependabot.yml`: Dependabot propone cada semana (lunes) las subidas de las acciones de GitHub de los workflows, agrupadas en un solo PR que pasa por el CI completo.

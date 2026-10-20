@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -226,6 +227,11 @@ class SimulationResult:
         return plot_simulation(self, **kwargs)
 
 
+LOTES_MC = 20             # lotes para el intervalo de confianza de Wq por medias de lotes
+T_975_19 = 2.093          # cuantil 0,975 de la t de Student con 19 grados de libertad
+PRECISION_RELATIVA_MC = 0.10  # avisar si el semiancho al 95 % supera el 10 % de Wq
+
+
 def monte_carlo_gg1(
     lam: float,
     mu: float,
@@ -271,9 +277,9 @@ def monte_carlo_gg1(
 
     Examples
     --------
-    >>> r = monte_carlo_gg1(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0, n_customers=500, seed=1)
+    >>> r = monte_carlo_gg1(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0, n_customers=50_000, seed=1)
     >>> round(r.L, 4)
-    2.0427
+    2.0169
     """
     lam         = as_positive(lam, "lam")
     mu          = as_positive(mu, "mu")
@@ -310,6 +316,17 @@ def monte_carlo_gg1(
 
     sojourn    = depart - arrival
     pct        = np.percentile(wait, [50, 90, 95, 99])
+
+    # Precisión de Wq por medias de lotes (20 lotes, t de Student con 19 g.l. al 95 %); una sola réplica puede engañar
+    lotes = wait[: n_customers - n_customers % LOTES_MC].reshape(LOTES_MC, -1).mean(axis=1) if n_customers >= LOTES_MC else None
+    if lotes is not None and wait.mean() > 0:
+        semiancho = T_975_19 * float(lotes.std(ddof=1)) / math.sqrt(LOTES_MC)
+        if semiancho > PRECISION_RELATIVA_MC * wait.mean():
+            warnings.warn(
+                _t("advanced.aviso.monte_carlo_gg1.estimacion_imprecisa", wq=float(wait.mean()), semiancho=semiancho,
+                   relativo=semiancho / float(wait.mean()), n=n_customers),
+                UserWarning, stacklevel=2,
+            )
 
     return SimulationResult(
         model=_t("advanced.modelo.monte_carlo_gg1.simulacion_ca2_cs2", ca2=ca2, cs2=cs2),

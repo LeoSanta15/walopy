@@ -253,12 +253,14 @@ def reorder_point(
     lead_time : float
         Tiempo de entrega medio L̄ (en las mismas unidades de tiempo que demand_rate).
     demand_std : float
-        Desviación estándar de la demanda por periodo σ_D (por defecto 0).
+        Desviación estándar de la demanda por periodo σ_D (por defecto 0). Si la demanda se pronostica, use la
+        desviación del error de pronóstico por periodo (p. ej. el RMSE), que es la incertidumbre que cubre el stock
+        de seguridad.
     lead_time_std : float
         Desviación estándar del tiempo de entrega σ_L (por defecto 0).
     service_level : float
-        Probabilidad de no tener faltante por ciclo de reposición ∈ (0, 1).
-        Por defecto 0.95.
+        Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1).
+        No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95.
 
     Returns
     -------
@@ -368,6 +370,9 @@ class NewsvendorResult:
         }])
 
 
+CV_MAX_NEWSVENDOR_NORMAL = 0.5  # con CV = σ/μ > 0,5 la normal da P(D < 0) > 2,3 %
+
+
 def newsvendor(
     demand_mean: float,
     demand_std: float,
@@ -424,6 +429,13 @@ def newsvendor(
         raise ValueError(_t("inventory.error.newsvendor.cost_debe_ser_menor_price"))
     if s >= c:
         raise ValueError(_t("inventory.error.newsvendor.salvage_debe_ser_menor_cost"))
+
+    if sig > CV_MAX_NEWSVENDOR_NORMAL * mu:
+        # La normal asigna probabilidad apreciable a demanda negativa: Q* y las ventas esperadas pierden sentido
+        warnings.warn(
+            _t("inventory.aviso.newsvendor.demanda_normal_cv_alto", cv=sig / mu, p_negativa=NormalDist().cdf(-mu / sig)),
+            UserWarning, stacklevel=2,
+        )
 
     Cu = p - c          # underage cost (opportunity loss)
     Co = c - s          # overage cost  (holding/disposal loss)
@@ -1587,11 +1599,14 @@ def rq_policy(
     lead_time : float
         Tiempo de entrega medio de reposición L̄.
     demand_std : float
-        Desviación estándar de la demanda por periodo σ_D (por defecto 0).
+        Desviación estándar de la demanda por periodo σ_D (por defecto 0). Si la demanda se pronostica, use la
+        desviación del error de pronóstico por periodo (p. ej. el RMSE), que es la incertidumbre que cubre el stock
+        de seguridad.
     lead_time_std : float
         Desviación estándar del tiempo de entrega σ_L (por defecto 0).
     service_level : float
-        Nivel de servicio por ciclo ∈ (0, 1). Por defecto 0.95.
+        Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1).
+        No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95.
 
     Returns
     -------
@@ -1730,11 +1745,14 @@ def rs_policy(
     review_period : float
         Intervalo de revisión R (periodos entre revisiones de inventario).
     demand_std : float
-        Desviación estándar de la demanda por periodo σ_D (por defecto 0).
+        Desviación estándar de la demanda por periodo σ_D (por defecto 0). Si la demanda se pronostica, use la
+        desviación del error de pronóstico por periodo (p. ej. el RMSE), que es la incertidumbre que cubre el stock
+        de seguridad.
     lead_time_std : float
         Desviación estándar del tiempo de entrega σ_L (por defecto 0).
     service_level : float
-        Nivel de servicio por ciclo ∈ (0, 1). Por defecto 0.95.
+        Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1).
+        No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95.
 
     Returns
     -------
@@ -2078,7 +2096,8 @@ def safety_stock_curve(
     items : list of dict
         Cada diccionario debe contener:
 
-        - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo.
+        - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo (o del error de
+          pronóstico, si la demanda se pronostica).
         - ``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo).
 
         Claves opcionales:

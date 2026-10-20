@@ -328,5 +328,29 @@
       "admite_modelos_con_kwargs",
       "cada_fila_es_el_modelo"
     ]
+  },
+  {
+    "id": "W-33",
+    "titulo": "parallel_system y koon_system calculan la disponibilidad como si nada se reparara hasta que cae todo el sistema",
+    "ref": "v0.4.3",
+    "selectores": [
+      "tests/test_disponibilidad_redundante.py"
+    ],
+    "guardas": [
+      "nunca_es_menos",
+      "un_solo_componente",
+      "sin_mttr"
+    ]
+  },
+  {
+    "id": "W-34",
+    "titulo": "pert suma las varianzas de todas las actividades críticas cuando hay varias rutas críticas empatadas",
+    "ref": "v0.4.3",
+    "selectores": [
+      "tests/test_pert_varianza.py -k 'empatadas or empate or una_sola'"
+    ],
+    "guardas": [
+      "una_sola_ruta"
+    ]
   }
 ]
