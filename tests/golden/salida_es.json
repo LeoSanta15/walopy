@@ -5904,7 +5904,9 @@
    }
   },
   "monte_carlo_gg1": {
-   "avisos": [],
+   "avisos": [
+    "UserWarning: La estimación Wq = 0.6735 tiene un semiancho de ±0.248 (37%) al 95 % (medias de 20 lotes) con 500 clientes: aumente n_customers o promedie varias réplicas (seed distintas)."
+   ],
    "grafica": [
     ".data[0].name=Wq",
     ".data[1].name=FDA empírica",

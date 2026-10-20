@@ -55,7 +55,7 @@ MUTANTES = [
      'mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")', "mttr_v = mttr",
      "tests/test_regresion_validacion.py -k 'mtbf_rechaza or sistemas_rechazan_t'"),
     ("MU-11", "W-20 versión desincronizada de los metadatos", "__init__.py",
-     '__version__ = "0.4.3"', '__version__ = "0.4.4"',
+     '__version__ = "0.4.4"', '__version__ = "0.4.5"',
      "tests/test_version.py"),
     ("MU-12", "H-02 EOQResult.plot() roto (plot_eoq)", "inventory.py",
      "return plot_eoq(self, **kwargs)", 'raise ImportError("plot_eoq")',
@@ -106,6 +106,14 @@ MUTANTES = [
     ("MU-26", "W-32 sensitivity no comprueba el parámetro", "solver.py",
      "if parametros is not None and param not in parametros and", "if False and param not in parametros and",
      "tests/test_solver_contratos.py -k parametro_inexistente"),
+    ("MU-27", "W-33 disponibilidad del paralelo sin reparación independiente", "reliability.py",
+     "avail = 1.0 - math.prod(1.0 - _disponibilidad_componente(lam, mttr) for lam in lams) if mttr is not None else None",
+     "avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None",
+     "tests/test_disponibilidad_redundante.py -k paralelo"),
+    ("MU-28", "W-34 varianza PERT sumada sobre todas las actividades críticas", "project.py",
+     "ruta, proj_var = _ruta_critica_de_mayor_varianza(acts, crit, variances, ES, EF, T)",
+     "ruta, proj_var = crit, sum(variances[nm] for nm in crit)",
+     "tests/test_pert_varianza.py -k 'empatadas or empate'"),
 ]
 
 

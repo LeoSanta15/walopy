@@ -76,6 +76,7 @@ def test_monte_carlo_gg1_deterministic_service():
     assert r_sim.Wq_mean == pytest.approx(r_analytic.Wq, rel=0.05)
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")  # solo el orden de los percentiles; la precisión avisa aparte
 def test_monte_carlo_percentiles_ordered():
     r = monte_carlo_gg1(lam=3.0, mu=5.0, ca2=1.0, cs2=1.0,
                          n_customers=10_000, seed=7)

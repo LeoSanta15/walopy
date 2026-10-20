@@ -199,7 +199,8 @@ def series_system(
     t : float, optional
         Tiempo para evaluar R(t).
     mttr : float, optional
-        Tiempo medio de reparación para calcular la disponibilidad.
+        Tiempo medio de reparación. Disponibilidad A = MTBF / (MTBF + MTTR) del sistema: mientras se repara el
+        componente que falló el sistema está detenido y los demás no fallan.
 
     Returns
     -------
@@ -237,6 +238,11 @@ def series_system(
     )
 
 
+def _disponibilidad_componente(lam: float, mttr: float) -> float:
+    """Disponibilidad en régimen de un componente reparable: MTBF / (MTBF + MTTR) = 1 / (1 + λ·MTTR)."""
+    return 1.0 / (1.0 + lam * mttr)
+
+
 def parallel_system(
     failure_rates: Sequence[float],
     *,
@@ -256,7 +262,9 @@ def parallel_system(
     t : float, optional
         Tiempo para evaluar R(t).
     mttr : float, optional
-        Tiempo medio de reparación para calcular la disponibilidad.
+        Tiempo medio de reparación de cada componente. La disponibilidad supone que cada componente se repara
+        en cuanto falla, de forma independiente: A = 1 − ∏(1 − Aᵢ), con Aᵢ = MTBFᵢ / (MTBFᵢ + MTTR). El MTBF
+        del resultado es el tiempo medio hasta la falla del sistema sin reparación.
 
     Returns
     -------
@@ -283,7 +291,8 @@ def parallel_system(
         return _r_system("parallel", lams, None, tt)
 
     mtbf_val = _mtbf_numeric(R_func, min(lams))
-    avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None
+    # Disponibilidad en régimen con reparación independiente de cada componente: A = 1 − ∏(1 − Aᵢ)
+    avail = 1.0 - math.prod(1.0 - _disponibilidad_componente(lam, mttr) for lam in lams) if mttr is not None else None
     R_t = R_func(t) if t is not None else None
     return ReliabilityResult(
         topology="parallel",
@@ -326,7 +335,10 @@ def koon_system(
     t : float, optional
         Tiempo para evaluar R(t).
     mttr : float, optional
-        Tiempo medio de reparación para calcular la disponibilidad.
+        Tiempo medio de reparación de cada componente. La disponibilidad supone reparación independiente de cada
+        componente: A = Σ_{j=k}^{n} C(n,j)·aʲ·(1 − a)ⁿ⁻ʲ, con a = MTBF / (MTBF + MTTR) de un componente. El MTBF
+        del resultado es el tiempo medio hasta la falla del sistema sin reparación. Con k = n, ``series_system``
+        supone en cambio que los demás componentes no fallan mientras el sistema está detenido.
 
     Returns
     -------
@@ -357,7 +369,12 @@ def koon_system(
     # Exact MTBF for k-of-n identical exponential:  (1/λ) * Σ_{j=k}^{n} 1/j
     mtbf_val = (1.0 / lam) * sum(1.0 / j for j in range(k, n + 1))
 
-    avail = mtbf_val / (mtbf_val + mttr) if mttr is not None else None
+    if mttr is not None:
+        # Reparación independiente: cada componente está disponible con probabilidad a, y el sistema si funcionan ≥ k
+        a = _disponibilidad_componente(lam, mttr)
+        avail: float | None = sum(math.comb(n, j) * a**j * (1.0 - a) ** (n - j) for j in range(k, n + 1))
+    else:
+        avail = None
     R_t = _r_system("k-of-n", lams, k, t) if t is not None else None
     return ReliabilityResult(
         topology="k-of-n",

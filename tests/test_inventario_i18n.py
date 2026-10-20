@@ -135,6 +135,9 @@ AÑADIDAS_TRAS_V030 = {
     "solver.error.sensitivity.values_no_puede_estar_vacio",   # W-32
     "solver.error.sensitivity.param_no_es_parametro_modelo",
     "solver.error.compare.sin_resultados",   # W-31
+    "project.aviso.pert.rutas_casi_criticas",   # 0.4.4: avisos de validez de los modelos
+    "inventory.aviso.newsvendor.demanda_normal_cv_alto",
+    "advanced.aviso.monte_carlo_gg1.estimacion_imprecisa",
     "project.cabecera.to_frame.ht",    # «HT»/«HL» (holgura total/libre): acrónimos españoles que el extractor no veía; ya existían en v0.3.0
     "project.cabecera.to_frame.hl",
 }

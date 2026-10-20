@@ -74,4 +74,6 @@ jobs:
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          attestations: false
+          # Procedencia (PEP 740): firma los archivos con la identidad OIDC de este workflow. Si el paso fallara al
+          # generar las atestaciones no se sube nada; volver a `false` y relanzar el job es seguro.
+          attestations: true

@@ -37,7 +37,7 @@ RESULTADOS = {
     "break_even_sales_real": lambda: wl.break_even_sales(1000.0, 0.4, actual_revenue=3000.0),
     "eoq": lambda: wl.eoq(1000.0, 50.0, 2.0),
     "optimize_servers": lambda: wl.optimize_servers(4.0, 3.0, cost_per_server=10.0, cost_per_wait=5.0),
-    "monte_carlo": lambda: wl.monte_carlo_gg1(2.0, 3.0, 1.0, 1.0, n_customers=2000, seed=1),
+    "monte_carlo": lambda: wl.monte_carlo_gg1(2.0, 3.0, 1.0, 1.0, n_customers=50_000, seed=1),  # sin aviso de precisión
     "oee_arbol": lambda: wl.oee_kpi_tree(0.9, 0.9, 0.9),
     "throughput_arbol": lambda: wl.throughput_kpi_tree(80.0, 100.0, 0.05),
     "roi_arbol": lambda: wl.roi_kpi_tree(1000.0, 200.0, 3.0, 100.0, 500.0),

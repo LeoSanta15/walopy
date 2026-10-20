@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import warnings
 from collections import deque
 from dataclasses import dataclass
 from statistics import NormalDist
@@ -211,6 +212,33 @@ def _forward_backward(acts: dict, durations: dict) -> tuple:
     return ES, EF, LS, LF, T, succ
 
 
+def _ruta_critica_de_mayor_varianza(acts: dict, crit: list, variances: dict, ES: dict, EF: dict, T: float) -> tuple:
+    """Ruta crítica (de inicio a fin) con la mayor varianza y esa varianza.
+
+    Con varias rutas críticas empatadas, la varianza del proyecto es la de **una** ruta (la convención es la de mayor
+    varianza), no la suma de todas las actividades críticas.
+    """
+    criticas = set(crit)
+    mejor: dict[str, float] = {}
+    previa: dict[str, str | None] = {}
+    for nm in [n for n in _toposort_and_succ(acts)[0] if n in criticas]:
+        candidatas = [p for p in acts[nm]["predecessors"] if p in criticas and abs(EF[p] - ES[nm]) < 1e-9]
+        p_max = max(candidatas, key=lambda p: mejor[p], default=None)
+        mejor[nm] = variances[nm] + (mejor[p_max] if p_max is not None else 0.0)
+        previa[nm] = p_max
+    finales = [nm for nm in mejor if abs(EF[nm] - T) < 1e-9]
+    if not finales:
+        return [], 0.0
+    final = max(finales, key=lambda n: mejor[n])
+    varianza = mejor[final]
+    nodo: str | None = final
+    ruta: list[str] = []
+    while nodo is not None:
+        ruta.append(nodo)
+        nodo = previa[nodo]
+    return ruta[::-1], varianza
+
+
 def _build_results(acts: dict, durations: dict, ES, EF, LS, LF, T, succ,
                    opt=None, ml=None, pess=None, variances=None) -> list:
     results = []
@@ -382,7 +410,14 @@ def pert(activities: list) -> ProjectResult:
     results = _build_results(acts, durations, ES, EF, LS, LF, T, succ,
                              opt=opt_d, ml=ml_d, pess=pess_d, variances=variances)
     crit     = [a.name for a in results if a.is_critical]
-    proj_var = sum(variances[nm] for nm in crit)
+    ruta, proj_var = _ruta_critica_de_mayor_varianza(acts, crit, variances, ES, EF, T)
+    sigma = math.sqrt(proj_var)
+    casi_criticas = [a.name for a in results if a.name not in ruta and a.total_float <= sigma + 1e-9]
+    if sigma > 0 and casi_criticas:
+        warnings.warn(
+            _t("project.aviso.pert.rutas_casi_criticas", n=len(casi_criticas), actividades=", ".join(casi_criticas[:5]), sigma=sigma),
+            UserWarning, stacklevel=2,
+        )
 
     return ProjectResult(
         activities=results,
