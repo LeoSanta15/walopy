@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-21 22:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -49,7 +49,7 @@ msgid "Parameters"
 msgstr "Parameters"
 
 #: of walopy.advanced.erlang_b:6 walopy.advanced.mm1k:6 walopy.advanced.mmck:6
-#: walopy.advanced.monte_carlo_gg1:7 walopy.advanced.queue_length_pmf:5
+#: walopy.advanced.monte_carlo_gg1:12 walopy.advanced.queue_length_pmf:5
 #: walopy.advanced.sojourn_cdf:5
 msgid "Tasa de llegadas λ."
 msgstr "Arrival rate λ."
@@ -98,7 +98,7 @@ msgstr "If any numeric argument is not finite or is outside its domain (for exam
 #: walopy.advanced.break_even_sales:19 walopy.advanced.erlang_b:17
 #: walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24
 #: walopy.advanced.mm1k:18 walopy.advanced.mmck:19
-#: walopy.advanced.monte_carlo_gg1:23 walopy.advanced.queue_length_pmf:16
+#: walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16
 #: walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
@@ -107,7 +107,7 @@ msgstr "If an argument is not numeric or a sequence contains values that are not
 #: walopy.advanced.break_even_sales:22 walopy.advanced.erlang_b:20
 #: walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27
 #: walopy.advanced.mm1k:21 walopy.advanced.mmck:22
-#: walopy.advanced.monte_carlo_gg1:26 walopy.advanced.queue_length_pmf:19
+#: walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19
 #: walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
 msgid "Examples"
 msgstr "Examples"
@@ -197,29 +197,42 @@ msgstr "Monte Carlo simulation of a single-server G/G/1 queue."
 msgid "Los tiempos entre llegadas y de servicio se extraen de distribuciones Gamma ajustadas a la media y al coeficiente de variación al cuadrado dados. Con CV² = 0 los tiempos son determinísticos; con CV² = 1 son exponenciales (se recupera el caso M/M/1)."
 msgstr "The interarrival and service times are drawn from Gamma distributions fitted to the given mean and squared coefficient of variation. With CV² = 0 the times are deterministic; with CV² = 1 they are exponential (the M/M/1 case is recovered)."
 
-#: of walopy.advanced.monte_carlo_gg1:9
+#: of walopy.advanced.monte_carlo_gg1:7
+#, python-format
+msgid "El sistema empieza vacío, así que Wq se subestima al principio (sesgo de arranque, notable con ρ alto). Una sola réplica, además, puede alejarse mucho del valor esperado. Para resultados fiables use varias réplicas independientes (``n_replications``) y descarte el periodo de calentamiento (``warmup``); el resultado trae el semiancho del intervalo de confianza al 95 % de Wq (``Wq_halfwidth``, ``Wq_ci``)."
+msgstr "The system starts empty, so Wq is underestimated at the beginning (start-up bias, noticeable with high ρ). A single replication can also stray far from the expected value. For reliable results use several independent replications (``n_replications``) and discard the warm-up period (``warmup``); the result carries the half-width of the 95 % confidence interval of Wq (``Wq_halfwidth``, ``Wq_ci``)."
+
+#: of walopy.advanced.monte_carlo_gg1:14
 msgid "Tasa de servicio μ (= 1 / tiempo medio de servicio)."
 msgstr "Service rate μ (= 1 / mean service time)."
 
-#: of walopy.advanced.monte_carlo_gg1:11
+#: of walopy.advanced.monte_carlo_gg1:16
 msgid "Coeficiente de variación al cuadrado de los tiempos entre llegadas (≥ 0)."
 msgstr "Squared coefficient of variation of the interarrival times (≥ 0)."
 
-#: of walopy.advanced.monte_carlo_gg1:13
+#: of walopy.advanced.monte_carlo_gg1:18
 msgid "Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0)."
 msgstr "Squared coefficient of variation of the service times (≥ 0)."
 
-#: of walopy.advanced.monte_carlo_gg1:15
-msgid "Número de clientes a simular (por defecto 20 000)."
-msgstr "Number of customers to simulate (default 20 000)."
-
-#: of walopy.advanced.monte_carlo_gg1:17
-msgid "Semilla aleatoria para reproducibilidad."
-msgstr "Random seed for reproducibility."
+#: of walopy.advanced.monte_carlo_gg1:20
+msgid "Número de clientes a simular por réplica (por defecto 20 000)."
+msgstr "Number of customers to simulate per replication (default 20 000)."
 
 #: of walopy.advanced.monte_carlo_gg1:22
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_customers`` supera 10⁷."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_customers`` exceeds 10⁷."
+msgid "Semilla aleatoria para reproducibilidad. Con varias réplicas se derivan flujos independientes de ella."
+msgstr "Random seed for reproducibility. With several replications, independent streams are derived from it."
+
+#: of walopy.advanced.monte_carlo_gg1:24
+msgid "Réplicas independientes (por defecto 1). Con 2 o más, el intervalo de confianza de Wq usa la t de Student sobre las medias de las réplicas; con 1 se estima por medias de 20 lotes."
+msgstr "Independent replications (default 1). With 2 or more, the confidence interval of Wq uses Student's t over the replication means; with 1 it is estimated from means of 20 batches."
+
+#: of walopy.advanced.monte_carlo_gg1:27
+msgid "Clientes iniciales de cada réplica que se descartan de las estadísticas (por defecto 0). Con ρ cercano a 1 el arranque en vacío sesga Wq a la baja durante del orden de 1/(1 − ρ)² clientes; descarte varias veces esa cantidad y mantenga ``n_customers`` mucho mayor."
+msgstr "Initial customers of each replication that are discarded from the statistics (default 0). With ρ close to 1 the empty start biases Wq downward for on the order of 1/(1 − ρ)² customers; discard several times that amount and keep ``n_customers`` much larger."
+
+#: of walopy.advanced.monte_carlo_gg1:34
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_customers`` o ``n_customers × n_replications`` superan 10⁷, si ``n_replications`` supera 10 000 o si     ``warmup`` no es un entero entre 0 y ``n_customers`` − 1."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_customers`` or ``n_customers × n_replications`` exceed 10⁷, if ``n_replications`` exceeds 10 000, or if     ``warmup`` is not an integer between 0 and ``n_customers`` − 1."
 
 #: of walopy.advanced.takt_time:1
 msgid "Calcula el tiempo takt = tiempo de producción disponible / demanda del cliente."
@@ -398,6 +411,11 @@ msgstr "Result of a G/G/1 Monte Carlo simulation."
 #: ../../source/referencia/advanced.rst
 msgid "Variables"
 msgstr "Variables"
+
+#: of walopy.SimulationResult.Wq_ci:1
+#, python-format
+msgid "Intervalo de confianza al 95 % de Wq (``Wq_mean`` ± semiancho), o ``None`` si no hay datos suficientes."
+msgstr "95 % confidence interval of Wq (``Wq_mean`` ± half-width), or ``None`` if there is not enough data."
 
 #: of walopy.advanced.LineBalanceResult:1
 msgid "Resultado del análisis de balance de una línea de producción."

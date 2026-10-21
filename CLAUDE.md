@@ -8,12 +8,12 @@ matplotlib y plotly se importan de forma perezosa dentro de las funciones de gr�
 
 Python ≥ 3.9 · layout `src/` · versión actual: ver `src/walopy/__init__.py` (`__version__`).
 
-## Estado verificado (2026-10-21, v0.4.5)
+## Estado verificado (2026-10-21, v0.4.6)
 Cifras medidas con `make check`; si cambian, actualiza esta sección con la salida real (no de memoria).
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 2 515 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Tests (`make test`) | 2 547 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
 | Cobertura | global 97,5 %; el módulo menor (`solver.py`) 91,9 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |

@@ -29,7 +29,7 @@ def test_newsvendor_no_avisa_con_cv_moderado():
 def test_simulacion_avisa_si_la_estimacion_es_imprecisa():
     with pytest.warns(UserWarning) as avisos:
         wl.monte_carlo_gg1(0.95, 1.0, 1.0, 1.0, n_customers=20_000, seed=1)
-    assert "n_customers" in str(avisos[0].message)
+    assert "n_customers" in str(avisos[0].message) and "n_replications" in str(avisos[0].message)
 
 
 def test_simulacion_no_avisa_si_la_estimacion_es_precisa():

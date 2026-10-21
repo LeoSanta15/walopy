@@ -381,6 +381,22 @@ print(sim.Wq_p99)    # percentil 99
 sim.plot()           # histograma + CDF empírica con percentiles anotados
 ```
 
+> **Una réplica puede engañar.** Con ρ alto una sola corrida se aleja mucho del valor esperado (con ρ = 0,95 y 20 000 clientes, 20 corridas dieron Wq entre 11 y 27 con un valor exacto de 19), y el arranque en vacío sesga Wq a la baja. Use réplicas independientes y descarte el calentamiento; el resultado trae el intervalo de confianza al 95 % de Wq.
+
+```python
+sim = wl.monte_carlo_gg1(
+    lam=3.0, mu=5.0, ca2=1.0, cs2=0.5,
+    n_customers=20_000,
+    n_replications=20,   # réplicas independientes (flujos derivados de `seed`)
+    warmup=1_000,        # clientes iniciales que se descartan de cada réplica
+    seed=42,
+)
+low, high = sim.Wq_ci    # IC 95 % de Wq (t de Student sobre las medias de las réplicas)
+print(round(sim.Wq_halfwidth, 3) < 0.05)   # True: estimación precisa
+```
+
+Con `n_replications=1` (por defecto) el intervalo se estima por medias de 20 lotes y el resultado es el de siempre. El modelo avisa (`UserWarning`) si el semiancho supera el 10 % de Wq.
+
 **`SimulationResult` — atributos:**
 
 | Atributo | Descripción |
@@ -389,6 +405,8 @@ sim.plot()           # histograma + CDF empírica con percentiles anotados
 | `Wq_p50/p90/p95/p99` | Percentiles de la distribución de espera |
 | `L_mean`, `Lq_mean` | Longitudes de sistema y cola promedio |
 | `model` | Descripción del modelo simulado |
+| `Wq_halfwidth`, `Wq_ci` | Semiancho e intervalo de confianza al 95 % de Wq |
+| `n_replications`, `warmup` | Réplicas y clientes de calentamiento descartados |
 
 ---
 
@@ -1503,6 +1521,16 @@ print(p.probability(9.0))   # ≈ 0.868: probabilidad de terminar en 9 unidades 
 ```
 
 `probability` solo está disponible en resultados PERT con varianza distinta de cero.
+
+**La aproximación normal considera una sola ruta y es optimista cuando convergen varias rutas casi críticas** (con 5 rutas paralelas idénticas, P(T ≤ 17,5) = 0,50 según PERT y 0,04 por simulación). Con `n_simulations` se simula el proyecto con duraciones beta-PERT y se consideran todas las rutas:
+
+```python
+p = wl.pert(acts, n_simulations=20_000, seed=1)
+print(round(p.mc_mean, 1))                 # duración media simulada (≥ la de una sola ruta)
+print(round(p.probability_mc(9.0), 2))     # P(T ≤ 9) simulada
+print(round(p.percentile_mc(90), 1))       # percentil 90 de la duración
+print(p.criticality_index)                 # fracción de simulaciones en que cada actividad es crítica
+```
 
 ---
 

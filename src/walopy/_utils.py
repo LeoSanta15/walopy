@@ -97,3 +97,22 @@ def as_float_list(seq: Any, name: str, *, kind: str = "positive", min_len: int =
             raise ValueError(_t("utils.error.as_nonempty.debe_contener_menos_elemento", name=name))
         raise ValueError(_t("utils.error.as_float_list.debe_contener_menos_elementos_recibieron", name=name, min_len=min_len, expr=len(out)))
     return out
+
+
+# Cuantil 0,975 de la t de Student (intervalo de confianza bilateral al 95 %), grados de libertad 1..30
+_T_975 = (
+    12.7062, 4.3027, 3.1824, 2.7764, 2.5706, 2.4469, 2.3646, 2.3060, 2.2622, 2.2281,
+    2.2010, 2.1788, 2.1604, 2.1448, 2.1314, 2.1199, 2.1098, 2.1009, 2.0930, 2.0860,
+    2.0796, 2.0739, 2.0687, 2.0639, 2.0595, 2.0555, 2.0518, 2.0484, 2.0452, 2.0423,
+)
+
+
+def t_cuantil_975(gl: int) -> float:
+    """Cuantil 0,975 de la t de Student con ``gl`` grados de libertad (tabla hasta 30; después, desarrollo de Cornish-Fisher)."""
+    if gl < 1:
+        raise ValueError(_t("utils.error.t_cuantil_975.gl_debe_ser_recibio", gl=gl))
+    if gl <= len(_T_975):
+        return _T_975[gl - 1]
+    z = 1.959963984540054
+    return z + (z**3 + z) / (4 * gl) + (5 * z**5 + 16 * z**3 + 3 * z) / (96 * gl**2) + (3 * z**7 + 19 * z**5 + 17 * z**3 - 15 * z) / (384 * gl**3)
+

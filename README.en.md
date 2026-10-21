@@ -394,6 +394,22 @@ print(sim.Wq_p99)    # 99th percentile
 sim.plot()           # histogram + empirical CDF with annotated percentiles
 ```
 
+> **A single replication can mislead.** With high ρ one run strays far from the expected value (with ρ = 0.95 and 20,000 customers, 20 runs gave Wq between 11 and 27 against an exact value of 19), and starting empty biases Wq downward. Use independent replications and discard the warm-up; the result carries the 95 % confidence interval of Wq.
+
+```python
+sim = wl.monte_carlo_gg1(
+    lam=3.0, mu=5.0, ca2=1.0, cs2=0.5,
+    n_customers=20_000,
+    n_replications=20,   # independent replications (streams derived from `seed`)
+    warmup=1_000,        # initial customers discarded from each replication
+    seed=42,
+)
+low, high = sim.Wq_ci    # 95 % CI of Wq (Student t over the replication means)
+print(round(sim.Wq_halfwidth, 3) < 0.05)   # True: precise estimate
+```
+
+With `n_replications=1` (default) the interval is estimated by batch means of 20 batches and the result is the same as always. The model warns (`UserWarning`) if the half-width exceeds 10 % of Wq.
+
 **`SimulationResult` — attributes:**
 
 | Attribute | Description |
@@ -402,6 +418,8 @@ sim.plot()           # histogram + empirical CDF with annotated percentiles
 | `Wq_p50/p90/p95/p99` | Percentiles of the waiting-time distribution |
 | `L_mean`, `Lq_mean` | Mean system and queue lengths |
 | `model` | Description of the simulated model |
+| `Wq_halfwidth`, `Wq_ci` | Half-width and 95 % confidence interval of Wq |
+| `n_replications`, `warmup` | Replications and warm-up customers discarded |
 
 ---
 
@@ -1516,6 +1534,16 @@ print(p.probability(9.0))   # ≈ 0.868: probability of finishing in 9 units or 
 ```
 
 `probability` is only available on PERT results with nonzero variance.
+
+**The normal approximation considers a single path and is optimistic when several near-critical paths merge** (with 5 identical parallel paths, P(T ≤ 17.5) = 0.50 according to PERT and 0.04 by simulation). With `n_simulations` the project is simulated with beta-PERT durations and all paths are considered:
+
+```python
+p = wl.pert(acts, n_simulations=20_000, seed=1)
+print(round(p.mc_mean, 1))                 # mean simulated duration (≥ that of a single path)
+print(round(p.probability_mc(9.0), 2))     # simulated P(T ≤ 9)
+print(round(p.percentile_mc(90), 1))       # 90th percentile of the duration
+print(p.criticality_index)                 # fraction of simulations in which each activity is critical
+```
 
 ---
 
