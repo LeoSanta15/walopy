@@ -5,10 +5,11 @@ import math
 import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from statistics import NormalDist
 from typing import TYPE_CHECKING
 
 from ._i18n import t as _t
-from ._utils import as_float_list, as_int_positive, as_nonneg, as_positive
+from ._utils import as_float_list, as_fraction, as_int_positive, as_nonneg, as_positive
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -419,6 +420,13 @@ class WeibullResult:
         ``'RRY'`` (regresión de rangos sobre Y / papel de probabilidad).
     n : int
         Número de tiempos de falla utilizados.
+    n_suspended : int
+        Número de unidades suspendidas (censuradas por la derecha) utilizadas.
+    confidence : float or None
+        Nivel de confianza de ``shape_ci`` y ``scale_ci``; ``None`` si no se calcularon.
+    shape_ci, scale_ci : tuple[float, float] or None
+        Intervalos de confianza de β y η (máxima verosimilitud, aproximación normal de la información observada sobre
+        el logaritmo del parámetro). ``None`` con ``method='RRY'`` o si la información no es invertible.
     """
 
     shape: float
@@ -428,6 +436,10 @@ class WeibullResult:
     b50: float
     method: str
     n: int
+    n_suspended: int = 0
+    confidence: float | None = None
+    shape_ci: tuple[float, float] | None = None
+    scale_ci: tuple[float, float] | None = None
 
     def R(self, t: float) -> float:
         """Confiabilidad en el tiempo *t*: R(t) = exp(−(t/η)^β)."""
@@ -452,9 +464,13 @@ class WeibullResult:
         return self.scale * (-math.log(1.0 - p)) ** (1.0 / self.shape)
 
     def summary(self) -> str:
-        return (
-            _t("reliability.etiqueta.summary.metodo_forma_escala_mttf_vida", method=self.method, n=self.n, shape=self.shape, scale=self.scale, mttf=self.mttf, b10=self.b10, b50=self.b50)
-        )
+        texto = _t("reliability.etiqueta.summary.metodo_forma_escala_mttf_vida", method=self.method, n=self.n, shape=self.shape, scale=self.scale, mttf=self.mttf, b10=self.b10, b50=self.b50)
+        if self.n_suspended:
+            texto += "\n" + _t("reliability.etiqueta.summary.suspensiones", n_suspended=self.n_suspended)
+        if self.shape_ci is not None and self.scale_ci is not None and self.confidence is not None:
+            texto += "\n" + _t("reliability.etiqueta.summary.intervalos", confianza=self.confidence, b_low=self.shape_ci[0], b_high=self.shape_ci[1],
+                                 e_low=self.scale_ci[0], e_high=self.scale_ci[1])
+        return texto
 
     def __str__(self) -> str:
         return self.summary()
@@ -469,27 +485,37 @@ class WeibullResult:
             "B50":        self.b50,
             _t("reliability.cabecera.to_frame.metodo"):     self.method,
             "n":          self.n,
+            _t("reliability.cabecera.to_frame.suspensiones"): self.n_suspended,
+            _t("reliability.cabecera.to_frame.forma_ic_inferior"): None if self.shape_ci is None else self.shape_ci[0],
+            _t("reliability.cabecera.to_frame.forma_ic_superior"): None if self.shape_ci is None else self.shape_ci[1],
+            _t("reliability.cabecera.to_frame.escala_ic_inferior"): None if self.scale_ci is None else self.scale_ci[0],
+            _t("reliability.cabecera.to_frame.escala_ic_superior"): None if self.scale_ci is None else self.scale_ci[1],
         }])
 
 
-def _weibull_mle_beta(failure_times: list) -> float:
-    """Resuelve la forma β de Weibull por máxima verosimilitud con bisección (normalizada por estabilidad)."""
-    n     = len(failure_times)
+def _weibull_mle_beta(failure_times: list, suspensions: list | None = None) -> float:
+    """Resuelve la forma β de Weibull por máxima verosimilitud con bisección (normalizada por estabilidad).
+
+    Con suspensiones (censura por la derecha) la ecuación es 1/β + media_f(ln t) − Σ_todos tᵝ ln t / Σ_todos tᵝ = 0, donde la media se toma
+    solo sobre las fallas y las sumas sobre fallas y suspensiones.
+    """
+    r     = len(failure_times)
     ln_t  = [math.log(t) for t in failure_times]
-    # Normalize by geometric mean: u_i = t_i / geom_mean.
-    # The MLE equation is invariant to this scaling, and ui near 1
+    # Normalize by the geometric mean of the failures: u_i = t_i / geom_mean.
+    # The MLE equation is invariant to this scaling, and u_i near 1
     # keeps u_i^beta from overflowing.
-    ln_mean = sum(ln_t) / n           # log of geometric mean
-    norm_ln = [lt - ln_mean for lt in ln_t]   # ln(u_i); sum = 0
+    ln_mean = sum(ln_t) / r           # log of geometric mean of the failures
+    norm_ln = [lt - ln_mean for lt in ln_t]   # ln(u_i) of the failures; sum = 0
+    todos_ln = norm_ln + [math.log(t) - ln_mean for t in (suspensions or [])]
 
     def g(beta: float) -> float:
         # u_i^beta = exp(beta * ln(u_i)); clamp to avoid overflow/underflow
-        u_beta  = [math.exp(max(-700.0, min(700.0, beta * lt))) for lt in norm_ln]
+        u_beta  = [math.exp(max(-700.0, min(700.0, beta * lt))) for lt in todos_ln]
         s_ub    = sum(u_beta)
         if s_ub == 0.0:
             return float("inf")
-        s_ub_ln = sum(ub * lt for ub, lt in zip(u_beta, norm_ln))
-        return n / beta - n * s_ub_ln / s_ub   # Σln(ui)=0 drops out
+        s_ub_ln = sum(ub * lt for ub, lt in zip(u_beta, todos_ln))
+        return r / beta - r * s_ub_ln / s_ub   # Σ_f ln(ui)=0 drops out
 
     lo, hi = 1e-4, 100.0
     if g(lo) <= 0.0:
@@ -513,15 +539,27 @@ def _weibull_mle_beta(failure_times: list) -> float:
     return (lo + hi) / 2.0
 
 
-def _weibull_rry(failure_times: list) -> tuple:
-    """Estima β y η por regresión de rangos sobre Y (papel de probabilidad)."""
-    n       = len(failure_times)
-    t_sort  = sorted(failure_times)
-    # Benard's median rank approximation
-    F_i     = [(i - 0.3) / (n + 0.4) for i in range(1, n + 1)]
-    X       = [math.log(t) for t in t_sort]
-    Y       = [math.log(-math.log(1.0 - f)) for f in F_i]
-    n_pts   = float(n)
+def _weibull_rry(failure_times: list, suspensions: list | None = None) -> tuple:
+    """Estima β y η por regresión de rangos sobre Y (papel de probabilidad).
+
+    Con suspensiones usa los rangos ajustados de Johnson (1964): para la falla en la posición *i* (de *n* unidades) el rango pasa de
+    ``previo`` a ``previo + (n + 1 − previo) / (n − i + 2)``, y el rango mediano de Benard es (rango − 0,3) / (n + 0,4).
+    """
+    susp    = suspensions or []
+    n       = len(failure_times) + len(susp)
+    # fallas antes que suspensiones en caso de empate
+    orden   = sorted([(t, 0) for t in failure_times] + [(t, 1) for t in susp])
+    previo  = 0.0
+    X: list[float] = []
+    Y: list[float] = []
+    for pos, (t, es_susp) in enumerate(orden, start=1):
+        if es_susp:
+            continue
+        previo = previo + (n + 1 - previo) / (n - pos + 2)
+        F      = (previo - 0.3) / (n + 0.4)          # rango mediano de Benard
+        X.append(math.log(t))
+        Y.append(math.log(-math.log(1.0 - F)))
+    n_pts   = float(len(X))
     sx      = sum(X)
     sy      = sum(Y)
     sxx     = sum(x * x for x in X)
@@ -533,14 +571,47 @@ def _weibull_rry(failure_times: list) -> tuple:
     return beta, eta
 
 
+def _weibull_intervalos(failure_times: list, suspensions: list, beta: float, eta: float, confianza: float) -> tuple:
+    """Intervalos de confianza de β y η a partir de la información observada (aproximación normal sobre el logaritmo del parámetro).
+
+    Con r fallas y todas las unidades i (fallas y suspensiones), zᵢ = (tᵢ/η)ᵝ y Lᵢ = ln(tᵢ/η), la matriz de información observada tiene
+    I_ββ = r/β² + Σ zᵢLᵢ², I_ηη = (β(β+1)Σzᵢ − rβ)/η² e I_βη = −(Σzᵢ − r + βΣzᵢLᵢ)/η. Devuelve (None, None) si no es invertible.
+    """
+    todos = failure_times + suspensions
+    r     = len(failure_times)
+    z     = [(t / eta) ** beta for t in todos]
+    L     = [math.log(t / eta) for t in todos]
+    sz, szl, szl2 = sum(z), sum(zi * li for zi, li in zip(z, L)), sum(zi * li * li for zi, li in zip(z, L))
+    i_bb  = r / beta**2 + szl2
+    i_ee  = (beta * (beta + 1.0) * sz - r * beta) / eta**2
+    i_be  = -(sz - r + beta * szl) / eta
+    det   = i_bb * i_ee - i_be**2
+    if not (math.isfinite(det) and det > 0.0 and i_bb > 0.0 and i_ee > 0.0):
+        return None, None
+    var_b = i_ee / det
+    var_e = i_bb / det
+    q     = NormalDist().inv_cdf(0.5 + confianza / 2.0)
+    se_ln_b, se_ln_e = math.sqrt(var_b) / beta, math.sqrt(var_e) / eta
+    return (
+        (beta * math.exp(-q * se_ln_b), beta * math.exp(q * se_ln_b)),
+        (eta * math.exp(-q * se_ln_e), eta * math.exp(q * se_ln_e)),
+    )
+
+
 def weibull_analysis(
     failure_times: Sequence[float],
     *,
     method: str = "MLE",
+    suspensions: Sequence[float] | None = None,
+    confidence: float = 0.95,
 ) -> WeibullResult:
-    """Ajusta una distribución Weibull de dos parámetros a datos de falla completos.
+    """Ajusta una distribución Weibull de dos parámetros a tiempos de falla, con o sin unidades suspendidas (censura por la derecha).
 
     F(t) = 1 − exp(−(t/η)^β)
+
+    En fiabilidad real casi siempre hay unidades que siguen funcionando cuando termina el estudio o que se retiran por otra causa
+    (suspensiones). Ignorarlas, o tratarlas como fallas, sesga la vida estimada: con las suspensiones, la máxima verosimilitud usa
+    f(t) para las fallas y R(t) para las suspendidas. Con ``method='MLE'`` el resultado incluye intervalos de confianza de β y η.
 
     Parameters
     ----------
@@ -548,7 +619,11 @@ def weibull_analysis(
         Tiempos de falla observados (todos deben ser > 0). Se requieren al menos 2 valores.
     method : str
         ``'MLE'`` (por defecto): máxima verosimilitud mediante bisección;
-        ``'RRY'``: regresión de rangos sobre Y (método de papel de probabilidad, más rápido).
+        ``'RRY'``: regresión de rangos sobre Y (papel de probabilidad; con suspensiones, rangos ajustados de Johnson).
+    suspensions : sequence of float, optional
+        Tiempos de las unidades suspendidas: siguieron funcionando hasta ese tiempo sin fallar (todos > 0).
+    confidence : float
+        Nivel de confianza de los intervalos de β y η (por defecto 0.95), solo con ``method='MLE'``.
 
     Returns
     -------
@@ -559,7 +634,8 @@ def weibull_analysis(
     ------
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
-        Si hay menos de 2 tiempos de falla, todos son iguales o ``method`` no es ``'MLE'`` ni ``'RRY'``.
+        Si hay menos de 2 tiempos de falla, todos son iguales, ``method`` no es ``'MLE'`` ni ``'RRY'`` o ``confidence`` no está
+        estrictamente entre 0 y 1.
     TypeError
         Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
@@ -571,8 +647,15 @@ def weibull_analysis(
     >>> r = weibull_analysis(times)
     >>> 2.0 < r.shape < 3.0  # cuantiles equiespaciados: menos dispersión que una muestra aleatoria
     True
+    >>> r = weibull_analysis(times[:6], suspensions=[80.0, 90.0, 95.0])  # tres unidades siguieron funcionando
+    >>> r.n, r.n_suspended
+    (6, 3)
     """
     t_list = as_float_list(failure_times, "failure_times", min_len=2)
+    susp_list = as_float_list(suspensions, "suspensions", min_len=1) if suspensions is not None and len(suspensions) > 0 else []
+    conf = as_fraction(confidence, "confidence")
+    if conf <= 0.0 or conf >= 1.0:
+        raise ValueError(_t("reliability.error.weibull_analysis.confidence_entre_0_1"))
     if max(t_list) == min(t_list):
         raise ValueError(
             _t("reliability.error.weibull_analysis.todos_tiempos_falla_son_iguales")
@@ -582,12 +665,13 @@ def weibull_analysis(
     if m not in ("MLE", "RRY"):
         raise ValueError(_t("reliability.error.weibull_analysis.method_debe_ser_mle_rry"))
 
+    shape_ci = scale_ci = None
     if m == "MLE":
-        beta  = _weibull_mle_beta(t_list)
-        n_pts = len(t_list)
-        eta   = (sum(t ** beta for t in t_list) / n_pts) ** (1.0 / beta)
+        beta  = _weibull_mle_beta(t_list, susp_list)
+        eta   = ((sum(t ** beta for t in t_list) + sum(t ** beta for t in susp_list)) / len(t_list)) ** (1.0 / beta)
+        shape_ci, scale_ci = _weibull_intervalos(t_list, susp_list, beta, eta, conf)
     else:
-        beta, eta = _weibull_rry(t_list)
+        beta, eta = _weibull_rry(t_list, susp_list)
 
     mttf = eta * math.gamma(1.0 + 1.0 / beta)
     b10  = eta * (-math.log(0.90)) ** (1.0 / beta)
@@ -601,4 +685,8 @@ def weibull_analysis(
         b50=b50,
         method=m,
         n=len(t_list),
+        n_suspended=len(susp_list),
+        confidence=conf if shape_ci is not None else None,
+        shape_ci=shape_ci,
+        scale_ci=scale_ci,
     )

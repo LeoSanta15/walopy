@@ -8,7 +8,31 @@ Sin cambios todavía.
 
 ---
 
-## [0.4.7] — 2026-10-22
+## [0.4.8] — 2026-10-21
+
+Versión de fiabilidad con datos censurados: `weibull_analysis` admite unidades suspendidas e intervalos de confianza, de la auditoría de dominio. Sin suspensiones,
+β y η son los de siempre.
+
+### Añadido
+- **`weibull_analysis(..., suspensions=[...])`**: censura por la derecha. Las unidades que seguían funcionando al terminar el estudio entran a la verosimilitud con R(t) en vez de f(t) (MLE)
+  o con los rangos ajustados de Johnson (RRY). Descartarlas, o tratarlas como fallas, sesga la vida: en una simulación de 150 muestras de 40 unidades (β = 2, η = 100, censura en t = 90, cerca de la mitad suspendidas),
+  ignorarlas deja η en promedio 38 % por debajo del valor verdadero y el MLE con censura, 0,5 %.
+- **Intervalos de confianza de β y η** con `method="MLE"` (`shape_ci`, `scale_ci`, `confidence`, nivel con `confidence=`, 0,95 por defecto): aproximación normal sobre el logaritmo del
+  parámetro con la información observada de Fisher. Coinciden con el Hessiano numérico y, sin censura, con las varianzas asintóticas 0,6079·β²/n y 1,1087·η²/(n·β²); en una simulación
+  de 500 muestras de 60 unidades con 31 % de censura la cobertura del 95 % fue 96,4 % para β y 95,6 % para η. Son asintóticos: con menos de unas 10 fallas pueden ser optimistas. Con `method="RRY"` no se calculan.
+- `WeibullResult` gana `n_suspended`, `confidence`, `shape_ci` y `scale_ci`; `summary()` y `to_frame()` los muestran (columnas nuevas al final de `to_frame()`).
+
+### Corregido
+- Textos de las notas de 0.4.7: el rango de utilización de la simulación de la línea serial era 0,64 a 0,78 (no 0,7 a 0,78), con CV² de servicio de 0,5, 2 y 1; las simulaciones de `ggc`
+  cubrían de 2 a 4 servidores (no solo 3 y 4); y la fecha de la versión es 2026-10-21.
+
+### Pruebas
+- `tests/test_weibull_censurado.py`: valores de scipy (optimizador y Hessiano numérico), búsqueda por sección áurea de la verosimilitud perfilada, rangos de Johnson calculados a mano,
+  invariancia a la escala de tiempo, varianzas asintóticas, cobertura por simulación y el sesgo de ignorar las suspensiones. Cuatro mutantes nuevos (`MU-29` a `MU-32`).
+
+---
+
+## [0.4.7] — 2026-10-21
 
 Versión de flujo y servicio: colas de varios servidores con variabilidad cualquiera y líneas de estaciones en serie, de la auditoría de dominio. Solo añade funciones: no cambia
 ningún resultado existente.
@@ -16,13 +40,13 @@ ningún resultado existente.
 ### Añadido
 - **`ggc(lam, mu, c, ca2, cs2)`**: cola G/G/c con la aproximación de Allen-Cunneen, Wq ≈ Wq(M/M/c)·(ca² + cs²)/2. Con un servidor coincide con `kingman`, con ca² = cs² = 1 con `mmc`
   y con servicio determinista y llegadas de Poisson (un servidor) con `md1`. En `params` incluye cd², el CV² de las salidas. En las pruebas, Wq quedó a menos de 12 % de una simulación
-  de eventos con ρ entre 0,70 y 0,85 (3 y 4 servidores; llegadas y servicio no exponenciales).
+  de eventos con ρ entre 0,70 y 0,85 (2 a 4 servidores; llegadas y servicio no exponenciales).
 - **`departure_cv2(lam, mu, c, ca2, cs2)`**: ecuación de enlace de la variabilidad de las salidas, cd² = 1 + (1 − ρ²)(ca² − 1) + ρ²(cs² − 1)/√c (Whitt; con un servidor, la de Hopp y Spearman).
   Es una aproximación: con ρ = 0,8, ca² = 2 y cs² = 0,5 da 1,04 y una simulación de 400 000 clientes, 0,96.
 - **`serial_line(station_names, mu, *, lam, ca2, cs2, servers)`**, **`SerialLineResult`** y **`LineStationResult`**: línea de estaciones en serie; cada estación es G/G/c y su cd² pasa a ser el
   ca² de la siguiente. Devuelve tiempo de ciclo, inventario en proceso (ley de Little), cuello de botella y los indicadores por estación. A diferencia de `jackson_network` (exacta, pero con
-  llegadas de Poisson y servicio exponencial) admite cualquier variabilidad; con todo exponencial coincide con ella. Contra una simulación de tres colas en serie (ρ = 0,7 a 0,78; servicio
-  Erlang-2, exponencial e hiperexponencial) el tiempo de ciclo quedó a menos de 10 %. Supone buffers infinitos, sin mermas ni reproceso.
+  llegadas de Poisson y servicio exponencial) admite cualquier variabilidad; con todo exponencial coincide con ella. Contra una simulación de tres colas en serie (ρ entre 0,64 y 0,78; CV² de
+  servicio de 0,5, 2 y 1) el tiempo de ciclo quedó a menos de 10 %. Supone buffers infinitos, sin mermas ni reproceso.
 
 ### Pruebas
 - `tests/test_ggc_linea_serial.py`: casos límite exactos, simulación multiservidor con `heapq`, simulación de colas en serie (recursión de Lindley), variabilidad de las salidas medida en una

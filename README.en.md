@@ -1511,10 +1511,11 @@ r.R(t=200)          # evaluates R(t) at any later time
 
 ### Weibull distribution — `weibull_analysis`
 
-Fits a two-parameter Weibull (shape β, scale η) to complete failure times by **maximum
-likelihood** (`method="MLE"`, bisection on the likelihood equation) or by **rank regression**
-(`method="RRY"`, Benard's median ranks). β < 1 indicates infant mortality, β ≈ 1 random failures and
-β > 1 wear-out.
+Fits a two-parameter Weibull (shape β, scale η) to failure times, with or without units that are still
+running when the study ends (**suspensions**, right censoring), by **maximum likelihood** (`method="MLE"`,
+bisection on the likelihood equation) or by **rank regression** (`method="RRY"`, Benard's median ranks; with
+suspensions, Johnson's adjusted ranks). β < 1 indicates infant mortality, β ≈ 1 random failures and β > 1
+wear-out.
 
 ```python
 times = [12.5, 18.3, 24.1, 31.7, 38.2, 45.9, 52.4, 61.0, 70.8, 85.3]
@@ -1528,7 +1529,26 @@ print(w.to_frame())
 w_rry = wl.weibull_analysis(times, method="RRY")
 ```
 
-At least 2 finite, positive times are needed; if all of them are equal the shape cannot be estimated
+### Censored data and confidence intervals
+
+There are almost always units that have not failed when the test ends. Discarding them underestimates the
+life; treating them as failures does too. With `suspensions=` the likelihood uses the density f(t) of the
+failures and the reliability R(t) of the suspended units. With `method="MLE"` the result carries confidence
+intervals for β and η (`shape_ci`, `scale_ci`) from Fisher's observed information (normal approximation on the
+logarithm of the parameter); `confidence` sets the level (95 % by default).
+
+```python
+failures = [72, 95, 130, 151, 176, 210, 243, 290]
+alive = [100, 120, 150, 200, 200, 250, 300, 300]       # suspended, still running
+w = wl.weibull_analysis(failures, suspensions=alive)
+print(w)                                               # β ≈ 2.42, η ≈ 273; 95 % CI for β: [1.37, 4.27]
+print(w.shape_ci, w.scale_ci, w.n_suspended)
+```
+
+The intervals are asymptotic: with few failures (fewer than about 10) they can be optimistic; with
+`method="RRY"` they are not computed.
+
+At least 2 finite, positive failure times are needed; if all of them are equal the shape cannot be estimated
 (`ValueError`) and, if there is almost no dispersion, a warning (`UserWarning`) says that β reached the upper bound of 100.
 
 ---
