@@ -55,7 +55,7 @@ MUTANTES = [
      'mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")', "mttr_v = mttr",
      "tests/test_regresion_validacion.py -k 'mtbf_rechaza or sistemas_rechazan_t'"),
     ("MU-11", "W-20 versión desincronizada de los metadatos", "__init__.py",
-     '__version__ = "0.4.7"', '__version__ = "0.4.8"',
+     '__version__ = "0.4.8"', '__version__ = "0.4.9"',
      "tests/test_version.py"),
     ("MU-12", "H-02 EOQResult.plot() roto (plot_eoq)", "inventory.py",
      "return plot_eoq(self, **kwargs)", 'raise ImportError("plot_eoq")',
@@ -114,6 +114,18 @@ MUTANTES = [
      "ruta, proj_var = _ruta_critica_de_mayor_varianza(acts, crit, variances, ES, EF, T)",
      "ruta, proj_var = crit, sum(variances[nm] for nm in crit)",
      "tests/test_pert_varianza.py -k 'empatadas or empate'"),
+    ("MU-29", "Weibull MLE ignora las suspensiones en la ecuación de β", "reliability.py",
+     "todos_ln = norm_ln + [math.log(t) - ln_mean for t in (suspensions or [])]", "todos_ln = norm_ln",
+     "tests/test_weibull_censurado.py -k 'coincide_con_scipy or ignorar'"),
+    ("MU-30", "Weibull RRY con incremento de rango de Johnson erróneo", "reliability.py",
+     "previo = previo + (n + 1 - previo) / (n - pos + 2)", "previo = previo + (n + 1 - previo) / (n - pos + 1)",
+     "tests/test_weibull_censurado.py -k rangos_ajustados"),
+    ("MU-31", "Weibull: término cruzado de la información observada incompleto", "reliability.py",
+     "i_be  = -(sz - r + beta * szl) / eta", "i_be  = -(sz - r) / eta",
+     "tests/test_weibull_censurado.py -k 'hessiano or asintoticas'"),
+    ("MU-32", "Weibull: cuantil de confianza unilateral en vez de bilateral", "reliability.py",
+     "NormalDist().inv_cdf(0.5 + confianza / 2.0)", "NormalDist().inv_cdf(confianza)",
+     "tests/test_weibull_censurado.py -k 'hessiano or cobertura'"),
 ]
 
 

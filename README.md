@@ -1498,10 +1498,11 @@ r.R(t=200)          # evalúa R(t) en cualquier tiempo posterior
 
 ### Distribución de Weibull — `weibull_analysis`
 
-Ajusta una Weibull de dos parámetros (forma β, escala η) a tiempos de falla completos por **máxima
-verosimilitud** (`method="MLE"`, bisección sobre la ecuación de verosimilitud) o por **regresión de rangos**
-(`method="RRY"`, rangos medianos de Benard). β < 1 indica mortalidad infantil, β ≈ 1 fallas aleatorias y
-β > 1 desgaste.
+Ajusta una Weibull de dos parámetros (forma β, escala η) a tiempos de falla, con o sin unidades que siguen
+funcionando al terminar el estudio (**suspensiones**, censura por la derecha), por **máxima verosimilitud**
+(`method="MLE"`, bisección sobre la ecuación de verosimilitud) o por **regresión de rangos** (`method="RRY"`,
+rangos medianos de Benard; con suspensiones, rangos ajustados de Johnson). β < 1 indica mortalidad infantil,
+β ≈ 1 fallas aleatorias y β > 1 desgaste.
 
 ```python
 tiempos = [12.5, 18.3, 24.1, 31.7, 38.2, 45.9, 52.4, 61.0, 70.8, 85.3]
@@ -1515,7 +1516,26 @@ print(w.to_frame())
 w_rry = wl.weibull_analysis(tiempos, method="RRY")
 ```
 
-Se necesitan al menos 2 tiempos finitos y positivos; si todos son iguales la forma no es estimable
+### Datos censurados e intervalos de confianza
+
+Casi siempre hay unidades que no han fallado cuando termina la prueba. Descartarlas subestima la vida;
+tratarlas como fallas también. Con `suspensions=` la verosimilitud usa la densidad f(t) de las fallas y la
+confiabilidad R(t) de las suspendidas. Con `method="MLE"` el resultado trae intervalos de confianza de β y η
+(`shape_ci`, `scale_ci`) a partir de la información observada de Fisher (aproximación normal sobre el
+logaritmo del parámetro); `confidence` fija el nivel (95 % por defecto).
+
+```python
+fallas = [72, 95, 130, 151, 176, 210, 243, 290]
+vivas = [100, 120, 150, 200, 200, 250, 300, 300]      # suspendidas, siguen funcionando
+w = wl.weibull_analysis(fallas, suspensions=vivas)
+print(w)                                               # β ≈ 2.42, η ≈ 273; IC 95 % de β: [1.37, 4.27]
+print(w.shape_ci, w.scale_ci, w.n_suspended)
+```
+
+Los intervalos son asintóticos: con pocas fallas (menos de unas 10) pueden ser optimistas; con `method="RRY"`
+no se calculan.
+
+Se necesitan al menos 2 tiempos de falla finitos y positivos; si todos son iguales la forma no es estimable
 (`ValueError`) y, si casi no hay dispersión, se avisa (`UserWarning`) de que β alcanzó la cota superior de 100.
 
 ---

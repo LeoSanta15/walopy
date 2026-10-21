@@ -2938,13 +2938,23 @@
     "__clase__": "WeibullResult",
     "b10": "4.88873825",
     "b50": "4.98170792",
+    "confidence": "0.95",
     "method": "MLE",
     "mttf": "4.97162928",
     "n": 4,
+    "n_suspended": 0,
     "scale": "5.00000003",
-    "shape": "100"
+    "scale_ci": [
+     "4.95124023",
+     "5.04924"
+    ],
+    "shape": "100",
+    "shape_ci": [
+     "37.5317857",
+     "266.440826"
+    ]
    },
-   "str": "Método       : MLE (n=4)\nForma β      : 100.0000\nEscala η     : 5\nMTTF         : 4.972\nVida B10     : 4.889\nB50 (mediana): 4.982"
+   "str": "Método       : MLE (n=4)\nForma β      : 100.0000\nEscala η     : 5\nMTTF         : 4.972\nVida B10     : 4.889\nB50 (mediana): 4.982\nIC 95%       : β ∈ [37.53, 266.4]; η ∈ [4.951, 5.049]"
   }
  },
  "funciones": {
@@ -9494,14 +9504,24 @@
     "__clase__": "WeibullResult",
     "b10": "11.8437013",
     "b50": "44.70813",
+    "confidence": "0.95",
     "method": "MLE",
     "mttf": "52.6605316",
     "n": 6,
+    "n_suspended": 0,
     "scale": "57.8928576",
-    "shape": "1.4181815"
+    "scale_ci": [
+     "31.9007584",
+     "105.062799"
+    ],
+    "shape": "1.4181815",
+    "shape_ci": [
+     "0.751759014",
+     "2.67537699"
+    ]
    },
-   "str": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71",
-   "summary": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71",
+   "str": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71\nIC 95%       : β ∈ [0.7518, 2.675]; η ∈ [31.9, 105.1]",
+   "summary": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71\nIC 95%       : β ∈ [0.7518, 2.675]; η ∈ [31.9, 105.1]",
    "to_frame": {
     "__df__": true,
     "columnas": [
@@ -9511,9 +9531,14 @@
      "B10",
      "B50",
      "método",
-     "n"
+     "n",
+     "suspensiones",
+     "β IC inferior",
+     "β IC superior",
+     "η IC inferior",
+     "η IC superior"
     ],
-    "csv": ",β (forma),η (escala),MTTF,B10,B50,método,n\n0,1.4181815,57.8928576,52.6605316,11.8437013,44.70813,MLE,6\n",
+    "csv": ",β (forma),η (escala),MTTF,B10,B50,método,n,suspensiones,β IC inferior,β IC superior,η IC inferior,η IC superior\n0,1.4181815,57.8928576,52.6605316,11.8437013,44.70813,MLE,6,0,0.751759014,2.67537699,31.9007584,105.062799\n",
     "indice": [
      "0"
     ]
@@ -9705,25 +9730,26 @@
   "README.md[53]": "0.751279941\n116.666666\n",
   "README.md[54]": "83.3333333\n0.657378003\n",
   "README.md[55]": "",
-  "README.md[56]": "Método       : MLE (n=10)\nForma β      : 2.0961\nEscala η     : 49.86\nMTTF         : 44.16\nVida B10     : 17.04\nB50 (mediana): 41.86\n0.708334594 0.291665406\n0.0240938222\n17.0394588 41.8577329 12.0868485\n   β (forma)  η (escala)       MTTF        B10        B50 método   n\n0   2.096095   49.855642  44.157389  17.039459  41.857733    MLE  10\n",
-  "README.md[57]": "Método            : CPM\nDuración proyecto  : 8\nRuta crítica       : A → B → D\n  Actividad  Duración Predecesoras   ES   EF   LS   LF   HT   HL  Crítica\n0         A       3.0               0.0  3.0  0.0  3.0  0.0  0.0     True\n1         B       4.0            A  3.0  7.0  3.0  7.0  0.0  0.0     True\n2         C       2.0            A  3.0  5.0  5.0  7.0  2.0  2.0    False\n3         D       1.0         B, C  7.0  8.0  7.0  8.0  0.0  0.0     True\n['A', 'B', 'D']\n",
-  "README.md[58]": "Método            : PERT\nDuración proyecto  : 7.5\nRuta crítica       : A → B\nVarianza proyecto  : 1.806\nσ del proyecto     : 1.344\n0.867855827\n",
-  "README.md[59]": "7.5\n0.83\n9.5\n{'A': 1.0, 'B': 1.0}\n",
+  "README.md[56]": "Método       : MLE (n=10)\nForma β      : 2.0961\nEscala η     : 49.86\nMTTF         : 44.16\nVida B10     : 17.04\nB50 (mediana): 41.86\nIC 95%       : β ∈ [1.277, 3.441]; η ∈ [36.5, 68.1]\n0.708334594 0.291665406\n0.0240938222\n17.0394588 41.8577329 12.0868485\n   β (forma)  η (escala)  ...  η IC inferior  η IC superior\n0   2.096095   49.855642  ...      36.500526      68.097239\n\n[1 rows x 12 columns]\n",
+  "README.md[57]": "Método       : MLE (n=8)\nForma β      : 2.4190\nEscala η     : 273.5\nMTTF         : 242.5\nVida B10     : 107.9\nB50 (mediana): 235\nSuspensiones : 8 (censura por la derecha)\nIC 95%       : β ∈ [1.369, 4.273]; η ∈ [202.9, 368.6]\n(1.36933004, 4.27341045) (202.866842, 368.636957) 8\n",
+  "README.md[58]": "Método            : CPM\nDuración proyecto  : 8\nRuta crítica       : A → B → D\n  Actividad  Duración Predecesoras   ES   EF   LS   LF   HT   HL  Crítica\n0         A       3.0               0.0  3.0  0.0  3.0  0.0  0.0     True\n1         B       4.0            A  3.0  7.0  3.0  7.0  0.0  0.0     True\n2         C       2.0            A  3.0  5.0  5.0  7.0  2.0  2.0    False\n3         D       1.0         B, C  7.0  8.0  7.0  8.0  0.0  0.0     True\n['A', 'B', 'D']\n",
+  "README.md[59]": "Método            : PERT\nDuración proyecto  : 7.5\nRuta crítica       : A → B\nVarianza proyecto  : 1.806\nσ del proyecto     : 1.344\n0.867855827\n",
   "README.md[5]": "0.3333\n0.8717\n1.04\n",
-  "README.md[60]": "",
+  "README.md[60]": "7.5\n0.83\n9.5\n{'A': 1.0, 'B': 1.0}\n",
   "README.md[61]": "",
-  "README.md[62]": "1.2\n",
-  "README.md[63]": "",
-  "README.md[64]": "3.57142857\n0.5\nModelo : M/M/1\nλ      : 3.57143  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 1  (servidores)\nρ      : 0.714286  (utilización por servidor)\nL      : 2.5  (unidades promedio en el sistema)\nLq     : 1.78571  (unidades promedio en cola)\nW      : 0.7  (tiempo promedio en el sistema)\nWq     : 0.5  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.285714\n",
-  "README.md[65]": "5\n",
-  "README.md[66]": "3.0\nModelo : M/M/3\nλ      : 8  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 3  (servidores)\nρ      : 0.533333  (utilización por servidor)\nL      : 1.91291  (unidades promedio en el sistema)\nLq     : 0.312911  (unidades promedio en cola)\nW      : 0.239114  (tiempo promedio en el sistema)\nWq     : 0.0391138  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.187166\n  C(c,a) Erlang-C: 0.273797\n",
-  "README.md[67]": "2\n23.375\n",
-  "README.md[68]": "['lam', 'mu', 'servers', 'rho', 'L', 'Lq', 'W', 'Wq']\n",
-  "README.md[69]": "   lam  rho        Wq         L\n0  1.0  0.2  0.050000  0.250000\n1  2.0  0.4  0.133333  0.666667\n2  3.0  0.6  0.300000  1.500000\n3  4.0  0.8  0.800000  4.000000\n   c                                             _error  lam  ...  Lq   W  Wq\n0  1  Sistema inestable: ρ = 1.6 ≥ 1. Se requiere λ ...  NaN  ... NaN NaN NaN\n\n[1 rows x 10 columns]\n",
+  "README.md[62]": "",
+  "README.md[63]": "1.2\n",
+  "README.md[64]": "",
+  "README.md[65]": "3.57142857\n0.5\nModelo : M/M/1\nλ      : 3.57143  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 1  (servidores)\nρ      : 0.714286  (utilización por servidor)\nL      : 2.5  (unidades promedio en el sistema)\nLq     : 1.78571  (unidades promedio en cola)\nW      : 0.7  (tiempo promedio en el sistema)\nWq     : 0.5  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.285714\n",
+  "README.md[66]": "5\n",
+  "README.md[67]": "3.0\nModelo : M/M/3\nλ      : 8  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 3  (servidores)\nρ      : 0.533333  (utilización por servidor)\nL      : 1.91291  (unidades promedio en el sistema)\nLq     : 0.312911  (unidades promedio en cola)\nW      : 0.239114  (tiempo promedio en el sistema)\nWq     : 0.0391138  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.187166\n  C(c,a) Erlang-C: 0.273797\n",
+  "README.md[68]": "2\n23.375\n",
+  "README.md[69]": "['lam', 'mu', 'servers', 'rho', 'L', 'Lq', 'W', 'Wq']\n",
   "README.md[6]": "",
-  "README.md[70]": "   label  ρ (utilización)  Wq (tiempo de espera)  L (en el sistema)\n0  M/M/1              0.6                0.30000           1.500000\n1  M/M/2              0.3                0.01978           0.659341\n2  M/D/1              0.6                0.15000           1.050000\n",
-  "README.md[71]": "",
+  "README.md[70]": "   lam  rho        Wq         L\n0  1.0  0.2  0.050000  0.250000\n1  2.0  0.4  0.133333  0.666667\n2  3.0  0.6  0.300000  1.500000\n3  4.0  0.8  0.800000  4.000000\n   c                                             _error  lam  ...  Lq   W  Wq\n0  1  Sistema inestable: ρ = 1.6 ≥ 1. Se requiere λ ...  NaN  ... NaN NaN NaN\n\n[1 rows x 10 columns]\n",
+  "README.md[71]": "   label  ρ (utilización)  Wq (tiempo de espera)  L (en el sistema)\n0  M/M/1              0.6                0.30000           1.500000\n1  M/M/2              0.3                0.01978           0.659341\n2  M/D/1              0.6                0.15000           1.050000\n",
   "README.md[72]": "",
+  "README.md[73]": "",
   "README.md[7]": "0.318309886\n",
   "README.md[8]": "",
   "README.md[9]": "0.401456472\n2.99271764\n",
