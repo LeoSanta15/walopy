@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-21 22:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -38,8 +38,9 @@ msgstr "Solves Little's law  L = λ · W  for the missing variable."
 #: of walopy.queuing.cv2_erlang walopy.queuing.cv2_gamma
 #: walopy.queuing.cv2_lognormal walopy.queuing.cv2_normal
 #: walopy.queuing.cv2_triangular walopy.queuing.cv2_uniform
-#: walopy.queuing.cv2_weibull walopy.queuing.kingman walopy.queuing.littles_law
-#: walopy.queuing.md1 walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
+#: walopy.queuing.cv2_weibull walopy.queuing.departure_cv2 walopy.queuing.ggc
+#: walopy.queuing.kingman walopy.queuing.littles_law walopy.queuing.md1
+#: walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
 msgid "Parameters"
 msgstr "Parameters"
 
@@ -63,16 +64,18 @@ msgstr "Returns"
 msgid "Valor de la variable faltante."
 msgstr "Value of the missing variable."
 
-#: of walopy.queuing.kingman walopy.queuing.littles_law walopy.queuing.md1
-#: walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
+#: of walopy.queuing.departure_cv2 walopy.queuing.ggc walopy.queuing.kingman
+#: walopy.queuing.littles_law walopy.queuing.md1 walopy.queuing.mg1
+#: walopy.queuing.mm1 walopy.queuing.mmc
 msgid "Return type"
 msgstr "Return type"
 
 #: of walopy.queuing.cv2_erlang walopy.queuing.cv2_gamma
 #: walopy.queuing.cv2_lognormal walopy.queuing.cv2_normal
 #: walopy.queuing.cv2_triangular walopy.queuing.cv2_uniform
-#: walopy.queuing.cv2_weibull walopy.queuing.kingman walopy.queuing.littles_law
-#: walopy.queuing.md1 walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
+#: walopy.queuing.cv2_weibull walopy.queuing.departure_cv2 walopy.queuing.ggc
+#: walopy.queuing.kingman walopy.queuing.littles_law walopy.queuing.md1
+#: walopy.queuing.mg1 walopy.queuing.mm1 walopy.queuing.mmc
 msgid "Raises"
 msgstr "Raises"
 
@@ -83,7 +86,8 @@ msgstr "If zero or more than one variable is ``None``."
 #: of walopy.queuing.cv2_erlang:10 walopy.queuing.cv2_gamma:10
 #: walopy.queuing.cv2_lognormal:12 walopy.queuing.cv2_normal:12
 #: walopy.queuing.cv2_triangular:14 walopy.queuing.cv2_uniform:12
-#: walopy.queuing.cv2_weibull:12 walopy.queuing.kingman:22
+#: walopy.queuing.cv2_weibull:12 walopy.queuing.departure_cv2:26
+#: walopy.queuing.ggc:28 walopy.queuing.kingman:22
 #: walopy.queuing.littles_law:13 walopy.queuing.md1:14 walopy.queuing.mg1:26
 #: walopy.queuing.mm1:14 walopy.queuing.mmc:16
 msgid "Examples"
@@ -101,7 +105,8 @@ msgstr "Arrival rate λ (must be < μ for the system to be stable)."
 msgid "Tasa de servicio μ por servidor."
 msgstr "Service rate μ per server."
 
-#: of walopy.queuing.kingman:18 walopy.queuing.md1:10 walopy.queuing.mg1:22
+#: of walopy.queuing.departure_cv2:22 walopy.queuing.ggc:24
+#: walopy.queuing.kingman:18 walopy.queuing.md1:10 walopy.queuing.mg1:22
 #: walopy.queuing.mm1:10
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1)."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1)."
@@ -109,7 +114,8 @@ msgstr "If any numeric argument is not finite or is outside its domain (for exam
 #: of walopy.queuing.cv2_erlang:7 walopy.queuing.cv2_gamma:7
 #: walopy.queuing.cv2_lognormal:9 walopy.queuing.cv2_normal:9
 #: walopy.queuing.cv2_triangular:11 walopy.queuing.cv2_uniform:9
-#: walopy.queuing.cv2_weibull:9 walopy.queuing.kingman:19 walopy.queuing.md1:11
+#: walopy.queuing.cv2_weibull:9 walopy.queuing.departure_cv2:23
+#: walopy.queuing.ggc:25 walopy.queuing.kingman:19 walopy.queuing.md1:11
 #: walopy.queuing.mg1:23 walopy.queuing.mm1:11 walopy.queuing.mmc:13
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
@@ -118,7 +124,8 @@ msgstr "If an argument is not numeric or a sequence contains values that are not
 msgid "Modelo de colas M/M/c de varios servidores."
 msgstr "M/M/c multi-server queueing model."
 
-#: of walopy.queuing.kingman:7 walopy.queuing.md1:3 walopy.queuing.mg1:7
+#: of walopy.queuing.departure_cv2:9 walopy.queuing.ggc:11
+#: walopy.queuing.kingman:7 walopy.queuing.md1:3 walopy.queuing.mg1:7
 #: walopy.queuing.mmc:3
 msgid "Tasa de llegadas λ."
 msgstr "Arrival rate λ."
@@ -158,6 +165,50 @@ msgstr "Squared coefficient of variation of the interarrival times (≥ 0)."
 #: of walopy.queuing.kingman:13
 msgid "Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0)."
 msgstr "Squared coefficient of variation of the service times (≥ 0)."
+
+#: of walopy.queuing.ggc:1
+msgid "Cola G/G/c de varios servidores mediante la aproximación de Allen-Cunneen."
+msgstr "Multi-server G/G/c queue using the Allen-Cunneen approximation."
+
+#: of walopy.queuing.ggc:3
+msgid "El tiempo medio de espera en cola se aproxima escalando el de M/M/c por la variabilidad::"
+msgstr "The mean waiting time in queue is approximated by scaling that of M/M/c by the variability::"
+
+#: of walopy.queuing.ggc:7
+msgid "Con un servidor coincide con la fórmula de Kingman (``kingman``) y con ca² = cs² = 1 con ``mmc``. El resultado incluye en ``params`` el CV² de las salidas (cd²), que alimenta la estación siguiente de una línea (``serial_line``). Es una aproximación; el error suele ser de pocos puntos porcentuales con carga moderada y puede crecer con muchos servidores y mucha variabilidad."
+msgstr "With one server it matches the Kingman formula (``kingman``) and, with ca² = cs² = 1, ``mmc``. The result includes in ``params`` the CV² of the departures (cd²), which feeds the next station of a line (``serial_line``). It is an approximation; the error is usually a few percentage points at moderate load and may grow with many servers and high variability."
+
+#: of walopy.queuing.departure_cv2:11 walopy.queuing.ggc:13
+msgid "Tasa de servicio por servidor μ."
+msgstr "Service rate per server μ."
+
+#: of walopy.queuing.departure_cv2:13 walopy.queuing.ggc:15
+msgid "Número de servidores."
+msgstr "Number of servers."
+
+#: of walopy.queuing.ggc:17
+msgid "CV² de los tiempos entre llegadas (≥ 0; 1 = llegadas de Poisson)."
+msgstr "CV² of the interarrival times (≥ 0; 1 = Poisson arrivals)."
+
+#: of walopy.queuing.ggc:19
+msgid "CV² de los tiempos de servicio (≥ 0; 1 = exponencial, 0 = determinista)."
+msgstr "CV² of the service times (≥ 0; 1 = exponential, 0 = deterministic)."
+
+#: of walopy.queuing.departure_cv2:1
+msgid "CV² de los tiempos entre salidas de una estación G/G/c (ecuación de enlace; Whitt, 1984)."
+msgstr "CV² of the interdeparture times of a G/G/c station (linking equation; Whitt, 1984)."
+
+#: of walopy.queuing.departure_cv2:3
+msgid "cd² = 1 + (1 − ρ²)(ca² − 1) + ρ²(cs² − 1)/√c"
+msgstr "cd² = 1 + (1 − ρ²)(ca² − 1) + ρ²(cs² − 1)/√c"
+
+#: of walopy.queuing.departure_cv2:5
+msgid "Con un servidor es la fórmula de Hopp y Spearman, cd² = ρ²·cs² + (1 − ρ²)·ca²: con poca carga las salidas heredan la variabilidad de las llegadas (cd² → ca²) y con mucha carga la del servicio (cd² → cs²). Es una aproximación: con ρ = 0,8, ca² = 2 y cs² = 0,5 da 1,04 y una simulación de 400 000 clientes, 0,96."
+msgstr "With one server it is the Hopp and Spearman formula, cd² = ρ²·cs² + (1 − ρ²)·ca²: at low load the departures inherit the variability of the arrivals (cd² → ca²) and at high load that of the service (cd² → cs²). It is an approximation: with ρ = 0.8, ca² = 2 and cs² = 0.5 it gives 1.04 and a 400 000-customer simulation, 0.96."
+
+#: of walopy.queuing.departure_cv2:15 walopy.queuing.departure_cv2:17
+msgid "CV² de los tiempos entre llegadas y de servicio (≥ 0)."
+msgstr "CV² of the interarrival and service times (≥ 0)."
 
 #: of walopy.queuing.mg1:1
 msgid "Modelo de colas M/G/1: fórmula exacta de valores medios de Pollaczek-Khinchine (P-K)."
@@ -232,7 +283,7 @@ msgstr "CV² of a Weibull(shape, scale) distribution."
 msgid "cv² = Γ(1 + 2/k) / Γ(1 + 1/k)² − 1"
 msgstr "cv² = Γ(1 + 2/k) / Γ(1 + 1/k)² − 1"
 
-#: ../../source/referencia/queuing.rst:36
+#: ../../source/referencia/queuing.rst:40
 msgid "Clases de resultado"
 msgstr "Result classes"
 

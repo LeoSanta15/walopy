@@ -159,6 +159,16 @@ AÑADIDAS_TRAS_V030 = {
     "advanced.cabecera.to_frame.semiancho_wq",
     "advanced.etiqueta.summary.ic_wq",
     "utils.error.t_cuantil_975.gl_debe_ser_recibio",
+    # 0.4.7: G/G/c y línea serial
+    "queuing.error.ggc.sistema_inestable",
+    "queuing.modelo.ggc.allen_cunneen",
+    "queuing.clave_params.ggc.cd2_cv2_salidas",
+    "network.cabecera.to_frame.ca2",
+    "network.cabecera.to_frame.cs2",
+    "network.cabecera.to_frame.cd2",
+    "network.error.serial_line.longitudes_distintas",
+    "network.error.serial_line.estacion_inestable",
+    "network.etiqueta.summary.linea_serial",
     # 0.4.6: PERT con simulación
     "project.error.probability_mc.requiere_simulacion",
     "project.error.percentile_mc.q_entre_0_100",
