@@ -16,6 +16,10 @@ Funciones
 
 .. autofunction:: walopy.kingman
 
+.. autofunction:: walopy.ggc
+
+.. autofunction:: walopy.departure_cv2
+
 .. autofunction:: walopy.mg1
 
 .. autofunction:: walopy.cv2_triangular

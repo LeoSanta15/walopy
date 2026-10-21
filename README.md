@@ -172,6 +172,25 @@ r   = wl.kingman(**fit.to_model_kwargs())
 
 ---
 
+### `ggc(lam, mu, c, ca2, cs2)` — G/G/c (Allen-Cunneen) y `departure_cv2`
+
+Cola de **varios servidores con variabilidad cualquiera**. Aproxima la espera escalando la de M/M/c por la variabilidad (Allen-Cunneen):
+
+```
+Wq ≈ Wq(M/M/c) · (ca² + cs²) / 2
+```
+
+Con un servidor coincide con `kingman`; con `ca2 = cs2 = 1`, con `mmc`. El resultado incluye en `params` el CV² de las **salidas** (cd²), según la ecuación de enlace `cd² = 1 + (1 − ρ²)(ca² − 1) + ρ²(cs² − 1)/√c` (Whitt), que también está disponible como `departure_cv2`. Son aproximaciones: en las pruebas, Wq quedó a menos de 12 % de una simulación de eventos con ρ entre 0,70 y 0,85, y cd² a ≈ 8 % en un caso de un servidor.
+
+```python
+r = wl.ggc(lam=2.0, mu=1.0, c=3, ca2=1.0, cs2=0.5)   # llegadas Poisson, servicio Erlang-2, 3 servidores
+print(round(r.Wq, 4))                    # 0.3333 (M/M/3: 0.4444)
+print(round(wl.departure_cv2(2.0, 1.0, 3, 1.0, 0.5), 4))   # 0.8717: lo mismo que el cd² de r.params
+print(round(wl.departure_cv2(0.8, 1.0, 1, 2.0, 0.5), 4))   # 1.04 (ρ² · cs² + (1 − ρ²) · ca²)
+```
+
+---
+
 ### `mg1(lam, mu, cs2)` — M/G/1 (Pollaczek-Khinchine exacto)
 
 Llegadas Poisson, servicio de **distribución arbitraria** parametrizado por su media (1/μ) y su variabilidad (cs²). La fórmula P-K es **exacta**, no una aproximación.
@@ -535,6 +554,25 @@ net2 = wl.jackson_network(
 | `L`, `Lq`, `W`, `Wq` | Indicadores estándar de cola |
 
 **Restricciones:** todas las estaciones deben ser estables (ρ < 1). La suma de probabilidades de routing por fila debe ser ≤ 1.
+
+### `serial_line(station_names, mu, *, lam, ca2, cs2, servers)` — Línea serial con variabilidad
+
+Estaciones **en serie** con variabilidad cualquiera: cada una se analiza como G/G/c (`ggc`) y la variabilidad de sus salidas (cd²) pasa a ser la de las llegadas de la siguiente. Devuelve el tiempo de ciclo, el inventario en proceso (ley de Little) y el cuello de botella. A diferencia de `jackson_network`, que es exacta pero exige llegadas de Poisson y servicio exponencial, admite cualquier `ca2` y `cs2`; con todo exponencial coincide con ella para una línea serial. Supone buffers infinitos, sin mermas ni reproceso.
+
+```python
+line = wl.serial_line(
+    station_names=["Corte", "Soldadura"],
+    mu=[1.0, 0.8],
+    lam=0.6,                 # la misma tasa en todas las estaciones
+    cs2=[0.5, 2.0],          # CV² del servicio de cada estación (por defecto 1)
+    servers=[1, 1],          # servidores por estación (por defecto 1)
+)
+print(line)                  # tabla por estación y resumen de la línea
+print(line.bottleneck)       # Soldadura
+print(round(line.cycle_time, 2), round(line.wip, 2))   # 8.66 5.2
+```
+
+**`SerialLineResult` — atributos:** `stations` (lista de `LineStationResult` con `rho`, `ca2`, `cs2`, `cd2`, `Wq`, `W`, `Lq`, `L`), `lam`, `cycle_time`, `wip`, `bottleneck`, `ca2_out`.
 
 ---
 
@@ -1816,14 +1854,14 @@ Wq     : 0.3   (tiempo promedio de espera en cola)
 
 | Módulo | Funciones y clases principales |
 |---|---|
-| `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
+| `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `ggc`, `departure_cv2`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
 | `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |
 | `project` | `cpm`, `pert`, `ProjectResult`, `ActivityResult` |
 | `reliability` | `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `weibull_analysis`, `ReliabilityResult`, `WeibullResult` |
-| `network` | `jackson_network`, `JacksonResult`, `StationMetrics` |
+| `network` | `jackson_network`, `serial_line`, `JacksonResult`, `SerialLineResult`, `StationMetrics`, `LineStationResult` |
 | `operations` | `oee`, `utilization_efficiency`, `unit_cost`, `OEEResult`, `UtilizationResult`, `UnitCostResult` |
 | `bottleneck` | `bottleneck_analysis`, `BottleneckResult`, `StationResult` |
 | `kpi` | `KPINode`, `oee_kpi_tree`, `throughput_kpi_tree`, `roi_kpi_tree` |

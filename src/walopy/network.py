@@ -227,3 +227,178 @@ def jackson_network(
         W_system=W_system,
         params={"J": J, "total_gamma": total_ext},
     )
+
+
+@dataclass
+class LineStationResult:
+    """Métricas de una estación de una línea serial (``serial_line``).
+
+    Attributes
+    ----------
+    name : str
+    mu : float
+        Tasa de servicio por servidor.
+    servers : int
+        Número de servidores.
+    rho : float
+        Utilización λ / (c·μ).
+    ca2, cs2, cd2 : float
+        CV² de las llegadas a la estación, del servicio y de las salidas (ecuación de enlace).
+    Wq, W, Lq, L : float
+        Espera en cola, tiempo en la estación, y número en cola y en la estación (Allen-Cunneen).
+    """
+
+    name: str
+    mu: float
+    servers: int
+    rho: float
+    ca2: float
+    cs2: float
+    cd2: float
+    Wq: float
+    W: float
+    Lq: float
+    L: float
+
+
+@dataclass
+class SerialLineResult:
+    """Resultado de una línea de estaciones en serie.
+
+    Attributes
+    ----------
+    stations : list[LineStationResult]
+    lam : float
+        Tasa de llegadas a la línea (= producción, si no hay mermas).
+    cycle_time : float
+        Tiempo medio total en la línea (suma de los W de las estaciones).
+    wip : float
+        Inventario en proceso λ · tiempo de ciclo (ley de Little).
+    bottleneck : str
+        Estación con mayor utilización.
+    ca2_out : float
+        CV² de las salidas de la línea.
+    params : dict
+    """
+
+    stations: list[LineStationResult]
+    lam: float
+    cycle_time: float
+    wip: float
+    bottleneck: str
+    ca2_out: float
+    params: dict = field(default_factory=dict)
+
+    def to_frame(self) -> pd.DataFrame:
+        import pandas as pd
+        return pd.DataFrame([{
+            _t("network.cabecera.to_frame.estacion"): s.name,
+            "μ": s.mu,
+            "c": s.servers,
+            "ρ": s.rho,
+            _t("network.cabecera.to_frame.ca2"): s.ca2,
+            _t("network.cabecera.to_frame.cs2"): s.cs2,
+            _t("network.cabecera.to_frame.cd2"): s.cd2,
+            "Wq": s.Wq,
+            "W": s.W,
+            "Lq": s.Lq,
+            "L": s.L,
+        } for s in self.stations])
+
+    def summary(self) -> str:
+        tabla = self.to_frame().to_string(index=False, float_format=lambda x: f"{x:.4g}")
+        return tabla + "\n" + _t(
+            "network.etiqueta.summary.linea_serial", lam=self.lam, cycle_time=self.cycle_time, wip=self.wip,
+            bottleneck=self.bottleneck, ca2_out=self.ca2_out,
+        )
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def serial_line(
+    station_names: Sequence[str],
+    mu: Sequence[float],
+    *,
+    lam: float,
+    ca2: float = 1.0,
+    cs2: Sequence[float] | None = None,
+    servers: Sequence[int] | None = None,
+) -> SerialLineResult:
+    """Línea de estaciones en serie con variabilidad (aproximación de colas lineales de Allen-Cunneen y ecuación de enlace).
+
+    Cada estación se analiza como G/G/c (``ggc``) y la variabilidad de sus salidas, cd² (``departure_cv2``), pasa a ser la de las
+    llegadas de la siguiente. Devuelve el tiempo de ciclo (suma de los tiempos por estación) y el inventario en proceso (ley de
+    Little). A diferencia de ``jackson_network`` (exacta, pero solo con llegadas de Poisson y servicio exponencial) admite
+    cualquier ca² y cs²; con ca² = cs² = 1 en todas las estaciones coincide con ella para una línea serial. Supone buffers
+    infinitos (sin bloqueo), sin mermas ni reproceso y la misma tasa en todas las estaciones.
+
+    Parameters
+    ----------
+    station_names : sequence of str
+        Nombres de las estaciones, en orden de flujo.
+    mu : sequence of float
+        Tasa de servicio μ por servidor en cada estación.
+    lam : float
+        Tasa de llegadas a la línea (la misma en todas las estaciones).
+    ca2 : float
+        CV² de los tiempos entre llegadas a la primera estación (por defecto 1, Poisson).
+    cs2 : sequence of float, optional
+        CV² del servicio de cada estación (por defecto 1, exponencial, en todas).
+    servers : sequence of int, optional
+        Número de servidores de cada estación (por defecto 1).
+
+    Returns
+    -------
+    SerialLineResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si las secuencias tienen longitudes distintas o alguna estación es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = serial_line(["Corte", "Soldadura"], mu=[1.0, 0.8], lam=0.6, cs2=[0.5, 2.0])
+    >>> r.bottleneck
+    'Soldadura'
+    >>> round(r.cycle_time, 3)
+    8.662
+    """
+    from .queuing import departure_cv2, ggc
+
+    names = [str(n) for n in station_names]
+    as_nonempty(names, "station_names")
+    J = len(names)
+    lam_v = as_positive(lam, "lam")
+    ca2_v = as_nonneg(ca2, "ca2")
+    mu_v = [as_positive(m, f"mu[{i}]") for i, m in enumerate(mu)]
+    cs2_v = [1.0] * J if cs2 is None else [as_nonneg(x, f"cs2[{i}]") for i, x in enumerate(cs2)]
+    c_v = [1] * J if servers is None else [as_int_positive(c, f"servers[{i}]") for i, c in enumerate(servers)]
+    if not (len(mu_v) == len(cs2_v) == len(c_v) == J):
+        raise ValueError(_t("network.error.serial_line.longitudes_distintas"))
+
+    estaciones: list[LineStationResult] = []
+    ca2_actual = ca2_v
+    for j in range(J):
+        rho = lam_v / (c_v[j] * mu_v[j])
+        if rho >= 1.0:
+            raise ValueError(_t("network.error.serial_line.estacion_inestable", expr=names[j], rho_j=rho))
+        res = ggc(lam_v, mu_v[j], c_v[j], ca2_actual, cs2_v[j])
+        cd2 = departure_cv2(lam_v, mu_v[j], c_v[j], ca2_actual, cs2_v[j])
+        estaciones.append(LineStationResult(
+            name=names[j], mu=mu_v[j], servers=c_v[j], rho=rho, ca2=ca2_actual, cs2=cs2_v[j], cd2=cd2,
+            Wq=res.Wq, W=res.W, Lq=res.Lq, L=res.L,
+        ))
+        ca2_actual = cd2
+
+    ciclo = sum(e.W for e in estaciones)
+    cuello = max(estaciones, key=lambda e: e.rho)
+    return SerialLineResult(
+        stations=estaciones, lam=lam_v, cycle_time=ciclo, wip=lam_v * ciclo, bottleneck=cuello.name, ca2_out=ca2_actual,
+        params={"ca2": ca2_v},
+    )
+

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:18+0000\n"
+"POT-Creation-Date: 2026-10-21 22:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -39,7 +39,7 @@ msgstr "Analyzes an open Jackson queueing network."
 msgid "En una red abierta de Jackson los clientes llegan desde fuera según procesos de Poisson (tasas *gamma*), reciben servicio exponencial en cada estación que visitan y se enrutan de forma probabilística entre estaciones hasta salir del sistema. Por el teorema de Jackson cada estación se comporta como una cola M/M/c independiente con la tasa de llegada efectiva obtenida de las ecuaciones de tráfico."
 msgstr "In an open Jackson network customers arrive from outside according to Poisson processes (rates *gamma*), receive exponential service at each station they visit and are routed probabilistically between stations until they leave the system. By Jackson's theorem each station behaves as an independent M/M/c queue with the effective arrival rate obtained from the traffic equations."
 
-#: of walopy.network.jackson_network
+#: of walopy.network.jackson_network walopy.network.serial_line
 msgid "Parameters"
 msgstr "Parameters"
 
@@ -63,11 +63,11 @@ msgstr "Routing matrix P where P[i][j] = probability of going from station *i* t
 msgid "Número de servidores c_j en cada estación. Por defecto 1 en todas."
 msgstr "Number of servers c_j at each station. Defaults to 1 for all."
 
-#: of walopy.network.jackson_network
+#: of walopy.network.jackson_network walopy.network.serial_line
 msgid "Return type"
 msgstr "Return type"
 
-#: of walopy.network.jackson_network
+#: of walopy.network.jackson_network walopy.network.serial_line
 msgid "Raises"
 msgstr "Raises"
 
@@ -75,11 +75,51 @@ msgstr "Raises"
 msgid "Si el sistema es inestable (ρ_j ≥ 1 en alguna estación)."
 msgstr "If the system is unstable (ρ_j ≥ 1 at some station)."
 
-#: of walopy.network.jackson_network:27
+#: of walopy.network.jackson_network:27 walopy.network.serial_line:28
 msgid "Examples"
 msgstr "Examples"
 
-#: ../../source/referencia/network.rst:12
+#: of walopy.network.serial_line:1
+msgid "Línea de estaciones en serie con variabilidad (aproximación de colas lineales de Allen-Cunneen y ecuación de enlace)."
+msgstr "Line of stations in series with variability (Allen-Cunneen linear queueing approximation and linking equation)."
+
+#: of walopy.network.serial_line:3
+msgid "Cada estación se analiza como G/G/c (``ggc``) y la variabilidad de sus salidas, cd² (``departure_cv2``), pasa a ser la de las llegadas de la siguiente. Devuelve el tiempo de ciclo (suma de los tiempos por estación) y el inventario en proceso (ley de Little). A diferencia de ``jackson_network`` (exacta, pero solo con llegadas de Poisson y servicio exponencial) admite cualquier ca² y cs²; con ca² = cs² = 1 en todas las estaciones coincide con ella para una línea serial. Supone buffers infinitos (sin bloqueo), sin mermas ni reproceso y la misma tasa en todas las estaciones."
+msgstr "Each station is analysed as G/G/c (``ggc``) and the variability of its departures, cd² (``departure_cv2``), becomes that of the arrivals to the next. It returns the cycle time (sum of the per-station times) and the work in process (Little's law). Unlike ``jackson_network`` (exact, but only with Poisson arrivals and exponential service) it accepts any ca² and cs²; with ca² = cs² = 1 at every station it matches it for a serial line. It assumes infinite buffers (no blocking), no scrap or rework and the same rate at every station."
+
+#: of walopy.network.serial_line:9
+msgid "Nombres de las estaciones, en orden de flujo."
+msgstr "Names of the stations, in flow order."
+
+#: of walopy.network.serial_line:11
+msgid "Tasa de servicio μ por servidor en cada estación."
+msgstr "Service rate μ per server at each station."
+
+#: of walopy.network.serial_line:13
+msgid "Tasa de llegadas a la línea (la misma en todas las estaciones)."
+msgstr "Arrival rate to the line (the same at every station)."
+
+#: of walopy.network.serial_line:15
+msgid "CV² de los tiempos entre llegadas a la primera estación (por defecto 1, Poisson)."
+msgstr "CV² of the interarrival times at the first station (default 1, Poisson)."
+
+#: of walopy.network.serial_line:17
+msgid "CV² del servicio de cada estación (por defecto 1, exponencial, en todas)."
+msgstr "Service CV² of each station (default 1, exponential, at all of them)."
+
+#: of walopy.network.serial_line:19
+msgid "Número de servidores de cada estación (por defecto 1)."
+msgstr "Number of servers at each station (default 1)."
+
+#: of walopy.network.serial_line:24
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si las secuencias tienen longitudes distintas o alguna estación es inestable (ρ ≥ 1)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the sequences have different lengths or a station is unstable (ρ ≥ 1)."
+
+#: of walopy.network.serial_line:25
+msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
+msgstr "If an argument is not numeric or a sequence contains values that are not."
+
+#: ../../source/referencia/network.rst:14
 msgid "Clases de resultado"
 msgstr "Result classes"
 
@@ -99,11 +139,11 @@ msgstr "Total arrival rate (external + routed from other stations)."
 msgid "Tasa de llegadas externas (Poisson)."
 msgstr "External (Poisson) arrival rate."
 
-#: of walopy.network.StationMetrics:9
+#: of walopy.network.LineStationResult:5 walopy.network.StationMetrics:9
 msgid "Tasa de servicio por servidor."
 msgstr "Service rate per server."
 
-#: of walopy.network.StationMetrics:11
+#: of walopy.network.LineStationResult:7 walopy.network.StationMetrics:11
 msgid "Número de servidores."
 msgstr "Number of servers."
 
@@ -130,4 +170,44 @@ msgstr "Expected total number of customers in all the stations (sum of L_j)."
 #: of walopy.network.JacksonResult:7
 msgid "Tiempo medio de permanencia en la red = L_system / tasa total de llegadas externas."
 msgstr "Mean time in the network = L_system / total external arrival rate."
+
+#: of walopy.network.SerialLineResult:1
+msgid "Resultado de una línea de estaciones en serie."
+msgstr "Result of a line of stations in series."
+
+#: of walopy.network.SerialLineResult:5
+msgid "Tasa de llegadas a la línea (= producción, si no hay mermas)."
+msgstr "Arrival rate to the line (= output, if there is no scrap)."
+
+#: of walopy.network.SerialLineResult:7
+msgid "Tiempo medio total en la línea (suma de los W de las estaciones)."
+msgstr "Mean total time in the line (sum of the stations' W)."
+
+#: of walopy.network.SerialLineResult:9
+msgid "Inventario en proceso λ · tiempo de ciclo (ley de Little)."
+msgstr "Work in process λ · cycle time (Little's law)."
+
+#: of walopy.network.SerialLineResult:11
+msgid "Estación con mayor utilización."
+msgstr "Station with the highest utilization."
+
+#: of walopy.network.SerialLineResult:13
+msgid "CV² de las salidas de la línea."
+msgstr "CV² of the departures of the line."
+
+#: of walopy.network.LineStationResult:1
+msgid "Métricas de una estación de una línea serial (``serial_line``)."
+msgstr "Metrics of one station of a serial line (``serial_line``)."
+
+#: of walopy.network.LineStationResult:9
+msgid "Utilización λ / (c·μ)."
+msgstr "Utilization λ / (c·μ)."
+
+#: of walopy.network.LineStationResult:11
+msgid "CV² de las llegadas a la estación, del servicio y de las salidas (ecuación de enlace)."
+msgstr "CV² of the arrivals to the station, of the service and of the departures (linking equation)."
+
+#: of walopy.network.LineStationResult:13
+msgid "Espera en cola, tiempo en la estación, y número en cola y en la estación (Allen-Cunneen)."
+msgstr "Wait in queue, time at the station, and number in queue and at the station (Allen-Cunneen)."
 

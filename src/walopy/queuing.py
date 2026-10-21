@@ -371,6 +371,120 @@ def kingman(
 
 
 # ---------------------------------------------------------------------------
+# G/G/c — aproximación de Allen-Cunneen y variabilidad de las salidas
+# ---------------------------------------------------------------------------
+
+def departure_cv2(lam: float, mu: float, c: int, ca2: float, cs2: float) -> float:
+    """CV² de los tiempos entre salidas de una estación G/G/c (ecuación de enlace; Whitt, 1984).
+
+    cd² = 1 + (1 − ρ²)(ca² − 1) + ρ²(cs² − 1)/√c
+
+    Con un servidor es la fórmula de Hopp y Spearman, cd² = ρ²·cs² + (1 − ρ²)·ca²: con poca carga las salidas heredan la variabilidad de
+    las llegadas (cd² → ca²) y con mucha carga la del servicio (cd² → cs²). Es una aproximación: con ρ = 0,8, ca² = 2 y cs² = 0,5 da 1,04
+    y una simulación de 400 000 clientes, 0,96.
+
+    Parameters
+    ----------
+    lam : float
+        Tasa de llegadas λ.
+    mu : float
+        Tasa de servicio por servidor μ.
+    c : int
+        Número de servidores.
+    ca2, cs2 : float
+        CV² de los tiempos entre llegadas y de servicio (≥ 0).
+
+    Returns
+    -------
+    float
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> round(departure_cv2(lam=0.8, mu=1.0, c=1, ca2=2.0, cs2=0.5), 4)
+    1.04
+    """
+    lam = as_positive(lam, "lam")
+    mu  = as_positive(mu, "mu")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    ca2 = as_nonneg(ca2, "ca2")
+    cs2 = as_nonneg(cs2, "cs2")
+    rho = lam / (c * mu)
+    if rho >= 1.0:
+        raise ValueError(_t("queuing.error.ggc.sistema_inestable", rho=rho))
+    return 1.0 + (1.0 - rho**2) * (ca2 - 1.0) + rho**2 * (cs2 - 1.0) / math.sqrt(c)
+
+
+def ggc(lam: float, mu: float, c: int, ca2: float, cs2: float) -> QueueResult:
+    """Cola G/G/c de varios servidores mediante la aproximación de Allen-Cunneen.
+
+    El tiempo medio de espera en cola se aproxima escalando el de M/M/c por la variabilidad::
+
+        Wq ≈ Wq(M/M/c) · (ca² + cs²) / 2
+
+    Con un servidor coincide con la fórmula de Kingman (``kingman``) y con ca² = cs² = 1 con ``mmc``. El resultado incluye en ``params``
+    el CV² de las salidas (cd²), que alimenta la estación siguiente de una línea (``serial_line``). Es una aproximación; el error suele
+    ser de pocos puntos porcentuales con carga moderada y puede crecer con muchos servidores y mucha variabilidad.
+
+    Parameters
+    ----------
+    lam : float
+        Tasa de llegadas λ.
+    mu : float
+        Tasa de servicio por servidor μ.
+    c : int
+        Número de servidores.
+    ca2 : float
+        CV² de los tiempos entre llegadas (≥ 0; 1 = llegadas de Poisson).
+    cs2 : float
+        CV² de los tiempos de servicio (≥ 0; 1 = exponencial, 0 = determinista).
+
+    Returns
+    -------
+    QueueResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si el sistema es inestable (ρ ≥ 1).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = ggc(lam=2.0, mu=1.0, c=3, ca2=1.0, cs2=0.5)
+    >>> round(r.Wq, 4)
+    0.3333
+    """
+    lam = as_positive(lam, "lam")
+    mu  = as_positive(mu, "mu")
+    c   = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    ca2 = as_nonneg(ca2, "ca2")
+    cs2 = as_nonneg(cs2, "cs2")
+    rho = lam / (c * mu)
+    if rho >= 1.0:
+        raise ValueError(_t("queuing.error.ggc.sistema_inestable", rho=rho))
+    Wq = mmc(lam, mu, c).Wq * (ca2 + cs2) / 2.0
+    Lq = lam * Wq
+    W  = Wq + 1 / mu
+    L  = lam * W
+    return QueueResult(
+        model=_t("queuing.modelo.ggc.allen_cunneen", c=c), lam=lam, mu=mu, servers=c,
+        rho=rho, L=L, Lq=Lq, W=W, Wq=Wq,
+        params={"ca² (CV² de llegadas)": ca2, "cs² (CV² de servicio)": cs2,
+                "cd² (CV² de salidas)": departure_cv2(lam, mu, c, ca2, cs2)},
+    )
+
+
+# ---------------------------------------------------------------------------
 # M/G/1 — Pollaczek-Khinchine exact formula
 # ---------------------------------------------------------------------------
 

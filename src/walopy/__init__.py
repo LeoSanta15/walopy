@@ -91,8 +91,11 @@ from .kpi import (
 # Network
 from .network import (
     JacksonResult,
+    LineStationResult,
+    SerialLineResult,
     StationMetrics,
     jackson_network,
+    serial_line,
 )
 
 # Operations
@@ -123,6 +126,8 @@ from .queuing import (
     cv2_triangular,
     cv2_uniform,
     cv2_weibull,
+    departure_cv2,
+    ggc,
     kingman,
     littles_law,
     md1,
@@ -166,7 +171,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.6"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.7"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos
@@ -180,6 +185,8 @@ __all__ = [
     "mmc",
     "md1",
     "kingman",
+    "ggc",
+    "departure_cv2",
     "mg1",
     "cv2_triangular",
     "cv2_uniform",
@@ -260,6 +267,9 @@ __all__ = [
     "StationMetrics",
     "JacksonResult",
     "jackson_network",
+    "serial_line",
+    "SerialLineResult",
+    "LineStationResult",
     # inventory additions
     "RQPolicyResult",
     "RSPolicyResult",

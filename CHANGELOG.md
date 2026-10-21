@@ -8,6 +8,28 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.7] — 2026-10-22
+
+Versión de flujo y servicio: colas de varios servidores con variabilidad cualquiera y líneas de estaciones en serie, de la auditoría de dominio. Solo añade funciones: no cambia
+ningún resultado existente.
+
+### Añadido
+- **`ggc(lam, mu, c, ca2, cs2)`**: cola G/G/c con la aproximación de Allen-Cunneen, Wq ≈ Wq(M/M/c)·(ca² + cs²)/2. Con un servidor coincide con `kingman`, con ca² = cs² = 1 con `mmc`
+  y con servicio determinista y llegadas de Poisson (un servidor) con `md1`. En `params` incluye cd², el CV² de las salidas. En las pruebas, Wq quedó a menos de 12 % de una simulación
+  de eventos con ρ entre 0,70 y 0,85 (3 y 4 servidores; llegadas y servicio no exponenciales).
+- **`departure_cv2(lam, mu, c, ca2, cs2)`**: ecuación de enlace de la variabilidad de las salidas, cd² = 1 + (1 − ρ²)(ca² − 1) + ρ²(cs² − 1)/√c (Whitt; con un servidor, la de Hopp y Spearman).
+  Es una aproximación: con ρ = 0,8, ca² = 2 y cs² = 0,5 da 1,04 y una simulación de 400 000 clientes, 0,96.
+- **`serial_line(station_names, mu, *, lam, ca2, cs2, servers)`**, **`SerialLineResult`** y **`LineStationResult`**: línea de estaciones en serie; cada estación es G/G/c y su cd² pasa a ser el
+  ca² de la siguiente. Devuelve tiempo de ciclo, inventario en proceso (ley de Little), cuello de botella y los indicadores por estación. A diferencia de `jackson_network` (exacta, pero con
+  llegadas de Poisson y servicio exponencial) admite cualquier variabilidad; con todo exponencial coincide con ella. Contra una simulación de tres colas en serie (ρ = 0,7 a 0,78; servicio
+  Erlang-2, exponencial e hiperexponencial) el tiempo de ciclo quedó a menos de 10 %. Supone buffers infinitos, sin mermas ni reproceso.
+
+### Pruebas
+- `tests/test_ggc_linea_serial.py`: casos límite exactos, simulación multiservidor con `heapq`, simulación de colas en serie (recursión de Lindley), variabilidad de las salidas medida en una
+  simulación de un servidor y coincidencia con `jackson_network` en una línea exponencial.
+
+---
+
 ## [0.4.6] — 2026-10-21
 
 Versión de simulación: réplicas con intervalo de confianza en `monte_carlo_gg1` y PERT con simulación Monte Carlo. Cierran los dos hallazgos de la auditoría de dominio
