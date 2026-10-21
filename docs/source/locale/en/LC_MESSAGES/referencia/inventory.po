@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 20:11+0000\n"
+"POT-Creation-Date: 2026-10-20 20:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -44,10 +44,10 @@ msgstr "Q* = sqrt(2 · D · K / h)"
 #: walopy.inventory.eoq_multi walopy.inventory.eoq_quantity_discount
 #: walopy.inventory.exchange_curve walopy.inventory.lot_for_lot
 #: walopy.inventory.mrp walopy.inventory.newsvendor
-#: walopy.inventory.reorder_point walopy.inventory.rq_policy
-#: walopy.inventory.rs_policy walopy.inventory.safety_stock_curve
-#: walopy.inventory.silver_meal walopy.inventory.wagner_whitin
-#: walopy.inventory.xyz_analysis
+#: walopy.inventory.reorder_point walopy.inventory.reorder_point_discrete
+#: walopy.inventory.rq_policy walopy.inventory.rs_policy
+#: walopy.inventory.safety_stock_curve walopy.inventory.silver_meal
+#: walopy.inventory.wagner_whitin walopy.inventory.xyz_analysis
 msgid "Parameters"
 msgstr "Parameters"
 
@@ -68,10 +68,10 @@ msgstr "Holding cost per unit per period *h* ($/unit/period)."
 #: walopy.inventory.eoq_multi walopy.inventory.eoq_quantity_discount
 #: walopy.inventory.exchange_curve walopy.inventory.lot_for_lot
 #: walopy.inventory.mrp walopy.inventory.newsvendor
-#: walopy.inventory.reorder_point walopy.inventory.rq_policy
-#: walopy.inventory.rs_policy walopy.inventory.safety_stock_curve
-#: walopy.inventory.silver_meal walopy.inventory.wagner_whitin
-#: walopy.inventory.xyz_analysis
+#: walopy.inventory.reorder_point walopy.inventory.reorder_point_discrete
+#: walopy.inventory.rq_policy walopy.inventory.rs_policy
+#: walopy.inventory.safety_stock_curve walopy.inventory.silver_meal
+#: walopy.inventory.wagner_whitin walopy.inventory.xyz_analysis
 msgid "Return type"
 msgstr "Return type"
 
@@ -80,10 +80,10 @@ msgstr "Return type"
 #: walopy.inventory.eoq_multi walopy.inventory.eoq_quantity_discount
 #: walopy.inventory.exchange_curve walopy.inventory.lot_for_lot
 #: walopy.inventory.mrp walopy.inventory.newsvendor
-#: walopy.inventory.reorder_point walopy.inventory.rq_policy
-#: walopy.inventory.rs_policy walopy.inventory.safety_stock_curve
-#: walopy.inventory.silver_meal walopy.inventory.wagner_whitin
-#: walopy.inventory.xyz_analysis
+#: walopy.inventory.reorder_point walopy.inventory.reorder_point_discrete
+#: walopy.inventory.rq_policy walopy.inventory.rs_policy
+#: walopy.inventory.safety_stock_curve walopy.inventory.silver_meal
+#: walopy.inventory.wagner_whitin walopy.inventory.xyz_analysis
 msgid "Raises"
 msgstr "Raises"
 
@@ -97,10 +97,11 @@ msgstr "If any numeric argument is not finite or is outside its domain (for exam
 #: walopy.inventory.eoq_multi_constrained:44
 #: walopy.inventory.eoq_quantity_discount:19 walopy.inventory.exchange_curve:39
 #: walopy.inventory.lot_for_lot:16 walopy.inventory.mrp:27
-#: walopy.inventory.newsvendor:21 walopy.inventory.reorder_point:25
-#: walopy.inventory.rq_policy:27 walopy.inventory.rs_policy:29
-#: walopy.inventory.safety_stock_curve:39 walopy.inventory.silver_meal:16
-#: walopy.inventory.wagner_whitin:17 walopy.inventory.xyz_analysis:22
+#: walopy.inventory.newsvendor:21 walopy.inventory.reorder_point:33
+#: walopy.inventory.reorder_point_discrete:32 walopy.inventory.rq_policy:31
+#: walopy.inventory.rs_policy:33 walopy.inventory.safety_stock_curve:39
+#: walopy.inventory.silver_meal:16 walopy.inventory.wagner_whitin:17
+#: walopy.inventory.xyz_analysis:22
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
@@ -110,10 +111,11 @@ msgstr "If an argument is not numeric or a sequence contains values that are not
 #: walopy.inventory.eoq_multi_constrained:47
 #: walopy.inventory.eoq_quantity_discount:22 walopy.inventory.exchange_curve:42
 #: walopy.inventory.lot_for_lot:19 walopy.inventory.mrp:30
-#: walopy.inventory.newsvendor:24 walopy.inventory.reorder_point:28
-#: walopy.inventory.rq_policy:30 walopy.inventory.rs_policy:32
-#: walopy.inventory.safety_stock_curve:42 walopy.inventory.silver_meal:19
-#: walopy.inventory.wagner_whitin:20 walopy.inventory.xyz_analysis:25
+#: walopy.inventory.newsvendor:24 walopy.inventory.reorder_point:36
+#: walopy.inventory.reorder_point_discrete:35 walopy.inventory.rq_policy:34
+#: walopy.inventory.rs_policy:36 walopy.inventory.safety_stock_curve:42
+#: walopy.inventory.silver_meal:19 walopy.inventory.wagner_whitin:20
+#: walopy.inventory.xyz_analysis:25
 msgid "Examples"
 msgstr "Examples"
 
@@ -438,10 +440,66 @@ msgstr "Standard deviation of the lead time σ_L (default 0)."
 msgid "Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1). No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95."
 msgstr "Cycle service level (type 1): probability of no stockout in a replenishment cycle ∈ (0, 1). It is not the fill rate (fraction of demand served from stock), which is usually higher. Default 0.95."
 
-#: of walopy.inventory.reorder_point:24 walopy.inventory.rq_policy:26
-#: walopy.inventory.rs_policy:28
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``service_level`` no está estrictamente entre 0 y 1."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``service_level`` is not strictly between 0 and 1."
+#: of walopy.inventory.reorder_point:21
+#, python-brace-format
+msgid "Tasa de llenado objetivo β ∈ (0, 1) (tipo 2): fracción de la demanda servida desde inventario. Si se indica, sustituye a ``service_level`` y exige ``order_qty``; se resuelve G(z) = (1 − β)·Q / σ_{DLT}, con G la función de pérdida de la normal. ``service_level`` del resultado es entonces el nivel por ciclo implícito Φ(z). El punto de reorden no baja de 0: si el objetivo es muy holgado frente a Q, la tasa de llenado alcanzada es mayor que la pedida."
+msgstr "Target fill rate β ∈ (0, 1) (type 2): fraction of demand served from stock. If given, it replaces ``service_level`` and requires ``order_qty``; it solves G(z) = (1 − β)·Q / σ_{DLT}, with G the normal loss function. The ``service_level`` of the result is then the implied cycle level Φ(z). The reorder point does not go below 0: if the target is very loose relative to Q, the fill rate achieved is higher than requested."
+
+#: of walopy.inventory.reorder_point:26
+msgid "Cantidad de pedido Q. Necesaria con ``fill_rate``; si se indica sin ella, el resultado informa la tasa de llenado que se obtiene con ``service_level``."
+msgstr "Order quantity Q. Required with ``fill_rate``; if given without it, the result reports the fill rate obtained with ``service_level``."
+
+#: of walopy.inventory.reorder_point:32
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1, o si se indica ``fill_rate`` sin ``order_qty``."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``service_level`` or ``fill_rate`` is not strictly between 0 and 1, or if ``fill_rate`` is given without ``order_qty``."
+
+#: of walopy.inventory.reorder_point_discrete:1
+msgid "Punto de reorden exacto para demanda discreta (unidades enteras), p. ej. piezas de baja rotación o intermitentes."
+msgstr "Exact reorder point for discrete demand (whole units), e.g. slow-moving or intermittent parts."
+
+#: of walopy.inventory.reorder_point_discrete:3
+msgid "La demanda durante el tiempo de entrega X se modela con una distribución de conteo:"
+msgstr "The demand during the lead time X is modelled with a count distribution:"
+
+#: of walopy.inventory.reorder_point_discrete:5
+msgid "**Poisson** (``demand_std`` no indicada, o con varianza igual a la media): media = varianza = D̄·L̄."
+msgstr "**Poisson** (``demand_std`` not given, or with variance equal to the mean): mean = variance = D̄·L̄."
+
+#: of walopy.inventory.reorder_point_discrete:6
+msgid "**Binomial negativa** (varianza > media, sobredispersión): media μ = D̄·L̄, varianza v = L̄·σ_D², con parámetros r = μ²/(v − μ) y p = μ/v."
+msgstr "**Negative binomial** (variance > mean, overdispersion): mean μ = D̄·L̄, variance v = L̄·σ_D², with parameters r = μ²/(v − μ) and p = μ/v."
+
+#: of walopy.inventory.reorder_point_discrete:9
+msgid "Se devuelve el menor entero *s* con P(X ≤ s) ≥ ``service_level`` o, si se indica ``fill_rate``, con 1 − E[(X − s)⁺]/Q ≥ ``fill_rate``. Es exacto (sin aproximar por la normal, que con medias pequeñas asigna probabilidad a demanda negativa y da puntos de reorden poco fiables). Supone tiempo de entrega constante e incrementos de demanda independientes entre periodos."
+msgstr "The smallest integer *s* with P(X ≤ s) ≥ ``service_level`` is returned or, if ``fill_rate`` is given, with 1 − E[(X − s)⁺]/Q ≥ ``fill_rate``. It is exact (it does not approximate by the normal, which with small means puts probability on negative demand and gives unreliable reorder points). It assumes a constant lead time and independent demand increments between periods."
+
+#: of walopy.inventory.reorder_point_discrete:14
+msgid "Demanda media por periodo D̄ (unidades/periodo; puede ser fraccionaria, p. ej. 0.3 unidades por periodo)."
+msgstr "Mean demand per period D̄ (units/period; may be fractional, e.g. 0.3 units per period)."
+
+#: of walopy.inventory.reorder_point_discrete:16
+msgid "Tiempo de entrega L̄ (mismas unidades de tiempo que ``demand_rate``)."
+msgstr "Lead time L̄ (same time units as ``demand_rate``)."
+
+#: of walopy.inventory.reorder_point_discrete:18
+msgid "Desviación estándar de la demanda por periodo σ_D. Sin ella, Poisson. Si L̄·σ_D² > D̄·L̄, binomial negativa; no se admite varianza menor que la media (subdispersión)."
+msgstr "Standard deviation of demand per period σ_D. Without it, Poisson. If L̄·σ_D² > D̄·L̄, negative binomial; a variance smaller than the mean (underdispersion) is not accepted."
+
+#: of walopy.inventory.reorder_point_discrete:21
+msgid "Nivel de servicio por ciclo ∈ (0, 1): P(no hay faltante en el ciclo). Por defecto 0.95."
+msgstr "Cycle service level ∈ (0, 1): P(no stockout in the cycle). Default 0.95."
+
+#: of walopy.inventory.reorder_point_discrete:23
+msgid "Tasa de llenado objetivo β ∈ (0, 1). Si se indica, sustituye a ``service_level`` y exige ``order_qty``."
+msgstr "Target fill rate β ∈ (0, 1). If given, it replaces ``service_level`` and requires ``order_qty``."
+
+#: of walopy.inventory.reorder_point_discrete:25
+msgid "Cantidad de pedido Q. Necesaria con ``fill_rate``; si se indica sin ella, el resultado informa la tasa de llenado alcanzada con ``service_level``."
+msgstr "Order quantity Q. Required with ``fill_rate``; if given without it, the result reports the fill rate achieved with ``service_level``."
+
+#: of walopy.inventory.reorder_point_discrete:31
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1, o si se indica ``fill_rate`` sin ``order_qty``.     Si la varianza de la demanda en el tiempo de entrega es menor que su media, o si la media supera 100 000 unidades     (use entonces ``reorder_point``, con la normal)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``service_level`` or ``fill_rate`` is not strictly between 0 and 1, or if ``fill_rate`` is given without ``order_qty``.     If the variance of lead-time demand is smaller than its mean, or if the mean exceeds 100 000 units     (use ``reorder_point``, with the normal distribution, then)."
 
 #: of walopy.inventory.newsvendor:1
 msgid "Modelo newsvendor (inventario de un solo periodo) con demanda normal."
@@ -496,6 +554,15 @@ msgstr "Fixed ordering cost K per order."
 msgid "Tiempo de entrega medio de reposición L̄."
 msgstr "Mean replenishment lead time L̄."
 
+#: of walopy.inventory.rq_policy:23
+#, python-brace-format
+msgid "Tasa de llenado objetivo β ∈ (0, 1) (tipo 2). Si se indica, sustituye a ``service_level``: se resuelve G(z) = (1 − β)·Q / σ_{DLT} con Q = EOQ y G la función de pérdida de la normal. El resultado informa siempre la tasa de llenado alcanzada y el nivel de servicio por ciclo Φ(z)."
+msgstr "Target fill rate β ∈ (0, 1) (type 2). If given, it replaces ``service_level``: G(z) = (1 − β)·Q / σ_{DLT} is solved with Q = EOQ and G the normal loss function. The result always reports the fill rate achieved and the cycle service level Φ(z)."
+
+#: of walopy.inventory.rq_policy:30 walopy.inventory.rs_policy:32
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``service_level`` or ``fill_rate`` is not strictly between 0 and 1."
+
 #: of walopy.inventory.rs_policy:1
 msgid "Política de inventario (R, S) de revisión periódica."
 msgstr "(R, S) periodic-review inventory policy."
@@ -507,6 +574,11 @@ msgstr "The inventory position is reviewed every R periods and an order is place
 #: of walopy.inventory.rs_policy:14
 msgid "Intervalo de revisión R (periodos entre revisiones de inventario)."
 msgstr "Review interval R (periods between inventory reviews)."
+
+#: of walopy.inventory.rs_policy:25
+#, python-brace-format
+msgid "Tasa de llenado objetivo β ∈ (0, 1) (tipo 2). Si se indica, sustituye a ``service_level``: se resuelve G(z) = (1 − β)·D·R / σ_{R+L} con G la función de pérdida de la normal. El resultado informa siempre la tasa de llenado alcanzada y el nivel de servicio por ciclo Φ(z)."
+msgstr "Target fill rate β ∈ (0, 1) (type 2). If given, it replaces ``service_level``: G(z) = (1 − β)·D·R / σ_{R+L} is solved with G the normal loss function. The result always reports the fill rate achieved and the cycle service level Φ(z)."
 
 #: of walopy.inventory.wagner_whitin:1
 msgid "Dimensionado dinámico óptimo de lotes de Wagner-Whitin mediante programación dinámica."
@@ -587,38 +659,6 @@ msgstr "SS_Investment(z) = z · Σ σᵢ_DLT · vᵢ"
 #: of walopy.inventory.safety_stock_curve:9
 msgid "Cada diccionario debe contener:  - ``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo (o del error de   pronóstico, si la demanda se pronostica). - ``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo).  Claves opcionales:  - ``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0). - ``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para   calcular el punto de reorden r = D·L + SS (por defecto: se omite). - ``unit_value`` (float) — valor unitario para la inversión (por defecto 1). - ``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
 msgstr "Each dictionary must contain:  - ``demand_std`` (float) — standard deviation of demand per unit of time (or of the forecast   error, if demand is forecast). - ``lead_time`` (float) — replenishment lead time (same time unit).  Optional keys:  - ``lead_time_std`` (float) — standard deviation of the lead time (default 0). - ``demand_rate`` (float) — mean demand per unit of time; used to   compute the reorder point r = D·L + SS (default: omitted). - ``unit_value`` (float) — unit value for the investment (default 1). - ``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
-
-#: of walopy.inventory.safety_stock_curve:9
-msgid "Cada diccionario debe contener:"
-msgstr "Each dictionary must contain:"
-
-#: of walopy.inventory.safety_stock_curve:11
-msgid "``demand_std`` (float) — desviación estándar de la demanda por unidad de tiempo (o del error de pronóstico, si la demanda se pronostica)."
-msgstr "``demand_std`` (float) — standard deviation of demand per unit of time (or of the forecast error, if demand is forecast)."
-
-#: of walopy.inventory.safety_stock_curve:13
-msgid "``lead_time`` (float) — tiempo de entrega de reposición (misma unidad de tiempo)."
-msgstr "``lead_time`` (float) — replenishment lead time (same time unit)."
-
-#: of walopy.inventory.safety_stock_curve:15
-msgid "Claves opcionales:"
-msgstr "Optional keys:"
-
-#: of walopy.inventory.safety_stock_curve:17
-msgid "``lead_time_std`` (float) — desviación estándar del tiempo de entrega (por defecto 0)."
-msgstr "``lead_time_std`` (float) — standard deviation of the lead time (default 0)."
-
-#: of walopy.inventory.safety_stock_curve:18
-msgid "``demand_rate`` (float) — demanda media por unidad de tiempo; sirve para calcular el punto de reorden r = D·L + SS (por defecto: se omite)."
-msgstr "``demand_rate`` (float) — mean demand per unit of time; used to compute the reorder point r = D·L + SS (default: omitted)."
-
-#: of walopy.inventory.safety_stock_curve:20
-msgid "``unit_value`` (float) — valor unitario para la inversión (por defecto 1)."
-msgstr "``unit_value`` (float) — unit value for the investment (default 1)."
-
-#: of walopy.inventory.safety_stock_curve:21
-msgid "``name`` (str) — etiqueta del artículo (por defecto ``'I1'``, ``'I2'``, …)."
-msgstr "``name`` (str) — item label (default ``'I1'``, ``'I2'``, …)."
 
 #: of walopy.inventory.safety_stock_curve:23
 msgid "Nivel de servicio por ciclo deseado ∈ (0, 1). Resuelve z = Φ⁻¹(NS)."
@@ -779,7 +819,7 @@ msgstr "Period labels (default 1, 2, …, T)."
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``gross_requirements`` está vacío, ``lead_time`` no es un entero ≥ 0, ``lot_size`` no es ``'LFL'`` ni positivo, o las longitudes no coinciden."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``gross_requirements`` is empty, ``lead_time`` is not an integer ≥ 0, ``lot_size`` is neither ``'LFL'`` nor positive, or the lengths do not match."
 
-#: ../../source/referencia/inventory.rst:48
+#: ../../source/referencia/inventory.rst:50
 msgid "Clases de resultado"
 msgstr "Result classes"
 
@@ -935,6 +975,38 @@ msgstr "Index of the selected price break."
 #: of walopy.inventory.QuantityDiscountResult:17
 msgid "Todos los candidatos evaluados (uno por tramo)."
 msgstr "All the candidates evaluated (one per break)."
+
+#: of walopy.inventory.DiscreteReorderResult:1
+msgid "Resultado del punto de reorden con demanda discreta durante el tiempo de entrega."
+msgstr "Result of the reorder point with discrete lead-time demand."
+
+#: of walopy.inventory.DiscreteReorderResult:3
+msgid "Menor entero s con el servicio pedido (cantidad entera de unidades)."
+msgstr "Smallest integer s with the requested service (whole number of units)."
+
+#: of walopy.inventory.DiscreteReorderResult:5
+msgid "Stock de seguridad s − E[X] (puede ser negativo con niveles de servicio bajos)."
+msgstr "Safety stock s − E[X] (may be negative with low service levels)."
+
+#: of walopy.inventory.DiscreteReorderResult:7
+msgid "Nivel de servicio por ciclo alcanzado P(X ≤ s) (≥ el pedido, porque s es entero)."
+msgstr "Cycle service level achieved P(X ≤ s) (≥ the requested one, because s is an integer)."
+
+#: of walopy.inventory.DiscreteReorderResult:9
+msgid "Tasa de llenado alcanzada 1 − E[(X − s)⁺]/Q; ``None`` si no se indicó ``order_qty``."
+msgstr "Fill rate achieved 1 − E[(X − s)⁺]/Q; ``None`` if ``order_qty`` was not given."
+
+#: of walopy.inventory.DiscreteReorderResult:11
+msgid "``'Poisson'`` o ``'binomial negativa'``."
+msgstr "``'Poisson'`` or ``'negative binomial'`` (``'binomial negativa'`` in Spanish)."
+
+#: of walopy.inventory.DiscreteReorderResult:13
+msgid "Demanda esperada durante el tiempo de entrega E[X]."
+msgstr "Expected demand during the lead time E[X]."
+
+#: of walopy.inventory.DiscreteReorderResult:15
+msgid "Varianza de la demanda durante el tiempo de entrega."
+msgstr "Variance of the demand during the lead time."
 
 #: of walopy.inventory.ReorderResult:1
 msgid "Resultado del punto de reorden y el stock de seguridad."

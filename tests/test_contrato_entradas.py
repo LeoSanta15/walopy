@@ -91,6 +91,7 @@ BASE = {
     "wagner_whitin": dict(demands=[10.0, 20.0, 30.0], setup_cost=50.0, holding_cost=1.0),
     "eoq_quantity_discount": dict(demand_rate=1000.0, ordering_cost=50.0, holding_cost_rate=0.2, price_breaks=[(0, 10.0), (500, 9.5)]),
     "reorder_point": dict(demand_rate=10.0, lead_time=2.0, demand_std=2.0),
+    "reorder_point_discrete": dict(demand_rate=0.5, lead_time=4.0, demand_std=1.5),
     "newsvendor": dict(demand_mean=100.0, demand_std=20.0, price=10.0, cost=4.0),
     "jackson_network": dict(station_names=["A", "B"], mu=[5.0, 6.0], gamma=[2.0, 0.0], routing=[[0.0, 1.0], [0.0, 0.0]]),
     "rq_policy": dict(demand_rate=100.0, ordering_cost=50.0, holding_cost=2.0, lead_time=2.0, demand_std=5.0),

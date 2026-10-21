@@ -44,6 +44,7 @@ from .inventory import (
     ABCResult,
     ABCXYZResult,
     ConstrainedMultiEOQResult,
+    DiscreteReorderResult,
     EBQResult,
     EOQResult,
     ExchangeCurveResult,
@@ -70,6 +71,7 @@ from .inventory import (
     mrp,
     newsvendor,
     reorder_point,
+    reorder_point_discrete,
     rq_policy,
     rs_policy,
     safety_stock_curve,
@@ -164,7 +166,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.4"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.5"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos
@@ -240,6 +242,7 @@ __all__ = [
     "ConstrainedMultiEOQResult",
     "LotSizingResult",
     "QuantityDiscountResult",
+    "DiscreteReorderResult",
     "ReorderResult",
     "NewsvendorResult",
     "eoq",
@@ -251,6 +254,7 @@ __all__ = [
     "silver_meal",
     "eoq_quantity_discount",
     "reorder_point",
+    "reorder_point_discrete",
     "newsvendor",
     # network
     "StationMetrics",

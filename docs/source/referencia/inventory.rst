@@ -24,6 +24,8 @@ Funciones
 
 .. autofunction:: walopy.reorder_point
 
+.. autofunction:: walopy.reorder_point_discrete
+
 .. autofunction:: walopy.newsvendor
 
 .. autofunction:: walopy.rq_policy
@@ -63,6 +65,9 @@ Clases de resultado
    :members:
 
 .. autoclass:: walopy.QuantityDiscountResult
+   :members:
+
+.. autoclass:: walopy.DiscreteReorderResult
    :members:
 
 .. autoclass:: walopy.ReorderResult

@@ -138,6 +138,19 @@ AÑADIDAS_TRAS_V030 = {
     "project.aviso.pert.rutas_casi_criticas",   # 0.4.4: avisos de validez de los modelos
     "inventory.aviso.newsvendor.demanda_normal_cv_alto",
     "advanced.aviso.monte_carlo_gg1.estimacion_imprecisa",
+    "inventory.error.reorder_point.fill_rate_debe_estar_estrictamente",   # 0.4.5: objetivos de tasa de llenado
+    "inventory.error.reorder_point.fill_rate_requiere_order_qty",
+    "inventory.etiqueta.summary.tasa_llenado",
+    "inventory.etiqueta.summary.tasa_llenado_politica",
+    "inventory.cabecera.to_frame.tasa_llenado",
+    "inventory.error.reorder_point_discrete.media_demasiado_grande",
+    "inventory.error.reorder_point_discrete.subdispersion",
+    "inventory.error.reorder_point_discrete.sin_solucion",
+    "inventory.etiqueta.reorder_point_discrete.poisson",
+    "inventory.etiqueta.reorder_point_discrete.binomial_negativa",
+    "inventory.etiqueta.summary.punto_reorden_discreto",
+    "inventory.cabecera.to_frame.distribucion",
+    "inventory.cabecera.to_frame.varianza_demanda_lt",
     "project.cabecera.to_frame.ht",    # «HT»/«HL» (holgura total/libre): acrónimos españoles que el extractor no veía; ya existían en v0.3.0
     "project.cabecera.to_frame.hl",
 }
