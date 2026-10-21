@@ -235,6 +235,19 @@ EN: dict[str, str] = {
     "inventory.aviso.newsvendor.demanda_normal_cv_alto": "The normal demand has CV = {cv:.2f} > 0.5: the model assigns P(D < 0) = {p_negativa:.1%} and Q* may be biased. With such variable demand a non-negative distribution (lognormal, gamma or empirical) is preferable.",
     "inventory.error.newsvendor.salvage_debe_ser_menor_cost": "'salvage' must be less than 'cost' (otherwise Co ≤ 0).",
     "inventory.error.reorder_point.service_level_debe_estar_estrictamente": "'service_level' must be strictly between 0 and 1.",
+    "inventory.error.reorder_point.fill_rate_debe_estar_estrictamente": "'fill_rate' must be strictly between 0 and 1.",
+    "inventory.error.reorder_point.fill_rate_requiere_order_qty": "With 'fill_rate' you must also give 'order_qty': the fill rate depends on the order quantity.",
+    "inventory.error.reorder_point_discrete.media_demasiado_grande": "The mean demand during the lead time ({mu:g}) exceeds {max:g} units: use 'reorder_point' (normal), which is an excellent approximation at that scale.",
+    "inventory.error.reorder_point_discrete.subdispersion": "The variance of lead-time demand ({var:g}) is smaller than its mean ({mu:g}): neither Poisson nor negative binomial admit underdispersion; use 'reorder_point' (normal).",
+    "inventory.error.reorder_point_discrete.sin_solucion": "The requested service was not reached with up to {tope} units; check 'service_level', 'fill_rate' and 'order_qty'.",
+    "inventory.etiqueta.reorder_point_discrete.poisson": "Poisson",
+    "inventory.etiqueta.reorder_point_discrete.binomial_negativa": "negative binomial",
+    "inventory.etiqueta.summary.punto_reorden_discreto": "Reorder point       : {reorder_point:.0f} units\nSafety stock        : {safety_stock:.4g} units\nService level       : {service_level:.2%}\nDistribution        : {distribution}\nMean demand in LT   : {mean_demand_lt:.4g}\nVariance in LT      : {var_demand_lt:.4g}",
+    "inventory.cabecera.to_frame.distribucion": "Distribution",
+    "inventory.cabecera.to_frame.varianza_demanda_lt": "LT demand variance",
+    "inventory.etiqueta.summary.tasa_llenado": "Fill rate           : {fill_rate:.2%}",
+    "inventory.etiqueta.summary.tasa_llenado_politica": "  Fill rate            : {fill_rate:.2%}",
+    "inventory.cabecera.to_frame.tasa_llenado": "Fill rate",
     "inventory.error.safety_stock_curve.indique_como_maximo_uno_target": "Provide at most one of 'target_service_level' or 'target_ss_investment'.",
     "inventory.error.safety_stock_curve.items_lead_time_std_debe": "items[{idx}]['lead_time_std'] must be ≥ 0.",
     "inventory.error.safety_stock_curve.target_service_level_debe_estar": "'target_service_level' must be strictly between 0 and 1.",
@@ -612,6 +625,7 @@ EN: dict[str, str] = {
 
 # Texts that are identical in both languages on purpose (symbols, identifiers, proper names, data keys). Anything else equal to the Spanish text is "untranslated".
 EXENTAS_DE_TRADUCCION: frozenset[str] = frozenset({
+    "inventory.etiqueta.reorder_point_discrete.poisson",
     "advanced.cabecera.to_frame.wq_p50",
     "advanced.cabecera.to_frame.wq_p90",
     "advanced.cabecera.to_frame.wq_p95",

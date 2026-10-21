@@ -8,6 +8,32 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.5] — 2026-10-21
+
+Versión de inventarios: objetivos de **tasa de llenado** y punto de reorden exacto para **demanda discreta**, a raíz de la auditoría de dominio. Sin
+cambios incompatibles en los cálculos existentes: con `service_level` el stock de seguridad es el de siempre.
+
+### Añadido
+- **Tasa de llenado (β, tipo 2) como objetivo** en `reorder_point` (con `order_qty`), `rq_policy` y `rs_policy`: `fill_rate=0.98` sustituye a `service_level` y se
+  resuelve G(z) = (1 − β)·Q / σ con la función de pérdida de la normal (Q = EOQ en (r, Q); D·R en (R, S)). El nivel de servicio del resultado pasa a ser el nivel
+  por ciclo implícito Φ(z). El punto de reorden no baja de 0: con un objetivo muy holgado frente a Q, la tasa alcanzada es mayor que la pedida. En `rq_policy` con
+  λ = 50, σ = 10, L = 2: «95 % de nivel por ciclo» equivale a una tasa de llenado de 99,5 %; quien pide 95 % de tasa de llenado necesita bastante menos stock.
+- **`reorder_point_discrete`** y **`DiscreteReorderResult`**: punto de reorden exacto cuando la demanda en el tiempo de entrega es de conteo (piezas de baja
+  rotación, demanda intermitente). **Poisson** sin `demand_std` (o con varianza igual a la media) y **binomial negativa** con varianza mayor que la media; devuelve
+  el menor entero con el nivel de servicio por ciclo o la tasa de llenado pedidos. Sin SciPy (recurrencias con `lgamma`). La normal, con medias pequeñas, asigna
+  probabilidad a demanda negativa. No admite subdispersión ni medias mayores de 100 000 unidades en el tiempo de entrega (usar `reorder_point`).
+
+### Cambiado
+- `ReorderResult`, `RQPolicyResult` y `RSPolicyResult` tienen el campo `fill_rate` (en `ReorderResult` solo si se indicó `order_qty`). `rq_policy` y `rs_policy`
+  muestran siempre la tasa de llenado alcanzada: una línea más en `summary()` y una columna más al final de `to_frame()`. No cambia ningún otro valor.
+
+### Pruebas
+- `tests/test_tasa_llenado_y_demanda_discreta.py`: la tasa alcanzada se comprueba con integración numérica de E[(X − r)⁺] (independiente de la función de pérdida
+  cerrada) y la demanda discreta con tablas de la función de masa por recurrencia: el punto de reorden es el menor entero que cumple el servicio (Poisson y binomial
+  negativa), coincide con la normal para medias grandes y la binomial negativa tiende a Poisson al acercarse la varianza a la media.
+
+---
+
 ## [0.4.4] — 2026-10-20
 
 Versión de corrección tras una auditoría de dominio: la disponibilidad de los sistemas redundantes y la varianza PERT con rutas críticas empatadas daban

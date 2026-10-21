@@ -612,7 +612,14 @@ print(r_det.safety_stock)   # 0.0 — no buffer needed
 r_90 = wl.reorder_point(50, 2, demand_std=10, service_level=0.90)
 r_99 = wl.reorder_point(50, 2, demand_std=10, service_level=0.99)
 print(r_99.safety_stock > r_90.safety_stock)  # True
+
+# Fill rate (type 2): fraction of demand served from stock; requires the order quantity Q
+r_beta = wl.reorder_point(demand_rate=50, lead_time=2, demand_std=10,
+                          fill_rate=0.98, order_qty=100)
+print(round(r_beta.fill_rate, 2))   # 0.98 (service_level becomes the implied cycle level Φ(z))
 ```
+
+> **Cycle service level ≠ fill rate.** `service_level` is the probability of no stockout in a cycle (type 1); the **fill rate** β is the fraction of demanded units served from stock (type 2) and depends on the order quantity: β = 1 − σ_DLT · G(z) / Q, with G(z) = φ(z) − z(1 − Φ(z)). Someone who asks for "95 %" thinking of fill rate ends up with excess safety stock when using `service_level`. `rq_policy` and `rs_policy` also accept `fill_rate` and always report the fill rate achieved.
 
 **`ReorderResult` — attributes:**
 
@@ -624,6 +631,29 @@ print(r_99.safety_stock > r_90.safety_stock)  # True
 | `z_score` | Safety factor z |
 | `mean_demand_lt` | Expected demand during the lead time |
 | `std_demand_lt` | Standard deviation of demand during LT |
+| `fill_rate` | Fill rate achieved (only if `order_qty` was given) |
+
+---
+
+### `reorder_point_discrete(demand_rate, lead_time, *, demand_std, service_level, fill_rate, order_qty)` — Reorder point with discrete demand
+
+For **slow-moving or intermittent** items (whole units, small means) the normal distribution puts probability on negative demand and gives unreliable reorder points. This function uses the exact lead-time demand distribution: **Poisson** (no `demand_std`, or variance equal to the mean) or **negative binomial** (variance greater than the mean). It returns the smallest integer *s* with P(X ≤ s) ≥ `service_level` or, with `fill_rate`, with the requested fill rate. It does not need SciPy.
+
+```python
+# 0.5 units per week, 4-week lead time: Poisson with mean 2
+r = wl.reorder_point_discrete(demand_rate=0.5, lead_time=4, service_level=0.95)
+print(r.reorder_point, r.distribution)   # 5.0 Poisson
+
+# With overdispersion (std 1.5 per week → variance 9 over the lead time): negative binomial
+r = wl.reorder_point_discrete(demand_rate=0.5, lead_time=4, demand_std=1.5, service_level=0.95)
+print(r.reorder_point, r.distribution)   # 8.0 negative binomial
+
+# Fill-rate target
+r = wl.reorder_point_discrete(0.5, 4, demand_std=1.5, fill_rate=0.98, order_qty=10)
+print(r.reorder_point, round(r.fill_rate, 3))
+```
+
+**`DiscreteReorderResult` — attributes:** `reorder_point` (integer), `safety_stock` (s − E[X]), `service_level` (achieved P(X ≤ s)), `fill_rate` (if `order_qty` was given), `distribution`, `mean_demand_lt`, `var_demand_lt`.
 
 ---
 
@@ -1775,7 +1805,7 @@ Wq     : 0.3   (average waiting time in queue)
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
 | `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
-| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
+| `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |
 | `project` | `cpm`, `pert`, `ProjectResult`, `ActivityResult` |
 | `reliability` | `mtbf_analysis`, `series_system`, `parallel_system`, `koon_system`, `weibull_analysis`, `ReliabilityResult`, `WeibullResult` |

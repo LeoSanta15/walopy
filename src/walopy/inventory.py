@@ -182,6 +182,53 @@ def eoq(
 # Reorder point and safety stock
 # ---------------------------------------------------------------------------
 
+def _perdida_normal(z: float) -> float:
+    """Función de pérdida de la normal estándar G(z) = E[(Z − z)⁺] = φ(z) − z·(1 − Φ(z))."""
+    nd = NormalDist()
+    return nd.pdf(z) - z * (1.0 - nd.cdf(z))
+
+
+def _tasa_de_llenado(sigma: float, z: float, volumen: float) -> float:
+    """Tasa de llenado (tipo 2) β = 1 − σ·G(z) / volumen, acotada a [0, 1].
+
+    ``sigma``·G(z) es el faltante esperado por ciclo; ``volumen`` es la demanda atendida por ciclo (Q en (r, Q); D·R en (R, S)).
+    """
+    if sigma <= 0.0:
+        return 1.0
+    return min(1.0, max(0.0, 1.0 - sigma * _perdida_normal(z) / volumen))
+
+
+def _z_para_tasa_de_llenado(fill_rate: float, sigma: float, volumen: float) -> float:
+    """z tal que 1 − σ·G(z)/volumen = fill_rate (G es decreciente: bisección). Con σ = 0 no hace falta stock de seguridad."""
+    if sigma <= 0.0:
+        return 0.0
+    objetivo = (1.0 - fill_rate) * volumen / sigma
+    lo, hi = -1e4, 12.0   # con Q grande frente a σ, G(z) = objetivo puede exigir z muy negativo (G(z) ≈ −z)
+    for _ in range(200):
+        medio = 0.5 * (lo + hi)
+        if _perdida_normal(medio) > objetivo:
+            lo = medio
+        else:
+            hi = medio
+    return 0.5 * (lo + hi)
+
+
+def _z_con_piso_en_cero(z: float, media: float, sigma: float) -> float:
+    """Evita un punto de reorden negativo: si media + z·σ < 0 se usa 0 (la tasa de llenado alcanzada será mayor que la pedida)."""
+    if sigma > 0.0 and media + z * sigma < 0.0:
+        return -media / sigma
+    return z
+
+
+def _validar_tasa_de_llenado(fill_rate: float | None) -> float | None:
+    if fill_rate is None:
+        return None
+    beta = as_fraction(fill_rate, "fill_rate")
+    if beta == 0.0 or beta == 1.0:
+        raise ValueError(_t("inventory.error.reorder_point.fill_rate_debe_estar_estrictamente"))
+    return beta
+
+
 @dataclass
 class ReorderResult:
     """Resultado del punto de reorden y el stock de seguridad.
@@ -210,11 +257,13 @@ class ReorderResult:
     mean_demand_lt: float
     std_demand_lt: float
     params: dict = field(default_factory=dict)
+    fill_rate: float | None = None
 
     def summary(self) -> str:
-        return (
-            _t("inventory.etiqueta.summary.punto_reorden_unidades_stock_seguridad", reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, z_score=self.z_score, mean_demand_lt=self.mean_demand_lt, std_demand_lt=self.std_demand_lt)
-        )
+        texto = _t("inventory.etiqueta.summary.punto_reorden_unidades_stock_seguridad", reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, z_score=self.z_score, mean_demand_lt=self.mean_demand_lt, std_demand_lt=self.std_demand_lt)
+        if self.fill_rate is not None:
+            texto += "\n" + _t("inventory.etiqueta.summary.tasa_llenado", fill_rate=self.fill_rate)
+        return texto
 
     def __str__(self) -> str:
         return self.summary()
@@ -228,6 +277,7 @@ class ReorderResult:
             "z": self.z_score,
             _t("inventory.cabecera.to_frame.demanda_media_lt"): self.mean_demand_lt,
             _t("inventory.cabecera.to_frame.desv_demanda_lt"): self.std_demand_lt,
+            **({_t("inventory.cabecera.to_frame.tasa_llenado"): self.fill_rate} if self.fill_rate is not None else {}),
         }])
 
 
@@ -238,6 +288,8 @@ def reorder_point(
     demand_std: float = 0.0,
     lead_time_std: float = 0.0,
     service_level: float = 0.95,
+    fill_rate: float | None = None,
+    order_qty: float | None = None,
 ) -> ReorderResult:
     """Calcula el punto de reorden (ROP) y el stock de seguridad.
 
@@ -261,6 +313,14 @@ def reorder_point(
     service_level : float
         Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1).
         No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95.
+    fill_rate : float, optional
+        Tasa de llenado objetivo β ∈ (0, 1) (tipo 2): fracción de la demanda servida desde inventario. Si se indica,
+        sustituye a ``service_level`` y exige ``order_qty``; se resuelve G(z) = (1 − β)·Q / σ_{DLT}, con G la función
+        de pérdida de la normal. ``service_level`` del resultado es entonces el nivel por ciclo implícito Φ(z). El punto de
+        reorden no baja de 0: si el objetivo es muy holgado frente a Q, la tasa de llenado alcanzada es mayor que la pedida.
+    order_qty : float, optional
+        Cantidad de pedido Q. Necesaria con ``fill_rate``; si se indica sin ella, el resultado informa la tasa de
+        llenado que se obtiene con ``service_level``.
 
     Returns
     -------
@@ -271,7 +331,7 @@ def reorder_point(
     ------
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
-        Si ``service_level`` no está estrictamente entre 0 y 1.
+        Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1, o si se indica ``fill_rate`` sin ``order_qty``.
     TypeError
         Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
@@ -280,6 +340,9 @@ def reorder_point(
     >>> r = reorder_point(demand_rate=50, lead_time=2, demand_std=10, service_level=0.95)
     >>> r.safety_stock > 0
     True
+    >>> r = reorder_point(demand_rate=50, lead_time=2, demand_std=10, fill_rate=0.98, order_qty=100)
+    >>> round(r.fill_rate, 4)
+    0.98
     """
     D   = as_positive(demand_rate, "demand_rate")
     LT  = as_positive(lead_time, "lead_time")
@@ -288,14 +351,23 @@ def reorder_point(
     svc = as_fraction(service_level, "service_level")
     if svc == 0.0 or svc == 1.0:
         raise ValueError(_t("inventory.error.reorder_point.service_level_debe_estar_estrictamente"))
+    beta = _validar_tasa_de_llenado(fill_rate)
+    Q = None if order_qty is None else as_positive(order_qty, "order_qty")
+    if beta is not None and Q is None:
+        raise ValueError(_t("inventory.error.reorder_point.fill_rate_requiere_order_qty"))
 
     mean_dlt = D * LT
     var_dlt  = LT * sd**2 + D**2 * sl**2
     std_dlt  = math.sqrt(var_dlt)
 
-    z   = NormalDist().inv_cdf(svc)
+    if beta is not None and Q is not None:
+        z = _z_con_piso_en_cero(_z_para_tasa_de_llenado(beta, std_dlt, Q), mean_dlt, std_dlt)
+        svc = 1.0 if std_dlt <= 0.0 else NormalDist().cdf(z)
+    else:
+        z = NormalDist().inv_cdf(svc)
     ss  = z * std_dlt
     rop = mean_dlt + ss
+    tasa = _tasa_de_llenado(std_dlt, z, Q) if Q is not None else None
 
     return ReorderResult(
         reorder_point=rop,
@@ -306,6 +378,7 @@ def reorder_point(
         std_demand_lt=std_dlt,
         params={"demand_rate": D, "lead_time": LT, "demand_std": sd,
                 "lead_time_std": sl},
+        fill_rate=tasa,
     )
 
 
@@ -1522,6 +1595,186 @@ def wagner_whitin(
 
 
 # ---------------------------------------------------------------------------
+# Punto de reorden con demanda discreta (Poisson / binomial negativa)
+# ---------------------------------------------------------------------------
+
+MAX_MEDIA_DEMANDA_DISCRETA = 100_000.0   # por encima, la normal es una aproximación excelente y el cálculo exacto es lento
+
+
+@dataclass
+class DiscreteReorderResult:
+    """Resultado del punto de reorden con demanda discreta durante el tiempo de entrega.
+
+    Attributes
+    ----------
+    reorder_point : float
+        Menor entero s con el servicio pedido (cantidad entera de unidades).
+    safety_stock : float
+        Stock de seguridad s − E[X] (puede ser negativo con niveles de servicio bajos).
+    service_level : float
+        Nivel de servicio por ciclo alcanzado P(X ≤ s) (≥ el pedido, porque s es entero).
+    fill_rate : float or None
+        Tasa de llenado alcanzada 1 − E[(X − s)⁺]/Q; ``None`` si no se indicó ``order_qty``.
+    distribution : str
+        ``'Poisson'`` o ``'binomial negativa'``.
+    mean_demand_lt : float
+        Demanda esperada durante el tiempo de entrega E[X].
+    var_demand_lt : float
+        Varianza de la demanda durante el tiempo de entrega.
+    params : dict
+    """
+
+    reorder_point: float
+    safety_stock: float
+    service_level: float
+    fill_rate: float | None
+    distribution: str
+    mean_demand_lt: float
+    var_demand_lt: float
+    params: dict = field(default_factory=dict)
+
+    def summary(self) -> str:
+        texto = _t("inventory.etiqueta.summary.punto_reorden_discreto", reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, distribution=self.distribution, mean_demand_lt=self.mean_demand_lt, var_demand_lt=self.var_demand_lt)
+        if self.fill_rate is not None:
+            texto += "\n" + _t("inventory.etiqueta.summary.tasa_llenado", fill_rate=self.fill_rate)
+        return texto
+
+    def __str__(self) -> str:
+        return self.summary()
+
+    def to_frame(self) -> pd.DataFrame:
+        import pandas as pd
+        return pd.DataFrame([{
+            _t("inventory.cabecera.to_frame.punto_reorden"): self.reorder_point,
+            _t("inventory.cabecera.to_frame.stock_seguridad"): self.safety_stock,
+            _t("inventory.cabecera.to_frame.nivel_servicio"): self.service_level,
+            _t("inventory.cabecera.to_frame.tasa_llenado"): self.fill_rate,
+            _t("inventory.cabecera.to_frame.distribucion"): self.distribution,
+            _t("inventory.cabecera.to_frame.demanda_media_lt"): self.mean_demand_lt,
+            _t("inventory.cabecera.to_frame.varianza_demanda_lt"): self.var_demand_lt,
+        }])
+
+
+def reorder_point_discrete(
+    demand_rate: float,
+    lead_time: float,
+    *,
+    demand_std: float | None = None,
+    service_level: float = 0.95,
+    fill_rate: float | None = None,
+    order_qty: float | None = None,
+) -> DiscreteReorderResult:
+    """Punto de reorden exacto para demanda discreta (unidades enteras), p. ej. piezas de baja rotación o intermitentes.
+
+    La demanda durante el tiempo de entrega X se modela con una distribución de conteo:
+
+    - **Poisson** (``demand_std`` no indicada, o con varianza igual a la media): media = varianza = D̄·L̄.
+    - **Binomial negativa** (varianza > media, sobredispersión): media μ = D̄·L̄, varianza v = L̄·σ_D², con parámetros
+      r = μ²/(v − μ) y p = μ/v.
+
+    Se devuelve el menor entero *s* con P(X ≤ s) ≥ ``service_level`` o, si se indica ``fill_rate``, con
+    1 − E[(X − s)⁺]/Q ≥ ``fill_rate``. Es exacto (sin aproximar por la normal, que con medias pequeñas asigna probabilidad
+    a demanda negativa y da puntos de reorden poco fiables). Supone tiempo de entrega constante e incrementos de demanda
+    independientes entre periodos.
+
+    Parameters
+    ----------
+    demand_rate : float
+        Demanda media por periodo D̄ (unidades/periodo; puede ser fraccionaria, p. ej. 0.3 unidades por periodo).
+    lead_time : float
+        Tiempo de entrega L̄ (mismas unidades de tiempo que ``demand_rate``).
+    demand_std : float, optional
+        Desviación estándar de la demanda por periodo σ_D. Sin ella, Poisson. Si L̄·σ_D² > D̄·L̄, binomial negativa;
+        no se admite varianza menor que la media (subdispersión).
+    service_level : float
+        Nivel de servicio por ciclo ∈ (0, 1): P(no hay faltante en el ciclo). Por defecto 0.95.
+    fill_rate : float, optional
+        Tasa de llenado objetivo β ∈ (0, 1). Si se indica, sustituye a ``service_level`` y exige ``order_qty``.
+    order_qty : float, optional
+        Cantidad de pedido Q. Necesaria con ``fill_rate``; si se indica sin ella, el resultado informa la tasa de llenado
+        alcanzada con ``service_level``.
+
+    Returns
+    -------
+    DiscreteReorderResult
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1, o si se indica ``fill_rate`` sin ``order_qty``.
+        Si la varianza de la demanda en el tiempo de entrega es menor que su media, o si la media supera 100 000 unidades
+        (use entonces ``reorder_point``, con la normal).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = reorder_point_discrete(demand_rate=0.5, lead_time=4, service_level=0.95)
+    >>> r.reorder_point, r.distribution
+    (5.0, 'Poisson')
+    >>> r = reorder_point_discrete(demand_rate=0.5, lead_time=4, demand_std=1.5, service_level=0.95)
+    >>> r.reorder_point, r.distribution
+    (8.0, 'binomial negativa')
+    """
+    D  = as_positive(demand_rate, "demand_rate")
+    LT = as_positive(lead_time, "lead_time")
+    sd = None if demand_std is None else as_nonneg(demand_std, "demand_std")
+    svc = as_fraction(service_level, "service_level")
+    if svc == 0.0 or svc == 1.0:
+        raise ValueError(_t("inventory.error.reorder_point.service_level_debe_estar_estrictamente"))
+    beta = _validar_tasa_de_llenado(fill_rate)
+    Q = None if order_qty is None else as_positive(order_qty, "order_qty")
+    if beta is not None and Q is None:
+        raise ValueError(_t("inventory.error.reorder_point.fill_rate_requiere_order_qty"))
+
+    mu = D * LT
+    var = mu if sd is None else LT * sd**2
+    if mu > MAX_MEDIA_DEMANDA_DISCRETA:
+        raise ValueError(_t("inventory.error.reorder_point_discrete.media_demasiado_grande", mu=mu, max=MAX_MEDIA_DEMANDA_DISCRETA))
+    if var < mu * (1.0 - 1e-9):
+        raise ValueError(_t("inventory.error.reorder_point_discrete.subdispersion", mu=mu, var=var))
+    poisson = var <= mu * (1.0 + 1e-9)
+    if not poisson:
+        r_nb = mu * mu / (var - mu)   # binomial negativa: forma r y probabilidad p con media μ y varianza v
+        p_nb = mu / var
+
+    def log_pmf(k: int) -> float:
+        if poisson:
+            return -mu + k * math.log(mu) - math.lgamma(k + 1)
+        return math.lgamma(k + r_nb) - math.lgamma(r_nb) - math.lgamma(k + 1) + r_nb * math.log(p_nb) + k * math.log1p(-p_nb)
+
+    tope = int(mu + 60.0 * math.sqrt(var)) + 200
+    acumulada = 0.0      # F(s) = P(X ≤ s)
+    primer_momento = 0.0  # Σ_{k ≤ s} k·P(X = k)
+    s_hallado = None
+    for k in range(tope + 1):
+        pk = math.exp(log_pmf(k))
+        acumulada += pk
+        primer_momento += k * pk
+        faltante = max(0.0, mu - primer_momento - k * (1.0 - acumulada))   # E[(X − k)⁺]
+        cumple = acumulada >= svc if beta is None else (Q is not None and 1.0 - faltante / Q >= beta)
+        if cumple:
+            s_hallado = k
+            nivel, faltante_s = min(1.0, acumulada), faltante
+            break
+    if s_hallado is None:
+        raise ValueError(_t("inventory.error.reorder_point_discrete.sin_solucion", tope=tope))
+
+    tasa = None if Q is None else min(1.0, max(0.0, 1.0 - faltante_s / Q))
+    return DiscreteReorderResult(
+        reorder_point=float(s_hallado),
+        safety_stock=float(s_hallado) - mu,
+        service_level=nivel,
+        fill_rate=tasa,
+        distribution=_t("inventory.etiqueta.reorder_point_discrete.poisson") if poisson else _t("inventory.etiqueta.reorder_point_discrete.binomial_negativa"),
+        mean_demand_lt=mu,
+        var_demand_lt=var,
+        params={"demand_rate": D, "lead_time": LT, "demand_std": sd},
+    )
+
+
+# ---------------------------------------------------------------------------
 # (r, Q) Continuous review policy
 # ---------------------------------------------------------------------------
 
@@ -1552,11 +1805,13 @@ class RQPolicyResult:
     avg_inventory: float
     total_cost: float
     params: dict = field(default_factory=dict)
+    fill_rate: float | None = None
 
     def summary(self) -> str:
-        return (
-            _t("inventory.etiqueta.summary.politica_revision_continua_cantidad_pedido", order_qty=self.order_qty, reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, avg_inventory=self.avg_inventory, total_cost=self.total_cost)
-        )
+        texto = _t("inventory.etiqueta.summary.politica_revision_continua_cantidad_pedido", order_qty=self.order_qty, reorder_point=self.reorder_point, safety_stock=self.safety_stock, service_level=self.service_level, avg_inventory=self.avg_inventory, total_cost=self.total_cost)
+        if self.fill_rate is not None:
+            texto += "\n" + _t("inventory.etiqueta.summary.tasa_llenado_politica", fill_rate=self.fill_rate)
+        return texto
 
     def __str__(self) -> str:
         return self.summary()
@@ -1570,6 +1825,7 @@ class RQPolicyResult:
             _t("inventory.cabecera.to_frame.nivel_servicio"): self.service_level,
             _t("inventory.cabecera.to_frame.inventario_promedio"): self.avg_inventory,
             _t("inventory.cabecera.to_frame.costo_total"): self.total_cost,
+            **({_t("inventory.cabecera.to_frame.tasa_llenado"): self.fill_rate} if self.fill_rate is not None else {}),
         }])
 
 
@@ -1582,6 +1838,7 @@ def rq_policy(
     demand_std: float = 0.0,
     lead_time_std: float = 0.0,
     service_level: float = 0.95,
+    fill_rate: float | None = None,
 ) -> RQPolicyResult:
     """Política de inventario (r, Q) de revisión continua.
 
@@ -1607,6 +1864,10 @@ def rq_policy(
     service_level : float
         Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1).
         No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95.
+    fill_rate : float, optional
+        Tasa de llenado objetivo β ∈ (0, 1) (tipo 2). Si se indica, sustituye a ``service_level``: se resuelve
+        G(z) = (1 − β)·Q / σ_{DLT} con Q = EOQ y G la función de pérdida de la normal. El resultado informa siempre la tasa
+        de llenado alcanzada y el nivel de servicio por ciclo Φ(z).
 
     Returns
     -------
@@ -1616,7 +1877,7 @@ def rq_policy(
     ------
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
-        Si ``service_level`` no está estrictamente entre 0 y 1.
+        Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1.
     TypeError
         Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
@@ -1643,10 +1904,16 @@ def rq_policy(
     if svc <= 0.0 or svc >= 1.0:
         raise ValueError(_t("inventory.error.reorder_point.service_level_debe_estar_estrictamente"))
 
+    beta = _validar_tasa_de_llenado(fill_rate)
+
     Q   = math.sqrt(2 * D * K / h)
     mean_dlt = D * LT
     std_dlt  = math.sqrt(LT * sd**2 + D**2 * sl**2)
-    z   = NormalDist().inv_cdf(svc)
+    if beta is not None:
+        z   = _z_con_piso_en_cero(_z_para_tasa_de_llenado(beta, std_dlt, Q), mean_dlt, std_dlt)
+        svc = 1.0 if std_dlt <= 0.0 else NormalDist().cdf(z)
+    else:
+        z   = NormalDist().inv_cdf(svc)
     SS  = z * std_dlt
     r   = mean_dlt + SS
     avg_inv  = Q / 2 + SS
@@ -1661,6 +1928,7 @@ def rq_policy(
         total_cost=total_cost,
         params={"demand_rate": D, "ordering_cost": K, "holding_cost": h,
                 "lead_time": LT, "demand_std": sd, "lead_time_std": sl},
+        fill_rate=_tasa_de_llenado(std_dlt, z, Q),
     )
 
 
@@ -1695,11 +1963,13 @@ class RSPolicyResult:
     avg_inventory: float
     total_cost: float
     params: dict = field(default_factory=dict)
+    fill_rate: float | None = None
 
     def summary(self) -> str:
-        return (
-            _t("inventory.etiqueta.summary.politica_revision_periodica_periodo_revision", review_period=self.review_period, order_up_to=self.order_up_to, safety_stock=self.safety_stock, service_level=self.service_level, avg_inventory=self.avg_inventory, total_cost=self.total_cost)
-        )
+        texto = _t("inventory.etiqueta.summary.politica_revision_periodica_periodo_revision", review_period=self.review_period, order_up_to=self.order_up_to, safety_stock=self.safety_stock, service_level=self.service_level, avg_inventory=self.avg_inventory, total_cost=self.total_cost)
+        if self.fill_rate is not None:
+            texto += "\n" + _t("inventory.etiqueta.summary.tasa_llenado_politica", fill_rate=self.fill_rate)
+        return texto
 
     def __str__(self) -> str:
         return self.summary()
@@ -1713,6 +1983,7 @@ class RSPolicyResult:
             _t("inventory.cabecera.to_frame.nivel_servicio"): self.service_level,
             _t("inventory.cabecera.to_frame.inventario_promedio"): self.avg_inventory,
             _t("inventory.cabecera.to_frame.costo_total"): self.total_cost,
+            **({_t("inventory.cabecera.to_frame.tasa_llenado"): self.fill_rate} if self.fill_rate is not None else {}),
         }])
 
 
@@ -1726,6 +1997,7 @@ def rs_policy(
     demand_std: float = 0.0,
     lead_time_std: float = 0.0,
     service_level: float = 0.95,
+    fill_rate: float | None = None,
 ) -> RSPolicyResult:
     """Política de inventario (R, S) de revisión periódica.
 
@@ -1753,6 +2025,10 @@ def rs_policy(
     service_level : float
         Nivel de servicio por ciclo (tipo 1): probabilidad de no tener faltante en un ciclo de reposición ∈ (0, 1).
         No es la tasa de llenado (fracción de la demanda servida desde inventario), que suele ser mayor. Por defecto 0.95.
+    fill_rate : float, optional
+        Tasa de llenado objetivo β ∈ (0, 1) (tipo 2). Si se indica, sustituye a ``service_level``: se resuelve
+        G(z) = (1 − β)·D·R / σ_{R+L} con G la función de pérdida de la normal. El resultado informa siempre la tasa de
+        llenado alcanzada y el nivel de servicio por ciclo Φ(z).
 
     Returns
     -------
@@ -1762,7 +2038,7 @@ def rs_policy(
     ------
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
-        Si ``service_level`` no está estrictamente entre 0 y 1.
+        Si ``service_level`` o ``fill_rate`` no están estrictamente entre 0 y 1.
     TypeError
         Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
@@ -1795,7 +2071,12 @@ def rs_policy(
     RL = R + LT
     mean_rl = D * RL
     std_rl  = math.sqrt(RL * sd**2 + D**2 * sl**2)
-    z       = NormalDist().inv_cdf(svc)
+    beta    = _validar_tasa_de_llenado(fill_rate)
+    if beta is not None:
+        z   = _z_con_piso_en_cero(_z_para_tasa_de_llenado(beta, std_rl, D * R), mean_rl, std_rl)
+        svc = 1.0 if std_rl <= 0.0 else NormalDist().cdf(z)
+    else:
+        z   = NormalDist().inv_cdf(svc)
     SS      = z * std_rl
     S       = mean_rl + SS
     avg_inv = D * R / 2 + SS
@@ -1811,6 +2092,7 @@ def rs_policy(
         params={"demand_rate": D, "ordering_cost": K, "holding_cost": h,
                 "lead_time": LT, "review_period": R, "demand_std": sd,
                 "lead_time_std": sl},
+        fill_rate=_tasa_de_llenado(std_rl, z, D * R),
     )
 
 

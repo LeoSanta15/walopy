@@ -55,7 +55,7 @@ MUTANTES = [
      'mttr_v = None if mttr is None else as_nonneg(mttr, "mttr")', "mttr_v = mttr",
      "tests/test_regresion_validacion.py -k 'mtbf_rechaza or sistemas_rechazan_t'"),
     ("MU-11", "W-20 versión desincronizada de los metadatos", "__init__.py",
-     '__version__ = "0.4.4"', '__version__ = "0.4.5"',
+     '__version__ = "0.4.5"', '__version__ = "0.4.6"',
      "tests/test_version.py"),
     ("MU-12", "H-02 EOQResult.plot() roto (plot_eoq)", "inventory.py",
      "return plot_eoq(self, **kwargs)", 'raise ImportError("plot_eoq")',
