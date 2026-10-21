@@ -151,6 +151,19 @@ AÑADIDAS_TRAS_V030 = {
     "inventory.etiqueta.summary.punto_reorden_discreto",
     "inventory.cabecera.to_frame.distribucion",
     "inventory.cabecera.to_frame.varianza_demanda_lt",
+    # 0.4.6: réplicas e intervalo de confianza en la simulación
+    "advanced.error.monte_carlo_gg1.demasiados_clientes_total",
+    "advanced.error.monte_carlo_gg1.warmup_invalido",
+    "advanced.cabecera.to_frame.replicas",
+    "advanced.cabecera.to_frame.calentamiento",
+    "advanced.cabecera.to_frame.semiancho_wq",
+    "advanced.etiqueta.summary.ic_wq",
+    "utils.error.t_cuantil_975.gl_debe_ser_recibio",
+    # 0.4.6: PERT con simulación
+    "project.error.probability_mc.requiere_simulacion",
+    "project.error.percentile_mc.q_entre_0_100",
+    "project.cabecera.to_frame.indice_criticidad",
+    "project.etiqueta.summary.simulacion",
     "project.cabecera.to_frame.ht",    # «HT»/«HL» (holgura total/libre): acrónimos españoles que el extractor no veía; ya existían en v0.3.0
     "project.cabecera.to_frame.hl",
 }

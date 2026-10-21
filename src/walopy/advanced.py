@@ -22,6 +22,7 @@ from ._utils import (
     as_nonempty,
     as_nonneg,
     as_positive,
+    t_cuantil_975,
 )
 from .queuing import QueueResult
 
@@ -196,6 +197,16 @@ class SimulationResult:
     n_customers: int
     _Wq_array: np.ndarray = field(repr=False)
     params: dict = field(default_factory=dict)
+    n_replications: int = 1
+    warmup: int = 0
+    Wq_halfwidth: float | None = None
+
+    @property
+    def Wq_ci(self) -> tuple[float, float] | None:
+        """Intervalo de confianza al 95 % de Wq (``Wq_mean`` ± semiancho), o ``None`` si no hay datos suficientes."""
+        if self.Wq_halfwidth is None:
+            return None
+        return (self.Wq_mean - self.Wq_halfwidth, self.Wq_mean + self.Wq_halfwidth)
 
     def to_frame(self) -> pd.DataFrame:
         return pd.DataFrame([{
@@ -212,12 +223,16 @@ class SimulationResult:
             _t("advanced.cabecera.to_frame.wq_p95"): self.Wq_p95,
             _t("advanced.cabecera.to_frame.wq_p99"): self.Wq_p99,
             _t("advanced.cabecera.to_frame.clientes"): self.n_customers,
+            _t("advanced.cabecera.to_frame.replicas"): self.n_replications,
+            _t("advanced.cabecera.to_frame.calentamiento"): self.warmup,
+            _t("advanced.cabecera.to_frame.semiancho_wq"): self.Wq_halfwidth,
         }])
 
     def summary(self) -> str:
-        return (
-            _t("advanced.etiqueta.summary.modelo_wq_medio_p50_p90", model=self.model, n_customers=self.n_customers, rho=self.rho, Wq_mean=self.Wq_mean, Wq_p50=self.Wq_p50, Wq_p90=self.Wq_p90, Wq_p95=self.Wq_p95, Wq_p99=self.Wq_p99, W_mean=self.W_mean, Lq=self.Lq, L=self.L)
-        )
+        texto = _t("advanced.etiqueta.summary.modelo_wq_medio_p50_p90", model=self.model, n_customers=self.n_customers, rho=self.rho, Wq_mean=self.Wq_mean, Wq_p50=self.Wq_p50, Wq_p90=self.Wq_p90, Wq_p95=self.Wq_p95, Wq_p99=self.Wq_p99, W_mean=self.W_mean, Lq=self.Lq, L=self.L)
+        if self.Wq_halfwidth is not None:
+            texto += "\n" + _t("advanced.etiqueta.summary.ic_wq", semiancho=self.Wq_halfwidth, replicas=self.n_replications, calentamiento=self.warmup)
+        return texto
 
     def __str__(self) -> str:
         return self.summary()
@@ -227,9 +242,9 @@ class SimulationResult:
         return plot_simulation(self, **kwargs)
 
 
-LOTES_MC = 20             # lotes para el intervalo de confianza de Wq por medias de lotes
-T_975_19 = 2.093          # cuantil 0,975 de la t de Student con 19 grados de libertad
+LOTES_MC = 20             # lotes para el intervalo de confianza de Wq cuando hay una sola réplica (medias de lotes)
 PRECISION_RELATIVA_MC = 0.10  # avisar si el semiancho al 95 % supera el 10 % de Wq
+MAX_REPLICAS = 10_000
 
 
 def monte_carlo_gg1(
@@ -240,12 +255,19 @@ def monte_carlo_gg1(
     *,
     n_customers: int = 20_000,
     seed: int | None = None,
+    n_replications: int = 1,
+    warmup: int = 0,
 ) -> SimulationResult:
     """Simulación Monte Carlo de una cola G/G/1 de un servidor.
 
     Los tiempos entre llegadas y de servicio se extraen de distribuciones Gamma ajustadas
     a la media y al coeficiente de variación al cuadrado dados. Con CV² = 0 los tiempos son
     determinísticos; con CV² = 1 son exponenciales (se recupera el caso M/M/1).
+
+    El sistema empieza vacío, así que Wq se subestima al principio (sesgo de arranque, notable con ρ alto). Una sola réplica,
+    además, puede alejarse mucho del valor esperado. Para resultados fiables use varias réplicas independientes
+    (``n_replications``) y descarte el periodo de calentamiento (``warmup``); el resultado trae el semiancho del intervalo de
+    confianza al 95 % de Wq (``Wq_halfwidth``, ``Wq_ci``).
 
     Parameters
     ----------
@@ -258,9 +280,16 @@ def monte_carlo_gg1(
     cs2 : float
         Coeficiente de variación al cuadrado de los tiempos de servicio (≥ 0).
     n_customers : int
-        Número de clientes a simular (por defecto 20 000).
+        Número de clientes a simular por réplica (por defecto 20 000).
     seed : int, optional
-        Semilla aleatoria para reproducibilidad.
+        Semilla aleatoria para reproducibilidad. Con varias réplicas se derivan flujos independientes de ella.
+    n_replications : int
+        Réplicas independientes (por defecto 1). Con 2 o más, el intervalo de confianza de Wq usa la t de Student sobre las
+        medias de las réplicas; con 1 se estima por medias de 20 lotes.
+    warmup : int
+        Clientes iniciales de cada réplica que se descartan de las estadísticas (por defecto 0). Con ρ cercano a 1 el
+        arranque en vacío sesga Wq a la baja durante del orden de 1/(1 − ρ)² clientes; descarte varias veces esa cantidad
+        y mantenga ``n_customers`` mucho mayor.
 
     Returns
     -------
@@ -271,7 +300,8 @@ def monte_carlo_gg1(
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
         Si el sistema es inestable (ρ ≥ 1).
-        Si ``n_customers`` supera 10⁷.
+        Si ``n_customers`` o ``n_customers × n_replications`` superan 10⁷, si ``n_replications`` supera 10 000 o si
+        ``warmup`` no es un entero entre 0 y ``n_customers`` − 1.
     TypeError
         Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
@@ -280,63 +310,89 @@ def monte_carlo_gg1(
     >>> r = monte_carlo_gg1(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0, n_customers=50_000, seed=1)
     >>> round(r.L, 4)
     2.0169
+    >>> r = monte_carlo_gg1(lam=2.0, mu=3.0, ca2=1.0, cs2=1.0, n_customers=5_000, seed=1, n_replications=10, warmup=500)
+    >>> r.n_replications, r.Wq_halfwidth < 0.2
+    (10, True)
     """
     lam         = as_positive(lam, "lam")
     mu          = as_positive(mu, "mu")
     ca2         = as_nonneg(ca2, "ca2")
     cs2         = as_nonneg(cs2, "cs2")
     n_customers = as_int_positive(n_customers, "n_customers", max=MAX_CLIENTES)
+    n_rep       = as_int_positive(n_replications, "n_replications", max=MAX_REPLICAS)
+    if n_customers * n_rep > MAX_CLIENTES:
+        raise ValueError(_t("advanced.error.monte_carlo_gg1.demasiados_clientes_total", total=n_customers * n_rep, max=MAX_CLIENTES))
+    if isinstance(warmup, str):
+        raise ValueError(_t("advanced.error.monte_carlo_gg1.warmup_invalido", n=n_customers))
+    valor = as_nonneg(warmup, "warmup")
+    if valor != int(valor) or valor >= n_customers:
+        raise ValueError(_t("advanced.error.monte_carlo_gg1.warmup_invalido", n=n_customers))
+    calentamiento = int(valor)
     rho         = lam / mu
     if rho >= 1.0:
         raise ValueError(_t("advanced.error.monte_carlo_gg1.sistema_inestable", rho=rho))
 
-    rng          = np.random.default_rng(seed)
     mean_ia      = 1.0 / lam
     mean_svc     = 1.0 / mu
+    # Una réplica con ``seed`` reproduce exactamente el flujo de siempre; con varias, flujos independientes derivados de la semilla
+    rngs = [np.random.default_rng(seed)] if n_rep == 1 else [np.random.default_rng(c) for c in np.random.SeedSequence(seed).spawn(n_rep)]
 
-    # Gamma(k, θ): mean = k·θ, CV² = 1/k  →  k = 1/cv², θ = mean·cv²
-    def _gamma_sample(mean: float, cv2: float, size: int) -> np.ndarray:
-        if cv2 < 1e-12:
-            return np.full(size, mean)
-        k = 1.0 / cv2
-        return rng.gamma(shape=k, scale=mean * cv2, size=size)
+    def _replica(rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
+        # Gamma(k, θ): mean = k·θ, CV² = 1/k  →  k = 1/cv², θ = mean·cv²
+        def _gamma_sample(mean: float, cv2: float, size: int) -> np.ndarray:
+            if cv2 < 1e-12:
+                return np.full(size, mean)
+            k = 1.0 / cv2
+            return rng.gamma(shape=k, scale=mean * cv2, size=size)
 
-    ia_times  = _gamma_sample(mean_ia, ca2, n_customers)
-    svc_times = _gamma_sample(mean_svc, cs2, n_customers)
+        ia_times  = _gamma_sample(mean_ia, ca2, n_customers)
+        svc_times = _gamma_sample(mean_svc, cs2, n_customers)
+        arrival   = np.cumsum(ia_times)
+        depart    = np.zeros(n_customers)
+        wait      = np.zeros(n_customers)
+        depart[0] = arrival[0] + svc_times[0]
+        for i in range(1, n_customers):
+            start      = max(arrival[i], depart[i - 1])
+            wait[i]    = start - arrival[i]
+            depart[i]  = start + svc_times[i]
+        return wait, depart - arrival
 
-    arrival    = np.cumsum(ia_times)
-    depart     = np.zeros(n_customers)
-    wait       = np.zeros(n_customers)
+    esperas: list[np.ndarray] = []
+    permanencias: list[np.ndarray] = []
+    for rng in rngs:
+        wait_r, sojourn_r = _replica(rng)
+        esperas.append(wait_r[calentamiento:])
+        permanencias.append(sojourn_r[calentamiento:])
 
-    depart[0] = arrival[0] + svc_times[0]
-    for i in range(1, n_customers):
-        start      = max(arrival[i], depart[i - 1])
-        wait[i]    = start - arrival[i]
-        depart[i]  = start + svc_times[i]
+    wait    = np.concatenate(esperas)
+    medias_wq = np.array([float(w.mean()) for w in esperas])
+    wq_mean = float(medias_wq.mean())
+    w_mean  = float(np.mean([float(x.mean()) for x in permanencias]))
+    pct     = np.percentile(wait, [50, 90, 95, 99])
 
-    sojourn    = depart - arrival
-    pct        = np.percentile(wait, [50, 90, 95, 99])
-
-    # Precisión de Wq por medias de lotes (20 lotes, t de Student con 19 g.l. al 95 %); una sola réplica puede engañar
-    lotes = wait[: n_customers - n_customers % LOTES_MC].reshape(LOTES_MC, -1).mean(axis=1) if n_customers >= LOTES_MC else None
-    if lotes is not None and wait.mean() > 0:
-        semiancho = T_975_19 * float(lotes.std(ddof=1)) / math.sqrt(LOTES_MC)
-        if semiancho > PRECISION_RELATIVA_MC * wait.mean():
-            warnings.warn(
-                _t("advanced.aviso.monte_carlo_gg1.estimacion_imprecisa", wq=float(wait.mean()), semiancho=semiancho,
-                   relativo=semiancho / float(wait.mean()), n=n_customers),
-                UserWarning, stacklevel=2,
-            )
+    # Intervalo de confianza al 95 % de Wq: t de Student sobre las medias de las réplicas o, con una sola, sobre medias de lotes
+    semiancho: float | None = None
+    if n_rep >= 2:
+        semiancho = t_cuantil_975(n_rep - 1) * float(medias_wq.std(ddof=1)) / math.sqrt(n_rep)
+    elif len(esperas[0]) >= LOTES_MC:
+        lotes = esperas[0][: len(esperas[0]) - len(esperas[0]) % LOTES_MC].reshape(LOTES_MC, -1).mean(axis=1)
+        semiancho = t_cuantil_975(LOTES_MC - 1) * float(lotes.std(ddof=1)) / math.sqrt(LOTES_MC)
+    if semiancho is not None and wq_mean > 0 and semiancho > PRECISION_RELATIVA_MC * wq_mean:
+        warnings.warn(
+            _t("advanced.aviso.monte_carlo_gg1.estimacion_imprecisa", wq=wq_mean, semiancho=semiancho,
+               relativo=semiancho / wq_mean, n=n_customers, replicas=n_rep),
+            UserWarning, stacklevel=2,
+        )
 
     return SimulationResult(
         model=_t("advanced.modelo.monte_carlo_gg1.simulacion_ca2_cs2", ca2=ca2, cs2=cs2),
         lam=lam,
         mu=mu,
         rho=rho,
-        Wq_mean=float(wait.mean()),
-        W_mean=float(sojourn.mean()),
-        Lq=float(lam * wait.mean()),
-        L=float(lam * sojourn.mean()),
+        Wq_mean=wq_mean,
+        W_mean=w_mean,
+        Lq=float(lam * wq_mean),
+        L=float(lam * w_mean),
         Wq_p50=float(pct[0]),
         Wq_p90=float(pct[1]),
         Wq_p95=float(pct[2]),
@@ -344,6 +400,9 @@ def monte_carlo_gg1(
         n_customers=n_customers,
         _Wq_array=wait,
         params={"ca2": ca2, "cs2": cs2, "seed": seed},
+        n_replications=n_rep,
+        warmup=calentamiento,
+        Wq_halfwidth=semiancho,
     )
 
 

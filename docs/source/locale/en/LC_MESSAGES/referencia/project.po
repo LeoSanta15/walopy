@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-04 19:22+0000\n"
+"POT-Creation-Date: 2026-10-21 22:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -69,11 +69,11 @@ msgstr "Raises"
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido o un ciclo."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``activities`` is empty, there are duplicate names, an unknown predecessor or a cycle."
 
-#: of walopy.project.cpm:18 walopy.project.pert:25
+#: of walopy.project.cpm:18 walopy.project.pert:34
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.project.cpm:21 walopy.project.pert:28
+#: of walopy.project.cpm:21 walopy.project.pert:37
 msgid "Examples"
 msgstr "Examples"
 
@@ -97,13 +97,21 @@ msgstr "The distribution of the project duration is approximated as normal with 
 msgid "Cada diccionario debe tener:  - ``'name'``: identificador de la actividad. - ``'optimistic'`` (a): duración en el mejor caso. - ``'most_likely'`` (m): duración más probable. - ``'pessimistic'`` (b): duración en el peor caso. - ``'predecessors'``: lista de nombres de predecesoras."
 msgstr "Each dictionary must have:  - ``'name'``: activity identifier. - ``'optimistic'`` (a): best-case duration. - ``'most_likely'`` (m): most likely duration. - ``'pessimistic'`` (b): worst-case duration. - ``'predecessors'``: list of predecessor names."
 
-#: of walopy.project.pert:20
-msgid "``project_duration`` es la longitud esperada de la ruta crítica. Llame a ``.probability(T)`` para P(terminación ≤ T)."
-msgstr "``project_duration`` is the expected length of the critical path. Call ``.probability(T)`` for P(completion ≤ T)."
+#: of walopy.project.pert:19
+msgid "Si es mayor que 0, además simula el proyecto ``n_simulations`` veces con duraciones beta-PERT (a + (b − a)·Beta(α, β), con α = 1 + 4(m − a)/(b − a) y β = 1 + 4(b − m)/(b − a), que tiene media (a + 4m + b)/6). Considera **todas** las rutas, a diferencia de la aproximación normal sobre una sola ruta, que es optimista cuando convergen varias rutas casi críticas. Añade ``mc_mean``, ``mc_std``, ``criticality_index`` (fracción de simulaciones en que cada actividad es crítica), ``probability_mc(T)`` y ``percentile_mc(q)``. Máximo 1 000 000."
+msgstr "If greater than 0, the project is also simulated ``n_simulations`` times with beta-PERT durations (a + (b − a)·Beta(α, β), with α = 1 + 4(m − a)/(b − a) and β = 1 + 4(b − m)/(b − a), whose mean is (a + 4m + b)/6). It considers **all** paths, unlike the normal approximation over a single path, which is optimistic when several near-critical paths merge. Adds ``mc_mean``, ``mc_std``, ``criticality_index`` (fraction of simulations in which each activity is critical), ``probability_mc(T)`` and ``percentile_mc(q)``. Maximum 1 000 000."
 
-#: of walopy.project.pert:24
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido, un ciclo o no se cumple optimistic ≤ most_likely ≤ pessimistic."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``activities`` is empty, there are duplicate names, an unknown predecessor, a cycle or optimistic ≤ most_likely ≤ pessimistic does not hold."
+#: of walopy.project.pert:25
+msgid "Semilla de la simulación (reproducibilidad)."
+msgstr "Seed of the simulation (reproducibility)."
+
+#: of walopy.project.pert:28
+msgid "``project_duration`` es la longitud esperada de la ruta crítica. Llame a ``.probability(T)`` para P(terminación ≤ T) (normal, una ruta) o, con ``n_simulations``, a ``.probability_mc(T)`` (todas las rutas)."
+msgstr "``project_duration`` is the expected length of the critical path. Call ``.probability(T)`` for P(completion ≤ T) (normal, one path) or, with ``n_simulations``, ``.probability_mc(T)`` (all paths)."
+
+#: of walopy.project.pert:33
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido, un ciclo o no se cumple optimistic ≤ most_likely ≤ pessimistic.     Si ``n_simulations`` no es un entero entre 0 y 1 000 000."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``activities`` is empty, there are duplicate names, an unknown predecessor, a cycle, or optimistic ≤ most_likely ≤ pessimistic does not hold.     If ``n_simulations`` is not an integer between 0 and 1 000 000."
 
 #: ../../source/referencia/project.rst:14
 msgid "Clases de resultado"
@@ -178,11 +186,28 @@ msgstr "Sum of the variances of the critical path (PERT only)."
 msgid "√(project_variance) (solo PERT)."
 msgstr "√(project_variance) (PERT only)."
 
+#: of walopy.project.ProjectResult.probability_mc:1
+msgid "P(duración del proyecto ≤ objetivo) estimada por simulación (requiere ``pert(..., n_simulations=N)``)."
+msgstr "P(project duration ≤ target) estimated by simulation (requires ``pert(..., n_simulations=N)``)."
+
+#: of walopy.project.ProjectResult.probability_mc:3
+msgid "A diferencia de ``probability`` (normal sobre una sola ruta), considera todas las rutas: con varias rutas casi críticas es bastante menor."
+msgstr "Unlike ``probability`` (normal over a single path), it considers all paths: with several near-critical paths it is considerably lower."
+
+#: of walopy.project.ProjectResult.probability:3
+#: walopy.project.ProjectResult.probability_mc:6
+msgid "Tiempo objetivo T de terminación del proyecto."
+msgstr "Target project completion time T."
+
+#: of walopy.project.ProjectResult.percentile_mc:1
+msgid "Percentil *q* (0 a 100) de la duración simulada del proyecto (requiere ``pert(..., n_simulations=N)``)."
+msgstr "Percentile *q* (0 to 100) of the simulated project duration (requires ``pert(..., n_simulations=N)``)."
+
+#: of walopy.project.ProjectResult.percentile_mc:3
+msgid "Percentil entre 0 y 100."
+msgstr "Percentile between 0 and 100."
+
 #: of walopy.project.ProjectResult.probability:1
 msgid "P(duración del proyecto ≤ objetivo) mediante aproximación normal (solo PERT)."
 msgstr "P(project duration ≤ target) using a normal approximation (PERT only)."
-
-#: of walopy.project.ProjectResult.probability:3
-msgid "Tiempo objetivo T de terminación del proyecto."
-msgstr "Target project completion time T."
 

@@ -4,12 +4,14 @@ from __future__ import annotations
 import math
 import warnings
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from statistics import NormalDist
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 from ._i18n import t as _t
-from ._utils import as_finite_scalar, as_nonneg
+from ._utils import as_finite_scalar, as_int_positive, as_nonneg
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -89,6 +91,50 @@ class ProjectResult:
     method: str
     project_variance: float | None = None
     project_std: float | None = None
+    n_simulations: int = 0
+    mc_mean: float | None = None
+    mc_std: float | None = None
+    criticality_index: dict | None = None
+    _mc_durations: np.ndarray | None = field(default=None, repr=False)
+
+    def probability_mc(self, target: float) -> float:
+        """P(duración del proyecto ≤ objetivo) estimada por simulación (requiere ``pert(..., n_simulations=N)``).
+
+        A diferencia de ``probability`` (normal sobre una sola ruta), considera todas las rutas: con varias rutas casi
+        críticas es bastante menor.
+
+        Parameters
+        ----------
+        target : float
+            Tiempo objetivo T de terminación del proyecto.
+
+        Returns
+        -------
+        float
+        """
+        target = as_finite_scalar(target, "target")
+        if self._mc_durations is None:
+            raise ValueError(_t("project.error.probability_mc.requiere_simulacion"))
+        return float(np.mean(self._mc_durations <= target))
+
+    def percentile_mc(self, q: float) -> float:
+        """Percentil *q* (0 a 100) de la duración simulada del proyecto (requiere ``pert(..., n_simulations=N)``).
+
+        Parameters
+        ----------
+        q : float
+            Percentil entre 0 y 100.
+
+        Returns
+        -------
+        float
+        """
+        q = as_finite_scalar(q, "q")
+        if self._mc_durations is None:
+            raise ValueError(_t("project.error.probability_mc.requiere_simulacion"))
+        if not 0.0 <= q <= 100.0:
+            raise ValueError(_t("project.error.percentile_mc.q_entre_0_100", q=q))
+        return float(np.percentile(self._mc_durations, q))
 
     def probability(self, target: float) -> float:
         """P(duración del proyecto ≤ objetivo) mediante aproximación normal (solo PERT).
@@ -119,6 +165,7 @@ class ProjectResult:
             _t("project.cabecera.to_frame.ht"): a.total_float,
             _t("project.cabecera.to_frame.hl"): a.free_float,
             _t("project.cabecera.to_frame.critica"): a.is_critical,
+            **({_t("project.cabecera.to_frame.indice_criticidad"): self.criticality_index[a.name]} if self.criticality_index is not None else {}),
         } for a in self.activities])
 
     def summary(self) -> str:
@@ -132,6 +179,9 @@ class ProjectResult:
                 _t("project.etiqueta.summary.varianza_proyecto", project_variance=self.project_variance),
                 _t("project.etiqueta.summary.proyecto", project_std=self.project_std),
             ]
+        if self._mc_durations is not None:
+            lines.append(_t("project.etiqueta.summary.simulacion", n=self.n_simulations, mc_mean=self.mc_mean, mc_std=self.mc_std,
+                            p50=self.percentile_mc(50), p90=self.percentile_mc(90)))
         return "\n".join(lines)
 
     def __str__(self) -> str:
@@ -333,7 +383,57 @@ def cpm(activities: list) -> ProjectResult:
     )
 
 
-def pert(activities: list) -> ProjectResult:
+MAX_SIMULACIONES_PERT = 10**6
+_CELDAS_POR_BLOQUE = 500_000   # actividades × simulaciones por bloque (acota la memoria)
+
+
+def _simular_pert(acts: dict, opt: dict, ml: dict, pess: dict, n_sim: int, seed: int | None) -> tuple:
+    """Simulación Monte Carlo de PERT con duraciones beta-PERT: a + (b − a)·Beta(1 + 4(m − a)/(b − a), 1 + 4(b − m)/(b − a)).
+
+    Devuelve (duraciones del proyecto, índice de criticidad por actividad). El índice es la fracción de simulaciones en que la actividad
+    está en la ruta crítica (siguiendo, desde la última en terminar, el predecesor que fija el inicio de cada actividad).
+    """
+    orden, _ = _toposort_and_succ(acts)
+    rng = np.random.default_rng(seed)
+    n_act = len(orden)
+    bloque = max(1, min(n_sim, _CELDAS_POR_BLOQUE // n_act))
+    duraciones = np.empty(n_sim)
+    cuenta = {nm: 0 for nm in orden}
+    hecho = 0
+    while hecho < n_sim:
+        c = min(bloque, n_sim - hecho)
+        ef: dict = {}
+        pred_idx: dict = {}
+        for nm in orden:
+            a, m, b = opt[nm], ml[nm], pess[nm]
+            if b > a:
+                alfa, beta = 1.0 + 4.0 * (m - a) / (b - a), 1.0 + 4.0 * (b - m) / (b - a)
+                dur = a + (b - a) * rng.beta(alfa, beta, size=c)
+            else:
+                dur = np.full(c, float(a))
+            preds = acts[nm]["predecessors"]
+            if preds:
+                matriz = np.stack([ef[p] for p in preds])
+                pred_idx[nm] = matriz.argmax(axis=0)
+                inicio = matriz.max(axis=0)
+            else:
+                inicio = np.zeros(c)
+            ef[nm] = inicio + dur
+        todas = np.stack([ef[nm] for nm in orden])
+        fin_idx = todas.argmax(axis=0)
+        duraciones[hecho:hecho + c] = todas.max(axis=0)
+        critica = {nm: fin_idx == k for k, nm in enumerate(orden)}
+        for nm in reversed(orden):
+            preds = acts[nm]["predecessors"]
+            for k, p in enumerate(preds):
+                critica[p] = critica[p] | (critica[nm] & (pred_idx[nm] == k))
+        for nm in orden:
+            cuenta[nm] += int(critica[nm].sum())
+        hecho += c
+    return duraciones, {nm: cuenta[nm] / n_sim for nm in orden}
+
+
+def pert(activities: list, *, n_simulations: int = 0, seed: int | None = None) -> ProjectResult:
     """Programación de proyectos PERT (Técnica de Evaluación y Revisión de Programas).
 
     Usa la aproximación de la distribución beta con tres estimaciones:
@@ -355,11 +455,21 @@ def pert(activities: list) -> ProjectResult:
         - ``'pessimistic'`` (b): duración en el peor caso.
         - ``'predecessors'``: lista de nombres de predecesoras.
 
+    n_simulations : int
+        Si es mayor que 0, además simula el proyecto ``n_simulations`` veces con duraciones beta-PERT (a + (b − a)·Beta(α, β), con
+        α = 1 + 4(m − a)/(b − a) y β = 1 + 4(b − m)/(b − a), que tiene media (a + 4m + b)/6). Considera **todas** las rutas, a diferencia
+        de la aproximación normal sobre una sola ruta, que es optimista cuando convergen varias rutas casi críticas. Añade
+        ``mc_mean``, ``mc_std``, ``criticality_index`` (fracción de simulaciones en que cada actividad es crítica),
+        ``probability_mc(T)`` y ``percentile_mc(q)``. Máximo 1 000 000.
+    seed : int, optional
+        Semilla de la simulación (reproducibilidad).
+
     Returns
     -------
     ProjectResult
         ``project_duration`` es la longitud esperada de la ruta crítica.
-        Llame a ``.probability(T)`` para P(terminación ≤ T).
+        Llame a ``.probability(T)`` para P(terminación ≤ T) (normal, una ruta) o, con ``n_simulations``,
+        a ``.probability_mc(T)`` (todas las rutas).
 
 
     Raises
@@ -367,6 +477,7 @@ def pert(activities: list) -> ProjectResult:
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
         Si ``activities`` está vacío, hay nombres duplicados, un predecesor desconocido, un ciclo o no se cumple optimistic ≤ most_likely ≤ pessimistic.
+        Si ``n_simulations`` no es un entero entre 0 y 1 000 000.
     TypeError
         Si un argumento no es numérico o una secuencia contiene valores que no lo son.
 
@@ -379,7 +490,14 @@ def pert(activities: list) -> ProjectResult:
     >>> r = pert(acts)
     >>> round(r.project_duration, 4)
     7.0
+    >>> r = pert(acts, n_simulations=2000, seed=1)
+    >>> r.n_simulations, round(r.criticality_index["A"], 2)
+    (2000, 1.0)
     """
+    if n_simulations != 0:
+        n_sim = as_int_positive(n_simulations, "n_simulations", max=MAX_SIMULACIONES_PERT)
+    else:
+        n_sim = 0
     acts:      dict = {}
     opt_d:     dict = {}
     ml_d:      dict = {}
@@ -413,11 +531,15 @@ def pert(activities: list) -> ProjectResult:
     ruta, proj_var = _ruta_critica_de_mayor_varianza(acts, crit, variances, ES, EF, T)
     sigma = math.sqrt(proj_var)
     casi_criticas = [a.name for a in results if a.name not in ruta and a.total_float <= sigma + 1e-9]
-    if sigma > 0 and casi_criticas:
+    if sigma > 0 and casi_criticas and n_sim == 0:
         warnings.warn(
             _t("project.aviso.pert.rutas_casi_criticas", n=len(casi_criticas), actividades=", ".join(casi_criticas[:5]), sigma=sigma),
             UserWarning, stacklevel=2,
         )
+
+    duraciones = indice = None
+    if n_sim > 0:
+        duraciones, indice = _simular_pert(acts, opt_d, ml_d, pess_d, n_sim, seed)
 
     return ProjectResult(
         activities=results,
@@ -426,4 +548,9 @@ def pert(activities: list) -> ProjectResult:
         method="PERT",
         project_variance=proj_var,
         project_std=math.sqrt(proj_var),
+        n_simulations=n_sim,
+        mc_mean=None if duraciones is None else float(duraciones.mean()),
+        mc_std=None if duraciones is None else float(duraciones.std(ddof=1)) if len(duraciones) > 1 else 0.0,
+        criticality_index=indice,
+        _mc_durations=duraciones,
     )

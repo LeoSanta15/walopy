@@ -166,7 +166,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.5"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.6"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos

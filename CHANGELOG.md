@@ -8,6 +8,39 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.6] — 2026-10-21
+
+Versión de simulación: réplicas con intervalo de confianza en `monte_carlo_gg1` y PERT con simulación Monte Carlo. Cierran los dos hallazgos de la auditoría de dominio
+que en 0.4.4 solo tenían un aviso. Los resultados existentes no cambian: con los valores por defecto los números son los de siempre.
+
+### Añadido
+- **`monte_carlo_gg1(..., n_replications=N, warmup=K)`**: réplicas independientes (flujos derivados de `seed` con `SeedSequence`) y descarte de los `K` primeros clientes de
+  cada una (el arranque en vacío sesga Wq a la baja). El resultado trae `Wq_halfwidth` y `Wq_ci` (intervalo de confianza al 95 %: t de Student sobre las medias de las
+  réplicas o, con una sola, medias de 20 lotes), `n_replications` y `warmup`. Con ρ = 0,95 y 20 000 clientes, 20 corridas sueltas dieron Wq entre 11 y 27 (exacto: 19); con 200
+  réplicas el intervalo fue [18,1; 19,6]. El aviso de precisión (semiancho > 10 % de Wq) usa ahora ese intervalo. Con `n_replications=1` y `warmup=0` el flujo aleatorio es
+  el de siempre.
+- **`pert(..., n_simulations=N, seed=...)`**: simula el proyecto con duraciones beta-PERT, a + (b − a)·Beta(1 + 4(m − a)/(b − a), 1 + 4(b − m)/(b − a)) (media (a + 4m + b)/6),
+  y considera **todas** las rutas. Añade `mc_mean`, `mc_std`, `criticality_index` (fracción de simulaciones en que cada actividad está en la ruta crítica),
+  `probability_mc(T)` y `percentile_mc(q)`; la tabla gana la columna de criticidad y el resumen una línea de simulación. Con 5 rutas paralelas idénticas, P(T ≤ 17,5) es 0,50
+  con la normal de una ruta y 0,04 por simulación. Con `n_simulations` no se emite el aviso de rutas casi críticas de 0.4.4 (que ahora recomienda esa opción).
+
+### Cambiado
+- `SimulationResult` tiene los campos `n_replications`, `warmup` y `Wq_halfwidth` (y la propiedad `Wq_ci`); `summary()` muestra una línea más (`IC 95 % Wq`) y `to_frame()` tres
+  columnas más al final. `ProjectResult` tiene `n_simulations`, `mc_mean`, `mc_std` y `criticality_index`, que solo se rellenan con `n_simulations`.
+- El texto del aviso de precisión de `monte_carlo_gg1` menciona `n_replications` en lugar de «varias semillas».
+
+### Descartado tras medirlo
+- Calentamiento automático con MSER-5: con ρ = 0,95 y 200 réplicas de 20 000 clientes dio Wq = 17,8 (IC [17,1; 18,5]) frente a 19 exacto, peor que no descartar nada (18,9;
+  [18,1; 19,6]), porque recorta justo las excursiones largas. Por eso `warmup` es un entero y la documentación orienta cuánto descartar (varias veces 1/(1 − ρ)² clientes).
+
+### Pruebas
+- `tests/test_simulacion_replicas.py`: M/M/1 como oráculo (Wq exacto = λ/(μ(μ − λ))): el intervalo cubre el valor exacto con frecuencia cercana al 95 % en 40 corridas, el semiancho
+  baja con más réplicas, las réplicas son independientes y reproducibles y los cuantiles de la t coinciden con tablas.
+- `tests/test_pert_simulacion.py`: casos deterministas exactos (duración e índice de criticidad), media y varianza exactas de la beta-PERT, dos rutas idénticas (criticidad 0,5 cada una y
+  P(T ≤ t) = F(t)² con F integrada numéricamente) y reproducibilidad independiente del tamaño de bloque.
+
+---
+
 ## [0.4.5] — 2026-10-21
 
 Versión de inventarios: objetivos de **tasa de llenado** y punto de reorden exacto para **demanda discreta**, a raíz de la auditoría de dominio. Sin
