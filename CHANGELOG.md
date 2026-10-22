@@ -8,6 +8,35 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.13] — 2026-10-22
+
+Versión de centros de contacto con servicio heterogéneo: tiempos de servicio distintos por clase en Erlang A con dos clases y prioridad. Solo añade capacidades: con `mu` numérico todo es igual que en 0.4.12.
+
+### Añadido
+- **`erlang_a_classes(lam, mu, theta, c)` y `erlang_a_classes_service_level(...)` aceptan `mu` como secuencia** con la tasa de servicio de cada clase (p. ej. agentes senior que atienden más rápido a los VIP). Exacto, no una aproximación. Con
+  tiempos distintos hay que seguir cuántos servidores ocupa cada clase (n₁ de alta y c − n₁ de baja), y la región sin cola, que ya no tiene forma cerrada, es una malla triangular de c(c+1)/2 estados. Se resuelve por niveles de la cola de la clase
+  baja con fases (n₁, q₁); la bajada de nivel deja de ser diagonal pero tiene a lo más dos entradas por fila, así que N·D se calcula sin matrices intermedias. **Solo con 2 clases**: con más y μ distintos lanza `ValueError`.
+- `ErlangAClassesResult.mu` es un número si es común, o una tupla con el de cada clase; `rho` es la proporción de servidores ocupados, Σ λ_eff,k /(μ_k·c); el resumen muestra una columna μ cuando difieren.
+- Niveles de servicio con μ distintos, exactos por uniformización: la clase alta con estado (n₁, posición) y la baja con (n₁, a, posición), donde n₁ cambia cuando termina un servicio de baja y entra uno de alta.
+- Con μ₁ = μ₂ el motor reproduce `erlang_a_priority` (cola, P(esperar), abandono y niveles de servicio, a 1e-8); la ocupación de cada clase cumple E[nₖ] = λ_eff,k/μₖ (a 1e-8); con una clase casi sin llegadas, la otra es `erlang_a` con su propio μ; y todo
+  coincide con una simulación de eventos con μ distintos (10 réplicas de 25 000 llegadas, a menos de 4 errores estándar).
+- Ejemplo: `examples/06_centro_de_contacto_erlang_a.py` compara 10 agentes con el mismo tiempo de servicio (1,3 % de abandono VIP y 7,1 % estándar) y con los VIP atendidos en 2,5 min (0,8 % y 4,3 %).
+
+### Cambia
+- Interno: el tamaño del truncamiento se amplía extrapolando el decaimiento geométrico de la masa en la frontera, en vez de multiplicar por un factor fijo cuando hay dos soluciones previas (nunca más que el factor); evita resolver una malla mucho mayor por pasarse por poco de la tolerancia.
+  Acelera también `erlang_a_classes` con μ común (p. ej. 3 clases con c = 6: de 5 s a 3 s).
+
+### Límites
+- **Tamaño con μ distintos.** El costo crece con c (fases (c + 1)(q₁ + 1) y región libre c(c+1)/2). Con carga cercana a la capacidad (ρ ≈ 1): ≈ 0,5 s con 10 servidores, ≈ 4 s con 20 y ≈ 15 s con 30; con 40 o más se supera la cota de
+  cálculo (≈ 20 s hasta rendirse) y lanza `ValueError`. Con carga menor, o `mu` común, el límite es mucho más holgado.
+- Solo 2 clases con μ distintos: con más, el estado necesitaría la composición de servidores por clase y no es abordable de forma exacta.
+
+### Pruebas
+- `tests/test_erlang_a_mu_distintos.py`: la cadena completa con álgebra lineal (c = 1 a 5), el caso μ₁ = μ₂ contra `erlang_a_priority`, la identidad de ocupación por clase, los límites con una clase casi sin llegadas, la exponencial de la matriz
+  de las dos cadenas de espera (transiciones escritas una a una), simulación de eventos con μ distintos y validación de entradas. Siete mutantes nuevos (`MU-53` a `MU-59`).
+
+---
+
 ## [0.4.12] — 2026-10-22
 
 Versión de centros de contacto con más de dos clases: Erlang A con K clases y prioridad. Solo añade funciones: no cambia ningún resultado existente.

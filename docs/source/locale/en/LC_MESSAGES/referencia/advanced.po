@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 21:31+0000\n"
+"POT-Creation-Date: 2026-10-22 22:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -47,7 +47,7 @@ msgstr "Parameters"
 msgid "Tasa de llegadas λ."
 msgstr "Arrival rate λ."
 
-#: of walopy.advanced.erlang_a:9 walopy.advanced.erlang_a_classes:13 walopy.advanced.erlang_a_priority:11 walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
+#: of walopy.advanced.erlang_a:9 walopy.advanced.erlang_a_priority:11 walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
 msgid "Tasa de servicio μ por servidor."
 msgstr "Service rate μ per server."
 
@@ -75,11 +75,11 @@ msgstr "Raises"
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``c`` supera 10⁶."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``c`` exceeds 10⁶."
 
-#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23 walopy.advanced.break_even_sales:19 walopy.advanced.erlang_a:22 walopy.advanced.erlang_a_classes:24 walopy.advanced.erlang_a_classes_service_level:18 walopy.advanced.erlang_a_priority:24 walopy.advanced.erlang_a_priority_service_level:20 walopy.advanced.erlang_a_servers:21 walopy.advanced.erlang_a_service_level:18 walopy.advanced.erlang_b:17 walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24 walopy.advanced.mm1k:18 walopy.advanced.mmck:19 walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16 walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
+#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23 walopy.advanced.break_even_sales:19 walopy.advanced.erlang_a:22 walopy.advanced.erlang_a_classes:28 walopy.advanced.erlang_a_classes_service_level:18 walopy.advanced.erlang_a_priority:24 walopy.advanced.erlang_a_priority_service_level:20 walopy.advanced.erlang_a_servers:21 walopy.advanced.erlang_a_service_level:18 walopy.advanced.erlang_b:17 walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24 walopy.advanced.mm1k:18 walopy.advanced.mmck:19 walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16 walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26 walopy.advanced.break_even_sales:22 walopy.advanced.erlang_a:25 walopy.advanced.erlang_a_classes:27 walopy.advanced.erlang_a_classes_service_level:21 walopy.advanced.erlang_a_priority:27 walopy.advanced.erlang_a_priority_service_level:23 walopy.advanced.erlang_a_servers:24 walopy.advanced.erlang_a_service_level:21 walopy.advanced.erlang_b:20 walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27 walopy.advanced.mm1k:21 walopy.advanced.mmck:22 walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19 walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
+#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26 walopy.advanced.break_even_sales:22 walopy.advanced.erlang_a:25 walopy.advanced.erlang_a_classes:31 walopy.advanced.erlang_a_classes_service_level:21 walopy.advanced.erlang_a_priority:27 walopy.advanced.erlang_a_priority_service_level:23 walopy.advanced.erlang_a_servers:24 walopy.advanced.erlang_a_service_level:21 walopy.advanced.erlang_b:20 walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27 walopy.advanced.mm1k:21 walopy.advanced.mmck:22 walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19 walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
 msgid "Examples"
 msgstr "Examples"
 
@@ -115,7 +115,7 @@ msgstr "M/M/c/K queue: *c* servers and system capacity *K* (including the server
 msgid "Los clientes que llegan cuando el sistema está lleno se bloquean (se pierden). El sistema siempre es estable, sea cual sea ρ, por su capacidad finita."
 msgstr "Customers who arrive when the system is full are blocked (lost). The system is always stable, whatever ρ is, because of its finite capacity."
 
-#: of walopy.advanced.erlang_a:13 walopy.advanced.erlang_a_classes:17 walopy.advanced.erlang_a_priority:17 walopy.advanced.mmck:10
+#: of walopy.advanced.erlang_a:13 walopy.advanced.erlang_a_classes:21 walopy.advanced.erlang_a_priority:17 walopy.advanced.mmck:10
 msgid "Número de servidores (≥ 1)."
 msgstr "Number of servers (≥ 1)."
 
@@ -223,7 +223,7 @@ msgstr "Arrival rates of the high- and low-priority class (both > 0; with a sing
 msgid "Tasas de abandono θ de cada clase."
 msgstr "Abandonment rates θ of each class."
 
-#: of walopy.advanced.erlang_a_classes:20 walopy.advanced.erlang_a_priority:20
+#: of walopy.advanced.erlang_a_classes:24 walopy.advanced.erlang_a_priority:20
 msgid "Por clase: probabilidad de abandono, tasa atendida, Lq y Wq; y la utilización y P(esperar) del sistema."
 msgstr "Per class: probability of abandonment, served rate, Lq and Wq; and the utilization and P(wait) of the system."
 
@@ -256,24 +256,32 @@ msgid "Cola M/M/c+M con K ≥ 2 clases que abandonan con paciencias distintas y 
 msgstr "M/M/c+M queue with K ≥ 2 classes that abandon with different patience and are served by non-preemptive priority."
 
 #: of walopy.advanced.erlang_a_classes:3
-msgid "``lam[0]`` y ``theta[0]`` son los de la clase de mayor prioridad. Cada clase pasa delante de las siguientes en la fila (sin desplazar a nadie en servicio), tiene su tasa de llegadas λ y su tasa de abandono θ (paciencia exponencial de media 1/θ), y el servicio es exponencial de tasa μ para todas. El resultado es exacto (cadena de Markov resuelta por niveles), no una aproximación, y estable aunque Σλ ≥ c·μ. Con dos clases coincide con ``erlang_a_priority``; con θ iguales, la cola total coincide con ``erlang_a``."
-msgstr "``lam[0]`` and ``theta[0]`` are those of the highest-priority class. Each class goes ahead of the following ones in the line (without displacing anyone in service), has its own arrival rate λ and abandonment rate θ (exponential patience with mean 1/θ), and the service is exponential with rate μ for all of them. The result is exact (a Markov chain solved by levels), not an approximation, and stable even when Σλ ≥ c·μ. With two classes it coincides with ``erlang_a_priority``; with equal θ, the total queue coincides with ``erlang_a``."
+msgid "``lam[0]`` y ``theta[0]`` son los de la clase de mayor prioridad. Cada clase pasa delante de las siguientes en la fila (sin desplazar a nadie en servicio), tiene su tasa de llegadas λ y su tasa de abandono θ (paciencia exponencial de media 1/θ), y el servicio es exponencial. El resultado es exacto (cadena de Markov resuelta por niveles), no una aproximación, y estable aunque Σλ ≥ c·μ. Con dos clases y μ común coincide con ``erlang_a_priority``; con θ iguales, la cola total coincide con ``erlang_a``."
+msgstr "``lam[0]`` and ``theta[0]`` are those of the highest-priority class. Each class goes ahead of the following ones in the line (without displacing anyone in service), has its own arrival rate λ and abandonment rate θ (exponential patience with mean 1/θ), and the service is exponential. The result is exact (a Markov chain solved by levels), not an approximation, and stable even when Σλ ≥ c·μ. With two classes and a common μ it coincides with ``erlang_a_priority``; with equal θ, the total queue coincides with ``erlang_a``."
 
 #: of walopy.advanced.erlang_a_classes:8
+msgid "``mu`` puede ser un número (común a todas las clases) o una secuencia con la tasa de servicio de cada clase. **Tiempos de servicio distintos por clase solo se admiten con 2 clases**: hay que seguir cuántos servidores ocupa cada clase y el estado crece con c (la región sin cola es una malla de c(c+1)/2 estados), así que el costo es mayor (con carga cercana a la capacidad, ≈ 0,5 s con 10 servidores, ≈ 4 s con 20 y ≈ 15 s con 30; con 40 o más supera la cota de cálculo)."
+msgstr "``mu`` can be a number (common to all classes) or a sequence with the service rate of each class. **Different service times per class are only supported with 2 classes**: it must track how many servers each class occupies and the state grows with c (the region without queue is a grid of c(c+1)/2 states), so the cost is higher (with load close to capacity, ≈ 0.5 s with 10 servers, ≈ 4 s with 20 and ≈ 15 s with 30; with 40 or more it exceeds the computation bound)."
+
+#: of walopy.advanced.erlang_a_classes:12
 msgid "El costo crece con el producto de las colas de las clases altas: con 2 o 3 clases es de décimas de segundo; con más clases o colas largas puede superar la cota de cálculo y lanzar ``ValueError``."
 msgstr "The cost grows with the product of the queues of the higher classes: with 2 or 3 classes it takes tenths of a second; with more classes or long queues it can exceed the computation bound and raise ``ValueError``."
 
-#: of walopy.advanced.erlang_a_classes:11
+#: of walopy.advanced.erlang_a_classes:15
 msgid "Tasas de llegada de cada clase, de mayor a menor prioridad (2 a 6 valores > 0)."
 msgstr "Arrival rates of each class, from highest to lowest priority (2 to 6 values > 0)."
 
-#: of walopy.advanced.erlang_a_classes:15
+#: of walopy.advanced.erlang_a_classes:17
+msgid "Tasa de servicio μ por servidor: un número común, o una secuencia con uno por clase (distintos solo con 2 clases)."
+msgstr "Service rate μ per server: a common number, or a sequence with one per class (different only with 2 classes)."
+
+#: of walopy.advanced.erlang_a_classes:19
 msgid "Tasas de abandono θ de cada clase (mismo orden y longitud que ``lam``)."
 msgstr "Abandonment rates θ of each class (same order and length as ``lam``)."
 
-#: of walopy.advanced.erlang_a_classes:23
-msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo), si ``lam`` y ``theta`` no tienen la misma     longitud o hay más de 6 clases. Si ``c`` supera 10⁶ o la cola esperada necesita un truncamiento demasiado grande."
-msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive), if ``lam`` and ``theta`` do not have the same     length or there are more than 6 classes. If ``c`` exceeds 10⁶ or the expected queue needs a truncation that is too large."
+#: of walopy.advanced.erlang_a_classes:27
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo), si ``lam`` y ``theta`` no tienen la misma     longitud o hay más de 6 clases, si ``mu`` es una secuencia de longitud distinta de la de ``lam`` o con valores distintos y más de 2 clases.     Si ``c`` supera 10⁶ o la cola esperada necesita un truncamiento demasiado grande."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive), if ``lam`` and ``theta`` do not have the same     length or there are more than 6 classes, if ``mu`` is a sequence whose length differs from that of ``lam`` or has different values and there are more than 2 classes.     If ``c`` exceeds 10⁶ or the expected queue needs a truncation that is too large."
 
 #: of walopy.advanced.erlang_a_classes_service_level:1
 msgid "Nivel de servicio de cada clase de ``erlang_a_classes``: fracción de sus llegadas que se atiende esperando como máximo *t*."
@@ -284,8 +292,8 @@ msgid "La clase de mayor prioridad solo ve a las de su clase en la fila y su niv
 msgstr "The highest-priority class only sees those of its own class in the line and its level is a closed form (as in ``erlang_a_service_level``). Each of the others is overtaken by arrivals of the higher classes during its wait: its level is computed with the chain of its wait (queues of the higher classes ahead, own position) by uniformization, also exact. Whoever abandons before *t* does not count as served."
 
 #: of walopy.advanced.erlang_a_classes_service_level:7 walopy.advanced.erlang_a_classes_service_level:8 walopy.advanced.erlang_a_classes_service_level:9 walopy.advanced.erlang_a_classes_service_level:10
-msgid "Igual que en ``erlang_a_classes``."
-msgstr "Same as in ``erlang_a_classes``."
+msgid "Igual que en ``erlang_a_classes`` (``mu`` puede ser una secuencia con un valor por clase si hay 2 clases)."
+msgstr "Same as in ``erlang_a_classes`` (``mu`` can be a sequence with one value per class if there are 2 classes)."
 
 #: of walopy.advanced.erlang_a_classes_service_level:14
 msgid "Un nivel por clase (de mayor a menor prioridad), cada uno en [0, 1 − P(abandono) de su clase]."
@@ -683,14 +691,23 @@ msgid "Resultado de ``erlang_a_classes``: M/M/c+M con K clases y prioridad no ex
 msgstr "Result of ``erlang_a_classes``: M/M/c+M with K classes and non-preemptive priority."
 
 #: of walopy.advanced.ErlangAClassesResult:5
-msgid "Tasa de servicio por servidor (la misma para todas las clases)."
-msgstr "Service rate per server (the same for all classes)."
+msgid "Tasa de servicio por servidor: un número si es común a todas las clases, o una tupla con la de cada clase."
+msgstr "Service rate per server: a number if it is common to all classes, or a tuple with that of each class."
 
 #: of walopy.advanced.ErlangAClassesResult:7
-msgid "Utilización Σ λ_eff,k /(c·μ)."
-msgstr "Utilization Σ λ_eff,k /(c·μ)."
+msgid "Utilización: servidores ocupados en promedio entre c, es decir Σ λ_eff,k /(μ_k·c)."
+msgstr "Utilization: average busy servers divided by c, that is Σ λ_eff,k /(μ_k·c)."
 
 #: of walopy.advanced.ErlangAClassesResult:11
 msgid "Métricas por clase, de mayor a menor prioridad (``class_id`` 0 = la mayor): ``class_id``, ``lam``, ``mu``, ``theta``, ``p_abandon``, ``lam_eff``, ``Lq`` y ``Wq``. ``Lq`` y ``Wq`` cuentan a todos los que llegan de la clase, también a quienes abandonan."
 msgstr "Metrics per class, from highest to lowest priority (``class_id`` 0 = the highest): ``class_id``, ``lam``, ``mu``, ``theta``, ``p_abandon``, ``lam_eff``, ``Lq`` and ``Wq``. ``Lq`` and ``Wq`` count everyone who arrives of the class, including those who abandon."
+
+#~ msgid "Igual que en ``erlang_a_classes``."
+#~ msgstr "Same as in ``erlang_a_classes``."
+
+#~ msgid "Utilización Σ λ_eff,k /(c·μ)."
+#~ msgstr "Utilization Σ λ_eff,k /(c·μ)."
+
+#~ msgid "``mu`` puede ser un número (común a todas las clases) o una secuencia con la tasa de servicio de cada clase. **Tiempos de servicio distintos por clase solo se admiten con 2 clases**: hay que seguir cuántos servidores ocupa cada clase y el estado crece con c (la región sin cola es una malla de c(c+1)/2 estados), así que el costo es mayor (≈ 1 s con 20 servidores, ≈ 3 s con 30, ≈ 7 s con 40) y se limita a unas decenas de servidores."
+#~ msgstr ""
 

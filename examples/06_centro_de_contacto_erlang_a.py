@@ -38,3 +38,10 @@ for c in range(9, 12):
     n3 = wl.erlang_a_classes_service_level(lam3, servicio, theta3, c, t=espera_meta)
     ab = " / ".join(f"{x['p_abandon']:.1%}" for x in r3.classes)
     print(f"{c:7d}  {ab:>31}   {n3[0]:.1%} / {n3[1]:.1%} / {n3[2]:.1%}")
+
+# Agentes senior para los VIP: se atiende a los VIP en 2.5 min (μ = 0.4) y a los estándar en 4 min (μ = 0.25).
+r_rapido = wl.erlang_a_classes([vip, estandar], mu=[0.4, servicio], theta=[0.1, abandono], c=10)
+r_igual = wl.erlang_a_classes([vip, estandar], mu=servicio, theta=[0.1, abandono], c=10)
+print("\nCon 10 agentes, abandono VIP / estándar:")
+print(f"  mismo tiempo de servicio (4 min)       : {r_igual.classes[0]['p_abandon']:.1%} / {r_igual.classes[1]['p_abandon']:.1%}")
+print(f"  VIP en 2.5 min, estándar en 4 min       : {r_rapido.classes[0]['p_abandon']:.1%} / {r_rapido.classes[1]['p_abandon']:.1%}")
