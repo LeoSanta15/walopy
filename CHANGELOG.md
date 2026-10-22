@@ -8,6 +8,38 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.12] — 2026-10-22
+
+Versión de centros de contacto con más de dos clases: Erlang A con K clases y prioridad. Solo añade funciones: no cambia ningún resultado existente.
+
+### Añadido
+- **`erlang_a_classes(lam, mu, theta, c)`** y **`ErlangAClassesResult`**: cola M/M/c+M con 2 a 6 clases que abandonan con paciencias distintas y se atienden por prioridad no expropiativa (la clase 0 es la de
+  mayor prioridad), con λ y θ propias y μ común. Generaliza `erlang_a_priority`: con dos clases da lo mismo, y con θ iguales la cola total coincide con `erlang_a`. Es exacto (cadena de Markov resuelta
+  por niveles de la cola de la clase de menor prioridad; no una aproximación) y estable aunque Σλ ≥ c·μ. Devuelve por clase la probabilidad de abandono, la tasa atendida, Lq y Wq, y la utilización y P(esperar).
+- **`erlang_a_classes_service_level(lam, mu, theta, c, t)`**: nivel de servicio exacto de cada clase. El de la clase 0 es la fórmula cerrada de `erlang_a_service_level`; el de cada una de las demás se calcula con la cadena de
+  su espera (colas de las clases altas por delante y posición propia) por uniformización.
+- Los indicadores de las tres clases (P(abandono), Wq y nivel de servicio de cada una, y P(esperar)) coinciden con una simulación de eventos con prioridad (10 réplicas de 25 000 llegadas, a menos de 4 errores estándar);
+  con 3 y 4 clases, el motor coincide con la cadena completa resuelta con álgebra lineal a 1e-12.
+- Ejemplo: `examples/06_centro_de_contacto_erlang_a.py` suma el caso de tres niveles (platino, oro y estándar). Con 10 agentes abandonan 0,6 %, 1,5 % y 7,8 %.
+
+### Cambia
+- Interno: el motor de dos clases de 0.4.11 es ahora el caso K = 2 del motor general. La truncación es un símplex (suma de las colas de las clases altas ≤ S, cola de la clase baja ≤ Q) en vez de una caja por clase,
+  que desperdiciaba casi todas las fases con tres o más clases; se amplía mientras la masa en la frontera supere 1e-10 (error relativo de los indicadores ≲ 1e-8; antes 1e-13). Para guardar menos
+  matrices en el recorrido por niveles se usan puntos de control (≈ 2√Q matrices en vez de Q, a cambio de ≈ el doble de tiempo). Los resultados de `erlang_a_priority` no cambian más allá de ese error.
+- Herramientas: `scripts/instantanea_salida.py` y la suite se ajustan a la nueva API.
+
+### Límites
+- **Tamaño.** El costo crece con el producto de las colas de las clases altas (matrices de C(S + K − 1, K − 1) filas). Con 2 o 3 clases y carga moderada tarda décimas de segundo; con 4 clases, unos segundos y solo con
+  colas cortas (0,7 s con Σλ = 1,8 y c = 4; 8 s con Σλ = 3,3); con más clases o colas largas (λ/θ muy grande) se supera la cota de cálculo (≈ 15 s) y lanza `ValueError`. No se ofrece una aproximación para esos casos.
+- Todas las clases comparten μ (los tiempos de servicio distintos por clase llegan en la versión siguiente).
+
+### Pruebas
+- `tests/test_erlang_a_clases.py`: la cadena completa con álgebra lineal (K = 2, 3 y 4, con la misma restricción de símplex), el caso de dos clases (`erlang_a_priority`), paciencias iguales (Erlang A), límites con una clase
+  casi sin llegadas, identidad de flujo, sobrecarga, la exponencial de la matriz de la cadena de espera (clases 1 a 3, aplicada a un vector), simulación de eventos con 3 clases y validación de entradas. Seis mutantes nuevos
+  (`MU-47` a `MU-52`).
+
+---
+
 ## [0.4.11] — 2026-10-22
 
 Versión de centros de contacto con dos tipos de cliente: Erlang A con dos clases y prioridad. Solo añade funciones: no cambia ningún resultado existente.

@@ -29,3 +29,12 @@ for c in range(9, 13):
     alto, bajo = wl.erlang_a_priority_service_level(vip, estandar, servicio, 0.1, abandono, c, t=espera_meta)
     a, b = r.classes
     print(f"{c:7d}  {a['p_abandon']:12.1%}  {b['p_abandon']:16.1%}  {alto:10.1%} / {bajo:.1%}")
+
+# Tres niveles de cliente (platino, oro, estándar), cada uno con su paciencia: K clases con prioridad.
+lam3, theta3 = [0.2, 0.5, 1.3], [0.05, 0.1, abandono]
+print("\nagentes  abandono platino / oro / estándar   atendidas en ≤ 20 s (platino / oro / estándar)")
+for c in range(9, 12):
+    r3 = wl.erlang_a_classes(lam3, servicio, theta3, c)
+    n3 = wl.erlang_a_classes_service_level(lam3, servicio, theta3, c, t=espera_meta)
+    ab = " / ".join(f"{x['p_abandon']:.1%}" for x in r3.classes)
+    print(f"{c:7d}  {ab:>31}   {n3[0]:.1%} / {n3[1]:.1%} / {n3[2]:.1%}")
