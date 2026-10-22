@@ -3009,6 +3009,7 @@
   },
   "weibull_cota": {
    "avisos": [
+    "UserWarning: Con solo 4 fallas (menos de 8) el MLE sobrestima la forma β (en promedio, +45 % con 5 fallas y +15 % con 10): usa method='RRY' o interpreta β con cautela; los intervalos de confianza ya lo tienen en cuenta.",
     "UserWarning: Los tiempos de falla casi no tienen dispersión: la forma β supera la cota 100; el resultado es el límite del intervalo de búsqueda, no el estimador exacto."
    ],
    "resultado": {
@@ -3022,16 +3023,16 @@
     "n_suspended": 0,
     "scale": "5.00000003",
     "scale_ci": [
-     "4.95124023",
-     "5.04924"
+     "4.8935825",
+     "5.10873174"
     ],
     "shape": "100",
     "shape_ci": [
-     "37.5317857",
-     "266.440826"
+     "11.632976",
+     "859.625261"
     ]
    },
-   "str": "Método       : MLE (n=4)\nForma β      : 100.0000\nEscala η     : 5\nMTTF         : 4.972\nVida B10     : 4.889\nB50 (mediana): 4.982\nIC 95%       : β ∈ [37.53, 266.4]; η ∈ [4.951, 5.049]"
+   "str": "Método       : MLE (n=4)\nForma β      : 100.0000\nEscala η     : 5\nMTTF         : 4.972\nVida B10     : 4.889\nB50 (mediana): 4.982\nIC 95%       : β ∈ [11.63, 859.6]; η ∈ [4.894, 5.109]"
   }
  },
  "funciones": {
@@ -9754,7 +9755,9 @@
    }
   },
   "weibull_analysis": {
-   "avisos": [],
+   "avisos": [
+    "UserWarning: Con solo 6 fallas (menos de 8) el MLE sobrestima la forma β (en promedio, +45 % con 5 fallas y +15 % con 10): usa method='RRY' o interpreta β con cautela; los intervalos de confianza ya lo tienen en cuenta."
+   ],
    "grafica": null,
    "resultado": {
     "__clase__": "WeibullResult",
@@ -9767,17 +9770,17 @@
     "n_suspended": 0,
     "scale": "57.8928576",
     "scale_ci": [
-     "31.9007584",
-     "105.062799"
+     "24.8874388",
+     "134.669662"
     ],
     "shape": "1.4181815",
     "shape_ci": [
-     "0.751759014",
-     "2.67537699"
+     "0.577094774",
+     "3.48511"
     ]
    },
-   "str": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71\nIC 95%       : β ∈ [0.7518, 2.675]; η ∈ [31.9, 105.1]",
-   "summary": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71\nIC 95%       : β ∈ [0.7518, 2.675]; η ∈ [31.9, 105.1]",
+   "str": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71\nIC 95%       : β ∈ [0.5771, 3.485]; η ∈ [24.89, 134.7]",
+   "summary": "Método       : MLE (n=6)\nForma β      : 1.4182\nEscala η     : 57.89\nMTTF         : 52.66\nVida B10     : 11.84\nB50 (mediana): 44.71\nIC 95%       : β ∈ [0.5771, 3.485]; η ∈ [24.89, 134.7]",
    "to_frame": {
     "__df__": true,
     "columnas": [
@@ -9794,7 +9797,7 @@
      "η IC inferior",
      "η IC superior"
     ],
-    "csv": ",β (forma),η (escala),MTTF,B10,B50,método,n,suspensiones,β IC inferior,β IC superior,η IC inferior,η IC superior\n0,1.4181815,57.8928576,52.6605316,11.8437013,44.70813,MLE,6,0,0.751759014,2.67537699,31.9007584,105.062799\n",
+    "csv": ",β (forma),η (escala),MTTF,B10,B50,método,n,suspensiones,β IC inferior,β IC superior,η IC inferior,η IC superior\n0,1.4181815,57.8928576,52.6605316,11.8437013,44.70813,MLE,6,0,0.577094774,3.48511,24.8874388,134.669662\n",
     "indice": [
      "0"
     ]
@@ -9987,8 +9990,8 @@
   "README.md[54]": "0.751279941\n116.666666\n",
   "README.md[55]": "83.3333333\n0.657378003\n",
   "README.md[56]": "",
-  "README.md[57]": "Método       : MLE (n=10)\nForma β      : 2.0961\nEscala η     : 49.86\nMTTF         : 44.16\nVida B10     : 17.04\nB50 (mediana): 41.86\nIC 95%       : β ∈ [1.277, 3.441]; η ∈ [36.5, 68.1]\n0.708334594 0.291665406\n0.0240938222\n17.0394588 41.8577329 12.0868485\n   β (forma)  η (escala)  ...  η IC inferior  η IC superior\n0   2.096095   49.855642  ...      36.500526      68.097239\n\n[1 rows x 12 columns]\n",
-  "README.md[58]": "Método       : MLE (n=8)\nForma β      : 2.4190\nEscala η     : 273.5\nMTTF         : 242.5\nVida B10     : 107.9\nB50 (mediana): 235\nSuspensiones : 8 (censura por la derecha)\nIC 95%       : β ∈ [1.369, 4.273]; η ∈ [202.9, 368.6]\n(1.36933004, 4.27341045) (202.866842, 368.636957) 8\n",
+  "README.md[57]": "Método       : MLE (n=10)\nForma β      : 2.0961\nEscala η     : 49.86\nMTTF         : 44.16\nVida B10     : 17.04\nB50 (mediana): 41.86\nIC 95%       : β ∈ [1.17, 3.756]; η ∈ [34.55, 71.95]\n0.708334594 0.291665406\n0.0240938222\n17.0394588 41.8577329 12.0868485\n   β (forma)  η (escala)  ...  η IC inferior  η IC superior\n0   2.096095   49.855642  ...       34.54546      71.951134\n\n[1 rows x 12 columns]\n",
+  "README.md[58]": "Método       : MLE (n=8)\nForma β      : 2.4190\nEscala η     : 273.5\nMTTF         : 242.5\nVida B10     : 107.9\nB50 (mediana): 235\nSuspensiones : 8 (censura por la derecha)\nIC 95%       : β ∈ [1.189, 4.922]; η ∈ [188.4, 397]\n(1.18879929, 4.92236945) (188.360122, 397.027857) 8\n",
   "README.md[59]": "Método            : CPM\nDuración proyecto  : 8\nRuta crítica       : A → B → D\n  Actividad  Duración Predecesoras   ES   EF   LS   LF   HT   HL  Crítica\n0         A       3.0               0.0  3.0  0.0  3.0  0.0  0.0     True\n1         B       4.0            A  3.0  7.0  3.0  7.0  0.0  0.0     True\n2         C       2.0            A  3.0  5.0  5.0  7.0  2.0  2.0    False\n3         D       1.0         B, C  7.0  8.0  7.0  8.0  0.0  0.0     True\n['A', 'B', 'D']\n",
   "README.md[5]": "0.3333\n0.8717\n1.04\n",
   "README.md[60]": "Método            : PERT\nDuración proyecto  : 7.5\nRuta crítica       : A → B\nVarianza proyecto  : 1.806\nσ del proyecto     : 1.344\n0.867855827\n",

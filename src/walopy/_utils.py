@@ -5,6 +5,8 @@ NaN e infinito se rechazan *antes* de comparar (``x <= 0`` es ``False`` para NaN
 """
 from __future__ import annotations
 
+import math
+from statistics import NormalDist
 from typing import Any
 
 import numpy as np
@@ -105,6 +107,77 @@ _T_975 = (
     2.2010, 2.1788, 2.1604, 2.1448, 2.1314, 2.1199, 2.1098, 2.1009, 2.0930, 2.0860,
     2.0796, 2.0739, 2.0687, 2.0639, 2.0595, 2.0555, 2.0518, 2.0484, 2.0452, 2.0423,
 )
+
+
+def _beta_incompleta_reg(a: float, b: float, x: float) -> float:
+    """Beta incompleta regularizada I_x(a, b) por fracciones continuas de Lentz (convergente para a, b > 0)."""
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    frente = math.exp(math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b) + a * math.log(x) + b * math.log1p(-x))
+
+    def fraccion(aa: float, bb: float, xx: float) -> float:
+        tiny = 1e-300
+        c, d = 1.0, 1.0 - (aa + bb) * xx / (aa + 1.0)
+        d = 1.0 / (d if abs(d) > tiny else tiny)
+        h = d
+        for m in range(1, 100_000):
+            m2 = 2 * m
+            num = m * (bb - m) * xx / ((aa + m2 - 1.0) * (aa + m2))
+            d = 1.0 + num * d
+            c = 1.0 + num / c
+            d = 1.0 / (d if abs(d) > tiny else tiny)
+            h *= d * (c if abs(c) > tiny else tiny)
+            num = -(aa + m) * (aa + bb + m) * xx / ((aa + m2) * (aa + m2 + 1.0))
+            d = 1.0 + num * d
+            c = 1.0 + num / c
+            d = 1.0 / (d if abs(d) > tiny else tiny)
+            delta = d * (c if abs(c) > tiny else tiny)
+            h *= delta
+            if abs(delta - 1.0) < 1e-15:
+                break
+        return h
+
+    if x < (a + 1.0) / (a + b + 2.0):
+        return frente * fraccion(a, b, x) / a
+    return 1.0 - frente * fraccion(b, a, 1.0 - x) / b
+
+
+def t_cuantil(p: float, gl: float) -> float:
+    """Cuantil de orden ``p`` ∈ (0, 1) de la t de Student con ``gl`` > 0 grados de libertad (inversión numérica de la función de distribución).
+
+    La distribución se calcula con la beta incompleta, F(t) = 1 − ½·I_{gl/(gl+t²)}(gl/2, ½) para t ≥ 0, y el cuantil se busca por bisección.
+    Con ``gl`` mayor de 10⁶ se usa la normal (la diferencia relativa es menor que 10⁻⁶).
+    """
+    if not (0.0 < p < 1.0):
+        raise ValueError(_t("utils.error.t_cuantil.p_debe_estar_entre_0_1", p=p))
+    if not gl > 0.0:
+        raise ValueError(_t("utils.error.t_cuantil.gl_debe_ser_positivo", gl=gl))
+    if p == 0.5:
+        return 0.0
+    if p < 0.5:
+        return -t_cuantil(1.0 - p, gl)
+    if gl > 1e6:
+        return NormalDist().inv_cdf(p)
+
+    def cdf(t: float) -> float:
+        return 1.0 - 0.5 * _beta_incompleta_reg(gl / 2.0, 0.5, gl / (gl + t * t))
+
+    lo, hi = 0.0, 1.0
+    while cdf(hi) < p:
+        lo, hi = hi, hi * 2.0
+        if hi > 1e300:
+            break
+    for _ in range(200):
+        mid = (lo + hi) / 2.0
+        if cdf(mid) < p:
+            lo = mid
+        else:
+            hi = mid
+        if hi - lo <= 1e-15 * max(1.0, hi):
+            break
+    return (lo + hi) / 2.0
 
 
 def t_cuantil_975(gl: int) -> float:

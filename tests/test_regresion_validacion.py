@@ -95,6 +95,7 @@ def test_weibull_datos_constantes_lanza_error_claro(metodo):
         wl.weibull_analysis([5.0, 5.0, 5.0, 5.0], method=metodo)
 
 
+@pytest.mark.filterwarnings("ignore:Con solo")
 def test_weibull_casi_constante_avisa_de_cota():
     with pytest.warns(UserWarning, match="cota"):
         r = wl.weibull_analysis([5.0, 5.0, 5.0, 5.0000001])
@@ -104,7 +105,9 @@ def test_weibull_casi_constante_avisa_de_cota():
 def test_weibull_n_dos_funciona_sin_aviso(recwarn):
     r = wl.weibull_analysis([5.0, 9.0])
     assert r.n == 2 and r.shape > 0
-    assert not [w for w in recwarn if issubclass(w.category, UserWarning)]
+    # solo el aviso (0.4.10) del sesgo del MLE con pocas fallas; ninguno por la cota ni por datos inválidos
+    otros = [w for w in recwarn if issubclass(w.category, UserWarning) and "Con solo" not in str(w.message)]
+    assert not otros
 
 
 # ─── N-04: nombres de actividad duplicados ─────────────────────────────────────────────────────

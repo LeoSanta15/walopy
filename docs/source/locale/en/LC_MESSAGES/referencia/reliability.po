@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 23:10+0000\n"
+"POT-Creation-Date: 2026-10-22 16:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -64,11 +64,11 @@ msgstr "Raises"
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo)."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive)."
 
-#: of walopy.reliability.koon_system:28 walopy.reliability.mtbf_analysis:13 walopy.reliability.parallel_system:19 walopy.reliability.series_system:16 walopy.reliability.weibull_analysis:22
+#: of walopy.reliability.koon_system:28 walopy.reliability.mtbf_analysis:13 walopy.reliability.parallel_system:19 walopy.reliability.series_system:16 walopy.reliability.weibull_analysis:24
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.reliability.koon_system:31 walopy.reliability.mtbf_analysis:16 walopy.reliability.parallel_system:22 walopy.reliability.series_system:19 walopy.reliability.weibull_analysis:25
+#: of walopy.reliability.koon_system:31 walopy.reliability.mtbf_analysis:16 walopy.reliability.parallel_system:22 walopy.reliability.series_system:19 walopy.reliability.weibull_analysis:27
 msgid "Examples"
 msgstr "Examples"
 
@@ -162,26 +162,27 @@ msgid "F(t) = 1 − exp(−(t/η)^β)"
 msgstr "F(t) = 1 − exp(−(t/η)^β)"
 
 #: of walopy.reliability.weibull_analysis:5
-msgid "En fiabilidad real casi siempre hay unidades que siguen funcionando cuando termina el estudio o que se retiran por otra causa (suspensiones). Ignorarlas, o tratarlas como fallas, sesga la vida estimada: con las suspensiones, la máxima verosimilitud usa f(t) para las fallas y R(t) para las suspendidas. Con ``method='MLE'`` el resultado incluye intervalos de confianza de β y η."
-msgstr "In real reliability work there are almost always units still running when the study ends, or withdrawn for another cause (suspensions). Ignoring them, or treating them as failures, biases the estimated life: with suspensions, maximum likelihood uses f(t) for the failures and R(t) for the suspended units. With ``method='MLE'`` the result includes confidence intervals for β and η."
+#, python-format
+msgid "En fiabilidad real casi siempre hay unidades que siguen funcionando cuando termina el estudio o que se retiran por otra causa (suspensiones). Ignorarlas, o tratarlas como fallas, sesga la vida estimada: con las suspensiones, la máxima verosimilitud usa f(t) para las fallas y R(t) para las suspendidas. Con ``method='MLE'`` el resultado incluye intervalos de confianza de β y η (con t de Student: con pocas fallas la normal queda corta). Con menos de 8 fallas el MLE sobrestima β (en promedio, +45 % con 5 fallas y +15 % con 10; ``method='RRY'`` casi no tiene ese sesgo) y se emite un ``UserWarning``."
+msgstr "In real reliability work there are almost always units still running when the study ends, or withdrawn for another cause (suspensions). Ignoring them, or treating them as failures, biases the estimated life: with suspensions, maximum likelihood uses f(t) for the failures and R(t) for the suspended units. With ``method='MLE'`` the result includes confidence intervals for β and η (with Student's t: with few failures the normal falls short). With fewer than 8 failures the MLE overestimates β (on average, +45 % with 5 failures and +15 % with 10; ``method='RRY'`` has almost no such bias) and a ``UserWarning`` is emitted."
 
-#: of walopy.reliability.weibull_analysis:9
+#: of walopy.reliability.weibull_analysis:11
 msgid "Tiempos de falla observados (todos deben ser > 0). Se requieren al menos 2 valores."
 msgstr "Observed failure times (all must be > 0). At least 2 values are required."
 
-#: of walopy.reliability.weibull_analysis:11
+#: of walopy.reliability.weibull_analysis:13
 msgid "``'MLE'`` (por defecto): máxima verosimilitud mediante bisección; ``'RRY'``: regresión de rangos sobre Y (papel de probabilidad; con suspensiones, rangos ajustados de Johnson)."
 msgstr "``'MLE'`` (default): maximum likelihood by bisection; ``'RRY'``: rank regression on Y (probability-paper method; with suspensions, Johnson's adjusted ranks)."
 
-#: of walopy.reliability.weibull_analysis:14
+#: of walopy.reliability.weibull_analysis:16
 msgid "Tiempos de las unidades suspendidas: siguieron funcionando hasta ese tiempo sin fallar (todos > 0)."
 msgstr "Times of the suspended units: they kept running until that time without failing (all > 0)."
 
-#: of walopy.reliability.weibull_analysis:16
+#: of walopy.reliability.weibull_analysis:18
 msgid "Nivel de confianza de los intervalos de β y η (por defecto 0.95), solo con ``method='MLE'``."
 msgstr "Confidence level of the intervals for β and η (default 0.95), only with ``method='MLE'``."
 
-#: of walopy.reliability.weibull_analysis:21
+#: of walopy.reliability.weibull_analysis:23
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si hay menos de 2 tiempos de falla, todos son iguales, ``method`` no es ``'MLE'`` ni ``'RRY'`` o ``confidence`` no está     estrictamente entre 0 y 1."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If there are fewer than 2 failure times, all are equal, ``method`` is neither ``'MLE'`` nor ``'RRY'`` or ``confidence`` is not strictly between 0 and 1."
 
@@ -279,8 +280,8 @@ msgid "Nivel de confianza de ``shape_ci`` y ``scale_ci``; ``None`` si no se calc
 msgstr "Confidence level of ``shape_ci`` and ``scale_ci``; ``None`` if they were not computed."
 
 #: of walopy.reliability.WeibullResult:27
-msgid "Intervalos de confianza de β y η (máxima verosimilitud, aproximación normal de la información observada sobre el logaritmo del parámetro). ``None`` con ``method='RRY'`` o si la información no es invertible."
-msgstr "Confidence intervals for β and η (maximum likelihood, normal approximation of the observed information on the logarithm of the parameter). ``None`` with ``method='RRY'`` or if the information is not invertible."
+msgid "Intervalos de confianza de β y η (máxima verosimilitud, información observada sobre el logaritmo del parámetro, con cuantil t de Student de r − 2 grados de libertad). ``None`` con ``method='RRY'``, con menos de 3 fallas o si la información no es invertible."
+msgstr "Confidence intervals for β and η (maximum likelihood, observed information on the logarithm of the parameter, with the Student t quantile with r − 2 degrees of freedom). ``None`` with ``method='RRY'``, with fewer than 3 failures or if the information is not invertible."
 
 #: of walopy.reliability.WeibullResult.R:1
 msgid "Confiabilidad en el tiempo *t*: R(t) = exp(−(t/η)^β)."

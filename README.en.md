@@ -1560,18 +1560,22 @@ There are almost always units that have not failed when the test ends. Discardin
 life; treating them as failures does too. With `suspensions=` the likelihood uses the density f(t) of the
 failures and the reliability R(t) of the suspended units. With `method="MLE"` the result carries confidence
 intervals for β and η (`shape_ci`, `scale_ci`) from Fisher's observed information (normal approximation on the
-logarithm of the parameter); `confidence` sets the level (95 % by default).
+logarithm of the parameter, with the quantile of a Student t with r − 2 degrees of freedom for r failures);
+`confidence` sets the level (95 % by default).
 
 ```python
 failures = [72, 95, 130, 151, 176, 210, 243, 290]
 alive = [100, 120, 150, 200, 200, 250, 300, 300]       # suspended, still running
 w = wl.weibull_analysis(failures, suspensions=alive)
-print(w)                                               # β ≈ 2.42, η ≈ 273; 95 % CI for β: [1.37, 4.27]
+print(w)                                               # β ≈ 2.42, η ≈ 273; 95 % CI for β: [1.19, 4.92]
 print(w.shape_ci, w.scale_ci, w.n_suspended)
 ```
 
-The intervals are asymptotic: with few failures (fewer than about 10) they can be optimistic; with
-`method="RRY"` they are not computed.
+**Few failures.** The plain normal interval covers much less than nominal with few failures (in simulation, with 5
+failures the "95 %" covered ≈ 85 %); with the t of r − 2 degrees of freedom it is close to 95 % from 5 failures on, and
+with fewer than 3 failures it is not computed (no degrees of freedom are left). Also, the MLE overestimates β with few
+failures: on average ≈ +45 % with 5 failures, +15 % with 10 and +7 % with 20; that is why with fewer than 8 failures
+`weibull_analysis` emits a `UserWarning`. `method="RRY"` has almost no such bias (but gives no intervals).
 
 At least 2 finite, positive failure times are needed; if all of them are equal the shape cannot be estimated
 (`ValueError`) and, if there is almost no dispersion, a warning (`UserWarning`) says that β reached the upper bound of 100.

@@ -8,6 +8,38 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.10] — 2026-10-22
+
+Versión de rigor estadístico en `weibull_analysis`: con pocas fallas los intervalos de 0.4.8 quedaban cortos y el MLE de β sobrestima. Mismos β y η que en 0.4.9; cambian los
+intervalos de confianza (más anchos con pocas fallas) y hay un aviso nuevo.
+
+### Corregido
+- **Intervalos de confianza de Weibull con pocas fallas.** Los de 0.4.8 usaban el cuantil normal y, con pocas fallas, cubrían mucho menos de lo nominal: en una simulación de 1 500 muestras completas
+  (β = 2, η = 100) el «95 %» cubría 85 % con 5 fallas, 90 % con 10 y 93 % con 20. Ahora se usa el cuantil de una t de Student con r − 2 grados de libertad (r fallas, dos parámetros estimados): la
+  cobertura queda en 94 a 96 % desde 5 fallas (94,7 % con 10, 94,5 % con 20); con datos censurados queda algo conservadora (≈ 95 a 98 %). Con menos de 3 fallas ya no hay grados de libertad y
+  `shape_ci`, `scale_ci` y `confidence` son `None`. Con muchas fallas el cambio es mínimo (con 40 fallas, la t es 3 % mayor que la normal).
+
+### Añadido
+- **Aviso de sesgo del MLE.** Con `method="MLE"` y menos de 8 fallas, `weibull_analysis` emite un `UserWarning`: el MLE de β sobrestima con pocas fallas (medido: en promedio +45 % con 5, +22 % con 8,
+  +15 % con 10, +7 % con 20 y +3,5 % con 40) y `method="RRY"` casi no tiene ese sesgo (de −4 a +5 % desde 5 fallas). Los intervalos de confianza ya lo tienen en cuenta; el aviso es sobre la estimación puntual.
+- Cuantil general de la t de Student (`walopy._utils.t_cuantil(p, gl)`, interno), por inversión numérica de la función de distribución con la beta incompleta: coincide con `scipy.stats.t.ppf`
+  hasta 1e-9 (relativo) y admite cualquier nivel de confianza y grados de libertad no enteros.
+
+- Ejemplos ejecutables de las capacidades de 0.4.8 y 0.4.9: `examples/04_confiabilidad_weibull.py` suma un caso con suspensiones (descartarlas deja η en 653 h y R(500 h) en 61,3 %; con ellas,
+  803 h y 70,0 %) y `examples/06_centro_de_contacto_erlang_a.py` dimensiona un centro de contacto con abandono (con 8 agentes λ = c·μ y `mmc` no es calculable; Erlang A sí). La referencia
+  de Sphinx y los dos README ya cubrían todas las funciones exportadas: no hubo huecos que cerrar.
+
+### Cambia
+- Los intervalos de `weibull_analysis` (solo los de 0.4.8 en adelante; antes no existían) son más anchos con pocas fallas, y con menos de 8 fallas aparece el aviso descrito arriba (con
+  `warnings` como error, esas llamadas ahora lanzan `UserWarning`: usa `method="RRY"` o filtra el aviso).
+
+### Pruebas
+- `tests/test_weibull_censurado.py`: constantes de scipy con la t de 6 grados de libertad, cobertura con 6 fallas, razón de anchos entre niveles de confianza igual a la de cuantiles t, sesgo del MLE
+  y de RRY medido por simulación, aviso en español e inglés y caso sin grados de libertad. `tests/test_t_cuantil.py`: 11 cuantiles de scipy, caso de Cauchy (forma cerrada), simetría y
+  límite normal. Cuatro mutantes nuevos (`MU-38` a `MU-41`).
+
+---
+
 ## [0.4.9] — 2026-10-22
 
 Versión de centros de contacto: Erlang A, la cola con abandono de clientes impacientes, el último punto de la hoja de ruta de la auditoría de dominio. Solo añade funciones: no cambia

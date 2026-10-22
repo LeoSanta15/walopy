@@ -5,11 +5,10 @@ import math
 import warnings
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from statistics import NormalDist
 from typing import TYPE_CHECKING
 
 from ._i18n import t as _t
-from ._utils import as_float_list, as_fraction, as_int_positive, as_nonneg, as_positive
+from ._utils import as_float_list, as_fraction, as_int_positive, as_nonneg, as_positive, t_cuantil
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -425,8 +424,9 @@ class WeibullResult:
     confidence : float or None
         Nivel de confianza de ``shape_ci`` y ``scale_ci``; ``None`` si no se calcularon.
     shape_ci, scale_ci : tuple[float, float] or None
-        Intervalos de confianza de β y η (máxima verosimilitud, aproximación normal de la información observada sobre
-        el logaritmo del parámetro). ``None`` con ``method='RRY'`` o si la información no es invertible.
+        Intervalos de confianza de β y η (máxima verosimilitud, información observada sobre el logaritmo del parámetro, con
+        cuantil t de Student de r − 2 grados de libertad). ``None`` con ``method='RRY'``, con menos de 3 fallas o si la
+        información no es invertible.
     """
 
     shape: float
@@ -572,13 +572,18 @@ def _weibull_rry(failure_times: list, suspensions: list | None = None) -> tuple:
 
 
 def _weibull_intervalos(failure_times: list, suspensions: list, beta: float, eta: float, confianza: float) -> tuple:
-    """Intervalos de confianza de β y η a partir de la información observada (aproximación normal sobre el logaritmo del parámetro).
+    """Intervalos de confianza de β y η a partir de la información observada (normal sobre el logaritmo del parámetro, con cuantil t).
+
+    El cuantil es el de una t de Student con r − 2 grados de libertad (r fallas, dos parámetros estimados): con pocas fallas el intervalo
+    normal (Wald) queda corto —con 5 fallas cubre ≈ 85 % en lugar de 95 %— y la t lo deja casi en el nivel nominal. Con r < 3 no hay grados de libertad.
 
     Con r fallas y todas las unidades i (fallas y suspensiones), zᵢ = (tᵢ/η)ᵝ y Lᵢ = ln(tᵢ/η), la matriz de información observada tiene
     I_ββ = r/β² + Σ zᵢLᵢ², I_ηη = (β(β+1)Σzᵢ − rβ)/η² e I_βη = −(Σzᵢ − r + βΣzᵢLᵢ)/η. Devuelve (None, None) si no es invertible.
     """
     todos = failure_times + suspensions
     r     = len(failure_times)
+    if r < 3:
+        return None, None
     z     = [(t / eta) ** beta for t in todos]
     L     = [math.log(t / eta) for t in todos]
     sz, szl, szl2 = sum(z), sum(zi * li for zi, li in zip(z, L)), sum(zi * li * li for zi, li in zip(z, L))
@@ -590,12 +595,16 @@ def _weibull_intervalos(failure_times: list, suspensions: list, beta: float, eta
         return None, None
     var_b = i_ee / det
     var_e = i_bb / det
-    q     = NormalDist().inv_cdf(0.5 + confianza / 2.0)
+    q     = t_cuantil(0.5 + confianza / 2.0, r - 2)
     se_ln_b, se_ln_e = math.sqrt(var_b) / beta, math.sqrt(var_e) / eta
     return (
         (beta * math.exp(-q * se_ln_b), beta * math.exp(q * se_ln_b)),
         (eta * math.exp(-q * se_ln_e), eta * math.exp(q * se_ln_e)),
     )
+
+
+# Con menos fallas el MLE de β sobrestima de forma apreciable (simulación: +45 % con 5 fallas, +22 % con 8, +15 % con 10, +7 % con 20).
+MIN_FALLAS_MLE_SIN_SESGO = 8
 
 
 def weibull_analysis(
@@ -611,7 +620,9 @@ def weibull_analysis(
 
     En fiabilidad real casi siempre hay unidades que siguen funcionando cuando termina el estudio o que se retiran por otra causa
     (suspensiones). Ignorarlas, o tratarlas como fallas, sesga la vida estimada: con las suspensiones, la máxima verosimilitud usa
-    f(t) para las fallas y R(t) para las suspendidas. Con ``method='MLE'`` el resultado incluye intervalos de confianza de β y η.
+    f(t) para las fallas y R(t) para las suspendidas. Con ``method='MLE'`` el resultado incluye intervalos de confianza de β y η (con t de
+    Student: con pocas fallas la normal queda corta). Con menos de 8 fallas el MLE sobrestima β (en promedio, +45 % con 5 fallas y
+    +15 % con 10; ``method='RRY'`` casi no tiene ese sesgo) y se emite un ``UserWarning``.
 
     Parameters
     ----------
@@ -647,9 +658,9 @@ def weibull_analysis(
     >>> r = weibull_analysis(times)
     >>> 2.0 < r.shape < 3.0  # cuantiles equiespaciados: menos dispersión que una muestra aleatoria
     True
-    >>> r = weibull_analysis(times[:6], suspensions=[80.0, 90.0, 95.0])  # tres unidades siguieron funcionando
+    >>> r = weibull_analysis(times[:8], suspensions=[80.0, 90.0, 95.0])  # tres unidades siguieron funcionando
     >>> r.n, r.n_suspended
-    (6, 3)
+    (8, 3)
     """
     t_list = as_float_list(failure_times, "failure_times", min_len=2)
     susp_list = as_float_list(suspensions, "suspensions", min_len=1) if suspensions is not None and len(suspensions) > 0 else []
@@ -667,6 +678,9 @@ def weibull_analysis(
 
     shape_ci = scale_ci = None
     if m == "MLE":
+        if len(t_list) < MIN_FALLAS_MLE_SIN_SESGO:
+            warnings.warn(_t("reliability.aviso.weibull_analysis.pocas_fallas_sesgo_mle", n=len(t_list), minimo=MIN_FALLAS_MLE_SIN_SESGO),
+                          UserWarning, stacklevel=2)
         beta  = _weibull_mle_beta(t_list, susp_list)
         eta   = ((sum(t ** beta for t in t_list) + sum(t ** beta for t in susp_list)) / len(t_list)) ** (1.0 / beta)
         shape_ci, scale_ci = _weibull_intervalos(t_list, susp_list, beta, eta, conf)
