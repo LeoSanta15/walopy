@@ -9,6 +9,7 @@ import random
 import statistics
 
 import numpy as np
+import pytest
 
 import walopy as wl
 
@@ -26,6 +27,7 @@ def _escenarios(familia: str):
     return [random.Random(r.random()) for _ in range(N)]
 
 
+@pytest.mark.filterwarnings("ignore:Con solo")
 def test_weibull_mle_cumple_la_ecuacion_de_verosimilitud():
     for r in _escenarios("weibull"):
         n, beta0, eta0 = r.randint(5, 40), r.uniform(0.6, 4), r.uniform(10, 1000)

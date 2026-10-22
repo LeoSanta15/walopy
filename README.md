@@ -1547,18 +1547,22 @@ Casi siempre hay unidades que no han fallado cuando termina la prueba. Descartar
 tratarlas como fallas también. Con `suspensions=` la verosimilitud usa la densidad f(t) de las fallas y la
 confiabilidad R(t) de las suspendidas. Con `method="MLE"` el resultado trae intervalos de confianza de β y η
 (`shape_ci`, `scale_ci`) a partir de la información observada de Fisher (aproximación normal sobre el
-logaritmo del parámetro); `confidence` fija el nivel (95 % por defecto).
+logaritmo del parámetro, con el cuantil de una t de Student de r − 2 grados de libertad para r fallas);
+`confidence` fija el nivel (95 % por defecto).
 
 ```python
 fallas = [72, 95, 130, 151, 176, 210, 243, 290]
 vivas = [100, 120, 150, 200, 200, 250, 300, 300]      # suspendidas, siguen funcionando
 w = wl.weibull_analysis(fallas, suspensions=vivas)
-print(w)                                               # β ≈ 2.42, η ≈ 273; IC 95 % de β: [1.37, 4.27]
+print(w)                                               # β ≈ 2.42, η ≈ 273; IC 95 % de β: [1.19, 4.92]
 print(w.shape_ci, w.scale_ci, w.n_suspended)
 ```
 
-Los intervalos son asintóticos: con pocas fallas (menos de unas 10) pueden ser optimistas; con `method="RRY"`
-no se calculan.
+**Pocas fallas.** El intervalo normal puro cubre mucho menos de lo nominal con pocas fallas (en simulación, con 5 fallas
+el «95 %» cubría ≈ 85 %); con la t de r − 2 grados de libertad queda cerca del 95 % desde 5 fallas, y con menos de 3 fallas
+no se calculan (no quedan grados de libertad). Además, el MLE sobrestima β con pocas fallas: en promedio ≈ +45 % con 5
+fallas, +15 % con 10 y +7 % con 20; por eso con menos de 8 fallas `weibull_analysis` emite un `UserWarning`. `method="RRY"`
+casi no tiene ese sesgo (pero no da intervalos).
 
 Se necesitan al menos 2 tiempos de falla finitos y positivos; si todos son iguales la forma no es estimable
 (`ValueError`) y, si casi no hay dispersión, se avisa (`UserWarning`) de que β alcanzó la cota superior de 100.

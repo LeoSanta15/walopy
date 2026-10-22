@@ -13,12 +13,13 @@ import pytest
 import walopy as wl
 
 # Origen: scipy 1.17 (Nelder-Mead sobre la log-verosimilitud en (ln β, ln η), xatol 1e-12) y Hessiano por diferencias finitas
-# centrales en (ln β, ln η) (paso 1e-3), intervalo normal sobre el logaritmo con z = 1,959964.
+# centrales en (ln β, ln η) (paso 1e-3), intervalo normal sobre el logaritmo con el cuantil t de Student de r − 2 = 6 grados
+# de libertad (t = 2,446912; scipy.stats.t.ppf(0.975, 6)).
 FALLAS = [72.0, 95.0, 130.0, 151.0, 176.0, 210.0, 243.0, 290.0]
 SUSPENSIONES = [100.0, 120.0, 150.0, 200.0, 200.0, 250.0, 300.0, 300.0]
 BETA_REF, ETA_REF = 2.419030624426742, 273.46702745731557
-IC_BETA_REF = (1.3693306826213536, 4.27340834188592)
-IC_ETA_REF = (202.86694423780213, 368.636770210713)
+IC_BETA_REF = (1.1887999901016812, 4.922366428867417)
+IC_ETA_REF = (188.36024004820257, 397.0276056518213)
 
 
 def _loglik(f, s, beta, eta):
@@ -181,6 +182,67 @@ class TestIntervalosDeConfianza:
         assert fila.isna().sum() == 4
 
 
+    def test_cobertura_con_pocas_fallas_sigue_siendo_casi_nominal(self):
+        """Con 6 fallas y datos completos, el intervalo normal (Wald) cubre ≈ 87 % y 85 % (β y η); con la t de r − 2 grados de libertad, ≈ 94 %."""
+        rng = random.Random(77)
+        aciertos_b = aciertos_e = total = 0
+        for _ in range(600):
+            f, _s = _simular(rng, 6, 2.0, 100.0, 1e9)
+            if max(f) == min(f):
+                continue
+            with pytest.warns(UserWarning, match="sobrestima"):
+                r = wl.weibull_analysis(f)
+            total += 1
+            aciertos_b += r.shape_ci[0] <= 2.0 <= r.shape_ci[1]
+            aciertos_e += r.scale_ci[0] <= 100.0 <= r.scale_ci[1]
+        assert aciertos_b / total >= 0.92 and aciertos_e / total >= 0.91
+        assert aciertos_b / total <= 0.985 and aciertos_e / total <= 0.985
+
+    def test_el_cuantil_es_el_de_la_t_de_r_menos_2(self):
+        """Con r fallas, ancho (en log) = 2·t(r−2)·ee: el cociente con el de otro nivel de confianza sigue el de los cuantiles t."""
+        c90 = wl.weibull_analysis(FALLAS, suspensions=SUSPENSIONES, confidence=0.90)
+        c95 = wl.weibull_analysis(FALLAS, suspensions=SUSPENSIONES)
+        ancho = lambda ic: math.log(ic[1] / ic[0])  # noqa: E731
+        assert ancho(c90.shape_ci) / ancho(c95.shape_ci) == pytest.approx(1.9431802805153042 / 2.4469118511449786, rel=1e-9)
+        assert ancho(c90.scale_ci) / ancho(c95.scale_ci) == pytest.approx(1.9431802805153042 / 2.4469118511449786, rel=1e-9)
+
+
+@pytest.mark.filterwarnings("ignore:Con solo")
+class TestSesgoDelMLE:
+    def test_avisa_con_menos_de_ocho_fallas(self):
+        for n in (2, 5, 7):
+            with pytest.warns(UserWarning, match=f"Con solo {n} fallas"):
+                wl.weibull_analysis(FALLAS[:n])
+
+    def test_no_avisa_con_ocho_o_mas_ni_con_rry(self, recwarn):
+        wl.weibull_analysis(FALLAS)                       # 8 fallas
+        wl.weibull_analysis(FALLAS, suspensions=SUSPENSIONES)
+        wl.weibull_analysis(FALLAS[:4], method="RRY")
+        assert not [w for w in recwarn if issubclass(w.category, UserWarning)]
+
+    def test_el_aviso_dice_la_verdad_sobre_el_sesgo(self):
+        """El MLE de β sobrestima con pocas fallas (≈ +45 % con 5 y +15 % con 10) y RRY casi no: lo que dice el aviso."""
+        rng = random.Random(21)
+        mle5, rry5, mle10 = [], [], []
+        for _ in range(1500):
+            f5 = [100.0 * (-math.log(1.0 - rng.random())) ** 0.5 for _ in range(5)]
+            f10 = f5 + [100.0 * (-math.log(1.0 - rng.random())) ** 0.5 for _ in range(5)]
+            mle5.append(wl.weibull_analysis(f5).shape / 2.0)
+            rry5.append(wl.weibull_analysis(f5, method="RRY").shape / 2.0)
+            mle10.append(wl.weibull_analysis(f10).shape / 2.0)
+        m5, r5, m10 = sum(mle5) / 1500, sum(rry5) / 1500, sum(mle10) / 1500
+        assert 1.30 < m5 < 1.65 and 1.08 < m10 < 1.25
+        assert abs(r5 - 1.0) < 0.15 and m5 > r5 + 0.25
+
+    def test_aviso_en_ingles(self):
+        wl.set_language("en")
+        try:
+            with pytest.warns(UserWarning, match="overestimates"):
+                wl.weibull_analysis(FALLAS[:5])
+        finally:
+            wl.set_language("es")
+
+
 class TestRRYConRangosDeJohnson:
     def test_rangos_ajustados_a_mano(self):
         """n = 5; F=1, S=2, F=3, F=4, S=5: incrementos 6/6, 5/4 y 3,75/3 → rangos 1; 2,25; 3,5 (Johnson, 1964)."""
@@ -218,11 +280,12 @@ class TestRRYConRangosDeJohnson:
         assert rry.scale == pytest.approx(mle.scale, rel=0.10)
 
 
+@pytest.mark.filterwarnings("ignore:Con solo")
 class TestCasosExtremos:
     @pytest.mark.parametrize("fallas,susp", [
-        ([10.0, 11.0], [1000.0] * 5),          # casi todo suspendido: la vida es muy incierta
-        ([10.0, 1000.0], [5.0]),
-        ([1.0, 2.0], [1e6] * 50),
+        ([10.0, 11.0, 12.0], [1000.0] * 5),    # casi todo suspendido: la vida es muy incierta
+        ([10.0, 1000.0, 500.0], [5.0]),
+        ([1.0, 2.0, 3.0], [1e6] * 50),
     ])
     def test_censura_fuerte_da_resultados_finitos_con_intervalos_amplios(self, fallas, susp):
         for metodo in ("MLE", "RRY"):
@@ -231,6 +294,12 @@ class TestCasosExtremos:
         mle = wl.weibull_analysis(fallas, suspensions=susp)
         # con tan pocas fallas el intervalo de η es muy ancho (más de un orden de magnitud)
         assert mle.scale_ci[1] / mle.scale_ci[0] > 10.0
+
+    def test_con_dos_fallas_no_hay_intervalos(self):
+        """Dos fallas y dos parámetros: no quedan grados de libertad, así que no se afirma ninguna incertidumbre."""
+        r = wl.weibull_analysis([5.0, 9.0], suspensions=[20.0])
+        assert (r.shape_ci, r.scale_ci, r.confidence) == (None, None, None)
+        assert r.shape > 0 and r.scale > 0
 
     def test_suspensiones_anteriores_a_todas_las_fallas(self):
         """Unidades retiradas mucho antes de la primera falla casi no aportan información: β y η apenas cambian."""
