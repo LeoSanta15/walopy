@@ -346,6 +346,24 @@ La clase de alta prioridad solo ve a las de su clase en la fila, así que su niv
 
 ---
 
+### `erlang_a_classes(...)` — Erlang A con K clases y prioridad
+
+Generaliza `erlang_a_priority` a **2 a 6 clases** (p. ej. platino, oro y estándar) con prioridad no expropiativa entre ellas: la clase 0 es la de mayor prioridad y cada clase tiene su λ y su θ, con el mismo μ. Es exacto (cadena de Markov resuelta por niveles, no una aproximación) y estable aunque Σλ ≥ c·μ. Con dos clases coincide con `erlang_a_priority`, y con θ iguales la cola total coincide con `erlang_a`.
+
+```python
+# Platino 0.2, oro 0.5 y estándar 1.3 llamadas/min (paciencia media 20, 10 y 3 min); 4 min por llamada; 10 agentes
+lam, theta = [0.2, 0.5, 1.3], [0.05, 0.1, 1/3]
+r = wl.erlang_a_classes(lam, mu=0.25, theta=theta, c=10)
+print(r)                                  # tabla por clase: abandono, tasa atendida, Lq y Wq
+print([x["p_abandon"] for x in r.classes])    # ≈ 0.6 %, 1.5 % y 7.8 %: cada nivel de prioridad paga distinto
+print(wl.erlang_a_classes_service_level(lam, 0.25, theta, 10, t=1/3))   # atendidas en ≤ 20 s: ≈ 0.870, 0.844 y 0.787
+print(r.to_frame())                       # una fila por clase
+```
+
+El nivel de servicio de la clase 0 es una fórmula cerrada; el de cada una de las demás se calcula con la cadena de su espera (las colas de las clases altas por delante y su posición) por uniformización, también exacta. **Límite de tamaño:** el costo crece con el producto de las colas de las clases altas. Con 2 o 3 clases y carga moderada tarda décimas de segundo; con 4 clases, solo con colas cortas (unos segundos); con más clases o colas largas (λ/θ muy grande) se supera la cota de cálculo y lanza `ValueError` tras un máximo de unos 15 s. Para dos clases con colas largas use `erlang_a_priority`.
+
+---
+
 ### `queue_length_pmf(lam, mu, n_max)` — PMF de longitud de cola
 
 Distribución de probabilidad del número de clientes en el sistema para M/M/1.
@@ -1926,7 +1944,7 @@ Wq     : 0.3   (tiempo promedio de espera en cola)
 | Módulo | Funciones y clases principales |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `ggc`, `departure_cv2`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
-| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
+| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_a_classes`, `erlang_a_classes_service_level`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `ErlangAClassesResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |

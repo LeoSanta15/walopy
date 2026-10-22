@@ -8,6 +8,7 @@ from ._i18n import get_language, language, set_language
 from .advanced import (
     BreakEvenMultiResult,
     BreakEvenResult,
+    ErlangAClassesResult,
     ErlangAPriorityResult,
     LineBalanceResult,
     PriorityQueueResult,
@@ -16,6 +17,8 @@ from .advanced import (
     break_even_multi,
     break_even_sales,
     erlang_a,
+    erlang_a_classes,
+    erlang_a_classes_service_level,
     erlang_a_priority,
     erlang_a_priority_service_level,
     erlang_a_servers,
@@ -177,7 +180,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.11"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.12"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos
@@ -231,10 +234,13 @@ __all__ = [
     "SimulationResult",
     "LineBalanceResult",
     "BreakEvenResult",
+    "ErlangAClassesResult",
     "ErlangAPriorityResult",
     "BreakEvenMultiResult",
     "PriorityQueueResult",
     "erlang_a",
+    "erlang_a_classes",
+    "erlang_a_classes_service_level",
     "erlang_a_priority",
     "erlang_a_priority_service_level",
     "erlang_a_servers",

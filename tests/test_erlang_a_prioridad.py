@@ -316,8 +316,9 @@ class TestEntradasYSalida:
         with pytest.raises(ValueError):
             wl.erlang_a_priority_service_level(*ARGS, t=-1.0)
 
-    def test_truncamiento_demasiado_grande(self):
-        # colas de unos 2 000 clientes: el truncamiento necesario (q₁·(q₂+1)²) supera la cota de memoria
+    def test_truncamiento_demasiado_grande(self, monkeypatch):
+        # colas de cientos de clientes en las dos clases: con una cota de cálculo baja se rechaza de inmediato (con la real tardaría decenas de segundos)
+        monkeypatch.setattr("walopy.advanced.MAX_COSTE_CLASES", 10**6)
         with pytest.raises(ValueError, match="truncamiento"):
             wl.erlang_a_priority(1000.0, 1002.0, 1.0, 1.0, 1.0, 2)
 

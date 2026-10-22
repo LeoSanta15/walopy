@@ -1395,8 +1395,13 @@ def erlang_a_servers(
 # Erlang A con dos clases y prioridad — M/M/c+M, prioridad no expropiativa
 # ---------------------------------------------------------------------------
 
-MAX_ELEMENTOS_PRIORIDAD = 3 * 10**7      # Q₂·(Q₁+1)² del truncamiento (≈ 8 bytes por elemento)
-MAX_PASOS_UNIFORMIZACION = 400_000       # iteraciones del nivel de servicio de la clase de baja prioridad
+MAX_ELEMENTOS_PRIORIDAD = 3 * 10**7      # ≈ 2√Q·m² elementos de matrices guardadas (m = fases): ≈ 8 bytes por elemento
+MAX_COSTE_CLASES = 10**11                # Q·m³: operaciones de la reducción por niveles (≈ 15 s en el peor caso)
+TOL_FRONTERA = 1e-10                     # masa máxima tolerada en la frontera del truncamiento (error relativo de los indicadores ≲ 1e-8)
+MAX_PASOS_UNIFORMIZACION = 400_000       # iteraciones del nivel de servicio de las clases de menor prioridad
+MAX_CELDAS_PASOS = 6 * 10**9             # estados de la cadena de espera × iteraciones
+MAX_CLASES = 6
+INICIO_ALTAS, INICIO_BAJA = 6, 12        # truncamiento inicial: suma de las colas altas y cola de la clase de menor prioridad
 
 
 def _gth(tasas: np.ndarray) -> np.ndarray:
@@ -1419,86 +1424,201 @@ def _gth(tasas: np.ndarray) -> np.ndarray:
     return pi / pi.sum()
 
 
-def _estacionaria_prioridad_truncada(lam1: float, lam2: float, mu: float, th1: float, th2: float, c: int, q1_max: int, q2_max: int) -> tuple[np.ndarray, np.ndarray]:
-    """Distribución estacionaria de M/M/c+M con dos clases y prioridad, truncada en q₁ ≤ q1_max y q₂ ≤ q2_max.
+def _fases_simplex(n_altas: int, s_max: int) -> list[tuple[int, ...]]:
+    """Todas las tuplas (q₀, …, q_{n−1}) de enteros ≥ 0 con q₀ + … + q_{n−1} ≤ s_max, en orden lexicográfico."""
+    if n_altas == 0:
+        return [()]
+    return [(v,) + resto for v in range(s_max + 1) for resto in _fases_simplex(n_altas - 1, s_max - v)]
 
-    Estado: *b* < c servidores ocupados sin cola, o b = c con (q₁, q₂) en cola; como μ es común, qué clase hay en servicio no importa. Se resuelve por
-    niveles q₂ con fases q₁ (la cola de alta es corta, así que las matrices son pequeñas): hacia arriba λ₂·I y hacia abajo la diagonal
-    θ₂·k + cμ·[q₁ = 0] (si no hay cola alta, el servicio libre atiende a uno de baja), de modo que la reducción por bloques solo invierte matrices de
-    q₁_max + 1 filas. Los estados b < c salen de un corte de flujo (λ·π_{c−1} = cμ·π(c; 0, 0)) y de un nacimiento y muerte (Erlang B), sin matrices
-    de tamaño c. Devuelve (p_b, p[q₁, q₂]).
+
+def _estacionaria_clases_truncada(lams: Sequence[float], ths: Sequence[float], mu: float, c: int, s_max: int, q_bajo: int) -> tuple[np.ndarray, np.ndarray]:
+    """Distribución estacionaria de M/M/c+M con K clases y prioridad (0 = la mayor), μ común, con las colas de las K − 1 clases altas sumando a lo más
+    ``s_max`` y la de la clase de menor prioridad a lo más ``q_bajo``.
+
+    Estado: *b* < c servidores ocupados sin cola, o b = c con (q₀, …, q_{K−1}) en cola; como μ es común, qué clase hay en servicio no importa. Se resuelve
+    por niveles de la cola de la clase de menor prioridad, con las colas de las clases altas como fases (un símplex de C(s_max + K − 1, K − 1) fases; la
+    masa conjunta de las colas altas se concentra ahí, y una caja por clase desperdicia casi todo): hacia arriba λ_K·I y hacia abajo la diagonal
+    θ_K·k + cμ·[fase vacía] (si no hay cola de las clases altas, el servicio libre atiende a la de menor prioridad), de modo que la reducción por bloques
+    solo invierte matrices del tamaño del símplex. Los estados b < c salen de un corte de flujo (λ·π_{c−1} = cμ·π(c; 0, …, 0)) y de un nacimiento y muerte
+    (Erlang B), sin matrices de tamaño c. Devuelve (p_b, p[q₀, …, q_{K−1}]), con p = 0 fuera del símplex.
     """
-    m = q1_max + 1
+    n_altas = len(lams) - 1
     cmu = c * mu
-    p_idx = np.arange(m)
-    T = np.zeros((m, m))                                   # q₁: sube a λ₁ y baja a θ₁·q₁ + cμ (abandona uno de alta o se atiende el primero)
-    T[p_idx[:-1], p_idx[:-1] + 1] = lam1
-    T[p_idx[1:], p_idx[1:] - 1] = th1 * p_idx[1:] + cmu
+    fases = _fases_simplex(n_altas, s_max)
+    ind = {q: i for i, q in enumerate(fases)}
+    m = len(fases)
+    lam_bajo, th_bajo = lams[-1], ths[-1]
+    T = np.zeros((m, m))
+    for q, p in ind.items():
+        primera = -1
+        for i in range(n_altas):
+            if sum(q) < s_max:
+                T[p, ind[q[:i] + (q[i] + 1,) + q[i + 1:]]] += lams[i]          # llega uno de la clase i
+            if q[i] > 0:
+                T[p, ind[q[:i] + (q[i] - 1,) + q[i + 1:]]] += ths[i] * q[i]    # abandona uno de la clase i
+                if primera < 0:
+                    primera = i
+        if primera >= 0:
+            T[p, ind[q[:primera] + (q[primera] - 1,) + q[primera + 1:]]] += cmu   # el servicio libre atiende a la primera clase con cola
+    cero = ind[(0,) * n_altas]                                                    # = 0: la primera fase del orden lexicográfico
+    idx = np.arange(m)
 
     def bajada(k: int) -> np.ndarray:
-        d = np.full(m, th2 * k)
-        d[0] += cmu
+        d = np.full(m, th_bajo * k)
+        d[cero] += cmu                                                  # fase vacía: el servicio libre atiende a la clase baja
         return d
 
-    N: dict[int, np.ndarray] = {}
-    G = T.copy()
-    G[p_idx, p_idx] = -(bajada(q2_max) + T.sum(axis=1))    # techo: sin subida de nivel
-    N[q2_max] = np.linalg.inv(-G)
-    for k in range(q2_max - 1, 0, -1):
-        G = T + lam2 * N[k + 1] * bajada(k + 1)[None, :]    # N·D con D diagonal
-        G[p_idx, p_idx] = 0.0
-        G[p_idx, p_idx] = -(bajada(k) + G.sum(axis=1))     # diagonal por filas (sin restas)
-        N[k] = np.linalg.inv(-G)
-    # nivel 0 censurado (los estados b < c se resuelven aparte): el paso (0,0) → b < c vuelve a (0,0) con probabilidad 1
+    def retroceder(n_arriba: np.ndarray, k: int) -> np.ndarray:
+        """N_k = (−G_k)⁻¹ a partir de N_{k+1}, con G_k = T + λ_K·N_{k+1}·D_{k+1} (D diagonal) y la diagonal por filas, sin restas."""
+        G = T + lam_bajo * n_arriba * bajada(k + 1)[None, :]
+        G[idx, idx] = 0.0
+        G[idx, idx] = -(bajada(k) + G.sum(axis=1))
+        return np.linalg.inv(-G)
+
+    G = T.copy()                                                        # techo: sin subida de nivel
+    G[idx, idx] = -(bajada(q_bajo) + T.sum(axis=1))
+    # Solo se guardan las N de unos puntos de control (cada ≈ √Q niveles): el recorrido hacia arriba recalcula las demás por tramos. Así la memoria es
+    # ≈ 2√Q matrices en vez de Q (con Q·m² grande, la diferencia entre caber o no), a cambio de ≈ el doble de tiempo.
+    tramo = max(1, math.isqrt(q_bajo))
+    N_act = np.linalg.inv(-G)
+    puntos = {q_bajo: N_act}
+    for k in range(q_bajo - 1, 0, -1):
+        N_act = retroceder(N_act, k)
+        if k % tramo == 0:
+            puntos[k] = N_act
+    # nivel 0 censurado (los estados b < c se resuelven aparte): el paso (0, …, 0) → b < c vuelve a (0, …, 0) con probabilidad 1
     A = T.copy()
-    if q2_max >= 1:
-        A += lam2 * N[1] * bajada(1)[None, :]
+    if q_bajo >= 1:
+        A += lam_bajo * N_act * bajada(1)[None, :]                      # N_act = N_1
     x0 = _gth(A)
     # recorrido hacia arriba: los niveles altos pueden pesar órdenes de magnitud más que el 0 (colas largas), así que cada nivel se reescala
-    niveles = np.zeros((q2_max + 1, m))
-    log_escala = np.zeros(q2_max + 1)
+    niveles = np.zeros((q_bajo + 1, m))
+    log_escala = np.zeros(q_bajo + 1)
     niveles[0] = x0
-    for k in range(1, q2_max + 1):
-        v = lam2 * niveles[k - 1] @ N[k]
-        suma = float(v.sum())
-        niveles[k] = v / suma
-        log_escala[k] = log_escala[k - 1] + math.log(suma)
+    k = 1
+    for fin in sorted(puntos):
+        seg = {fin: puntos[fin]}
+        for j in range(fin - 1, k - 1, -1):
+            seg[j] = retroceder(seg[j + 1], j)
+        for j in range(k, fin + 1):
+            v = lam_bajo * niveles[j - 1] @ seg[j]
+            suma = float(v.sum())
+            niveles[j] = v / suma
+            log_escala[j] = log_escala[j - 1] + math.log(suma)
+        k = fin + 1
     peso = np.exp(log_escala - log_escala.max())
-    niveles = np.maximum(niveles * peso[:, None], 0.0)     # escala común; x(0,0) = niveles[0, 0]
-    # estados b < c: π_{c−1} = cμ·x(0,0)/λ y π_{b−1} = (b·μ/λ)·π_b, en logaritmos (con λ ≪ c·μ los pesos son diminutos)
-    lam = lam1 + lam2
+    niveles = np.maximum(niveles * peso[:, None], 0.0)                  # escala común; x(0, …, 0) = niveles[0, 0]
+    # estados b < c: π_{c−1} = cμ·x(0, …, 0)/λ y π_{b−1} = (b·μ/λ)·π_b, en logaritmos (con λ ≪ c·μ los pesos son diminutos)
+    lam = float(sum(lams))
     paso = np.log(np.arange(c - 1, 0, -1) * mu / lam) if c > 1 else np.zeros(0)
-    log_r = np.concatenate(([0.0], np.cumsum(paso)))       # log(π_{c−1−i}/π_{c−1}), i = 0 … c−1
-    log_pb = math.log(max(float(niveles[0, 0]), 1e-300)) + math.log(cmu / lam) + log_r
-    total_c = float(niveles.sum())
-    mx = max(float(log_pb.max()), math.log(total_c))
-    pb_rel = np.exp(log_pb - mx)[::-1]                     # índice b = 0 … c − 1
+    log_r = np.concatenate(([0.0], np.cumsum(paso)))                    # log(π_{c−1−i}/π_{c−1}), i = 0 … c−1
+    log_pb = math.log(max(float(niveles[0, cero]), 1e-300)) + math.log(cmu / lam) + log_r
+    mx = max(float(log_pb.max()), math.log(float(niveles.sum())))
+    pb_rel = np.exp(log_pb - mx)[::-1]                                  # índice b = 0 … c − 1
     niv_rel = niveles * math.exp(-mx)
     total = float(pb_rel.sum() + niv_rel.sum())
-    return pb_rel / total, (niv_rel / total).T
+    niv = np.zeros((s_max + 1,) * n_altas + (q_bajo + 1,))
+    for q, p in ind.items():
+        niv[q] = niv_rel[:, p] / total
+    return pb_rel / total, niv
+
+
+def _estacionaria_clases(lams: Sequence[float], ths: Sequence[float], mu: float, c: int) -> tuple[np.ndarray, np.ndarray]:
+    """Distribución estacionaria de M/M/c+M con K clases y prioridad, ampliando el truncamiento hasta que la masa en el borde es despreciable.
+
+    La cola total es estocásticamente menor que la de Erlang A con Σλ y la menor de las pacientes θ, y eso acota las colas de todas las clases. Se amplían
+    por separado la suma de las colas altas (×1,25) y la cola de la clase baja (×2) mientras la masa en su frontera supere ``TOL_FRONTERA``.
+    """
+    n_altas = len(lams) - 1
+    q = _distribucion_erlang_a(float(sum(lams)), mu, min(ths), c)[c:]
+    cola = np.cumsum(q[::-1])[::-1]                  # P(cola ≥ k)
+    cota = max(int(np.argmax(cola < 1e-13)) if (cola < 1e-13).any() else len(cola), 4)
+    s_max, q_bajo = min(INICIO_ALTAS, cota), min(INICIO_BAJA, cota)
+    while True:
+        fases = math.comb(s_max + n_altas, n_altas)
+        matrices = q_bajo // max(1, math.isqrt(q_bajo)) + 1 + math.isqrt(q_bajo)      # puntos de control + el tramo que se recalcula
+        if matrices * fases**2 > MAX_ELEMENTOS_PRIORIDAD or q_bajo * fases**3 > MAX_COSTE_CLASES:
+            raise ValueError(_t("advanced.error.erlang_a_prioridad.demasiados_estados"))
+        pb, niv = _estacionaria_clases_truncada(lams, ths, mu, c, s_max, q_bajo)
+        suma_altas = np.indices(niv.shape[:-1]).sum(axis=0) if n_altas else np.zeros(())
+        frontera = float(niv[suma_altas == s_max].sum())
+        techo = float(niv[..., q_bajo].sum())
+        crece_s, crece_q = s_max < cota and frontera > TOL_FRONTERA, q_bajo < cota and techo > TOL_FRONTERA
+        if not (crece_s or crece_q):
+            return pb, niv
+        if crece_s:
+            s_max = min(max(s_max + 1, int(math.ceil(1.25 * s_max))), cota)
+        if crece_q:
+            q_bajo = min(2 * q_bajo, cota)
+
+
+def _estacionaria_prioridad_truncada(lam1: float, lam2: float, mu: float, th1: float, th2: float, c: int, q1_max: int, q2_max: int) -> tuple[np.ndarray, np.ndarray]:
+    """Dos clases: ``_estacionaria_clases_truncada`` con K = 2. Devuelve (p_b, p[q₁, q₂])."""
+    return _estacionaria_clases_truncada([lam1, lam2], [th1, th2], mu, c, q1_max, q2_max)
 
 
 def _estacionaria_prioridad(lam1: float, lam2: float, mu: float, th1: float, th2: float, c: int) -> tuple[np.ndarray, np.ndarray]:
-    """Distribución estacionaria de M/M/c+M con dos clases y prioridad, ampliando el truncamiento hasta que la masa en el borde es despreciable.
+    """Dos clases: ``_estacionaria_clases`` con K = 2."""
+    return _estacionaria_clases([lam1, lam2], [th1, th2], mu, c)
 
-    La cola total es estocásticamente menor que la de Erlang A con λ₁ + λ₂ y la menor de las pacientes θ, y eso acota ambas colas.
+
+def _nivel_servicio_clase(niv: np.ndarray, pb: np.ndarray, lams: Sequence[float], ths: Sequence[float], mu: float, c: int, k: int, t: float) -> float:
+    """Nivel de servicio (atendido esperando ≤ t, con t > 0) de la clase *k* de M/M/c+M con prioridad.
+
+    La clase 0 solo ve a las de su clase en la fila: fórmula cerrada. Las demás son pasadas por las llegadas de las clases altas mientras esperan: se usa
+    la cadena de su espera —colas a₀ … a_{k−1} de las clases altas y posición propia m— por uniformización. Los estados de esa cadena son los de las
+    colas de las clases 0 … k (las de menor prioridad no intervienen), y a = 0 hace que el servicio libre atienda a la clase *k*.
     """
-    q = _distribucion_erlang_a(lam1 + lam2, mu, min(th1, th2), c)[c:]
-    cola = np.cumsum(q[::-1])[::-1]                  # P(cola ≥ k)
-    cota = max(int(np.argmax(cola < 1e-13)) if (cola < 1e-13).any() else len(cola), 4)
-    q1_max, q2_max = min(16, cota), min(48, cota)
-    while True:
-        if q2_max * (q1_max + 1) ** 2 > MAX_ELEMENTOS_PRIORIDAD:
-            raise ValueError(_t("advanced.error.erlang_a_prioridad.demasiados_estados"))
-        pb, niv = _estacionaria_prioridad_truncada(lam1, lam2, mu, th1, th2, c, q1_max, q2_max)
-        crece_q1 = q1_max < cota and float(niv[q1_max].sum()) > 1e-13
-        crece_q2 = q2_max < cota and float(niv[:, q2_max].sum()) > 1e-13
-        if not (crece_q1 or crece_q2):
-            return pb, niv
-        if crece_q1:
-            q1_max = min(2 * q1_max, cota)
-        if crece_q2:
-            q2_max = min(2 * q2_max, cota)
+    n_clases = niv.ndim
+    cmu = c * mu
+    libre = float(pb.sum())
+    marg = niv.sum(axis=tuple(range(k + 1, n_clases))) if k + 1 < n_clases else niv     # P(q₀, …, q_k)
+    if k == 0:
+        return _nivel_servicio_cola(marg, libre, cmu, ths[0], t)
+    forma = marg.shape
+
+    def rebanada(eje: int, desde: int, hasta: int | None) -> tuple:
+        r: list[slice] = [slice(None)] * len(forma)
+        r[eje] = slice(desde, hasta)
+        return tuple(r)
+
+    rejilla = np.meshgrid(*[np.arange(n, dtype=float) for n in forma], indexing="ij")
+    a, pos = rejilla[:k], rejilla[k] + 1.0
+    tasa = cmu + ths[k] * pos
+    for i in range(k):
+        tasa = tasa + lams[i] * (a[i] < forma[i] - 1) + ths[i] * a[i]
+    unif = float(tasa.max()) * (1.0 + 1e-9)
+    x = unif * t
+    n_max = int(x + 12.0 * math.sqrt(x + 1.0) + 30.0)
+    if n_max > MAX_PASOS_UNIFORMIZACION:
+        raise ValueError(_t("advanced.error.erlang_a_prioridad.demasiadas_iteraciones", pasos=n_max, maximo=MAX_PASOS_UNIFORMIZACION))
+    if marg.size * n_max > MAX_CELDAS_PASOS:
+        raise ValueError(_t("advanced.error.erlang_a_clases.demasiado_costoso", celdas=marg.size, pasos=n_max))
+    pesos = np.exp(-x + np.arange(n_max + 1) * math.log(x) - np.array([math.lgamma(i + 1.0) for i in range(n_max + 1)]))
+    vacias = [np.ones(forma)]                                      # z_i: a₀ = … = a_{i−1} = 0 (el servicio libre llega hasta la clase i)
+    for i in range(k):
+        vacias.append(vacias[-1] * (a[i] == 0))
+    # coeficiente de u(a − e_i): abandona uno de la clase i, o se atiende si es la primera clase con cola
+    coef = [ths[i] * a[i] + cmu * vacias[i] * (a[i] > 0) for i in range(k)]
+    u = np.zeros(forma)                                            # u_n(estado) = P(atendido tras n pasos uniformizados)
+    acum = np.zeros(forma)
+    quieto = (unif - tasa) / unif
+    for n in range(n_max + 1):
+        acum += pesos[n] * u
+        nuevo = np.zeros(forma)
+        for i in range(k):
+            nuevo[rebanada(i, 0, -1)] += lams[i] * u[rebanada(i, 1, None)]       # llega uno de la clase i: a_i + 1
+            desp = np.zeros(forma)
+            desp[rebanada(i, 1, None)] = u[rebanada(i, 0, -1)]
+            nuevo += coef[i] * desp                                              # sale uno de la clase i: a_i − 1
+        desp = np.zeros(forma)
+        desp[rebanada(k, 1, None)] = u[rebanada(k, 0, -1)]
+        nuevo += ths[k] * (pos - 1.0) * desp                                     # abandona uno de la clase k por delante: m − 1
+        avance = desp.copy()
+        avance[rebanada(k, 0, 1)] = 1.0                                          # m = 1: queda atendido
+        nuevo += cmu * vacias[k] * avance                                        # sin colas altas, el servicio libre atiende a la clase k
+        u = nuevo / unif + quieto * u
+    return float(min(libre + float((marg * acum).sum()), 1.0))
 
 
 @dataclass
@@ -1647,35 +1767,164 @@ def erlang_a_priority_service_level(lam_high: float, lam_low: float, mu: float, 
     libre = float(pb.sum())
     if t == 0.0:
         return libre, libre
-    cmu = c * mu
-    alta = _nivel_servicio_cola(niv.sum(axis=1), libre, cmu, th1, t)
-    # Cadena de espera de la clase baja: a = clientes de alta por delante (0…Q₁), m = posición propia entre los de baja (1…Q₂+1).
-    q1_max, m = niv.shape[0] - 1, niv.shape[1]
-    a = np.arange(q1_max + 1, dtype=float)[:, None]
-    pos = np.arange(1, m + 1, dtype=float)[None, :]
-    tasa = lam1 * (a < q1_max) + th1 * a + cmu + th2 * pos        # tasa total de salida de cada estado
-    unif = float(tasa.max()) * (1.0 + 1e-9)
-    x = unif * t
-    n_max = int(x + 12.0 * math.sqrt(x + 1.0) + 30.0)
-    if n_max > MAX_PASOS_UNIFORMIZACION:
-        raise ValueError(_t("advanced.error.erlang_a_prioridad.demasiadas_iteraciones", pasos=n_max, maximo=MAX_PASOS_UNIFORMIZACION))
-    pesos = np.exp(-x + np.arange(n_max + 1) * math.log(x) - np.array([math.lgamma(i + 1.0) for i in range(n_max + 1)]))
-    u = np.zeros((q1_max + 1, m))                                  # u_n(estado) = P(atendido tras n pasos uniformizados)
-    acum = np.zeros_like(u)
-    quieto = (unif - tasa) / unif
-    for i in range(n_max + 1):
-        acum += pesos[i] * u
-        nuevo = np.zeros_like(u)
-        nuevo[:-1] += lam1 * u[1:]                                  # llega uno de alta: a + 1
-        nuevo[1:] += (th1 * a[1:] + cmu) * u[:-1]                   # sale uno de alta (abandona o se atiende): a − 1
-        avance = np.zeros(m)                                        # con a = 0 el servicio libre atiende a la clase baja: m − 1
-        avance[1:] = u[0, :-1]
-        avance[0] = 1.0                                             # m = 1: queda atendido
-        nuevo[0] += cmu * avance
-        nuevo[:, 1:] += th2 * (pos[:, 1:] - 1.0) * u[:, :-1]        # abandona uno de baja por delante: m − 1
-        u = nuevo / unif + quieto * u
-    baja = float(min(libre + float((niv * acum).sum()), 1.0))
-    return alta, baja
+    lams, ths = [lam1, lam2], [th1, th2]
+    return _nivel_servicio_clase(niv, pb, lams, ths, mu, c, 0, t), _nivel_servicio_clase(niv, pb, lams, ths, mu, c, 1, t)
+
+
+@dataclass
+class ErlangAClassesResult:
+    """Resultado de ``erlang_a_classes``: M/M/c+M con K clases y prioridad no expropiativa.
+
+    Attributes
+    ----------
+    servers : int
+        Número de servidores *c*.
+    mu : float
+        Tasa de servicio por servidor (la misma para todas las clases).
+    rho : float
+        Utilización Σ λ_eff,k /(c·μ).
+    p_wait : float
+        Probabilidad de que quien llega (de cualquier clase) encuentre todos los servidores ocupados.
+    classes : list[dict]
+        Métricas por clase, de mayor a menor prioridad (``class_id`` 0 = la mayor): ``class_id``, ``lam``, ``mu``, ``theta``, ``p_abandon``,
+        ``lam_eff``, ``Lq`` y ``Wq``. ``Lq`` y ``Wq`` cuentan a todos los que llegan de la clase, también a quienes abandonan.
+    """
+
+    servers: int
+    mu: float
+    rho: float
+    p_wait: float
+    classes: list[dict]
+    params: dict = field(default_factory=dict)
+
+    def to_frame(self) -> pd.DataFrame:
+        """Una fila por clase."""
+        return pd.DataFrame(self.classes).rename(columns={
+            "class_id": _t("advanced.cabecera.to_frame.id_clase"), "lam": "λ", "mu": "μ", "theta": "θ",
+            "p_abandon": _t("advanced.cabecera.to_frame.p_abandono"), "lam_eff": _t("advanced.cabecera.to_frame.eff"),
+        })
+
+    def summary(self) -> str:
+        lines = [
+            _t("advanced.etiqueta.summary.erlang_a_clases", c=self.servers, k=len(self.classes), mu=self.mu, rho=self.rho, p_wait=self.p_wait),
+            f"{_t('advanced.texto_en_expresion.summary.clase'):>6}  {'λ':>9}  {'θ':>8}  {_t('advanced.cabecera.to_frame.p_abandono'):>11}  {_t('advanced.cabecera.to_frame.eff'):>9}  {_t('advanced.texto_en_expresion.summary.lq'):>9}  {_t('advanced.texto_en_expresion.summary.wq'):>10}",
+            "-" * 72,
+        ]
+        for cl in self.classes:
+            lines.append(f"{cl['class_id']:>6}  {cl['lam']:>9.4g}  {cl['theta']:>8.4g}  {cl['p_abandon']:>11.4%}  {cl['lam_eff']:>9.4g}  {cl['Lq']:>9.4g}  {cl['Wq']:>10.4g}")
+        return "\n".join(lines)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def _validar_clases(lam: Sequence[float], mu: float, theta: Sequence[float], c: int) -> tuple[list[float], float, list[float], int]:
+    lams = as_float_list(lam, "lam", min_len=2)
+    ths = as_float_list(theta, "theta", min_len=2)
+    if len(lams) != len(ths):
+        raise ValueError(_t("advanced.error.erlang_a_clases.lam_theta_misma_longitud", n_lam=len(lams), n_theta=len(ths)))
+    if len(lams) > MAX_CLASES:
+        raise ValueError(_t("advanced.error.erlang_a_clases.demasiadas_clases", max=MAX_CLASES, n=len(lams)))
+    return lams, as_positive(mu, "mu"), ths, as_int_positive(c, "c", max=MAX_SERVIDORES)
+
+
+def erlang_a_classes(lam: Sequence[float], mu: float, theta: Sequence[float], c: int) -> ErlangAClassesResult:
+    """Cola M/M/c+M con K ≥ 2 clases que abandonan con paciencias distintas y se atienden por prioridad no expropiativa.
+
+    ``lam[0]`` y ``theta[0]`` son los de la clase de mayor prioridad. Cada clase pasa delante de las siguientes en la fila (sin desplazar a nadie en
+    servicio), tiene su tasa de llegadas λ y su tasa de abandono θ (paciencia exponencial de media 1/θ), y el servicio es exponencial de tasa μ para
+    todas. El resultado es exacto (cadena de Markov resuelta por niveles), no una aproximación, y estable aunque Σλ ≥ c·μ. Con dos clases coincide con
+    ``erlang_a_priority``; con θ iguales, la cola total coincide con ``erlang_a``.
+
+    El costo crece con el producto de las colas de las clases altas: con 2 o 3 clases es de décimas de segundo; con más clases o colas largas puede
+    superar la cota de cálculo y lanzar ``ValueError``.
+
+    Parameters
+    ----------
+    lam : sequence of float
+        Tasas de llegada de cada clase, de mayor a menor prioridad (2 a 6 valores > 0).
+    mu : float
+        Tasa de servicio μ por servidor.
+    theta : sequence of float
+        Tasas de abandono θ de cada clase (mismo orden y longitud que ``lam``).
+    c : int
+        Número de servidores (≥ 1).
+
+    Returns
+    -------
+    ErlangAClassesResult
+        Por clase: probabilidad de abandono, tasa atendida, Lq y Wq; y la utilización y P(esperar) del sistema.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo), si ``lam`` y ``theta`` no tienen la misma
+        longitud o hay más de 6 clases. Si ``c`` supera 10⁶ o la cola esperada necesita un truncamiento demasiado grande.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = erlang_a_classes(lam=[0.7, 1.1, 1.6], mu=1.0, theta=[0.9, 0.5, 0.25], c=4)
+    >>> [round(x["p_abandon"], 4) for x in r.classes]
+    [0.1051, 0.0892, 0.0996]
+    >>> round(r.p_wait, 4)
+    0.5179
+    """
+    lams, mu, ths, c = _validar_clases(lam, mu, theta, c)
+    pb, niv = _estacionaria_clases(lams, ths, mu, c)
+    clases = []
+    for k in range(len(lams)):
+        eje = tuple(i for i in range(niv.ndim) if i != k)
+        eq = float((np.arange(niv.shape[k]) * niv.sum(axis=eje)).sum())
+        pab = ths[k] * eq / lams[k]                                  # flujo de abandonos: θ·E[cola] = λ·P(abandono)
+        clases.append({"class_id": k, "lam": lams[k], "mu": mu, "theta": ths[k], "p_abandon": pab, "lam_eff": lams[k] * (1.0 - pab), "Lq": eq, "Wq": eq / lams[k]})
+    total = sum(lams)
+    return ErlangAClassesResult(
+        servers=c, mu=mu, rho=sum(x["lam_eff"] for x in clases) / (c * mu), p_wait=float(niv.sum()), classes=clases,
+        params={"P(abandono) total": sum(x["lam"] * x["p_abandon"] for x in clases) / total},
+    )
+
+
+def erlang_a_classes_service_level(lam: Sequence[float], mu: float, theta: Sequence[float], c: int, t: float) -> tuple[float, ...]:
+    """Nivel de servicio de cada clase de ``erlang_a_classes``: fracción de sus llegadas que se atiende esperando como máximo *t*.
+
+    La clase de mayor prioridad solo ve a las de su clase en la fila y su nivel es una fórmula cerrada (como en ``erlang_a_service_level``). A cada una de
+    las demás la pasan las llegadas de las clases altas durante su espera: su nivel se calcula con la cadena de su espera (colas de las clases altas por
+    delante, posición propia) por uniformización, también exacta. Quien abandona antes de *t* no cuenta como atendido.
+
+    Parameters
+    ----------
+    lam, mu, theta, c
+        Igual que en ``erlang_a_classes``.
+    t : float
+        Tiempo máximo de espera (≥ 0, en las mismas unidades de tiempo que 1/λ).
+
+    Returns
+    -------
+    tuple[float, ...]
+        Un nivel por clase (de mayor a menor prioridad), cada uno en [0, 1 − P(abandono) de su clase].
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo, o ``t`` negativo), si ``lam`` y ``theta`` no
+        tienen la misma longitud o hay más de 6 clases. Si ``c`` supera 10⁶, el truncamiento es demasiado grande o ``t`` exige demasiado cálculo.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> niveles = erlang_a_classes_service_level([0.7, 1.1, 1.6], 1.0, [0.9, 0.5, 0.25], 4, t=0.6)
+    >>> [round(x, 4) for x in niveles]
+    [0.8663, 0.8355, 0.7103]
+    """
+    lams, mu, ths, c = _validar_clases(lam, mu, theta, c)
+    t = as_nonneg(t, "t")
+    pb, niv = _estacionaria_clases(lams, ths, mu, c)
+    if t == 0.0:
+        return tuple(float(pb.sum()) for _ in lams)
+    return tuple(_nivel_servicio_clase(niv, pb, lams, ths, mu, c, k, t) for k in range(len(lams)))
 
 
 # ---------------------------------------------------------------------------
