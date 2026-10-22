@@ -130,6 +130,18 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
+    # 0.4.14: simulación de Erlang A
+    "advanced.error.monte_carlo_erlang_a.seed_tipo",
+    "advanced.error.monte_carlo_erlang_a.seed_negativa",
+    "advanced.error.monte_carlo_erlang_a.replicas_minimo",
+    "advanced.error.monte_carlo_erlang_a.demasiadas_llegadas",
+    "advanced.error.monte_carlo_erlang_a.warmup_invalido",
+    "advanced.error.monte_carlo_erlang_a.una_por_clase",
+    "advanced.cabecera.to_frame.semiancho_p_abandono",
+    "advanced.cabecera.to_frame.semiancho_wq_clase",
+    "advanced.cabecera.to_frame.nivel_servicio",
+    "advanced.cabecera.to_frame.semiancho_nivel",
+    "advanced.etiqueta.summary.simulacion_erlang_a",
     # 0.4.12: Erlang A con K clases
     "advanced.error.erlang_a_clases.mu_longitud",   # 0.4.13: μ distintos por clase
     "advanced.error.erlang_a_clases.mu_tipo",

@@ -8,6 +8,31 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.14] — 2026-10-22
+
+Versión de simulación para centros de contacto grandes o con más clases: lo que los modelos exactos de 0.4.11 a 0.4.13 no alcanzan. Solo añade una función.
+
+### Añadido
+- **`monte_carlo_erlang_a(lam, mu, theta, c, *, n_customers, n_replications, warmup, t, seed)`** y **`ErlangASimulationResult`**: simulación de eventos de M/M/c+M con 1 a 6 clases, prioridad no expropiativa, abandono en cola y tasa de servicio por clase,
+  con cualquier *c*. Es el mismo sistema que modela `erlang_a_classes`, sin sesgo de modelo: solo error estadístico, que se mide con réplicas independientes (un flujo por réplica derivado de `seed`) y se informa como semiancho
+  del intervalo de confianza del 95 % (t de Student) de cada estimación: P(abandono) y Wq por clase, nivel de servicio por clase (con `t`) y P(esperar). El abandono no es un evento: al liberarse un servidor se descarta, en orden de llegada, a quien ya se había
+  ido, lo que la hace rápida (≈ 1 s por millón de llegadas, casi independiente de *c*: 200 agentes y 2 millones de llegadas en 1,7 s).
+- Ejemplo: `examples/06_centro_de_contacto_erlang_a.py` simula 80 agentes con VIP y estándar a tiempos de servicio distintos (abandono estándar ≈ 5,5 % ± 0,4 puntos).
+
+### Explorado y descartado
+Para «dos clases con μ distintos y muchos agentes» se probaron aproximaciones deterministas, y **ninguna** alcanzó una exactitud que justificara publicarla. Con el modelo exacto como referencia (c = 10 a 30, carga 0,85 a 1,15):
+- *Jerarquía simple* (la clase alta como Erlang A aislado, la baja con la capacidad que le deja): error relativo ≈ 100 % en la clase alta (ignora que en sobrecarga todos los servidores los ocupa la baja y la alta espera una liberación).
+- *Campo medio* (modelo exacto de μ común con una tasa efectiva calibrada por la ley de conservación E[ocupados] = Σ λ_eff,k/μ_k): ≤ 3 % en sobrecarga con la clase alta más rápida, pero −14 a −17 % con carga 0,85 y la clase alta más lenta, y ese sesgo no baja con c.
+- *Promediar la cola de la clase alta* (fases n₁ en vez de (n₁, q₁)), incluso conservándola exacta en los primeros 8 niveles de la cola baja: −8 a −28 % en la clase baja con carga 0,85. Con muchos agentes q₁ y q₂ saltan a la misma velocidad (≈ c·μ), y el promedio
+  distorsiona la varianza de q₂, que gobierna el abandono cerca del equilibrio.
+La simulación (sin sesgo de modelo, con error estadístico medido) es la herramienta fiable para esos casos; las aproximaciones asintóticas (QED/difusión) quedan como trabajo futuro con su propia validación.
+
+### Pruebas
+- `tests/test_monte_carlo_erlang_a.py`: contra los modelos exactos (2 clases con μ distintos, 3 clases, 1 clase = `erlang_a`, y c = 100 contra `erlang_a_priority`), con sus propios intervalos de confianza; reproducibilidad con semilla; el semiancho recalculado a mano con
+  las mismas réplicas; que más llegadas lo estrechen ≈ √n; la prioridad ordena las esperas; y validación de entradas. Seis mutantes nuevos (`MU-60` a `MU-65`).
+
+---
+
 ## [0.4.13] — 2026-10-22
 
 Versión de centros de contacto con servicio heterogéneo: tiempos de servicio distintos por clase en Erlang A con dos clases y prioridad. Solo añade capacidades: con `mu` numérico todo es igual que en 0.4.12.

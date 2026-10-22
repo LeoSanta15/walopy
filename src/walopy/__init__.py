@@ -10,6 +10,7 @@ from .advanced import (
     BreakEvenResult,
     ErlangAClassesResult,
     ErlangAPriorityResult,
+    ErlangASimulationResult,
     LineBalanceResult,
     PriorityQueueResult,
     SimulationResult,
@@ -28,6 +29,7 @@ from .advanced import (
     mm1_priority,
     mm1k,
     mmck,
+    monte_carlo_erlang_a,
     monte_carlo_gg1,
     queue_length_pmf,
     sojourn_cdf,
@@ -180,7 +182,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.13"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.14"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos
@@ -236,6 +238,7 @@ __all__ = [
     "BreakEvenResult",
     "ErlangAClassesResult",
     "ErlangAPriorityResult",
+    "ErlangASimulationResult",
     "BreakEvenMultiResult",
     "PriorityQueueResult",
     "erlang_a",
@@ -249,6 +252,7 @@ __all__ = [
     "mm1k",
     "mmck",
     "mm1_priority",
+    "monte_carlo_erlang_a",
     "monte_carlo_gg1",
     "takt_time",
     "line_balance",

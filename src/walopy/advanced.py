@@ -1,6 +1,8 @@
 """Modelos de colas avanzados, simulación, balance de línea y análisis de punto de equilibrio."""
 from __future__ import annotations
 
+import collections
+import heapq
 import math
 import warnings
 from collections.abc import Sequence
@@ -2200,6 +2202,266 @@ def erlang_a_classes_service_level(lam: Sequence[float], mu: float | Sequence[fl
     if t == 0.0:
         return tuple(float(pb.sum()) for _ in lams)
     return tuple(_nivel_servicio_clase(niv, pb, lams, ths, mus[0], c, k, t) for k in range(len(lams)))
+
+
+# ---------------------------------------------------------------------------
+# Simulación de M/M/c+M con K clases, prioridad y tiempos de servicio por clase
+# ---------------------------------------------------------------------------
+
+MAX_CLIENTES_REPLICA = 5_000_000      # llegadas por réplica (memoria: ≈ 5 arreglos de ese tamaño)
+MAX_CLIENTES_TOTAL = 50_000_000       # llegadas entre todas las réplicas (≈ minutos de cálculo)
+
+
+def _replica_contacto(lams: Sequence[float], mus: Sequence[float], ths: Sequence[float], c: int, n: int, rng: np.random.Generator, calentamiento: int, t: float | None) -> dict[str, np.ndarray]:
+    """Una réplica: *n* llegadas Poisson con prioridad no expropiativa, abandono en cola y servicio exponencial por clase.
+
+    Las llegadas, las clases, los tiempos de servicio y las pacientes se sortean de antemano. Los abandonos no son eventos: al liberarse un servidor se descarta
+    de cada cola, en orden de llegada, a quien ya se había ido (espera > paciencia) y se atiende al primero que sigue ahí. Devuelve, por clase, las llegadas
+    medidas, los abandonos, la espera total (también la de quien abandona), los que tuvieron que esperar y los atendidos con espera ≤ *t*.
+    """
+    k_clases = len(lams)
+    lam_total = float(sum(lams))
+    llegada = np.cumsum(rng.exponential(1.0 / lam_total, n))
+    acumulada = np.cumsum(np.asarray(lams) / lam_total)
+    clase_arr = np.minimum(np.searchsorted(acumulada, rng.random(n), side="right"), k_clases - 1)
+    servicio = (rng.exponential(1.0, n) / np.asarray(mus)[clase_arr]).tolist()
+    paciencia = (rng.exponential(1.0, n) / np.asarray(ths)[clase_arr]).tolist()
+    llegada_l, clase = llegada.tolist(), clase_arr.tolist()
+    espera = [0.0] * n
+    abandono = bytearray(n)
+    encolado = bytearray(n)
+    colas: list[collections.deque] = [collections.deque() for _ in range(k_clases)]
+    salidas: list[float] = []
+    ocupados = 0
+    i = 0
+    while i < n or salidas:
+        if i < n and (not salidas or llegada_l[i] <= salidas[0]):
+            if ocupados < c:
+                ocupados += 1
+                heapq.heappush(salidas, llegada_l[i] + servicio[i])
+            else:
+                colas[clase[i]].append(i)
+                encolado[i] = 1
+            i += 1
+        else:
+            ahora = heapq.heappop(salidas)
+            ocupados -= 1
+            for cola in colas:
+                atendido = False
+                while cola:
+                    j = cola.popleft()
+                    w = ahora - llegada_l[j]
+                    if w > paciencia[j]:                      # se fue antes de que se liberara un servidor
+                        abandono[j] = 1
+                        espera[j] = paciencia[j]
+                    else:
+                        espera[j] = w
+                        ocupados += 1
+                        heapq.heappush(salidas, ahora + servicio[j])
+                        atendido = True
+                        break
+                if atendido:
+                    break
+    esp = np.asarray(espera)[calentamiento:]
+    ab = np.frombuffer(abandono, dtype=np.uint8)[calentamiento:].astype(bool)
+    enc = np.frombuffer(encolado, dtype=np.uint8)[calentamiento:].astype(bool)
+    cl = clase_arr[calentamiento:]
+    salida: dict[str, np.ndarray] = {
+        "n": np.bincount(cl, minlength=k_clases).astype(float),
+        "abandonos": np.bincount(cl, weights=ab, minlength=k_clases),
+        "espera": np.bincount(cl, weights=esp, minlength=k_clases),
+        "esperan": np.array([float(enc.sum())]),
+    }
+    if t is not None:
+        salida["nivel"] = np.bincount(cl, weights=(~ab) & (esp <= t), minlength=k_clases)
+    return salida
+
+
+@dataclass
+class ErlangASimulationResult:
+    """Resultado de ``monte_carlo_erlang_a``: estimaciones con intervalo de confianza del 95 % a partir de réplicas independientes.
+
+    Attributes
+    ----------
+    servers : int
+        Número de servidores *c*.
+    n_customers, n_replications, warmup : int
+        Llegadas por réplica, número de réplicas y llegadas descartadas al principio de cada una.
+    p_wait, p_wait_halfwidth : float
+        Probabilidad de que quien llega (de cualquier clase) encuentre todos los servidores ocupados, y el semiancho de su intervalo.
+    classes : list[dict]
+        Por clase (``class_id`` 0 = la mayor prioridad): ``lam``, ``mu``, ``theta``, ``p_abandon``, ``Wq`` y, si se indicó ``t``, ``service_level``, cada
+        uno con su semiancho (``p_abandon_halfwidth``, ``wq_halfwidth``, ``service_level_halfwidth``). ``Wq`` cuenta a todos los que llegan de la clase,
+        también a quienes abandonan.
+    t : float or None
+        Tiempo de espera del nivel de servicio.
+    """
+
+    servers: int
+    n_customers: int
+    n_replications: int
+    warmup: int
+    p_wait: float
+    p_wait_halfwidth: float
+    classes: list[dict]
+    t: float | None = None
+
+    def to_frame(self) -> pd.DataFrame:
+        """Una fila por clase, con cada estimación seguida de su semiancho."""
+        filas = []
+        for cl in self.classes:
+            fila = {
+                _t("advanced.cabecera.to_frame.id_clase"): cl["class_id"], "λ": cl["lam"], "μ": cl["mu"], "θ": cl["theta"],
+                _t("advanced.cabecera.to_frame.p_abandono"): cl["p_abandon"], _t("advanced.cabecera.to_frame.semiancho_p_abandono"): cl["p_abandon_halfwidth"],
+                _t("advanced.texto_en_expresion.summary.wq"): cl["Wq"], _t("advanced.cabecera.to_frame.semiancho_wq_clase"): cl["wq_halfwidth"],
+            }
+            if self.t is not None:
+                fila[_t("advanced.cabecera.to_frame.nivel_servicio")] = cl["service_level"]
+                fila[_t("advanced.cabecera.to_frame.semiancho_nivel")] = cl["service_level_halfwidth"]
+            filas.append(fila)
+        return pd.DataFrame(filas)
+
+    def summary(self) -> str:
+        lineas = [
+            _t("advanced.etiqueta.summary.simulacion_erlang_a", c=self.servers, k=len(self.classes), n=self.n_customers, r=self.n_replications,
+               w=self.warmup, p_wait=self.p_wait, hw=self.p_wait_halfwidth),
+            f"{_t('advanced.texto_en_expresion.summary.clase'):>6}  {'λ':>9}  {'μ':>8}  {'θ':>8}  {_t('advanced.cabecera.to_frame.p_abandono'):>11}  {'±':>8}  {_t('advanced.texto_en_expresion.summary.wq'):>10}  {'±':>8}"
+            + (f"  {_t('advanced.cabecera.to_frame.nivel_servicio'):>17}  {'±':>8}" if self.t is not None else ""),
+        ]
+        for cl in self.classes:
+            fila = (f"{cl['class_id']:>6}  {cl['lam']:>9.4g}  {cl['mu']:>8.4g}  {cl['theta']:>8.4g}  {cl['p_abandon']:>11.4%}  {cl['p_abandon_halfwidth']:>8.2%}  "
+                    f"{cl['Wq']:>10.4g}  {cl['wq_halfwidth']:>8.2g}")
+            if self.t is not None:
+                fila += f"  {cl['service_level']:>17.4%}  {cl['service_level_halfwidth']:>8.2%}"
+            lineas.append(fila)
+        return "\n".join(lineas)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def monte_carlo_erlang_a(
+    lam: Sequence[float],
+    mu: float | Sequence[float],
+    theta: float | Sequence[float],
+    c: int,
+    *,
+    n_customers: int = 200_000,
+    n_replications: int = 10,
+    warmup: int | None = None,
+    t: float | None = None,
+    seed: int | None = None,
+) -> ErlangASimulationResult:
+    """Simulación de eventos de M/M/c+M con K clases, prioridad no expropiativa, abandono y tiempos de servicio distintos por clase.
+
+    Es la herramienta para lo que los modelos exactos no alcanzan: **muchos agentes**, **más de dos clases con μ distintos** o colas muy largas. No tiene sesgo
+    de modelo (simula el mismo sistema que ``erlang_a_classes``), solo error estadístico, que se mide con réplicas independientes: cada estimación trae el
+    semiancho de su intervalo de confianza del 95 % (t de Student sobre las medias de las réplicas). Con los mismos parámetros, los resultados de
+    ``erlang_a_classes`` caen dentro de esos intervalos.
+
+    El sistema empieza vacío; ``warmup`` descarta las primeras llegadas de cada réplica (por defecto, el 10 %). El costo es lineal en
+    ``n_customers · n_replications`` (≈ 1 s por millón de llegadas) y casi no depende de *c*.
+
+    Parameters
+    ----------
+    lam : sequence of float
+        Tasas de llegada de cada clase, de mayor a menor prioridad (1 a 6 valores > 0).
+    mu : float or sequence of float
+        Tasa de servicio por servidor: un número común o uno por clase.
+    theta : float or sequence of float
+        Tasa de abandono de cada clase (paciencia exponencial de media 1/θ): un número común o uno por clase.
+    c : int
+        Número de servidores (≥ 1).
+    n_customers : int
+        Llegadas por réplica (por defecto 200 000; hasta 5 000 000).
+    n_replications : int
+        Réplicas independientes (≥ 2, por defecto 10; ``seed`` deriva un flujo por réplica). Entre todas, hasta 50 000 000 de llegadas.
+    warmup : int, optional
+        Llegadas descartadas al principio de cada réplica (por defecto, ``n_customers // 10``).
+    t : float, optional
+        Si se indica, estima también el nivel de servicio: fracción de las llegadas de cada clase que se atiende esperando como máximo *t*.
+    seed : int, optional
+        Semilla (entero ≥ 0) para reproducir el resultado.
+
+    Returns
+    -------
+    ErlangASimulationResult
+        Por clase: probabilidad de abandono, espera media en cola (de todas las llegadas) y, con ``t``, nivel de servicio; con su semiancho. Además P(esperar).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo), si ``lam``, ``mu`` o ``theta`` no tienen una
+        tasa por clase, si hay más de 6 clases, si ``n_replications`` < 2, si ``warmup`` no es un entero menor que ``n_customers``, si ``seed`` es negativa o si el total de llegadas supera 50 000 000.
+    TypeError
+        Si un argumento no es numérico, ``seed`` no es un entero o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = monte_carlo_erlang_a([0.5, 1.5], [0.4, 0.25], [0.1, 1/3], 10, n_customers=20_000, n_replications=4, seed=7)
+    >>> [round(x["p_abandon"], 2) for x in r.classes]
+    [0.01, 0.04]
+    """
+    lams = as_float_list(lam, "lam", min_len=1)
+    k_clases = len(lams)
+    if k_clases > MAX_CLASES:
+        raise ValueError(_t("advanced.error.erlang_a_clases.demasiadas_clases", max=MAX_CLASES, n=k_clases))
+    mus = _por_clase(mu, "mu", k_clases)
+    ths = _por_clase(theta, "theta", k_clases)
+    c = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    n = as_int_positive(n_customers, "n_customers", max=MAX_CLIENTES_REPLICA)
+    n_rep = as_int_positive(n_replications, "n_replications", max=MAX_REPLICAS)
+    if n_rep < 2:
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.replicas_minimo"))
+    if n * n_rep > MAX_CLIENTES_TOTAL:
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.demasiadas_llegadas", total=n * n_rep, max=MAX_CLIENTES_TOTAL))
+    if warmup is None:
+        calent = n // 10
+    else:
+        if isinstance(warmup, str):
+            raise ValueError(_t("advanced.error.monte_carlo_erlang_a.warmup_invalido", n=n))
+        valor = as_nonneg(warmup, "warmup")
+        if valor != int(valor) or valor >= n:
+            raise ValueError(_t("advanced.error.monte_carlo_erlang_a.warmup_invalido", n=n))
+        calent = int(valor)
+    espera_t = None if t is None else as_nonneg(t, "t")
+    if seed is not None:
+        if isinstance(seed, bool) or not isinstance(seed, (int, np.integer)):
+            raise TypeError(_t("advanced.error.monte_carlo_erlang_a.seed_tipo", valor=seed))
+        if seed < 0:
+            raise ValueError(_t("advanced.error.monte_carlo_erlang_a.seed_negativa", valor=seed))
+    flujos = [np.random.default_rng(s) for s in np.random.SeedSequence(seed).spawn(n_rep)]
+    reps = [_replica_contacto(lams, mus, ths, c, n, g, calent, espera_t) for g in flujos]
+    medidas = n - calent
+    cuantil = t_cuantil_975(n_rep - 1)
+
+    def ic(valores: np.ndarray) -> tuple[float, float]:
+        return float(valores.mean()), float(cuantil * valores.std(ddof=1) / math.sqrt(n_rep))
+
+    clases = []
+    for k in range(k_clases):
+        n_k = np.array([r["n"][k] for r in reps])
+        pab, pab_hw = ic(np.array([r["abandonos"][k] for r in reps]) / n_k)
+        wq, wq_hw = ic(np.array([r["espera"][k] for r in reps]) / n_k)
+        fila = {"class_id": k, "lam": lams[k], "mu": mus[k], "theta": ths[k], "p_abandon": pab, "p_abandon_halfwidth": pab_hw, "Wq": wq, "wq_halfwidth": wq_hw}
+        if espera_t is not None:
+            nivel, nivel_hw = ic(np.array([r["nivel"][k] for r in reps]) / n_k)
+            fila.update({"service_level": nivel, "service_level_halfwidth": nivel_hw})
+        clases.append(fila)
+    pw, pw_hw = ic(np.array([r["esperan"][0] for r in reps]) / medidas)
+    return ErlangASimulationResult(servers=c, n_customers=n, n_replications=n_rep, warmup=calent, p_wait=pw, p_wait_halfwidth=pw_hw, classes=clases, t=espera_t)
+
+
+def _por_clase(valor: float | Sequence[float], nombre: str, k_clases: int) -> list[float]:
+    """Una tasa por clase: un número se repite para todas; una secuencia debe tener exactamente una por clase."""
+    if isinstance(valor, (int, float, np.number)) and not isinstance(valor, bool):
+        return [as_positive(valor, nombre)] * k_clases
+    if isinstance(valor, (str, bytes, bool)) or valor is None or not hasattr(valor, "__len__"):
+        raise TypeError(_t("advanced.error.erlang_a_clases.mu_tipo", tipo=type(valor).__name__))
+    lista = as_float_list(valor, nombre, min_len=1)
+    if len(lista) != k_clases:
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.una_por_clase", nombre=nombre, n=k_clases, n_dado=len(lista)))
+    return lista
 
 
 # ---------------------------------------------------------------------------

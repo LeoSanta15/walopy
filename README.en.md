@@ -391,6 +391,25 @@ print(wl.erlang_a_classes_service_level([0.5, 1.5], [0.4, 0.25], [0.1, 1/3], 10,
 
 ---
 
+### `monte_carlo_erlang_a(...)` — simulation for large centers or with more classes
+
+When the exact models do not reach (**many agents**, more than 2 classes with **different μ**, very long queues), `monte_carlo_erlang_a` simulates the same system as `erlang_a_classes` (Poisson arrivals per class, non-preemptive priority, abandonment in the queue, exponential service with each class's rate) for any *c* and up to 6 classes. It has no model bias, only statistical error, and each estimate comes with the **half-width of its 95 % confidence interval** (Student t over independent replications). It costs ≈ 1 s per million arrivals and hardly depends on *c*.
+
+```python
+# 80 agents, VIP (λ = 5.5/min, 2.5 min per call, patience 10 min) and standard (λ = 16.5/min, 4 min, patience 3 min)
+r = wl.monte_carlo_erlang_a([5.5, 16.5], mu=[0.4, 0.25], theta=[0.1, 1/3], c=80,
+                            n_customers=200_000, n_replications=10, t=1/3, seed=2026)
+print(r)                                  # per class: P(abandonment), Wq and service level, each with its ±
+vip, standard = r.classes
+print(standard["p_abandon"], standard["p_abandon_halfwidth"])   # ≈ 5.6 % ± 0.2 points
+print(standard["service_level"])                                # ≈ 76 % served within 20 s
+print(r.to_frame())                       # one row per class with the estimates and their ±
+```
+
+With the same parameters, the exact results of `erlang_a_classes` fall inside these intervals (the suite checks it with 2 and 3 classes, with common and different μ). `seed` makes the result reproducible; `warmup` (10 % by default) discards the first arrivals of each replication, because the system starts empty; and `t` adds the service level. To halve an interval, four times more arrivals are needed.
+
+---
+
 ### `queue_length_pmf(lam, mu, n_max)` — Queue length PMF
 
 Probability distribution of the number of customers in the system for M/M/1.
@@ -1972,7 +1991,7 @@ Wq     : 0.3   (average waiting time in queue)
 | Module | Main functions and classes |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `ggc`, `departure_cv2`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
-| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_a_classes`, `erlang_a_classes_service_level`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `ErlangAClassesResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
+| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_a_classes`, `erlang_a_classes_service_level`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `monte_carlo_erlang_a`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `ErlangAClassesResult`, `ErlangASimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |
