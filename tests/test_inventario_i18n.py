@@ -130,6 +130,13 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
+    # 0.4.11: Erlang A con dos clases y prioridad
+    "advanced.cabecera.to_frame.eff",
+    "advanced.cabecera.to_frame.p_abandono",
+    "advanced.clave_params.erlang_a_prioridad.p_abandono_total",
+    "advanced.error.erlang_a_prioridad.demasiados_estados",
+    "advanced.error.erlang_a_prioridad.demasiadas_iteraciones",
+    "advanced.etiqueta.summary.erlang_a_prioridad",
     "reliability.aviso.weibull_analysis.pocas_fallas_sesgo_mle",   # 0.4.10: sesgo del MLE con pocas fallas
     "utils.error.t_cuantil.p_debe_estar_entre_0_1",
     "utils.error.t_cuantil.gl_debe_ser_positivo",

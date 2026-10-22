@@ -324,6 +324,28 @@ print(wl.erlang_a_servers(10.0, 1.0, 0.5, max_abandon=0.05, min_service_level=0.
 
 ---
 
+### `erlang_a_priority(...)` — Erlang A con dos clases y prioridad
+
+Dos tipos de llamada (p. ej. clientes VIP y estándar) que comparten los mismos agentes: la clase de **alta prioridad** pasa delante en la fila (sin desplazar a quien ya está en servicio) y cada clase tiene su tasa de llegadas λ y su paciencia θ. Es exacto (cadena de Markov resuelta por niveles, no una aproximación), estable aunque λ ≥ c·μ, y el servicio tiene la misma tasa μ para las dos clases. Con θ iguales, la cola total coincide con `erlang_a`.
+
+```python
+# VIP: 0.5 llamadas/min, paciencia media 10 min (θ = 0.1); estándar: 1.5 llamadas/min, paciencia 3 min (θ = 1/3); 4 min por llamada, 10 agentes
+r = wl.erlang_a_priority(lam_high=0.5, lam_low=1.5, mu=0.25, theta_high=0.1, theta_low=1/3, c=10)
+print(r)                                   # tabla por clase: abandono, tasa atendida, Lq y Wq
+vip, estandar = r.classes
+print(vip["p_abandon"], estandar["p_abandon"])      # ≈ 1.3 % y ≈ 7.1 %: la prioridad protege a los VIP
+print(r.p_wait, r.rho)
+
+# Nivel de servicio por clase: fracción atendida esperando como máximo t (aquí 20 s = 1/3 min)
+alto, bajo = wl.erlang_a_priority_service_level(0.5, 1.5, 0.25, 0.1, 1/3, 10, t=1/3)
+print(alto, bajo)                          # ≈ 0.858 y 0.793
+print(r.to_frame())                        # una fila por clase
+```
+
+La clase de alta prioridad solo ve a las de su clase en la fila, así que su nivel de servicio es una fórmula cerrada; a la de baja la pasan las llegadas de alta durante su espera y su nivel se calcula con la cadena de esa espera por uniformización (también exacta). Las dos clases comparten μ: si los tiempos de servicio difieren por clase, el modelo no aplica. Colas de miles de clientes (λ/θ muy grande) lanzan `ValueError` por el tamaño del truncamiento.
+
+---
+
 ### `queue_length_pmf(lam, mu, n_max)` — PMF de longitud de cola
 
 Distribución de probabilidad del número de clientes en el sistema para M/M/1.
@@ -1904,7 +1926,7 @@ Wq     : 0.3   (tiempo promedio de espera en cola)
 | Módulo | Funciones y clases principales |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `ggc`, `departure_cv2`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
-| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
+| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |

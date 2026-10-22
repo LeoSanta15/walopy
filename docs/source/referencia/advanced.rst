@@ -18,6 +18,10 @@ Funciones
 
 .. autofunction:: walopy.erlang_a_servers
 
+.. autofunction:: walopy.erlang_a_priority
+
+.. autofunction:: walopy.erlang_a_priority_service_level
+
 .. autofunction:: walopy.mm1_priority
 
 .. autofunction:: walopy.monte_carlo_gg1
@@ -52,5 +56,8 @@ Clases de resultado
    :members:
 
 .. autoclass:: walopy.PriorityQueueResult
+   :members:
+
+.. autoclass:: walopy.ErlangAPriorityResult
    :members:
 

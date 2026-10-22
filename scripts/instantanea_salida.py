@@ -169,7 +169,7 @@ def capturar_funciones(contrato) -> dict:
             resultado = fn(**copy.deepcopy(contrato.BASE[nombre]))
         entrada: dict = {"resultado": describir(resultado), "avisos": [f"{a.category.__name__}: {a.message}" for a in avisos if a.category is UserWarning]}
         if hasattr(resultado, "__str__") and not isinstance(resultado, (pd.DataFrame, float, int)):
-            entrada["str"] = str(resultado)
+            entrada["str"] = _redondear_flotantes(str(resultado))
         for met in ("summary", "to_frame", "curve_to_frame"):
             if hasattr(resultado, met):
                 try:
@@ -211,7 +211,7 @@ def capturar_escenarios() -> dict:
             warnings.simplefilter("always")
             try:
                 r = f()
-                salida[clave] = {"resultado": describir(r), "str": str(r), "avisos": [f"{a.category.__name__}: {a.message}" for a in avisos if a.category is UserWarning]}
+                salida[clave] = {"resultado": describir(r), "str": _redondear_flotantes(str(r)), "avisos": [f"{a.category.__name__}: {a.message}" for a in avisos if a.category is UserWarning]}
             except Exception as e:  # noqa: BLE001
                 salida[clave] = {"excepcion": _mensaje_de_excepcion(e), "avisos": [f"{a.category.__name__}: {a.message}" for a in avisos if a.category is UserWarning]}
 
