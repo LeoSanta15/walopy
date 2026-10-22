@@ -1109,6 +1109,281 @@ def mmck(lam: float, mu: float, c: int, K: int) -> QueueResult:
 
 
 # ---------------------------------------------------------------------------
+# Erlang A — M/M/c+M (abandono de clientes impacientes)
+# ---------------------------------------------------------------------------
+
+def _distribucion_erlang_a(lam: float, mu: float, theta: float, c: int) -> np.ndarray:
+    """Probabilidades estacionarias p_n (n = 0, 1, …) de M/M/c+M, normalizadas y truncadas donde la cola ya no pesa.
+
+    Es un proceso de nacimiento y muerte: llegadas λ; muertes nμ para n ≤ c y cμ + (n − c)θ para n > c. Se calcula en logaritmos
+    (los pesos pueden ser enormes o minúsculos) y se amplía por tramos hasta que la cola es despreciable.
+    """
+    n = np.arange(1, c + 1)
+    lw = np.concatenate(([0.0], np.cumsum(np.log(lam) - np.log(n * mu))))
+    tramos = [lw]
+    ultimo, k_ini, max_lw = lw[-1], 0, float(lw.max())
+    largo = max(64, c)
+    while True:
+        k = np.arange(k_ini + 1, k_ini + largo + 1, dtype=float)
+        log_r = math.log(lam) - np.log(c * mu + k * theta)
+        tramo = ultimo + np.cumsum(log_r)
+        tramos.append(tramo)
+        max_lw = max(max_lw, float(tramo.max()))
+        ultimo, k_ini = float(tramo[-1]), k_ini + largo
+        if log_r[-1] < 0.0 and ultimo < max_lw - 50.0:
+            break
+        if k_ini >= MAX_ESTADOS:
+            raise ValueError(_t("advanced.error.erlang_a.demasiados_estados", max=MAX_ESTADOS))
+        largo *= 2
+    lw_todo = np.concatenate(tramos)
+    pesos = np.exp(lw_todo - lw_todo.max())
+    return pesos / pesos.sum()
+
+
+def _indicadores_erlang_a(lam: float, mu: float, theta: float, c: int) -> dict[str, float]:
+    """Indicadores exactos de M/M/c+M a partir de la distribución estacionaria (PASTA: quien llega ve el estado estacionario).
+
+    Un cliente que llega y encuentra k clientes en cola ocupa la posición j = k + 1: avanza a tasa cμ + (j − 1)θ (alguien delante
+    se atiende o abandona) y abandona a tasa θ. Con R_j = cμ + jθ salen en forma recursiva, todas con términos positivos,
+    la probabilidad de atenderse S_j = cμ/R_j, la espera acumulada de los atendidos U_j y la de los que abandonan V_j.
+    """
+    p = _distribucion_erlang_a(lam, mu, theta, c)
+    q = p[c:]                                    # q[k] = P(el sistema tiene c + k clientes)
+    cmu = c * mu
+    j = np.arange(1, len(q) + 1, dtype=float)
+    R = cmu + j * theta                          # tasa total de salida de la posición j
+    adv = cmu + (j - 1.0) * theta                # tasa de avance de la posición j
+    S_prev = np.concatenate(([1.0], cmu / R[:-1]))          # S_{j-1}
+    aband = j * theta / R                         # 1 − S_j (sin cancelación)
+    U = np.zeros_like(R)
+    V = np.zeros_like(R)
+    u_prev = v_prev = 0.0
+    for i in range(len(R)):
+        r, a = R[i], adv[i]
+        u_prev = (a / r) * (S_prev[i] / r + u_prev)
+        v_prev = theta / (r * r) + (a / r) * ((1.0 - S_prev[i]) / r + v_prev)
+        U[i], V[i] = u_prev, v_prev
+    k = np.arange(len(q), dtype=float)
+    Lq = float((k * q).sum())
+    p_espera = float(q.sum())
+    p_aband = float((q * aband).sum())
+    wq_atendidos = float((q * U).sum()) / (1.0 - p_aband)
+    wq_abandonos = float((q * V).sum()) / p_aband if p_aband > 0.0 else 0.0
+    return {"Lq": Lq, "p_espera": p_espera, "p_aband": p_aband, "wq_atendidos": wq_atendidos, "wq_abandonos": wq_abandonos}
+
+
+def erlang_a(lam: float, mu: float, theta: float, c: int) -> QueueResult:
+    """Cola M/M/c+M (Erlang A): *c* servidores y clientes impacientes que abandonan la fila.
+
+    Cada cliente en espera abandona a tasa θ (paciencia exponencial de media 1/θ); quien ya está en servicio no abandona. A diferencia de
+    ``mmc``, el sistema es estable aunque λ ≥ c·μ, porque las salidas por abandono compensan: es el modelo habitual de centros de contacto. Es
+    exacto (nacimiento y muerte), no una aproximación. Con θ → 0 tiende a ``mmc`` (si ρ < 1) y con θ grande, a ``erlang_b``.
+
+    Parameters
+    ----------
+    lam : float
+        Tasa de llegadas λ.
+    mu : float
+        Tasa de servicio μ por servidor.
+    theta : float
+        Tasa de abandono θ de cada cliente en espera (1/θ = paciencia media).
+    c : int
+        Número de servidores (≥ 1).
+
+    Returns
+    -------
+    QueueResult
+        ``rho`` es la utilización λ_eff/(c·μ). ``Lq``/``Wq`` cuentan a todos los que llegan (también a los que abandonan) y ``L``/``W``
+        cumplen la ley de Little con λ. En ``params`` están P(esperar), P(abandono), la tasa de clientes atendidos y la espera media de
+        quienes se atienden y de quienes abandonan.
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).
+        Si ``c`` supera 10⁶ o la cola esperada necesita más de 10⁶ estados (λ/θ demasiado grande).
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = erlang_a(lam=10.0, mu=1.0, theta=0.5, c=8)
+    >>> round(r.params["P(abandono)"], 4)
+    0.2272
+    >>> round(r.rho, 4)
+    0.966
+    """
+    lam   = as_positive(lam, "lam")
+    mu    = as_positive(mu, "mu")
+    theta = as_positive(theta, "theta")
+    c     = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    ind   = _indicadores_erlang_a(lam, mu, theta, c)
+    lam_eff = lam * (1.0 - ind["p_aband"])
+    Lq    = ind["Lq"]
+    Wq    = Lq / lam
+    L     = Lq + lam_eff / mu
+    return QueueResult(
+        model=_t("advanced.modelo.erlang_a.texto", c=c),
+        lam=lam, mu=mu, servers=c,
+        rho=lam_eff / (c * mu), L=L, Lq=Lq, W=L / lam, Wq=Wq,
+        params={
+            "θ (tasa de abandono)": theta,
+            "P(esperar)": ind["p_espera"],
+            "P(abandono)": ind["p_aband"],
+            "λ_eff (tasa atendida)": lam_eff,
+            "Wq atendidos": ind["wq_atendidos"],
+            "Wq abandonos": ind["wq_abandonos"],
+        },
+    )
+
+
+def erlang_a_service_level(lam: float, mu: float, theta: float, c: int, t: float) -> float:
+    """Nivel de servicio de M/M/c+M: fracción de las llegadas que se atienden esperando como máximo *t*.
+
+    Es la medida habitual de un centro de contacto (p. ej. «80 % atendidas en 20 segundos»). Los clientes que abandonan antes de *t*
+    **no** cuentan como atendidos. El cálculo es exacto: la espera de un cliente en la posición *j* es la de una cola con salidas a tasa
+    cμ + iθ, y θ·T = −ln B con B ~ Beta(cμ/θ, j); con *j* entero la distribución beta incompleta es una suma finita de términos positivos.
+
+    Parameters
+    ----------
+    lam, mu, theta, c
+        Igual que en ``erlang_a``.
+    t : float
+        Tiempo máximo de espera (≥ 0, en las mismas unidades de tiempo que 1/λ).
+
+    Returns
+    -------
+    float
+        Fracción en [0, 1 − P(abandono)]. Con ``t = 0`` es la fracción que no espera; al crecer *t* tiende a 1 − P(abandono).
+
+    Raises
+    ------
+    ValueError
+        Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo, o ``t`` negativo).
+        Si ``c`` supera 10⁶ o la cola esperada necesita más de 10⁶ estados.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> round(erlang_a_service_level(lam=10.0, mu=1.0, theta=0.5, c=8, t=0.0), 4)
+    0.1302
+    >>> round(erlang_a_service_level(lam=10.0, mu=1.0, theta=0.5, c=8, t=2.0), 4)
+    0.7715
+    """
+    lam   = as_positive(lam, "lam")
+    mu    = as_positive(mu, "mu")
+    theta = as_positive(theta, "theta")
+    c     = as_int_positive(c, "c", max=MAX_SERVIDORES)
+    t     = as_nonneg(t, "t")
+    p     = _distribucion_erlang_a(lam, mu, theta, c)
+    libre = float(p[:c].sum())                   # llegan y encuentran un servidor libre
+    if t == 0.0:
+        return libre
+    q = p[c:]
+    J = len(q)
+    j = np.arange(1, J + 1, dtype=float)
+    a1 = c * mu / theta                          # a' = cμ/θ
+    k = np.arange(1, J, dtype=float)
+    # I_x(a'+1, j) = x^(a'+1) Σ_{k<j} (a'+1)_k/k! (1−x)^k, con x = e^(−θt); acumulada en logaritmos
+    log_uno_menos_x = math.log(-math.expm1(-theta * t))
+    log_term = -(a1 + 1.0) * theta * t + np.concatenate(([0.0], np.cumsum(np.log((a1 + k) / k)))) + np.arange(J) * log_uno_menos_x
+    I = np.minimum(np.cumsum(np.exp(log_term)), 1.0)
+    g = (a1 / (a1 + j)) * (1.0 - I)              # P(atenderse esperando ≤ t | posición j)
+    return float(min(libre + float((q * g).sum()), 1.0))
+
+
+def erlang_a_servers(
+    lam: float,
+    mu: float,
+    theta: float,
+    *,
+    max_abandon: float | None = None,
+    max_wait_prob: float | None = None,
+    min_service_level: float | None = None,
+    t: float | None = None,
+    c_max: int = 10_000,
+) -> QueueResult:
+    """Mínimo número de servidores de M/M/c+M que cumple los objetivos pedidos (todos a la vez).
+
+    Parameters
+    ----------
+    lam, mu, theta
+        Igual que en ``erlang_a``.
+    max_abandon : float, optional
+        Máxima probabilidad de abandono permitida, en (0, 1).
+    max_wait_prob : float, optional
+        Máxima probabilidad de tener que esperar, en (0, 1).
+    min_service_level : float, optional
+        Mínimo nivel de servicio (fracción atendida esperando ≤ *t*), en (0, 1). Requiere ``t``.
+    t : float, optional
+        Tiempo de espera del nivel de servicio (≥ 0); solo se usa con ``min_service_level``.
+    c_max : int
+        Cota superior de servidores a considerar (por defecto 10 000).
+
+    Returns
+    -------
+    QueueResult
+        El resultado de ``erlang_a`` con el menor *c* que cumple todos los objetivos.
+
+    Raises
+    ------
+    ValueError
+        Si no se indica ningún objetivo, si ``min_service_level`` se da sin ``t``, si un objetivo está fuera de (0, 1) o
+        si ni con ``c_max`` servidores se cumplen. También los de ``erlang_a``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = erlang_a_servers(lam=10.0, mu=1.0, theta=0.5, max_abandon=0.02)
+    >>> r.servers, round(r.params["P(abandono)"], 4)
+    (14, 0.0125)
+    """
+    lam   = as_positive(lam, "lam")
+    mu    = as_positive(mu, "mu")
+    theta = as_positive(theta, "theta")
+    c_max = as_int_positive(c_max, "c_max", max=MAX_SERVIDORES)
+    objetivos = {"max_abandon": max_abandon, "max_wait_prob": max_wait_prob, "min_service_level": min_service_level}
+    for nombre, valor in objetivos.items():
+        if valor is not None:
+            v = as_fraction(valor, nombre)
+            if v <= 0.0 or v >= 1.0:
+                raise ValueError(_t("advanced.error.erlang_a_servers.objetivo_entre_0_1", nombre=nombre))
+    if all(v is None for v in objetivos.values()):
+        raise ValueError(_t("advanced.error.erlang_a_servers.sin_objetivo"))
+    if min_service_level is not None:
+        if t is None:
+            raise ValueError(_t("advanced.error.erlang_a_servers.nivel_servicio_requiere_t"))
+        t = as_nonneg(t, "t")
+
+    def cumple(c: int) -> bool:
+        ind = _indicadores_erlang_a(lam, mu, theta, c)
+        if max_abandon is not None and ind["p_aband"] > max_abandon:
+            return False
+        if max_wait_prob is not None and ind["p_espera"] > max_wait_prob:
+            return False
+        if min_service_level is not None and erlang_a_service_level(lam, mu, theta, c, t or 0.0) < min_service_level:
+            return False
+        return True
+
+    # Los tres indicadores mejoran al añadir servidores: se busca por duplicación y bisección.
+    hi = 1
+    while not cumple(hi):
+        if hi >= c_max:
+            raise ValueError(_t("advanced.error.erlang_a_servers.inalcanzable", c_max=c_max))
+        hi = min(2 * hi, c_max)
+    lo = hi // 2 if hi > 1 else 0
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        if cumple(mid):
+            hi = mid
+        else:
+            lo = mid
+    return erlang_a(lam, mu, theta, hi)
+
+
+# ---------------------------------------------------------------------------
 # M/M/1 non-preemptive Head-of-Line priority queue
 # ---------------------------------------------------------------------------
 

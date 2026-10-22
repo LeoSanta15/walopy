@@ -14,6 +14,9 @@ from .advanced import (
     break_even,
     break_even_multi,
     break_even_sales,
+    erlang_a,
+    erlang_a_servers,
+    erlang_a_service_level,
     erlang_b,
     line_balance,
     mm1_priority,
@@ -171,7 +174,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.8"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.9"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos
@@ -227,6 +230,9 @@ __all__ = [
     "BreakEvenResult",
     "BreakEvenMultiResult",
     "PriorityQueueResult",
+    "erlang_a",
+    "erlang_a_servers",
+    "erlang_a_service_level",
     "erlang_b",
     "mm1k",
     "mmck",
