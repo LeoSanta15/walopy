@@ -8,6 +8,31 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.9] — 2026-10-22
+
+Versión de centros de contacto: Erlang A, la cola con abandono de clientes impacientes, el último punto de la hoja de ruta de la auditoría de dominio. Solo añade funciones: no cambia
+ningún resultado existente.
+
+### Añadido
+- **`erlang_a(lam, mu, theta, c)`**: cola M/M/c+M, donde cada cliente en espera abandona a tasa θ (paciencia exponencial de media 1/θ). A diferencia de `mmc`, es estable aunque λ ≥ c·μ
+  (los abandonos compensan el exceso de carga) y es exacta (proceso de nacimiento y muerte), no una aproximación. Devuelve un `QueueResult` (`rho` es la utilización λ_eff/(c·μ); `Lq` y `Wq`
+  cuentan a todos los que llegan, y `L` y `W` cumplen la ley de Little con λ) con, en `params`, P(esperar), P(abandono), la tasa atendida λ_eff y la espera media de quienes se atienden
+  y de quienes abandonan. Con θ → 0 coincide con `mmc` y con θ grande, con `erlang_b`; con θ = μ el número en el sistema es Poisson(λ/μ).
+- **`erlang_a_service_level(lam, mu, theta, c, t)`**: nivel de servicio exacto, la fracción de las llegadas que se atienden esperando como máximo *t* (p. ej. «80 % atendidas en 20 segundos»).
+  Los que abandonan antes no cuentan como atendidos. Es una fórmula cerrada: la espera de quien llega a la posición *j* de la fila cumple θ·T = −ln B con B ~ Beta(cμ/θ, j), y la
+  beta incompleta es una suma finita de términos positivos (sin simulación y sin restas que cancelen).
+- **`erlang_a_servers(lam, mu, theta, *, max_abandon, max_wait_prob, min_service_level, t, c_max)`**: mínimo número de servidores que cumple todos los objetivos pedidos (por duplicación y bisección,
+  porque los tres indicadores mejoran al añadir servidores). Devuelve el `erlang_a` de ese *c*.
+- Los cinco indicadores (P(abandono), P(esperar), espera de atendidos, espera de abandonos y nivel de servicio) coinciden con una simulación de eventos con colas FIFO y abandono: 30 réplicas de 100 000
+  llegadas, con λ = 10, μ = 1, θ = 0,5 y 8 servidores (λ > c·μ), a menos de 0,5 errores estándar.
+
+### Pruebas
+- `tests/test_erlang_a.py`: solución directa de las ecuaciones de balance con álgebra lineal, identidades de flujo y de Little, reparto de la espera media entre atendidos y abandonos, el límite
+  θ = μ (Poisson), los límites M/M/c y Erlang B, sobrecarga con λ = 2·c·μ, monotonía en *c* y θ, integración numérica (RK4) de las ecuaciones de la espera para el nivel de servicio,
+  simulación con intervalo de confianza y validación de entradas. Cinco mutantes nuevos (`MU-33` a `MU-37`).
+
+---
+
 ## [0.4.8] — 2026-10-21
 
 Versión de fiabilidad con datos censurados: `weibull_analysis` admite unidades suspendidas e intervalos de confianza, de la auditoría de dominio. Sin suspensiones,

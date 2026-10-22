@@ -130,6 +130,19 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
+    # 0.4.9: Erlang A (M/M/c+M)
+    "advanced.clave_params.erlang_a.theta",
+    "advanced.clave_params.erlang_a.p_esperar",
+    "advanced.clave_params.erlang_a.p_abandono",
+    "advanced.clave_params.erlang_a.lam_eff",
+    "advanced.clave_params.erlang_a.wq_atendidos",
+    "advanced.clave_params.erlang_a.wq_abandonos",
+    "advanced.error.erlang_a.demasiados_estados",
+    "advanced.error.erlang_a_servers.objetivo_entre_0_1",
+    "advanced.error.erlang_a_servers.sin_objetivo",
+    "advanced.error.erlang_a_servers.nivel_servicio_requiere_t",
+    "advanced.error.erlang_a_servers.inalcanzable",
+    "advanced.modelo.erlang_a.texto",
     "reliability.cabecera.to_frame.suspensiones",   # 0.4.8: Weibull con datos censurados
     "reliability.cabecera.to_frame.forma_ic_inferior",
     "reliability.cabecera.to_frame.forma_ic_superior",

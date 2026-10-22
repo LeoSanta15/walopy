@@ -312,6 +312,31 @@ for c in range(1, 20):
 
 ---
 
+### `erlang_a(lam, mu, theta, c)` — Erlang A (M/M/c+M)
+
+Queue of **impatient customers**: each waiting customer abandons at rate θ (exponential patience with mean 1/θ); a customer already in service does not abandon. It is the usual contact-center model and, unlike `mmc`, **it is stable even when λ ≥ c·μ**: the abandonments offset the excess load. The result is exact (birth and death), not an approximation. As θ → 0 it tends to `mmc` and with a large θ, to `erlang_b`.
+
+```python
+# 10 calls per minute, 1 minute per call, mean patience of 2 min (θ = 0.5), 8 agents: λ > c·μ
+r = wl.erlang_a(lam=10.0, mu=1.0, theta=0.5, c=8)
+print(r.params["P(abandono)"])        # ≈ 0.227: almost one call in four is lost
+print(r.params["P(esperar)"])         # fraction that has to wait
+print(r.params["Wq atendidos"], r.params["Wq abandonos"])   # mean wait of those served and of those who abandon
+print(r.rho)                          # utilization λ_eff/(c·μ), not λ/(c·μ)
+
+# Service level: fraction served after waiting at most t
+print(wl.erlang_a_service_level(lam=10.0, mu=1.0, theta=0.5, c=8, t=2.0))   # ≈ 0.771
+
+# Minimum number of agents for abandonment ≤ 2 %
+print(wl.erlang_a_servers(10.0, 1.0, 0.5, max_abandon=0.02).servers)         # 14
+# ... or for several targets at once (abandonment ≤ 5 % and 80 % served within 1 min)
+print(wl.erlang_a_servers(10.0, 1.0, 0.5, max_abandon=0.05, min_service_level=0.8, t=1.0).servers)  # 12
+```
+
+`Lq` and `Wq` count everyone who arrives (including those who abandon) and `L`, `W` satisfy Little's law with λ. `erlang_a_service_level` is exact (not simulated): customers who abandon before *t* do not count as served. `erlang_a_servers` accepts `max_abandon`, `max_wait_prob` and `min_service_level` (with `t`) and returns the `erlang_a` of the smallest *c* that meets all of them.
+
+---
+
 ### `queue_length_pmf(lam, mu, n_max)` — Queue length PMF
 
 Probability distribution of the number of customers in the system for M/M/1.
@@ -1889,7 +1914,7 @@ Wq     : 0.3   (average waiting time in queue)
 | Module | Main functions and classes |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `ggc`, `departure_cv2`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
-| `advanced` | `mm1k`, `mmck`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
+| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |

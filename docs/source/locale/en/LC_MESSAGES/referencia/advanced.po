@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 22:13+0000\n"
+"POT-Creation-Date: 2026-10-22 15:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -39,22 +39,15 @@ msgstr "Erlang B formula: blocking probability of an M/M/c/c loss system."
 msgid "En un sistema de pérdida no hay sala de espera: los clientes que llegan y encuentran los *c* servidores ocupados se pierden (se bloquean)."
 msgstr "In a loss system there is no waiting room: customers who arrive and find all *c* servers busy are lost (blocked)."
 
-#: of walopy.advanced.break_even walopy.advanced.break_even_multi
-#: walopy.advanced.break_even_sales walopy.advanced.erlang_b
-#: walopy.advanced.line_balance walopy.advanced.mm1_priority
-#: walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1
-#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
-#: walopy.advanced.takt_time
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Parameters"
 msgstr "Parameters"
 
-#: of walopy.advanced.erlang_b:6 walopy.advanced.mm1k:6 walopy.advanced.mmck:6
-#: walopy.advanced.monte_carlo_gg1:12 walopy.advanced.queue_length_pmf:5
-#: walopy.advanced.sojourn_cdf:5
+#: of walopy.advanced.erlang_a:7 walopy.advanced.erlang_b:6 walopy.advanced.mm1k:6 walopy.advanced.mmck:6 walopy.advanced.monte_carlo_gg1:12 walopy.advanced.queue_length_pmf:5 walopy.advanced.sojourn_cdf:5
 msgid "Tasa de llegadas λ."
 msgstr "Arrival rate λ."
 
-#: of walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
+#: of walopy.advanced.erlang_a:9 walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
 msgid "Tasa de servicio μ por servidor."
 msgstr "Service rate μ per server."
 
@@ -62,9 +55,7 @@ msgstr "Service rate μ per server."
 msgid "Número de servidores (= capacidad del sistema)."
 msgstr "Number of servers (= system capacity)."
 
-#: of walopy.advanced.erlang_b walopy.advanced.mm1k walopy.advanced.mmck
-#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
-#: walopy.advanced.takt_time
+#: of walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Returns"
 msgstr "Returns"
 
@@ -72,21 +63,11 @@ msgstr "Returns"
 msgid "Probabilidad de bloqueo B(c, a) ∈ [0, 1]."
 msgstr "Blocking probability B(c, a) ∈ [0, 1]."
 
-#: of walopy.advanced.break_even walopy.advanced.break_even_multi
-#: walopy.advanced.break_even_sales walopy.advanced.erlang_b
-#: walopy.advanced.line_balance walopy.advanced.mm1_priority
-#: walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1
-#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
-#: walopy.advanced.takt_time
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Return type"
 msgstr "Return type"
 
-#: of walopy.advanced.break_even walopy.advanced.break_even_multi
-#: walopy.advanced.break_even_sales walopy.advanced.erlang_b
-#: walopy.advanced.line_balance walopy.advanced.mm1_priority
-#: walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1
-#: walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf
-#: walopy.advanced.takt_time
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Raises"
 msgstr "Raises"
 
@@ -94,21 +75,11 @@ msgstr "Raises"
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``c`` supera 10⁶."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``c`` exceeds 10⁶."
 
-#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23
-#: walopy.advanced.break_even_sales:19 walopy.advanced.erlang_b:17
-#: walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24
-#: walopy.advanced.mm1k:18 walopy.advanced.mmck:19
-#: walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16
-#: walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
+#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23 walopy.advanced.break_even_sales:19 walopy.advanced.erlang_a:22 walopy.advanced.erlang_a_servers:21 walopy.advanced.erlang_a_service_level:18 walopy.advanced.erlang_b:17 walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24 walopy.advanced.mm1k:18 walopy.advanced.mmck:19 walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16 walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26
-#: walopy.advanced.break_even_sales:22 walopy.advanced.erlang_b:20
-#: walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27
-#: walopy.advanced.mm1k:21 walopy.advanced.mmck:22
-#: walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19
-#: walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
+#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26 walopy.advanced.break_even_sales:22 walopy.advanced.erlang_a:25 walopy.advanced.erlang_a_servers:24 walopy.advanced.erlang_a_service_level:21 walopy.advanced.erlang_b:20 walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27 walopy.advanced.mm1k:21 walopy.advanced.mmck:22 walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19 walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
 msgid "Examples"
 msgstr "Examples"
 
@@ -120,8 +91,7 @@ msgstr "M/M/1/K queue: a single server with a finite waiting room."
 msgid "La capacidad del sistema es *K* (servidor + cola). Los clientes que llegan cuando el sistema está lleno se pierden."
 msgstr "The system capacity is *K* (server + queue). Customers who arrive when the system is full are lost."
 
-#: of walopy.advanced.mm1k:8 walopy.advanced.queue_length_pmf:7
-#: walopy.advanced.sojourn_cdf:7
+#: of walopy.advanced.mm1k:8 walopy.advanced.queue_length_pmf:7 walopy.advanced.sojourn_cdf:7
 msgid "Tasa de servicio μ."
 msgstr "Service rate μ."
 
@@ -145,7 +115,7 @@ msgstr "M/M/c/K queue: *c* servers and system capacity *K* (including the server
 msgid "Los clientes que llegan cuando el sistema está lleno se bloquean (se pierden). El sistema siempre es estable, sea cual sea ρ, por su capacidad finita."
 msgstr "Customers who arrive when the system is full are blocked (lost). The system is always stable, whatever ρ is, because of its finite capacity."
 
-#: of walopy.advanced.mmck:10
+#: of walopy.advanced.erlang_a:13 walopy.advanced.mmck:10
 msgid "Número de servidores (≥ 1)."
 msgstr "Number of servers (≥ 1)."
 
@@ -160,6 +130,82 @@ msgstr "``rho`` is the server utilization λ_eff / (c · μ)."
 #: of walopy.advanced.mmck:18
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``K < c`` o ``c``/``K`` superan 10⁶."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``K < c`` or ``c``/``K`` exceed 10⁶."
+
+#: of walopy.advanced.erlang_a:1
+msgid "Cola M/M/c+M (Erlang A): *c* servidores y clientes impacientes que abandonan la fila."
+msgstr "M/M/c+M queue (Erlang A): *c* servers and impatient customers who abandon the line."
+
+#: of walopy.advanced.erlang_a:3
+msgid "Cada cliente en espera abandona a tasa θ (paciencia exponencial de media 1/θ); quien ya está en servicio no abandona. A diferencia de ``mmc``, el sistema es estable aunque λ ≥ c·μ, porque las salidas por abandono compensan: es el modelo habitual de centros de contacto. Es exacto (nacimiento y muerte), no una aproximación. Con θ → 0 tiende a ``mmc`` (si ρ < 1) y con θ grande, a ``erlang_b``."
+msgstr "Each waiting customer abandons at rate θ (exponential patience with mean 1/θ); a customer already in service does not abandon. Unlike ``mmc``, the system is stable even when λ ≥ c·μ, because the departures by abandonment offset the load: it is the usual contact-center model. It is exact (birth and death), not an approximation. As θ → 0 it tends to ``mmc`` (if ρ < 1) and with a large θ, to ``erlang_b``."
+
+#: of walopy.advanced.erlang_a:11
+msgid "Tasa de abandono θ de cada cliente en espera (1/θ = paciencia media)."
+msgstr "Abandonment rate θ of each waiting customer (1/θ = mean patience)."
+
+#: of walopy.advanced.erlang_a:16
+msgid "``rho`` es la utilización λ_eff/(c·μ). ``Lq``/``Wq`` cuentan a todos los que llegan (también a los que abandonan) y ``L``/``W`` cumplen la ley de Little con λ. En ``params`` están P(esperar), P(abandono), la tasa de clientes atendidos y la espera media de quienes se atienden y de quienes abandonan."
+msgstr "``rho`` is the utilization λ_eff/(c·μ). ``Lq``/``Wq`` count everyone who arrives (including those who abandon) and ``L``/``W`` satisfy Little's law with λ. ``params`` holds P(wait), P(abandonment), the rate of customers served and the mean wait of those who are served and of those who abandon."
+
+#: of walopy.advanced.erlang_a:21
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``c`` supera 10⁶ o la cola esperada necesita más de 10⁶ estados (λ/θ demasiado grande)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``c`` exceeds 10⁶ or the expected queue needs more than 10⁶ states (λ/θ too large)."
+
+#: of walopy.advanced.erlang_a_service_level:1
+msgid "Nivel de servicio de M/M/c+M: fracción de las llegadas que se atienden esperando como máximo *t*."
+msgstr "Service level of M/M/c+M: fraction of the arrivals that are served after waiting at most *t*."
+
+#: of walopy.advanced.erlang_a_service_level:3
+msgid "Es la medida habitual de un centro de contacto (p. ej. «80 % atendidas en 20 segundos»). Los clientes que abandonan antes de *t* **no** cuentan como atendidos. El cálculo es exacto: la espera de un cliente en la posición *j* es la de una cola con salidas a tasa cμ + iθ, y θ·T = −ln B con B ~ Beta(cμ/θ, j); con *j* entero la distribución beta incompleta es una suma finita de términos positivos."
+msgstr "It is the usual contact-center measure (e.g. \"80 % answered within 20 seconds\"). Customers who abandon before *t* do **not** count as served. The computation is exact: the wait of a customer in position *j* is that of a queue with departures at rate cμ + iθ, and θ·T = −ln B with B ~ Beta(cμ/θ, j); with integer *j* the incomplete beta distribution is a finite sum of positive terms."
+
+#: of walopy.advanced.erlang_a_servers:3 walopy.advanced.erlang_a_servers:4 walopy.advanced.erlang_a_servers:5 walopy.advanced.erlang_a_service_level:7 walopy.advanced.erlang_a_service_level:8 walopy.advanced.erlang_a_service_level:9 walopy.advanced.erlang_a_service_level:10
+msgid "Igual que en ``erlang_a``."
+msgstr "Same as in ``erlang_a``."
+
+#: of walopy.advanced.erlang_a_service_level:11
+msgid "Tiempo máximo de espera (≥ 0, en las mismas unidades de tiempo que 1/λ)."
+msgstr "Maximum waiting time (≥ 0, in the same time units as 1/λ)."
+
+#: of walopy.advanced.erlang_a_service_level:14
+msgid "Fracción en [0, 1 − P(abandono)]. Con ``t = 0`` es la fracción que no espera; al crecer *t* tiende a 1 − P(abandono)."
+msgstr "Fraction in [0, 1 − P(abandonment)]. With ``t = 0`` it is the fraction that does not wait; as *t* grows it tends to 1 − P(abandonment)."
+
+#: of walopy.advanced.erlang_a_service_level:17
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo, o ``t`` negativo).     Si ``c`` supera 10⁶ o la cola esperada necesita más de 10⁶ estados."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive, or ``t`` negative).     If ``c`` exceeds 10⁶ or the expected queue needs more than 10⁶ states."
+
+#: of walopy.advanced.erlang_a_servers:1
+msgid "Mínimo número de servidores de M/M/c+M que cumple los objetivos pedidos (todos a la vez)."
+msgstr "Minimum number of servers of M/M/c+M that meets the requested targets (all at once)."
+
+#: of walopy.advanced.erlang_a_servers:6
+msgid "Máxima probabilidad de abandono permitida, en (0, 1)."
+msgstr "Maximum allowed probability of abandonment, in (0, 1)."
+
+#: of walopy.advanced.erlang_a_servers:8
+msgid "Máxima probabilidad de tener que esperar, en (0, 1)."
+msgstr "Maximum probability of having to wait, in (0, 1)."
+
+#: of walopy.advanced.erlang_a_servers:10
+msgid "Mínimo nivel de servicio (fracción atendida esperando ≤ *t*), en (0, 1). Requiere ``t``."
+msgstr "Minimum service level (fraction served after waiting ≤ *t*), in (0, 1). Requires ``t``."
+
+#: of walopy.advanced.erlang_a_servers:12
+msgid "Tiempo de espera del nivel de servicio (≥ 0); solo se usa con ``min_service_level``."
+msgstr "Waiting time of the service level (≥ 0); only used with ``min_service_level``."
+
+#: of walopy.advanced.erlang_a_servers:14
+msgid "Cota superior de servidores a considerar (por defecto 10 000)."
+msgstr "Upper bound on the number of servers to consider (default 10 000)."
+
+#: of walopy.advanced.erlang_a_servers:17
+msgid "El resultado de ``erlang_a`` con el menor *c* que cumple todos los objetivos."
+msgstr "The ``erlang_a`` result with the smallest *c* that meets all the targets."
+
+#: of walopy.advanced.erlang_a_servers:20
+msgid "Si no se indica ningún objetivo, si ``min_service_level`` se da sin ``t``, si un objetivo está fuera de (0, 1) o     si ni con ``c_max`` servidores se cumplen. También los de ``erlang_a``."
+msgstr "If no target is given, if ``min_service_level`` is given without ``t``, if a target is outside (0, 1) or     if they are not met even with ``c_max`` servers. Also those of ``erlang_a``."
 
 #: of walopy.advanced.mm1_priority:1
 msgid "Cola M/M/1 con prioridades Head-of-Line (HOL) no expropiativas."
@@ -278,8 +324,7 @@ msgstr "If any numeric argument is not finite or is outside its domain (for exam
 msgid "Calcula el punto de equilibrio y el margen de contribución."
 msgstr "Computes the break-even point and the contribution margin."
 
-#: of walopy.advanced.break_even:3 walopy.advanced.break_even_multi:9
-#: walopy.advanced.break_even_sales:8
+#: of walopy.advanced.break_even:3 walopy.advanced.break_even_multi:9 walopy.advanced.break_even_sales:8
 msgid "Costo fijo total del periodo."
 msgstr "Total fixed cost of the period."
 
@@ -400,7 +445,7 @@ msgstr "Columns: ``t``, ``F(t)`` (CDF), ``f(t)`` (density)."
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_points`` supera 10⁶ o ``t_max`` no es positivo."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_points`` exceeds 10⁶ or ``t_max`` is not positive."
 
-#: ../../source/referencia/advanced.rst:34
+#: ../../source/referencia/advanced.rst:40
 msgid "Clases de resultado"
 msgstr "Result classes"
 

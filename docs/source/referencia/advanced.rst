@@ -12,6 +12,12 @@ Funciones
 
 .. autofunction:: walopy.mmck
 
+.. autofunction:: walopy.erlang_a
+
+.. autofunction:: walopy.erlang_a_service_level
+
+.. autofunction:: walopy.erlang_a_servers
+
 .. autofunction:: walopy.mm1_priority
 
 .. autofunction:: walopy.monte_carlo_gg1
