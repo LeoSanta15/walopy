@@ -30,6 +30,8 @@ Funciones
 
 .. autofunction:: walopy.monte_carlo_gg1
 
+.. autofunction:: walopy.monte_carlo_erlang_a
+
 .. autofunction:: walopy.takt_time
 
 .. autofunction:: walopy.line_balance
@@ -66,5 +68,8 @@ Clases de resultado
    :members:
 
 .. autoclass:: walopy.ErlangAClassesResult
+   :members:
+
+.. autoclass:: walopy.ErlangASimulationResult
    :members:
 

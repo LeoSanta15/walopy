@@ -45,3 +45,11 @@ r_igual = wl.erlang_a_classes([vip, estandar], mu=servicio, theta=[0.1, abandono
 print("\nCon 10 agentes, abandono VIP / estándar:")
 print(f"  mismo tiempo de servicio (4 min)       : {r_igual.classes[0]['p_abandon']:.1%} / {r_igual.classes[1]['p_abandon']:.1%}")
 print(f"  VIP en 2.5 min, estándar en 4 min       : {r_rapido.classes[0]['p_abandon']:.1%} / {r_rapido.classes[1]['p_abandon']:.1%}")
+
+# Centro grande (80 agentes) con tiempos de servicio distintos: el modelo exacto ya no llega (c ≥ 40), se simula con intervalos de confianza.
+sim = wl.monte_carlo_erlang_a([5.5, 16.5], mu=[0.4, servicio], theta=[0.1, abandono], c=80,
+                              n_customers=100_000, n_replications=6, t=espera_meta, seed=2026)
+vip_s, est_s = sim.classes
+print(f"\n80 agentes (simulación, IC 95 %): abandono VIP {vip_s['p_abandon']:.2%} ± {vip_s['p_abandon_halfwidth']:.2%}, "
+      f"estándar {est_s['p_abandon']:.2%} ± {est_s['p_abandon_halfwidth']:.2%}")
+print(f"  atendidas en ≤ 20 s: VIP {vip_s['service_level']:.1%}, estándar {est_s['service_level']:.1%}")
