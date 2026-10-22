@@ -131,6 +131,9 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
     # 0.4.12: Erlang A con K clases
+    "advanced.error.erlang_a_clases.mu_longitud",   # 0.4.13: μ distintos por clase
+    "advanced.error.erlang_a_clases.mu_tipo",
+    "advanced.error.erlang_a_clases.mu_distintos_solo_dos_clases",
     "advanced.error.erlang_a_clases.lam_theta_misma_longitud",
     "advanced.error.erlang_a_clases.demasiadas_clases",
     "advanced.error.erlang_a_clases.demasiado_costoso",

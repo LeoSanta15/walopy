@@ -362,6 +362,20 @@ print(r.to_frame())                       # una fila por clase
 
 El nivel de servicio de la clase 0 es una fórmula cerrada; el de cada una de las demás se calcula con la cadena de su espera (las colas de las clases altas por delante y su posición) por uniformización, también exacta. **Límite de tamaño:** el costo crece con el producto de las colas de las clases altas. Con 2 o 3 clases y carga moderada tarda décimas de segundo; con 4 clases, solo con colas cortas (unos segundos); con más clases o colas largas (λ/θ muy grande) se supera la cota de cálculo y lanza `ValueError` tras un máximo de unos 15 s. Para dos clases con colas largas use `erlang_a_priority`.
 
+#### Tiempos de servicio distintos por clase
+
+Con **2 clases**, `mu` puede ser una secuencia con la tasa de servicio de cada clase (p. ej. agentes senior que atienden más rápido a los VIP). Sigue siendo exacto, pero ya no basta la cola: hay que seguir cuántos servidores ocupa cada clase, de modo que el costo es mayor.
+
+```python
+# VIP: 2.5 min por llamada (μ = 0.4); estándar: 4 min (μ = 0.25); mismas llegadas y paciencias que arriba; 10 agentes
+r = wl.erlang_a_classes([0.5, 1.5], mu=[0.4, 0.25], theta=[0.1, 1/3], c=10)
+print(r.mu)                                           # (0.4, 0.25)
+print([x["p_abandon"] for x in r.classes])            # ≈ 0.8 % y 4.3 % (con μ = 0.25 para las dos serían 1.3 % y 7.1 %)
+print(wl.erlang_a_classes_service_level([0.5, 1.5], [0.4, 0.25], [0.1, 1/3], 10, t=1/3))   # ≈ 0.910 y 0.865
+```
+
+`rho` es entonces la proporción de servidores ocupados, Σ λ_eff,k /(μ_k·c). **Límite de tamaño:** con carga cercana a la capacidad tarda ≈ 0.5 s con 10 servidores, ≈ 4 s con 20 y ≈ 15 s con 30; con 40 o más supera la cota de cálculo y lanza `ValueError`. Con más de 2 clases, `mu` debe ser común.
+
 ---
 
 ### `queue_length_pmf(lam, mu, n_max)` — PMF de longitud de cola

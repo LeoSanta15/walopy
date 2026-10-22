@@ -375,6 +375,20 @@ print(r.to_frame())                       # one row per class
 
 The service level of class 0 is a closed form; that of each other class is computed with the chain of its wait (the queues of the higher classes ahead and its position) by uniformization, also exact. **Size limit:** the cost grows with the product of the queues of the higher classes. With 2 or 3 classes and moderate load it takes tenths of a second; with 4 classes, only with short queues (a few seconds); with more classes or long queues (very large λ/θ) the computation bound is exceeded and `ValueError` is raised after at most about 15 s. For two classes with long queues use `erlang_a_priority`.
 
+#### Different service times per class
+
+With **2 classes**, `mu` can be a sequence with the service rate of each class (e.g. senior agents who serve the VIPs faster). It is still exact, but the queue alone is no longer enough: it must track how many servers each class occupies, so the cost is higher.
+
+```python
+# VIP: 2.5 min per call (μ = 0.4); standard: 4 min (μ = 0.25); same arrivals and patience as above; 10 agents
+r = wl.erlang_a_classes([0.5, 1.5], mu=[0.4, 0.25], theta=[0.1, 1/3], c=10)
+print(r.mu)                                           # (0.4, 0.25)
+print([x["p_abandon"] for x in r.classes])            # ≈ 0.8 % and 4.3 % (with μ = 0.25 for both they would be 1.3 % and 7.1 %)
+print(wl.erlang_a_classes_service_level([0.5, 1.5], [0.4, 0.25], [0.1, 1/3], 10, t=1/3))   # ≈ 0.910 and 0.865
+```
+
+`rho` is then the proportion of busy servers, Σ λ_eff,k /(μ_k·c). **Size limit:** with load close to capacity it takes ≈ 0.5 s with 10 servers, ≈ 4 s with 20 and ≈ 15 s with 30; with 40 or more it exceeds the computation bound and raises `ValueError`. With more than 2 classes, `mu` must be common.
+
 ---
 
 ### `queue_length_pmf(lam, mu, n_max)` — Queue length PMF
