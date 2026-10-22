@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: walopy \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 15:38+0000\n"
+"POT-Creation-Date: 2026-10-22 19:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -39,7 +39,7 @@ msgstr "Erlang B formula: blocking probability of an M/M/c/c loss system."
 msgid "En un sistema de pérdida no hay sala de espera: los clientes que llegan y encuentran los *c* servidores ocupados se pierden (se bloquean)."
 msgstr "In a loss system there is no waiting room: customers who arrive and find all *c* servers busy are lost (blocked)."
 
-#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_priority walopy.advanced.erlang_a_priority_service_level walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Parameters"
 msgstr "Parameters"
 
@@ -47,7 +47,7 @@ msgstr "Parameters"
 msgid "Tasa de llegadas λ."
 msgstr "Arrival rate λ."
 
-#: of walopy.advanced.erlang_a:9 walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
+#: of walopy.advanced.erlang_a:9 walopy.advanced.erlang_a_priority:11 walopy.advanced.erlang_b:8 walopy.advanced.mmck:8
 msgid "Tasa de servicio μ por servidor."
 msgstr "Service rate μ per server."
 
@@ -55,7 +55,7 @@ msgstr "Service rate μ per server."
 msgid "Número de servidores (= capacidad del sistema)."
 msgstr "Number of servers (= system capacity)."
 
-#: of walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
+#: of walopy.advanced.erlang_a walopy.advanced.erlang_a_priority walopy.advanced.erlang_a_priority_service_level walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Returns"
 msgstr "Returns"
 
@@ -63,11 +63,11 @@ msgstr "Returns"
 msgid "Probabilidad de bloqueo B(c, a) ∈ [0, 1]."
 msgstr "Blocking probability B(c, a) ∈ [0, 1]."
 
-#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_priority walopy.advanced.erlang_a_priority_service_level walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Return type"
 msgstr "Return type"
 
-#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
+#: of walopy.advanced.break_even walopy.advanced.break_even_multi walopy.advanced.break_even_sales walopy.advanced.erlang_a walopy.advanced.erlang_a_priority walopy.advanced.erlang_a_priority_service_level walopy.advanced.erlang_a_servers walopy.advanced.erlang_a_service_level walopy.advanced.erlang_b walopy.advanced.line_balance walopy.advanced.mm1_priority walopy.advanced.mm1k walopy.advanced.mmck walopy.advanced.monte_carlo_gg1 walopy.advanced.queue_length_pmf walopy.advanced.sojourn_cdf walopy.advanced.takt_time
 msgid "Raises"
 msgstr "Raises"
 
@@ -75,11 +75,11 @@ msgstr "Raises"
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``c`` supera 10⁶."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``c`` exceeds 10⁶."
 
-#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23 walopy.advanced.break_even_sales:19 walopy.advanced.erlang_a:22 walopy.advanced.erlang_a_servers:21 walopy.advanced.erlang_a_service_level:18 walopy.advanced.erlang_b:17 walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24 walopy.advanced.mm1k:18 walopy.advanced.mmck:19 walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16 walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
+#: of walopy.advanced.break_even:15 walopy.advanced.break_even_multi:23 walopy.advanced.break_even_sales:19 walopy.advanced.erlang_a:22 walopy.advanced.erlang_a_priority:24 walopy.advanced.erlang_a_priority_service_level:20 walopy.advanced.erlang_a_servers:21 walopy.advanced.erlang_a_service_level:18 walopy.advanced.erlang_b:17 walopy.advanced.line_balance:13 walopy.advanced.mm1_priority:24 walopy.advanced.mm1k:18 walopy.advanced.mmck:19 walopy.advanced.monte_carlo_gg1:35 walopy.advanced.queue_length_pmf:16 walopy.advanced.sojourn_cdf:18 walopy.advanced.takt_time:13
 msgid "Si un argumento no es numérico o una secuencia contiene valores que no lo son."
 msgstr "If an argument is not numeric or a sequence contains values that are not."
 
-#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26 walopy.advanced.break_even_sales:22 walopy.advanced.erlang_a:25 walopy.advanced.erlang_a_servers:24 walopy.advanced.erlang_a_service_level:21 walopy.advanced.erlang_b:20 walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27 walopy.advanced.mm1k:21 walopy.advanced.mmck:22 walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19 walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
+#: of walopy.advanced.break_even:18 walopy.advanced.break_even_multi:26 walopy.advanced.break_even_sales:22 walopy.advanced.erlang_a:25 walopy.advanced.erlang_a_priority:27 walopy.advanced.erlang_a_priority_service_level:23 walopy.advanced.erlang_a_servers:24 walopy.advanced.erlang_a_service_level:21 walopy.advanced.erlang_b:20 walopy.advanced.line_balance:16 walopy.advanced.mm1_priority:27 walopy.advanced.mm1k:21 walopy.advanced.mmck:22 walopy.advanced.monte_carlo_gg1:38 walopy.advanced.queue_length_pmf:19 walopy.advanced.sojourn_cdf:21 walopy.advanced.takt_time:16
 msgid "Examples"
 msgstr "Examples"
 
@@ -115,7 +115,7 @@ msgstr "M/M/c/K queue: *c* servers and system capacity *K* (including the server
 msgid "Los clientes que llegan cuando el sistema está lleno se bloquean (se pierden). El sistema siempre es estable, sea cual sea ρ, por su capacidad finita."
 msgstr "Customers who arrive when the system is full are blocked (lost). The system is always stable, whatever ρ is, because of its finite capacity."
 
-#: of walopy.advanced.erlang_a:13 walopy.advanced.mmck:10
+#: of walopy.advanced.erlang_a:13 walopy.advanced.erlang_a_priority:17 walopy.advanced.mmck:10
 msgid "Número de servidores (≥ 1)."
 msgstr "Number of servers (≥ 1)."
 
@@ -163,7 +163,7 @@ msgstr "It is the usual contact-center measure (e.g. \"80 % answered within 20 s
 msgid "Igual que en ``erlang_a``."
 msgstr "Same as in ``erlang_a``."
 
-#: of walopy.advanced.erlang_a_service_level:11
+#: of walopy.advanced.erlang_a_priority_service_level:13 walopy.advanced.erlang_a_service_level:11
 msgid "Tiempo máximo de espera (≥ 0, en las mismas unidades de tiempo que 1/λ)."
 msgstr "Maximum waiting time (≥ 0, in the same time units as 1/λ)."
 
@@ -206,6 +206,50 @@ msgstr "The ``erlang_a`` result with the smallest *c* that meets all the targets
 #: of walopy.advanced.erlang_a_servers:20
 msgid "Si no se indica ningún objetivo, si ``min_service_level`` se da sin ``t``, si un objetivo está fuera de (0, 1) o     si ni con ``c_max`` servidores se cumplen. También los de ``erlang_a``."
 msgstr "If no target is given, if ``min_service_level`` is given without ``t``, if a target is outside (0, 1) or     if they are not met even with ``c_max`` servers. Also those of ``erlang_a``."
+
+#: of walopy.advanced.erlang_a_priority:1
+msgid "Cola M/M/c+M con dos clases (alta y baja prioridad) que abandonan con paciencias distintas (prioridad no expropiativa)."
+msgstr "M/M/c+M queue with two classes (high and low priority) that abandon with different patience (non-preemptive priority)."
+
+#: of walopy.advanced.erlang_a_priority:3
+msgid "Los clientes de alta prioridad pasan delante en la fila pero no desplazan a nadie en servicio. Cada clase tiene su tasa de llegadas λ y su tasa de abandono θ (paciencia exponencial de media 1/θ); el servicio es exponencial de tasa μ para las dos. El resultado es exacto (cadena de Markov resuelta numéricamente por niveles, no una aproximación) y estable aunque λ ≥ c·μ. Con θ iguales, la cola total coincide con ``erlang_a``."
+msgstr "High-priority customers go ahead in the line but displace no one in service. Each class has its own arrival rate λ and abandonment rate θ (exponential patience with mean 1/θ); the service is exponential with rate μ for both. The result is exact (a Markov chain solved numerically by levels, not an approximation) and stable even when λ ≥ c·μ. With equal θ, the total queue coincides with ``erlang_a``."
+
+#: of walopy.advanced.erlang_a_priority:7 walopy.advanced.erlang_a_priority:9
+msgid "Tasas de llegada de la clase de alta y de baja prioridad (ambas > 0; con una sola clase use ``erlang_a``)."
+msgstr "Arrival rates of the high- and low-priority class (both > 0; with a single class use ``erlang_a``)."
+
+#: of walopy.advanced.erlang_a_priority:13 walopy.advanced.erlang_a_priority:15
+msgid "Tasas de abandono θ de cada clase."
+msgstr "Abandonment rates θ of each class."
+
+#: of walopy.advanced.erlang_a_priority:20
+msgid "Por clase: probabilidad de abandono, tasa atendida, Lq y Wq; y la utilización y P(esperar) del sistema."
+msgstr "Per class: probability of abandonment, served rate, Lq and Wq; and the utilization and P(wait) of the system."
+
+#: of walopy.advanced.erlang_a_priority:23
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si ``c`` supera 10⁶ o la cola esperada necesita un truncamiento demasiado grande (λ/θ muy grande)."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If ``c`` exceeds 10⁶ or the expected queue needs a truncation that is too large (very large λ/θ)."
+
+#: of walopy.advanced.erlang_a_priority_service_level:1
+msgid "Nivel de servicio de cada clase de ``erlang_a_priority``: fracción de sus llegadas que se atiende esperando como máximo *t*."
+msgstr "Service level of each class of ``erlang_a_priority``: fraction of its arrivals that are served after waiting at most *t*."
+
+#: of walopy.advanced.erlang_a_priority_service_level:3
+msgid "La clase de alta prioridad solo ve a las de su clase en la fila y su nivel es una fórmula cerrada (como en ``erlang_a_service_level``). A la de baja prioridad la pasan las llegadas de alta durante su espera: su nivel se calcula con la cadena de su espera (clientes de alta prioridad por delante, posición propia) por uniformización, también exacta. Quien abandona antes de *t* no cuenta como atendido."
+msgstr "The high-priority class only sees those of its own class in the line and its level is a closed form (as in ``erlang_a_service_level``). The low-priority class is overtaken by high-priority arrivals during its wait: its level is computed with the chain of its wait (high-priority customers ahead, own position) by uniformization, also exact. Whoever abandons before *t* does not count as served."
+
+#: of walopy.advanced.erlang_a_priority_service_level:7 walopy.advanced.erlang_a_priority_service_level:8 walopy.advanced.erlang_a_priority_service_level:9 walopy.advanced.erlang_a_priority_service_level:10 walopy.advanced.erlang_a_priority_service_level:11 walopy.advanced.erlang_a_priority_service_level:12
+msgid "Igual que en ``erlang_a_priority``."
+msgstr "Same as in ``erlang_a_priority``."
+
+#: of walopy.advanced.erlang_a_priority_service_level:16
+msgid "(nivel de la clase alta, nivel de la clase baja), cada uno en [0, 1 − P(abandono) de su clase]."
+msgstr "(level of the high class, level of the low class), each in [0, 1 − P(abandonment) of its class]."
+
+#: of walopy.advanced.erlang_a_priority_service_level:19
+msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo, o ``t`` negativo).     Si ``c`` supera 10⁶, el truncamiento es demasiado grande o ``t`` exige demasiadas iteraciones."
+msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive, or ``t`` negative).     If ``c`` exceeds 10⁶, the truncation is too large or ``t`` requires too many iterations."
 
 #: of walopy.advanced.mm1_priority:1
 msgid "Cola M/M/1 con prioridades Head-of-Line (HOL) no expropiativas."
@@ -445,7 +489,7 @@ msgstr "Columns: ``t``, ``F(t)`` (CDF), ``f(t)`` (density)."
 msgid "Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo).     Si el sistema es inestable (ρ ≥ 1).     Si ``n_points`` supera 10⁶ o ``t_max`` no es positivo."
 msgstr "If any numeric argument is not finite or is outside its domain (for example, not positive).     If the system is unstable (ρ ≥ 1).     If ``n_points`` exceeds 10⁶ or ``t_max`` is not positive."
 
-#: ../../source/referencia/advanced.rst:40
+#: ../../source/referencia/advanced.rst:44
 msgid "Clases de resultado"
 msgstr "Result classes"
 
@@ -561,4 +605,32 @@ msgstr "Total server utilization = sum(λ_k) / μ."
 #: of walopy.advanced.PriorityQueueResult:10
 msgid "Tasa de servicio."
 msgstr "Service rate."
+
+#: of walopy.advanced.ErlangAPriorityResult:1
+msgid "Resultado de ``erlang_a_priority``: M/M/c+M con dos clases y prioridad no expropiativa."
+msgstr "Result of ``erlang_a_priority``: M/M/c+M with two classes and non-preemptive priority."
+
+#: of walopy.advanced.ErlangAPriorityResult:3
+msgid "Número de servidores *c*."
+msgstr "Number of servers *c*."
+
+#: of walopy.advanced.ErlangAPriorityResult:5
+msgid "Tasa de servicio por servidor (la misma para las dos clases)."
+msgstr "Service rate per server (the same for both classes)."
+
+#: of walopy.advanced.ErlangAPriorityResult:7
+msgid "Utilización (λ_eff alta + λ_eff baja)/(c·μ)."
+msgstr "Utilization (λ_eff high + λ_eff low)/(c·μ)."
+
+#: of walopy.advanced.ErlangAPriorityResult:9
+msgid "Probabilidad de que quien llega (de cualquier clase) encuentre todos los servidores ocupados."
+msgstr "Probability that an arrival (of either class) finds all servers busy."
+
+#: of walopy.advanced.ErlangAPriorityResult:11
+msgid "Métricas por clase (0 = alta prioridad, 1 = baja): ``class_id``, ``lam``, ``theta``, ``p_abandon``, ``lam_eff``, ``Lq`` y ``Wq``. ``Lq`` y ``Wq`` cuentan a todos los que llegan de la clase, también a quienes abandonan."
+msgstr "Metrics per class (0 = high priority, 1 = low): ``class_id``, ``lam``, ``theta``, ``p_abandon``, ``lam_eff``, ``Lq`` and ``Wq``. ``Lq`` and ``Wq`` count everyone who arrives of the class, including those who abandon."
+
+#: of walopy.advanced.ErlangAPriorityResult.to_frame:1
+msgid "Una fila por clase."
+msgstr "One row per class."
 

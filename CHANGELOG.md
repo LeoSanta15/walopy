@@ -8,6 +8,34 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.11] — 2026-10-22
+
+Versión de centros de contacto con dos tipos de cliente: Erlang A con dos clases y prioridad. Solo añade funciones: no cambia ningún resultado existente.
+
+### Añadido
+- **`erlang_a_priority(lam_high, lam_low, mu, theta_high, theta_low, c)`** y **`ErlangAPriorityResult`**: cola M/M/c+M con dos clases (p. ej. VIP y estándar) que comparten los mismos
+  agentes. La clase alta pasa delante en la fila sin desplazar a nadie en servicio (prioridad no expropiativa); cada clase tiene su λ y su paciencia θ y el servicio tiene la misma tasa μ. Es
+  exacto, no una aproximación: la cadena de Markov (b < c servidores ocupados, o c ocupados con q₁ y q₂ en cola) se resuelve por niveles de q₂, de modo que solo se invierten matrices del
+  tamaño de la cola de la clase alta (≈ 20 × 20), y los estados con servidores libres salen de un corte de flujo y de un nacimiento y muerte. Devuelve por clase la probabilidad de abandono, la tasa
+  atendida, Lq y Wq (que cuentan a todos los que llegan de la clase), y la utilización y P(esperar) del sistema. Tarda menos de 1 s con 250 agentes y es estable aunque λ ≥ c·μ.
+- **`erlang_a_priority_service_level(..., t)`**: nivel de servicio exacto de cada clase (fracción atendida esperando como máximo *t*). El de la clase alta es la fórmula cerrada de
+  `erlang_a_service_level` sobre su propia cola; el de la baja se calcula con la cadena de su espera (clientes de alta por delante, posición propia) por uniformización.
+- Con paciencias iguales la cola total coincide con `erlang_a` (a 1e-9 relativo); con una clase casi sin llegadas, la otra coincide con `erlang_a`; y los indicadores de las dos clases coinciden
+  con una simulación de eventos con prioridad (10 réplicas de 30 000 llegadas: P(abandono), Wq y nivel de servicio de ambas clases y P(esperar), a menos de 4 errores estándar).
+- Ejemplo: `examples/06_centro_de_contacto_erlang_a.py` suma el caso VIP y estándar. Con 10 agentes, 1,3 % de los VIP y 7,1 % de los estándar abandonan.
+
+### Cambia
+- Interno: el nivel de servicio de una clase se calcula con un helper compartido (`_nivel_servicio_cola`) que usan `erlang_a_service_level` y la clase alta; sin cambio de resultados.
+- Herramientas: la instantánea de salida (`scripts/instantanea_salida.py`) redondea a 9 cifras los números del `str()` de los resultados, como ya hacía con la salida del README; sin eso, el `str()` de
+  una tupla de floats difería en la última cifra con numpy 1.22 (dependencias mínimas) y con numpy 2.
+
+### Pruebas
+- `tests/test_erlang_a_prioridad.py`: la cadena completa resuelta con álgebra lineal (sin la reducción por niveles), el límite de paciencias iguales (Erlang A), los límites de una sola clase, identidades de
+  flujo, sobrecarga con λ = 2·c·μ, la exponencial de la matriz de la cadena de espera de la clase baja (aplicada a un vector), simulación de eventos con prioridad y validación de entradas. Cinco
+  mutantes nuevos (`MU-42` a `MU-46`).
+
+---
+
 ## [0.4.10] — 2026-10-22
 
 Versión de rigor estadístico en `weibull_analysis`: con pocas fallas los intervalos de 0.4.8 quedaban cortos y el MLE de β sobrestima. Mismos β y η que en 0.4.9; cambian los

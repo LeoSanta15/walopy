@@ -20,3 +20,12 @@ solo_nivel = wl.erlang_a_servers(llegadas, servicio, abandono, min_service_level
 ambos = wl.erlang_a_servers(llegadas, servicio, abandono, max_abandon=0.03, min_service_level=0.8, t=espera_meta)
 print(f"\nAbandono ≤ 3 %: {solo_abandono.servers} agentes; 80 % en ≤ 20 s: {solo_nivel.servers} agentes; ambos: {ambos.servers}")
 print(f"Con {ambos.servers} agentes la ocupación es {ambos.rho:.1%} y quien se atiende espera {ambos.params['Wq atendidos'] * 60:.0f} s de media.")
+
+# Dos tipos de cliente: el 25 % son VIP (paciencia media de 10 min) y pasan delante en la fila; el resto (3 min de paciencia) espera su turno.
+vip, estandar = 0.5, 1.5                       # llamadas por minuto de cada clase
+print("\nagentes  abandono VIP  abandono estándar  atendidas en ≤ 20 s (VIP / estándar)")
+for c in range(9, 13):
+    r = wl.erlang_a_priority(vip, estandar, servicio, 0.1, abandono, c)
+    alto, bajo = wl.erlang_a_priority_service_level(vip, estandar, servicio, 0.1, abandono, c, t=espera_meta)
+    a, b = r.classes
+    print(f"{c:7d}  {a['p_abandon']:12.1%}  {b['p_abandon']:16.1%}  {alto:10.1%} / {bajo:.1%}")
