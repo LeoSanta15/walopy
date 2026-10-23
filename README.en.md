@@ -410,6 +410,28 @@ With the same parameters, the exact results of `erlang_a_classes` fall inside th
 
 ---
 
+### `erlang_a_classes_servers(...)` — minimum staffing with K classes
+
+The sizing question of a contact center with priorities: *how many agents so that VIPs abandon less than 1 % and 90 % of standard customers are served within 20 s?* `erlang_a_classes_servers` finds the smallest *c* that meets **all** the targets at once (maximum abandonment and minimum service level per class, and the maximum probability of waiting), starting from a rigorous lower bound (the servers that must be busy on average) with growing steps and bisection. With `method="auto"` it evaluates with the exact model where it reaches and with `monte_carlo_erlang_a` where it does not (more classes, different μ, many agents, or when the exact model exceeds its computation bound).
+
+```python
+# Exact: 2 classes with different service times and patiences
+r = wl.erlang_a_classes_servers([0.5, 1.5], mu=[0.4, 0.25], theta=[0.1, 1/3],
+                                max_abandon=[0.01, 0.05], min_service_level=[None, 0.9], t=1/3)
+print(r.servers, r.method)                # 11 'exact'
+print(r)                                  # target and achieved value per class
+
+# Large center: evaluated by simulation (same random numbers at every size tried)
+g = wl.erlang_a_classes_servers([5.5, 16.5], mu=[0.4, 0.25], theta=[0.1, 1/3],
+                                max_abandon=[0.01, 0.05], min_service_level=[None, 0.8], t=1/3,
+                                n_customers=50_000, n_replications=6, seed=2026)
+print(g.servers, g.method)                # ≈ 82 'simulation'
+```
+
+With simulation the minimum has statistical error; `conservative=True` requires the adverse end of the 95 % interval to meet the target (a safer staffing, usually 1 or 2 more agents). `evaluations` shows the sizes tried and `lower_bound` the lower bound.
+
+---
+
 ### `queue_length_pmf(lam, mu, n_max)` — Queue length PMF
 
 Probability distribution of the number of customers in the system for M/M/1.
@@ -1991,7 +2013,7 @@ Wq     : 0.3   (average waiting time in queue)
 | Module | Main functions and classes |
 |---|---|
 | `queuing` | `mm1`, `mmc`, `md1`, `kingman`, `ggc`, `departure_cv2`, `mg1`, `littles_law`, `QueueResult`, `cv2_normal`, `cv2_triangular`, `cv2_uniform`, `cv2_erlang`, `cv2_gamma`, `cv2_lognormal`, `cv2_weibull` |
-| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_a_classes`, `erlang_a_classes_service_level`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `monte_carlo_erlang_a`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `ErlangAClassesResult`, `ErlangASimulationResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
+| `advanced` | `mm1k`, `mmck`, `erlang_a`, `erlang_a_service_level`, `erlang_a_servers`, `erlang_a_priority`, `erlang_a_priority_service_level`, `erlang_a_classes`, `erlang_a_classes_service_level`, `erlang_a_classes_servers`, `erlang_b`, `mm1_priority`, `monte_carlo_gg1`, `monte_carlo_erlang_a`, `takt_time`, `line_balance`, `break_even`, `break_even_multi`, `break_even_sales`, `queue_length_pmf`, `sojourn_cdf`, `PriorityQueueResult`, `SimulationResult`, `ErlangAPriorityResult`, `ErlangAClassesResult`, `ErlangASimulationResult`, `ErlangAStaffingResult`, `LineBalanceResult`, `BreakEvenResult`, `BreakEvenMultiResult` |
 | `fitting` | `fit_from_data`, `FitResult` |
 | `inventory` | `eoq`, `ebq`, `eoq_multi`, `ebq_multi`, `eoq_multi_constrained`, `lot_for_lot`, `silver_meal`, `eoq_quantity_discount`, `wagner_whitin`, `rq_policy`, `rs_policy`, `exchange_curve`, `safety_stock_curve`, `abc_analysis`, `xyz_analysis`, `abc_xyz`, `mrp`, `reorder_point`, `reorder_point_discrete`, `newsvendor`, `EOQResult`, `EBQResult`, `MultiItemResult`, `ConstrainedMultiEOQResult`, `LotSizingResult`, `QuantityDiscountResult`, `ReorderResult`, `DiscreteReorderResult`, `NewsvendorResult`, `RQPolicyResult`, `RSPolicyResult`, `ExchangeCurveResult`, `SafetyStockCurveResult`, `ABCResult`, `XYZResult`, `ABCXYZResult`, `MRPResult` |
 | `scheduling` | `schedule_single`, `johnson_flowshop`, `neh_flowshop`, `ScheduleResult`, `JobSchedule`, `FlowShopResult`, `NEHResult` |

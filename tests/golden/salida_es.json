@@ -468,6 +468,31 @@
   "erlang_a_classes(theta=[])": "ValueError: 'theta' debe contener al menos 2 elementos, se recibieron 0.",
   "erlang_a_classes(theta=[inf, 1.0])": "ValueError: 'theta[0]' debe ser un número finito y positivo, se recibió inf.",
   "erlang_a_classes(theta=[nan, 1.0])": "ValueError: 'theta[0]' debe ser un número finito y positivo, se recibió nan.",
+  "erlang_a_classes_servers(lam=['x', 1.0])": "TypeError: 'lam[0]' debe ser un número, se recibió 'str'.",
+  "erlang_a_classes_servers(lam=[0.7, 1.1])": "ValueError: 'theta' debe ser un número o una secuencia con un valor por clase (2); se recibieron 3.",
+  "erlang_a_classes_servers(lam=[None, 1.0])": "TypeError: 'lam[0]' debe ser un número, se recibió 'NoneType'.",
+  "erlang_a_classes_servers(lam=[])": "ValueError: 'lam' debe contener al menos un elemento.",
+  "erlang_a_classes_servers(lam=[inf, 1.0])": "ValueError: 'lam[0]' debe ser un número finito y positivo, se recibió inf.",
+  "erlang_a_classes_servers(lam=[nan, 1.0])": "ValueError: 'lam[0]' debe ser un número finito y positivo, se recibió nan.",
+  "erlang_a_classes_servers(max_abandon='abc')": "TypeError: 'max_abandon' debe ser un número, una secuencia con un valor por clase o None, se recibió str.",
+  "erlang_a_classes_servers(max_abandon=-inf)": "ValueError: 'max_abandon' debe ser un valor finito en [0, 1], se recibió -inf.",
+  "erlang_a_classes_servers(max_abandon=True)": "TypeError: 'max_abandon' debe ser un número, una secuencia con un valor por clase o None, se recibió bool.",
+  "erlang_a_classes_servers(max_abandon=inf)": "ValueError: 'max_abandon' debe ser un valor finito en [0, 1], se recibió inf.",
+  "erlang_a_classes_servers(max_abandon=nan)": "ValueError: 'max_abandon' debe ser un valor finito en [0, 1], se recibió nan.",
+  "erlang_a_classes_servers(method=5)": "ValueError: 'method' debe ser 'auto', 'exact' o 'simulation'.",
+  "erlang_a_classes_servers(method=None)": "ValueError: 'method' debe ser 'auto', 'exact' o 'simulation'.",
+  "erlang_a_classes_servers(mu='abc')": "TypeError: 'mu' debe ser un número o una secuencia de números, se recibió 'str'.",
+  "erlang_a_classes_servers(mu=-inf)": "ValueError: 'mu' debe ser un número finito y positivo, se recibió -inf.",
+  "erlang_a_classes_servers(mu=None)": "TypeError: 'mu' debe ser un número o una secuencia de números, se recibió 'NoneType'.",
+  "erlang_a_classes_servers(mu=True)": "TypeError: 'mu' debe ser un número o una secuencia de números, se recibió 'bool'.",
+  "erlang_a_classes_servers(mu=inf)": "ValueError: 'mu' debe ser un número finito y positivo, se recibió inf.",
+  "erlang_a_classes_servers(mu=nan)": "ValueError: 'mu' debe ser un número finito y positivo, se recibió nan.",
+  "erlang_a_classes_servers(theta=['x', 1.0])": "TypeError: 'theta[0]' debe ser un número, se recibió 'str'.",
+  "erlang_a_classes_servers(theta=[0.9, 0.5])": "ValueError: 'theta' debe ser un número o una secuencia con un valor por clase (3); se recibieron 2.",
+  "erlang_a_classes_servers(theta=[None, 1.0])": "TypeError: 'theta[0]' debe ser un número, se recibió 'NoneType'.",
+  "erlang_a_classes_servers(theta=[])": "ValueError: 'theta' debe contener al menos un elemento.",
+  "erlang_a_classes_servers(theta=[inf, 1.0])": "ValueError: 'theta[0]' debe ser un número finito y positivo, se recibió inf.",
+  "erlang_a_classes_servers(theta=[nan, 1.0])": "ValueError: 'theta[0]' debe ser un número finito y positivo, se recibió nan.",
   "erlang_a_classes_service_level(c='abc')": "TypeError: 'c' debe ser un entero positivo, se recibió 'str' = 'abc'.",
   "erlang_a_classes_service_level(c=-inf)": "TypeError: 'c' debe ser un entero positivo, se recibió 'float' = -inf.",
   "erlang_a_classes_service_level(c=None)": "TypeError: 'c' debe ser un entero positivo, se recibió 'NoneType' = None.",
@@ -4761,6 +4786,258 @@
      "Wq"
     ],
     "csv": ",id_clase,λ,μ,θ,P(abandono),λ_eff,Lq,Wq\n0,0,0.7,1,0.9,0.1051398,0.62640214,0.0817754002,0.116822\n1,1,1.1,1,0.5,0.0891600003,1.001924,0.196152001,0.178320001\n2,2,1.6,1,0.25,0.0995794297,1.44067291,0.63730835,0.398317719\n",
+    "indice": [
+     "0",
+     "1",
+     "2"
+    ]
+   }
+  },
+  "erlang_a_classes_servers": {
+   "avisos": [],
+   "grafica": null,
+   "resultado": {
+    "__clase__": "ErlangAStaffingResult",
+    "classes": [
+     {
+      "__dict__": [
+       [
+        "class_id",
+        0
+       ],
+       [
+        "max_abandon",
+        "0.2"
+       ],
+       [
+        "p_abandon",
+        "0.1051398"
+       ],
+       [
+        "min_service_level",
+        null
+       ],
+       [
+        "service_level",
+        null
+       ],
+       [
+        "ok",
+        true
+       ]
+      ]
+     },
+     {
+      "__dict__": [
+       [
+        "class_id",
+        1
+       ],
+       [
+        "max_abandon",
+        "0.2"
+       ],
+       [
+        "p_abandon",
+        "0.0891600003"
+       ],
+       [
+        "min_service_level",
+        null
+       ],
+       [
+        "service_level",
+        null
+       ],
+       [
+        "ok",
+        true
+       ]
+      ]
+     },
+     {
+      "__dict__": [
+       [
+        "class_id",
+        2
+       ],
+       [
+        "max_abandon",
+        "0.2"
+       ],
+       [
+        "p_abandon",
+        "0.0995794297"
+       ],
+       [
+        "min_service_level",
+        null
+       ],
+       [
+        "service_level",
+        null
+       ],
+       [
+        "ok",
+        true
+       ]
+      ]
+     }
+    ],
+    "evaluations": [
+     [
+      3,
+      false
+     ],
+     [
+      4,
+      true
+     ]
+    ],
+    "lower_bound": 3,
+    "method": "exact",
+    "p_wait": null,
+    "p_wait_target": null,
+    "result": {
+     "__clase__": "ErlangAClassesResult",
+     "classes": [
+      {
+       "__dict__": [
+        [
+         "class_id",
+         0
+        ],
+        [
+         "lam",
+         "0.7"
+        ],
+        [
+         "mu",
+         "1"
+        ],
+        [
+         "theta",
+         "0.9"
+        ],
+        [
+         "p_abandon",
+         "0.1051398"
+        ],
+        [
+         "lam_eff",
+         "0.62640214"
+        ],
+        [
+         "Lq",
+         "0.0817754002"
+        ],
+        [
+         "Wq",
+         "0.116822"
+        ]
+       ]
+      },
+      {
+       "__dict__": [
+        [
+         "class_id",
+         1
+        ],
+        [
+         "lam",
+         "1.1"
+        ],
+        [
+         "mu",
+         "1"
+        ],
+        [
+         "theta",
+         "0.5"
+        ],
+        [
+         "p_abandon",
+         "0.0891600003"
+        ],
+        [
+         "lam_eff",
+         "1.001924"
+        ],
+        [
+         "Lq",
+         "0.196152001"
+        ],
+        [
+         "Wq",
+         "0.178320001"
+        ]
+       ]
+      },
+      {
+       "__dict__": [
+        [
+         "class_id",
+         2
+        ],
+        [
+         "lam",
+         "1.6"
+        ],
+        [
+         "mu",
+         "1"
+        ],
+        [
+         "theta",
+         "0.25"
+        ],
+        [
+         "p_abandon",
+         "0.0995794297"
+        ],
+        [
+         "lam_eff",
+         "1.44067291"
+        ],
+        [
+         "Lq",
+         "0.63730835"
+        ],
+        [
+         "Wq",
+         "0.398317719"
+        ]
+       ]
+      }
+     ],
+     "mu": "1",
+     "p_wait": "0.517921846",
+     "params": {
+      "__dict__": [
+       [
+        "P(abandono) total",
+        "0.09735322"
+       ]
+      ]
+     },
+     "rho": "0.767249763",
+     "servers": 4
+    },
+    "servers": 4
+   },
+   "str": "Dotación mínima: 4 servidores  (método: exact; cota inferior 3; 2 tamaños probados)\n id_clase  Máx. abandono  P(abandono) Mín. nivel de servicio Nivel de servicio  Cumple\n        0            0.2     0.105140                   None              None    True\n        1            0.2     0.089160                   None              None    True\n        2            0.2     0.099579                   None              None    True",
+   "summary": "Dotación mínima: 4 servidores  (método: exact; cota inferior 3; 2 tamaños probados)\n id_clase  Máx. abandono  P(abandono) Mín. nivel de servicio Nivel de servicio  Cumple\n        0            0.2     0.105140                   None              None    True\n        1            0.2     0.089160                   None              None    True\n        2            0.2     0.099579                   None              None    True",
+   "to_frame": {
+    "__df__": true,
+    "columnas": [
+     "id_clase",
+     "Máx. abandono",
+     "P(abandono)",
+     "Mín. nivel de servicio",
+     "Nivel de servicio",
+     "Cumple"
+    ],
+    "csv": ",id_clase,Máx. abandono,P(abandono),Mín. nivel de servicio,Nivel de servicio,Cumple\n0,0,0.2,0.1051398,,,True\n1,1,0.2,0.0891600003,,,True\n2,2,0.2,0.0995794297,,,True\n",
     "indice": [
      "0",
      "1",
@@ -10500,74 +10777,75 @@
   "README.md[14]": "M/M/10+M con 3 clases y prioridad no expropiativa  (μ=0.25, ρ=0.7559, P(esperar)=0.2789)\n Clase          λ         θ  P(abandono)      λ_eff         Lq          Wq\n------------------------------------------------------------------------\n     0        0.2      0.05      0.5914%     0.1988    0.02365      0.1183\n     1        0.5       0.1      1.5311%     0.4923    0.07655      0.1531\n     2        1.3    0.3333      7.7997%      1.199     0.3042       0.234\n[0.00591367995, 0.0153106383, 0.0779966726]\n(0.869593196, 0.844348063, 0.787385366)\n   id_clase    λ     μ         θ  P(abandono)     λ_eff        Lq        Wq\n0         0  0.2  0.25  0.050000     0.005914  0.198817  0.023655  0.118274\n1         1  0.5  0.25  0.100000     0.015311  0.492345  0.076553  0.153106\n2         2  1.3  0.25  0.333333     0.077997  1.198604  0.304187  0.233990\n",
   "README.md[15]": "(0.4, 0.25)\n[0.00788122345, 0.0427710147]\n(0.909985646, 0.865385627)\n",
   "README.md[16]": "Simulación M/M/80+M con 2 clase(s) y prioridad  (200,000 llegadas × 10 réplicas, calentamiento 20,000; P(esperar)=0.4777 ± 0.011; IC 95 %)\n Clase          λ         μ         θ  P(abandono)         ±          Wq         ±  Nivel de servicio         ±\n     0        5.5       0.4       0.1      0.2622%     0.02%     0.02836   0.00072           99.5721%     0.03%\n     1       16.5      0.25    0.3333      5.5542%     0.16%      0.1677    0.0052           75.7174%     0.71%\n0.055541912 0.00155339171\n0.757174285\n   id_clase     λ     μ  ...      ± Wq  Nivel de servicio  ± nivel de servicio\n0         0   5.5  0.40  ...  0.000722           0.995721             0.000265\n1         1  16.5  0.25  ...  0.005211           0.757174             0.007118\n\n[2 rows x 10 columns]\n",
-  "README.md[17]": "   n   P(N=n)  P(N<=n)\n0  0  0.40000  0.40000\n1  1  0.24000  0.64000\n2  2  0.14400  0.78400\n3  3  0.08640  0.87040\n4  4  0.05184  0.92224\n",
-  "README.md[18]": "95% of customers leave before t = 1.508\n",
-  "README.md[19]": "M/M/1 con prioridad HOL no expropiativa  (μ=5, ρ=0.8)\n Clase           λ         ρ            Wq             W          Lq           L\n------------------------------------------------------------------------\n     0           2    0.4000      0.266667      0.466667      0.5333      0.9333\n     1         1.5    0.3000      0.888889       1.08889       1.333       1.633\n     2         0.5    0.1000       2.66667       2.86667       1.333       1.433\nClase 0: Wq = 0.2667\nClase 1: Wq = 0.8889\nClase 2: Wq = 2.6667\n0.2\n0.5\n",
+  "README.md[17]": "11 exact\nDotación mínima: 11 servidores  (método: exact; cota inferior 7; 6 tamaños probados)\n id_clase  Máx. abandono  P(abandono)  Mín. nivel de servicio  Nivel de servicio  Cumple\n        0           0.01     0.004273                     NaN           0.950365    True\n        1           0.05     0.022658                     0.9           0.924310    True\n82 simulation\n",
+  "README.md[18]": "   n   P(N=n)  P(N<=n)\n0  0  0.40000  0.40000\n1  1  0.24000  0.64000\n2  2  0.14400  0.78400\n3  3  0.08640  0.87040\n4  4  0.05184  0.92224\n",
+  "README.md[19]": "95% of customers leave before t = 1.508\n",
   "README.md[1]": "Modelo : M/M/1\nλ      : 3  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 1  (servidores)\nρ      : 0.6  (utilización por servidor)\nL      : 1.5  (unidades promedio en el sistema)\nLq     : 0.9  (unidades promedio en cola)\nW      : 0.5  (tiempo promedio en el sistema)\nWq     : 0.3  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.4\n",
-  "README.md[20]": "0.227116147\n0.0784083533\n0.672524357\n0.918454728\n1.46468468\n",
-  "README.md[21]": "True\n",
-  "README.md[22]": "Ajuste (FitResult)\n  λ (tasa de llegada)     : 4.92923  (n=1000)\n  media entre llegadas    : 0.202872\n  desv. entre llegadas    : 0.205521\n  ca² (CV² de llegadas)   : 1.02629\n  μ (tasa de servicio)    : 9.84618  (n=1000)\n  media de servicio       : 0.101562\n  desv. de servicio       : 0.102661\n  cs² (CV² de servicio)   : 1.02175\n4.92922568 1.02628991\nNone\n",
-  "README.md[23]": "Estación                λ_ext    λ_tot    c      ρ        L       Lq          W         Wq\n------------------------------------------------------------------------------------------\nRecepción                   5        5    1  0.500        1      0.5        0.2        0.1\nControl de calidad          0        5    1  0.625    1.667    1.042     0.3333     0.2083\nEmpaque                     0        5    2  0.208   0.4356  0.01891    0.08711   0.003781\n------------------------------------------------------------------------------------------\nL_sistema : 3.10224  (clientes totales en la red)\nW_sistema : 0.620448  (tiempo medio de permanencia en la red)\n             Estación  λ_ext  λ_total  ...        Lq         W        Wq\n0           Recepción    5.0      5.0  ...  0.500000  0.200000  0.100000\n1  Control de calidad    0.0      5.0  ...  1.041667  0.333333  0.208333\n2             Empaque    0.0      5.0  ...  0.018905  0.087114  0.003781\n\n[3 rows x 10 columns]\nRecepción: λ=5.00, Wq=0.1000, ρ=0.50\nControl de calidad: λ=5.00, Wq=0.2083, ρ=0.62\nEmpaque: λ=5.00, Wq=0.0038, ρ=0.21\nL_sistema = 3.1022\nW_sistema = 0.6204\n",
-  "README.md[24]": " Estación   μ  c    ρ  ca²  cs²   cd²    Wq     W    Lq     L\n    Corte   1  1  0.6    1  0.5  0.82 1.125 2.125 0.675 1.275\nSoldadura 0.8  1 0.75 0.82    2 1.484 5.287 6.537 3.172 3.922\nλ = 0.6   Tiempo de ciclo = 8.662   WIP = 5.197   Cuello de botella: Soldadura   cd² de salida = 1.484\nSoldadura\n8.66 5.2\n",
-  "README.md[25]": "EOQ (cantidad de pedido): 223.6 unidades\nFrecuencia de pedidos   : 4.472 pedidos/periodo\nTiempo de ciclo         : 0.2236 periodos\nCosto total             : 447.214\n  Costo de mantener     : 223.607\n  Costo de ordenar      : 223.607\n",
-  "README.md[26]": "Punto de reorden    : 147.2 unidades\nStock de seguridad  : 47.24 unidades\nNivel de servicio   : 95.00%\nz                   : 1.645\nDemanda media en LT : 100\nDesv. demanda en LT : 28.72\n0.0\nTrue\n0.98\n",
-  "README.md[27]": "5.0 Poisson\n8.0 binomial negativa\n8.0 0.982\n",
-  "README.md[28]": "Cantidad óptima     : 100 unidades\nRazón crítica       : 0.5\nUtilidad esperada   : 336.169\nVentas esperadas    : 92.02\nSobrante esperado   : 7.979\nFaltante esperado   : 7.979\nCosto de subestimar Cu: 4\nCosto de sobrestimar Co: 4\nTrue\nTrue\n",
-  "README.md[29]": "EBQ (tamaño de lote): 258.2 unidades\nInventario máximo   : 193.6\nInventario promedio : 96.82\nFrecuencia de lotes : 3.873 lotes/periodo\nTiempo de ciclo     : 0.2582 periodos\nTiempo de producción: 0.06455 periodos\nCosto total         : 387.298\n  Costo de mantener : 193.649\n  Costo de preparación: 193.649\n",
+  "README.md[20]": "M/M/1 con prioridad HOL no expropiativa  (μ=5, ρ=0.8)\n Clase           λ         ρ            Wq             W          Lq           L\n------------------------------------------------------------------------\n     0           2    0.4000      0.266667      0.466667      0.5333      0.9333\n     1         1.5    0.3000      0.888889       1.08889       1.333       1.633\n     2         0.5    0.1000       2.66667       2.86667       1.333       1.433\nClase 0: Wq = 0.2667\nClase 1: Wq = 0.8889\nClase 2: Wq = 2.6667\n0.2\n0.5\n",
+  "README.md[21]": "0.227116147\n0.0784083533\n0.672524357\n0.918454728\n1.46468468\n",
+  "README.md[22]": "True\n",
+  "README.md[23]": "Ajuste (FitResult)\n  λ (tasa de llegada)     : 4.92923  (n=1000)\n  media entre llegadas    : 0.202872\n  desv. entre llegadas    : 0.205521\n  ca² (CV² de llegadas)   : 1.02629\n  μ (tasa de servicio)    : 9.84618  (n=1000)\n  media de servicio       : 0.101562\n  desv. de servicio       : 0.102661\n  cs² (CV² de servicio)   : 1.02175\n4.92922568 1.02628991\nNone\n",
+  "README.md[24]": "Estación                λ_ext    λ_tot    c      ρ        L       Lq          W         Wq\n------------------------------------------------------------------------------------------\nRecepción                   5        5    1  0.500        1      0.5        0.2        0.1\nControl de calidad          0        5    1  0.625    1.667    1.042     0.3333     0.2083\nEmpaque                     0        5    2  0.208   0.4356  0.01891    0.08711   0.003781\n------------------------------------------------------------------------------------------\nL_sistema : 3.10224  (clientes totales en la red)\nW_sistema : 0.620448  (tiempo medio de permanencia en la red)\n             Estación  λ_ext  λ_total  ...        Lq         W        Wq\n0           Recepción    5.0      5.0  ...  0.500000  0.200000  0.100000\n1  Control de calidad    0.0      5.0  ...  1.041667  0.333333  0.208333\n2             Empaque    0.0      5.0  ...  0.018905  0.087114  0.003781\n\n[3 rows x 10 columns]\nRecepción: λ=5.00, Wq=0.1000, ρ=0.50\nControl de calidad: λ=5.00, Wq=0.2083, ρ=0.62\nEmpaque: λ=5.00, Wq=0.0038, ρ=0.21\nL_sistema = 3.1022\nW_sistema = 0.6204\n",
+  "README.md[25]": " Estación   μ  c    ρ  ca²  cs²   cd²    Wq     W    Lq     L\n    Corte   1  1  0.6    1  0.5  0.82 1.125 2.125 0.675 1.275\nSoldadura 0.8  1 0.75 0.82    2 1.484 5.287 6.537 3.172 3.922\nλ = 0.6   Tiempo de ciclo = 8.662   WIP = 5.197   Cuello de botella: Soldadura   cd² de salida = 1.484\nSoldadura\n8.66 5.2\n",
+  "README.md[26]": "EOQ (cantidad de pedido): 223.6 unidades\nFrecuencia de pedidos   : 4.472 pedidos/periodo\nTiempo de ciclo         : 0.2236 periodos\nCosto total             : 447.214\n  Costo de mantener     : 223.607\n  Costo de ordenar      : 223.607\n",
+  "README.md[27]": "Punto de reorden    : 147.2 unidades\nStock de seguridad  : 47.24 unidades\nNivel de servicio   : 95.00%\nz                   : 1.645\nDemanda media en LT : 100\nDesv. demanda en LT : 28.72\n0.0\nTrue\n0.98\n",
+  "README.md[28]": "5.0 Poisson\n8.0 binomial negativa\n8.0 0.982\n",
+  "README.md[29]": "Cantidad óptima     : 100 unidades\nRazón crítica       : 0.5\nUtilidad esperada   : 336.169\nVentas esperadas    : 92.02\nSobrante esperado   : 7.979\nFaltante esperado   : 7.979\nCosto de subestimar Cu: 4\nCosto de sobrestimar Co: 4\nTrue\nTrue\n",
   "README.md[2]": "0.711111111\nTrue\n",
-  "README.md[30]": "930.257344\n",
-  "README.md[31]": "",
-  "README.md[32]": "[]\n{'budget': 0.0}\n",
-  "README.md[33]": "0.0\n4\nMétodo               : Lote por lote\nNúmero de pedidos    : 4\nCosto total          : 800\n  Costo de preparación: 800\n  Costo de mantener  : 0\n\nPeriodo    Cantidad                Cubre\n------------------------------------------\n1               100                  [1]\n2                80                  [2]\n4               120                  [4]\n5                60                  [5]\n",
-  "README.md[34]": "True\n",
-  "README.md[35]": "1000\n9.0\n9950.0\n",
-  "README.md[36]": "Valor anual total : 10000\nClase  Artíc.  %Artíc.   %Valor\n--------------------------------\n  A       2     40.0%    80.0%\n  B       2     40.0%    17.0%\n  C       1     20.0%     3.0%\n  artículo  valor_anual  pct_acumulado clase\n0        A       5000.0           0.50     A\n1        B       3000.0           0.80     A\n2        C       1000.0           0.90     B\n3        D        700.0           0.97     B\n4        E        300.0           1.00     C\n  artículo        cv clase\n0        A  0.240000     X\n1        B  0.200000     X\n2        C  1.500000     Z\n3        D  0.428571     X\n4        E  0.033333     X\n   X  Y  Z\nA  2  0  0\nB  1  0  1\nC  1  0  0\nAX\n",
-  "README.md[37]": "Artículo: Eje\n Periodo       RB       RP       EP       RN      RPl      LPl\n--------------------------------------------------------------\n       1     0.00     0.00    40.00     0.00     0.00    40.00\n       2    50.00     0.00    30.00    20.00    40.00     0.00\n       3     0.00    25.00    55.00     0.00     0.00     0.00\n       4    30.00     0.00    25.00     0.00     0.00    80.00\n       5    60.00     0.00    45.00    45.00    80.00     0.00\n       6    20.00     0.00    25.00     0.00     0.00     0.00\n   Periodo  Req_bruto  Recep_prog  Exist_proy  Req_neto  Recep_plan  Lib_plan\n0        1        0.0         0.0        40.0       0.0         0.0      40.0\n1        2       50.0         0.0        30.0      20.0        40.0       0.0\n2        3        0.0        25.0        55.0       0.0         0.0       0.0\n3        4       30.0         0.0        25.0       0.0         0.0      80.0\n4        5       60.0         0.0        45.0      45.0        80.0       0.0\n5        6       20.0         0.0        25.0       0.0         0.0       0.0\n0.0\n",
-  "README.md[38]": "Disponibilidad (A) : 90.00%\nRendimiento    (P) : 80.00%\nCalidad        (Q) : 95.00%\nOEE                : 68.40%\n",
-  "README.md[39]": "0.75\n0.25\n",
+  "README.md[30]": "EBQ (tamaño de lote): 258.2 unidades\nInventario máximo   : 193.6\nInventario promedio : 96.82\nFrecuencia de lotes : 3.873 lotes/periodo\nTiempo de ciclo     : 0.2582 periodos\nTiempo de producción: 0.06455 periodos\nCosto total         : 387.298\n  Costo de mantener : 193.649\n  Costo de preparación: 193.649\n",
+  "README.md[31]": "930.257344\n",
+  "README.md[32]": "",
+  "README.md[33]": "[]\n{'budget': 0.0}\n",
+  "README.md[34]": "0.0\n4\nMétodo               : Lote por lote\nNúmero de pedidos    : 4\nCosto total          : 800\n  Costo de preparación: 800\n  Costo de mantener  : 0\n\nPeriodo    Cantidad                Cubre\n------------------------------------------\n1               100                  [1]\n2                80                  [2]\n4               120                  [4]\n5                60                  [5]\n",
+  "README.md[35]": "True\n",
+  "README.md[36]": "1000\n9.0\n9950.0\n",
+  "README.md[37]": "Valor anual total : 10000\nClase  Artíc.  %Artíc.   %Valor\n--------------------------------\n  A       2     40.0%    80.0%\n  B       2     40.0%    17.0%\n  C       1     20.0%     3.0%\n  artículo  valor_anual  pct_acumulado clase\n0        A       5000.0           0.50     A\n1        B       3000.0           0.80     A\n2        C       1000.0           0.90     B\n3        D        700.0           0.97     B\n4        E        300.0           1.00     C\n  artículo        cv clase\n0        A  0.240000     X\n1        B  0.200000     X\n2        C  1.500000     Z\n3        D  0.428571     X\n4        E  0.033333     X\n   X  Y  Z\nA  2  0  0\nB  1  0  1\nC  1  0  0\nAX\n",
+  "README.md[38]": "Artículo: Eje\n Periodo       RB       RP       EP       RN      RPl      LPl\n--------------------------------------------------------------\n       1     0.00     0.00    40.00     0.00     0.00    40.00\n       2    50.00     0.00    30.00    20.00    40.00     0.00\n       3     0.00    25.00    55.00     0.00     0.00     0.00\n       4    30.00     0.00    25.00     0.00     0.00    80.00\n       5    60.00     0.00    45.00    45.00    80.00     0.00\n       6    20.00     0.00    25.00     0.00     0.00     0.00\n   Periodo  Req_bruto  Recep_prog  Exist_proy  Req_neto  Recep_plan  Lib_plan\n0        1        0.0         0.0        40.0       0.0         0.0      40.0\n1        2       50.0         0.0        30.0      20.0        40.0       0.0\n2        3        0.0        25.0        55.0       0.0         0.0       0.0\n3        4       30.0         0.0        25.0       0.0         0.0      80.0\n4        5       60.0         0.0        45.0      45.0        80.0       0.0\n5        6       20.0         0.0        25.0       0.0         0.0       0.0\n0.0\n",
+  "README.md[39]": "Disponibilidad (A) : 90.00%\nRendimiento    (P) : 80.00%\nCalidad        (Q) : 95.00%\nOEE                : 68.40%\n",
   "README.md[3]": "0.5\n",
-  "README.md[40]": "30.0\n20.0\n10.0\n",
-  "README.md[41]": "Estación cuello de botella: Soldadura\nThroughput del sistema    : 80\nTasa de demanda           : 70\n\nEstación                Demanda  Capacidad    Util.    Holgura\n--------------------------------------------------------------\nCorte                        70        120  58.33%         50\nSoldadura                    70         80  87.50%         10 ← CB\nPintura                      70        100  70.00%         30\n",
-  "README.md[42]": "8.0\n",
-  "README.md[43]": "B\n0.6\n2\n",
-  "README.md[44]": "1000.0\n25000.0\n0.333333333\n500.0\n",
-  "README.md[45]": "28.3333333\n4235.29412\n303529.412\nProducto-1 2117.64706\nProducto-2 1411.76471\nProducto-3 705.882353\n",
-  "README.md[46]": "125000.0\n0.4\n75000.0\n0.375\n",
-  "README.md[47]": "Objetivo                : eoq\nMultiplicador k         : 1.0000\nN pedidos/año (EOQ)     : 13.68\nN pedidos/año (óptimo)  : 13.68\nInversión (EOQ)         : 2816\nInversión (óptimo)      : 2816\n",
-  "README.md[48]": "",
-  "README.md[49]": "Objetivo          : nivel_de_servicio=95.0000%\nz               : 1.6449\nNivel de servicio : 95.0000%\nInversión en SS   : 729.6\n",
+  "README.md[40]": "0.75\n0.25\n",
+  "README.md[41]": "30.0\n20.0\n10.0\n",
+  "README.md[42]": "Estación cuello de botella: Soldadura\nThroughput del sistema    : 80\nTasa de demanda           : 70\n\nEstación                Demanda  Capacidad    Util.    Holgura\n--------------------------------------------------------------\nCorte                        70        120  58.33%         50\nSoldadura                    70         80  87.50%         10 ← CB\nPintura                      70        100  70.00%         30\n",
+  "README.md[43]": "8.0\n",
+  "README.md[44]": "B\n0.6\n2\n",
+  "README.md[45]": "1000.0\n25000.0\n0.333333333\n500.0\n",
+  "README.md[46]": "28.3333333\n4235.29412\n303529.412\nProducto-1 2117.64706\nProducto-2 1411.76471\nProducto-3 705.882353\n",
+  "README.md[47]": "125000.0\n0.4\n75000.0\n0.375\n",
+  "README.md[48]": "Objetivo                : eoq\nMultiplicador k         : 1.0000\nN pedidos/año (EOQ)     : 13.68\nN pedidos/año (óptimo)  : 13.68\nInversión (EOQ)         : 2816\nInversión (óptimo)      : 2816\n",
+  "README.md[49]": "",
   "README.md[4]": "",
-  "README.md[50]": "",
-  "README.md[51]": "Regla                   : SPT\nSecuencia               : B → D → A → C → E\nMakespan (Cmax)         : 14\nFinalización total ΣCj  : 31\nFinalización pond. ΣwCj : 46\nRetraso máximo          : 2\nTardanza total ΣTj      : 2\nTrabajos con retraso    : 1\n",
-  "README.md[52]": "",
-  "README.md[53]": "Secuencia : J5 → J1 → J3 → J4 → J2\nMakespan  : 27\n",
-  "README.md[54]": "",
-  "README.md[55]": "Algoritmo : heurística NEH\nMáquinas  : 3\nSecuencia : P4 → P2 → P1 → P3\nMakespan  : 43\n  Trabajo  M1_inicio  M1_fin  M2_inicio  M2_fin  M3_inicio  M3_fin\n0      P4        0.0     4.0        4.0    12.0       12.0    20.0\n1      P2        4.0    13.0       13.0    16.0       20.0    30.0\n2      P1       13.0    18.0       18.0    27.0       30.0    38.0\n3      P3       18.0    27.0       27.0    31.0       38.0    43.0\n['P4', 'P2', 'P1', 'P3'] 43.0\n",
-  "README.md[56]": "Topología       : component\nComponentes     : 1\nTasas de falla λ: ['0.01']\nMTBF            : 100\nR(t=100)       : 0.367879\nDisponibilidad  : 95.2381%\n",
-  "README.md[57]": "16.6666667\n0.548811636\n",
-  "README.md[58]": "0.751279941\n116.666666\n",
-  "README.md[59]": "83.3333333\n0.657378003\n",
+  "README.md[50]": "Objetivo          : nivel_de_servicio=95.0000%\nz               : 1.6449\nNivel de servicio : 95.0000%\nInversión en SS   : 729.6\n",
+  "README.md[51]": "",
+  "README.md[52]": "Regla                   : SPT\nSecuencia               : B → D → A → C → E\nMakespan (Cmax)         : 14\nFinalización total ΣCj  : 31\nFinalización pond. ΣwCj : 46\nRetraso máximo          : 2\nTardanza total ΣTj      : 2\nTrabajos con retraso    : 1\n",
+  "README.md[53]": "",
+  "README.md[54]": "Secuencia : J5 → J1 → J3 → J4 → J2\nMakespan  : 27\n",
+  "README.md[55]": "",
+  "README.md[56]": "Algoritmo : heurística NEH\nMáquinas  : 3\nSecuencia : P4 → P2 → P1 → P3\nMakespan  : 43\n  Trabajo  M1_inicio  M1_fin  M2_inicio  M2_fin  M3_inicio  M3_fin\n0      P4        0.0     4.0        4.0    12.0       12.0    20.0\n1      P2        4.0    13.0       13.0    16.0       20.0    30.0\n2      P1       13.0    18.0       18.0    27.0       30.0    38.0\n3      P3       18.0    27.0       27.0    31.0       38.0    43.0\n['P4', 'P2', 'P1', 'P3'] 43.0\n",
+  "README.md[57]": "Topología       : component\nComponentes     : 1\nTasas de falla λ: ['0.01']\nMTBF            : 100\nR(t=100)       : 0.367879\nDisponibilidad  : 95.2381%\n",
+  "README.md[58]": "16.6666667\n0.548811636\n",
+  "README.md[59]": "0.751279941\n116.666666\n",
   "README.md[5]": "0.3333\n0.8717\n1.04\n",
-  "README.md[60]": "",
-  "README.md[61]": "Método       : MLE (n=10)\nForma β      : 2.0961\nEscala η     : 49.86\nMTTF         : 44.16\nVida B10     : 17.04\nB50 (mediana): 41.86\nIC 95%       : β ∈ [1.17, 3.756]; η ∈ [34.55, 71.95]\n0.708334594 0.291665406\n0.0240938222\n17.0394588 41.8577329 12.0868485\n   β (forma)  η (escala)  ...  η IC inferior  η IC superior\n0   2.096095   49.855642  ...       34.54546      71.951134\n\n[1 rows x 12 columns]\n",
-  "README.md[62]": "Método       : MLE (n=8)\nForma β      : 2.4190\nEscala η     : 273.5\nMTTF         : 242.5\nVida B10     : 107.9\nB50 (mediana): 235\nSuspensiones : 8 (censura por la derecha)\nIC 95%       : β ∈ [1.189, 4.922]; η ∈ [188.4, 397]\n(1.18879929, 4.92236945) (188.360122, 397.027857) 8\n",
-  "README.md[63]": "Método            : CPM\nDuración proyecto  : 8\nRuta crítica       : A → B → D\n  Actividad  Duración Predecesoras   ES   EF   LS   LF   HT   HL  Crítica\n0         A       3.0               0.0  3.0  0.0  3.0  0.0  0.0     True\n1         B       4.0            A  3.0  7.0  3.0  7.0  0.0  0.0     True\n2         C       2.0            A  3.0  5.0  5.0  7.0  2.0  2.0    False\n3         D       1.0         B, C  7.0  8.0  7.0  8.0  0.0  0.0     True\n['A', 'B', 'D']\n",
-  "README.md[64]": "Método            : PERT\nDuración proyecto  : 7.5\nRuta crítica       : A → B\nVarianza proyecto  : 1.806\nσ del proyecto     : 1.344\n0.867855827\n",
-  "README.md[65]": "7.5\n0.83\n9.5\n{'A': 1.0, 'B': 1.0}\n",
-  "README.md[66]": "",
+  "README.md[60]": "83.3333333\n0.657378003\n",
+  "README.md[61]": "",
+  "README.md[62]": "Método       : MLE (n=10)\nForma β      : 2.0961\nEscala η     : 49.86\nMTTF         : 44.16\nVida B10     : 17.04\nB50 (mediana): 41.86\nIC 95%       : β ∈ [1.17, 3.756]; η ∈ [34.55, 71.95]\n0.708334594 0.291665406\n0.0240938222\n17.0394588 41.8577329 12.0868485\n   β (forma)  η (escala)  ...  η IC inferior  η IC superior\n0   2.096095   49.855642  ...       34.54546      71.951134\n\n[1 rows x 12 columns]\n",
+  "README.md[63]": "Método       : MLE (n=8)\nForma β      : 2.4190\nEscala η     : 273.5\nMTTF         : 242.5\nVida B10     : 107.9\nB50 (mediana): 235\nSuspensiones : 8 (censura por la derecha)\nIC 95%       : β ∈ [1.189, 4.922]; η ∈ [188.4, 397]\n(1.18879929, 4.92236945) (188.360122, 397.027857) 8\n",
+  "README.md[64]": "Método            : CPM\nDuración proyecto  : 8\nRuta crítica       : A → B → D\n  Actividad  Duración Predecesoras   ES   EF   LS   LF   HT   HL  Crítica\n0         A       3.0               0.0  3.0  0.0  3.0  0.0  0.0     True\n1         B       4.0            A  3.0  7.0  3.0  7.0  0.0  0.0     True\n2         C       2.0            A  3.0  5.0  5.0  7.0  2.0  2.0    False\n3         D       1.0         B, C  7.0  8.0  7.0  8.0  0.0  0.0     True\n['A', 'B', 'D']\n",
+  "README.md[65]": "Método            : PERT\nDuración proyecto  : 7.5\nRuta crítica       : A → B\nVarianza proyecto  : 1.806\nσ del proyecto     : 1.344\n0.867855827\n",
+  "README.md[66]": "7.5\n0.83\n9.5\n{'A': 1.0, 'B': 1.0}\n",
   "README.md[67]": "",
-  "README.md[68]": "1.2\n",
-  "README.md[69]": "",
+  "README.md[68]": "",
+  "README.md[69]": "1.2\n",
   "README.md[6]": "",
-  "README.md[70]": "3.57142857\n0.5\nModelo : M/M/1\nλ      : 3.57143  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 1  (servidores)\nρ      : 0.714286  (utilización por servidor)\nL      : 2.5  (unidades promedio en el sistema)\nLq     : 1.78571  (unidades promedio en cola)\nW      : 0.7  (tiempo promedio en el sistema)\nWq     : 0.5  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.285714\n",
-  "README.md[71]": "5\n",
-  "README.md[72]": "3.0\nModelo : M/M/3\nλ      : 8  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 3  (servidores)\nρ      : 0.533333  (utilización por servidor)\nL      : 1.91291  (unidades promedio en el sistema)\nLq     : 0.312911  (unidades promedio en cola)\nW      : 0.239114  (tiempo promedio en el sistema)\nWq     : 0.0391138  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.187166\n  C(c,a) Erlang-C: 0.273797\n",
-  "README.md[73]": "2\n23.375\n",
-  "README.md[74]": "['lam', 'mu', 'servers', 'rho', 'L', 'Lq', 'W', 'Wq']\n",
-  "README.md[75]": "   lam  rho        Wq         L\n0  1.0  0.2  0.050000  0.250000\n1  2.0  0.4  0.133333  0.666667\n2  3.0  0.6  0.300000  1.500000\n3  4.0  0.8  0.800000  4.000000\n   c                                             _error  lam  ...  Lq   W  Wq\n0  1  Sistema inestable: ρ = 1.6 ≥ 1. Se requiere λ ...  NaN  ... NaN NaN NaN\n\n[1 rows x 10 columns]\n",
-  "README.md[76]": "   label  ρ (utilización)  Wq (tiempo de espera)  L (en el sistema)\n0  M/M/1              0.6                0.30000           1.500000\n1  M/M/2              0.3                0.01978           0.659341\n2  M/D/1              0.6                0.15000           1.050000\n",
-  "README.md[77]": "",
+  "README.md[70]": "",
+  "README.md[71]": "3.57142857\n0.5\nModelo : M/M/1\nλ      : 3.57143  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 1  (servidores)\nρ      : 0.714286  (utilización por servidor)\nL      : 2.5  (unidades promedio en el sistema)\nLq     : 1.78571  (unidades promedio en cola)\nW      : 0.7  (tiempo promedio en el sistema)\nWq     : 0.5  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.285714\n",
+  "README.md[72]": "5\n",
+  "README.md[73]": "3.0\nModelo : M/M/3\nλ      : 8  (tasa de llegada)\nμ      : 5  (tasa de servicio por servidor)\nc      : 3  (servidores)\nρ      : 0.533333  (utilización por servidor)\nL      : 1.91291  (unidades promedio en el sistema)\nLq     : 0.312911  (unidades promedio en cola)\nW      : 0.239114  (tiempo promedio en el sistema)\nWq     : 0.0391138  (tiempo promedio de espera en cola)\n  P0 (prob. de sistema vacío): 0.187166\n  C(c,a) Erlang-C: 0.273797\n",
+  "README.md[74]": "2\n23.375\n",
+  "README.md[75]": "['lam', 'mu', 'servers', 'rho', 'L', 'Lq', 'W', 'Wq']\n",
+  "README.md[76]": "   lam  rho        Wq         L\n0  1.0  0.2  0.050000  0.250000\n1  2.0  0.4  0.133333  0.666667\n2  3.0  0.6  0.300000  1.500000\n3  4.0  0.8  0.800000  4.000000\n   c                                             _error  lam  ...  Lq   W  Wq\n0  1  Sistema inestable: ρ = 1.6 ≥ 1. Se requiere λ ...  NaN  ... NaN NaN NaN\n\n[1 rows x 10 columns]\n",
+  "README.md[77]": "   label  ρ (utilización)  Wq (tiempo de espera)  L (en el sistema)\n0  M/M/1              0.6                0.30000           1.500000\n1  M/M/2              0.3                0.01978           0.659341\n2  M/D/1              0.6                0.15000           1.050000\n",
   "README.md[78]": "",
+  "README.md[79]": "",
   "README.md[7]": "0.318309886\n",
   "README.md[8]": "",
   "README.md[9]": "0.401456472\n2.99271764\n",

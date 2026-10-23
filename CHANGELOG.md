@@ -8,6 +8,25 @@ Sin cambios todavía.
 
 ---
 
+## [0.4.15] — 2026-10-23
+
+Versión de dimensionamiento con K clases: la pregunta «¿cuántos agentes?» para los modelos de 0.4.11 a 0.4.14. Solo añade capacidades.
+
+### Añadido
+- **`erlang_a_classes_servers(lam, mu, theta, *, max_abandon, max_wait_prob, min_service_level, t, method, conservative, c_max, n_customers, n_replications, seed)`** y **`ErlangAStaffingResult`**: el menor número de servidores de M/M/c+M con 2 a 6 clases, prioridad y
+  tiempo de servicio por clase que cumple **todos** los objetivos a la vez: abandono máximo por clase, nivel de servicio mínimo por clase (con un *t* común), y probabilidad máxima de esperar. Cada objetivo por clase es un número (para todas) o una secuencia con `None`
+  donde no se pide. Es el equivalente de `erlang_a_servers` para varias clases.
+- **Búsqueda**: parte de una **cota inferior rigurosa** (los servidores ocupados en promedio, Σ λₖ(1 − abandono máximoₖ)/μₖ, no superan a *c*), crece con pasos duplicados y bisecta; `evaluations` registra los tamaños probados y si cumplían.
+- **`method`**: `'exact'` evalúa con `erlang_a_classes`; `'simulation'` con `monte_carlo_erlang_a` (cualquier *c*, K y μ), con la misma semilla en todos los tamaños (números aleatorios comunes, que hacen casi monótona la respuesta en *c*);
+  `'auto'` (por defecto) usa el exacto donde llega (2 clases, o 3 con μ común, y *c* moderado si los μ difieren) y simula si no, o si el exacto supera su cota de cálculo. `conservative=True` exige el extremo adverso del intervalo del 95 %.
+- Ejemplo: `examples/06_centro_de_contacto_erlang_a.py` calcula la dotación mínima con la carga base (10 agentes, exacto) y con diez veces más llamadas (82, simulación).
+
+### Pruebas
+- `tests/test_erlang_a_dotacion_clases.py`: el mínimo contra un barrido lineal c = 1, 2, … con el modelo exacto (abandono, nivel de servicio, P(esperar); 2 clases con μ distintos y 3 con μ común); la cota inferior; que con un servidor menos algún objetivo incumpla (la traza);
+  la simulación contra lo exacto y el modo conservador; los respaldos de `'auto'` (K = 4, 3 clases con μ distintos, cota de cálculo superada) y la validación de entradas. Seis mutantes nuevos (`MU-66` a `MU-71`).
+
+---
+
 ## [0.4.14] — 2026-10-22
 
 Versión de simulación para centros de contacto grandes o con más clases: lo que los modelos exactos de 0.4.11 a 0.4.13 no alcanzan. Solo añade una función.

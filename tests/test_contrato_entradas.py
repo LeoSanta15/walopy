@@ -75,6 +75,7 @@ BASE = {
     "monte_carlo_erlang_a": dict(lam=[0.5, 1.5], mu=[0.4, 0.25], theta=[0.1, 0.3], c=4, n_customers=2000, n_replications=2, seed=1),
     "erlang_a_classes": dict(lam=[0.7, 1.1, 1.6], mu=1.0, theta=[0.9, 0.5, 0.25], c=4),
     "erlang_a_classes_service_level": dict(lam=[0.7, 1.1, 1.6], mu=1.0, theta=[0.9, 0.5, 0.25], c=4, t=0.6),
+    "erlang_a_classes_servers": dict(lam=[0.7, 1.1, 1.6], mu=1.0, theta=[0.9, 0.5, 0.25], max_abandon=0.2, method="exact"),
     "erlang_a_priority": dict(lam_high=1.5, lam_low=2.5, mu=1.0, theta_high=0.8, theta_low=0.3, c=4),
     "erlang_a_priority_service_level": dict(lam_high=1.5, lam_low=2.5, mu=1.0, theta_high=0.8, theta_low=0.3, c=4, t=0.7),
     "erlang_a_servers": dict(lam=10.0, mu=1.0, theta=0.5, max_abandon=0.05),

@@ -130,6 +130,15 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
+    # 0.4.15: dotación con K clases
+    "advanced.error.erlang_a_classes_servers.objetivo_tipo",
+    "advanced.error.erlang_a_classes_servers.objetivo_longitud",
+    "advanced.error.erlang_a_classes_servers.metodo_invalido",
+    "advanced.etiqueta.summary.dotacion_clases",
+    "advanced.etiqueta.summary.dotacion_p_espera",
+    "advanced.cabecera.to_frame.objetivo_abandono",
+    "advanced.cabecera.to_frame.objetivo_nivel",
+    "advanced.cabecera.to_frame.cumple",
     # 0.4.14: simulación de Erlang A
     "advanced.error.monte_carlo_erlang_a.seed_tipo",
     "advanced.error.monte_carlo_erlang_a.seed_negativa",
