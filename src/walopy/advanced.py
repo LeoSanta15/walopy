@@ -2212,20 +2212,78 @@ MAX_CLIENTES_REPLICA = 5_000_000      # llegadas por réplica (memoria: ≈ 5 ar
 MAX_CLIENTES_TOTAL = 50_000_000       # llegadas entre todas las réplicas (≈ minutos de cálculo)
 
 
-def _replica_contacto(lams: Sequence[float], mus: Sequence[float], ths: Sequence[float], c: int, n: int, rng: np.random.Generator, calentamiento: int, t: float | None) -> dict[str, np.ndarray]:
-    """Una réplica: *n* llegadas Poisson con prioridad no expropiativa, abandono en cola y servicio exponencial por clase.
+DISTRIBUCIONES = ("exponential", "deterministic", "gamma", "lognormal", "hyperexponential")
+_EXPONENCIAL = ("exponential", 1.0)
+MAX_CV2 = 1e4                          # CV² máximo admitido (más allá, la media muestral no converge en tamaños razonables)
+
+
+def _unitaria(rng: np.random.Generator, familia: str, cv2: float, n: int) -> np.ndarray:
+    """*n* variables positivas de media 1 y CV² (varianza) ``cv2`` de la familia dada; la media final la fija la tasa de cada clase."""
+    if familia == "exponential":
+        return rng.exponential(1.0, n)
+    if familia == "deterministic":
+        return np.ones(n)
+    if familia == "gamma":
+        return rng.gamma(1.0 / cv2, cv2, n)
+    if familia == "lognormal":
+        s2 = math.log1p(cv2)
+        return rng.lognormal(-0.5 * s2, math.sqrt(s2), n)
+    p1 = 0.5 * (1.0 + math.sqrt((cv2 - 1.0) / (cv2 + 1.0)))          # hiperexponencial de dos fases con medias balanceadas
+    z = rng.exponential(1.0, n)
+    return np.where(rng.random(n) < p1, z / (2.0 * p1), z / (2.0 * (1.0 - p1)))
+
+
+def _muestrear(rng: np.random.Generator, especs: Sequence[tuple[str, float]], clase_arr: np.ndarray, tasas: Sequence[float], n: int) -> np.ndarray:
+    """Un tiempo por llegada: la variable unitaria de la distribución de su clase dividida por la tasa de esa clase (media 1/tasa)."""
+    tasa = np.asarray(tasas)[clase_arr]
+    if len(set(especs)) == 1:
+        return _unitaria(rng, especs[0][0], especs[0][1], n) / tasa
+    x = np.empty(n)
+    for k, (familia, cv2) in enumerate(especs):
+        idx = np.flatnonzero(clase_arr == k)
+        x[idx] = _unitaria(rng, familia, cv2, idx.size)
+    return x / tasa
+
+
+def _llegadas(rng: np.random.Generator, lams: Sequence[float], especs: Sequence[tuple[str, float]], n: int) -> tuple[np.ndarray, np.ndarray]:
+    """Instantes y clases de las primeras *n* llegadas: Poisson fusionado si todas son exponenciales; si no, un proceso de renovación por clase."""
+    k_clases = len(lams)
+    lam_total = float(sum(lams))
+    if all(e == _EXPONENCIAL for e in especs):
+        llegada = np.cumsum(rng.exponential(1.0 / lam_total, n))
+        acumulada = np.cumsum(np.asarray(lams) / lam_total)
+        return llegada, np.minimum(np.searchsorted(acumulada, rng.random(n), side="right"), k_clases - 1)
+    horizonte = 1.05 * n / lam_total
+    while True:
+        tiempos = []
+        for lam_k, (familia, cv2) in zip(lams, especs):
+            m = int(lam_k * horizonte + 6.0 * math.sqrt(lam_k * horizonte) + 20)
+            tiempos.append(np.cumsum(_unitaria(rng, familia, cv2, m) / lam_k))
+        todos = np.concatenate(tiempos)
+        orden = np.argsort(todos, kind="stable")
+        if todos.size >= n:
+            corte = todos[orden[n - 1]]
+            if all(t_k[-1] >= corte for t_k in tiempos):          # ninguna clase se quedó corta antes de la n-ésima llegada
+                clases = np.concatenate([np.full(len(t_k), k) for k, t_k in enumerate(tiempos)])
+                return todos[orden[:n]], clases[orden[:n]]
+        horizonte *= 1.5
+
+
+def _replica_contacto(lams: Sequence[float], mus: Sequence[float], ths: Sequence[float], c: int, n: int, rng: np.random.Generator, calentamiento: int, t: float | None,
+                      llegada_d: Sequence[tuple[str, float]] | None = None, servicio_d: Sequence[tuple[str, float]] | None = None,
+                      paciencia_d: Sequence[tuple[str, float]] | None = None) -> dict[str, np.ndarray]:
+    """Una réplica: *n* llegadas con prioridad no expropiativa, abandono en cola y servicio por clase (por defecto, Poisson y exponenciales).
 
     Las llegadas, las clases, los tiempos de servicio y las pacientes se sortean de antemano. Los abandonos no son eventos: al liberarse un servidor se descarta
     de cada cola, en orden de llegada, a quien ya se había ido (espera > paciencia) y se atiende al primero que sigue ahí. Devuelve, por clase, las llegadas
     medidas, los abandonos, la espera total (también la de quien abandona), los que tuvieron que esperar y los atendidos con espera ≤ *t*.
+    ``llegada_d``, ``servicio_d`` y ``paciencia_d`` son la distribución (familia, CV²) de cada clase; la media sigue siendo 1/λ, 1/μ y 1/θ.
     """
     k_clases = len(lams)
-    lam_total = float(sum(lams))
-    llegada = np.cumsum(rng.exponential(1.0 / lam_total, n))
-    acumulada = np.cumsum(np.asarray(lams) / lam_total)
-    clase_arr = np.minimum(np.searchsorted(acumulada, rng.random(n), side="right"), k_clases - 1)
-    servicio = (rng.exponential(1.0, n) / np.asarray(mus)[clase_arr]).tolist()
-    paciencia = (rng.exponential(1.0, n) / np.asarray(ths)[clase_arr]).tolist()
+    expo = [_EXPONENCIAL] * k_clases
+    llegada, clase_arr = _llegadas(rng, lams, llegada_d or expo, n)
+    servicio = _muestrear(rng, servicio_d or expo, clase_arr, mus, n).tolist()
+    paciencia = _muestrear(rng, paciencia_d or expo, clase_arr, ths, n).tolist()
     llegada_l, clase = llegada.tolist(), clase_arr.tolist()
     espera = [0.0] * n
     abandono = bytearray(n)
@@ -2295,6 +2353,8 @@ class ErlangASimulationResult:
         también a quienes abandonan.
     t : float or None
         Tiempo de espera del nivel de servicio.
+    arrivals, service, patience : list[tuple[str, float]] or None
+        Distribución (familia, CV²) de las llegadas, el servicio y la paciencia de cada clase (``('exponential', 1.0)`` en el modelo clásico).
     """
 
     servers: int
@@ -2305,6 +2365,9 @@ class ErlangASimulationResult:
     p_wait_halfwidth: float
     classes: list[dict]
     t: float | None = None
+    arrivals: list[tuple[str, float]] | None = None
+    service: list[tuple[str, float]] | None = None
+    patience: list[tuple[str, float]] | None = None
 
     def to_frame(self) -> pd.DataFrame:
         """Una fila por clase, con cada estimación seguida de su semiancho."""
@@ -2322,8 +2385,10 @@ class ErlangASimulationResult:
         return pd.DataFrame(filas)
 
     def summary(self) -> str:
+        dists = [self.arrivals, self.service, self.patience]
+        general = any(d is not None and any(e != _EXPONENCIAL for e in d) for d in dists)
         lineas = [
-            _t("advanced.etiqueta.summary.simulacion_erlang_a", c=self.servers, k=len(self.classes), n=self.n_customers, r=self.n_replications,
+            _t("advanced.etiqueta.summary.simulacion_erlang_a_general" if general else "advanced.etiqueta.summary.simulacion_erlang_a", c=self.servers, k=len(self.classes), n=self.n_customers, r=self.n_replications,
                w=self.warmup, p_wait=self.p_wait, hw=self.p_wait_halfwidth),
             f"{_t('advanced.texto_en_expresion.summary.clase'):>6}  {'λ':>9}  {'μ':>8}  {'θ':>8}  {_t('advanced.cabecera.to_frame.p_abandono'):>11}  {'±':>8}  {_t('advanced.texto_en_expresion.summary.wq'):>10}  {'±':>8}"
             + (f"  {_t('advanced.cabecera.to_frame.nivel_servicio'):>17}  {'±':>8}" if self.t is not None else ""),
@@ -2334,6 +2399,9 @@ class ErlangASimulationResult:
             if self.t is not None:
                 fila += f"  {cl['service_level']:>17.4%}  {cl['service_level_halfwidth']:>8.2%}"
             lineas.append(fila)
+        if general:
+            llegadas, servicio, paciencia = (_texto_distribuciones(d or [_EXPONENCIAL]) for d in dists)
+            lineas.append(_t("advanced.etiqueta.summary.simulacion_distribuciones", llegadas=llegadas, servicio=servicio, paciencia=paciencia))
         return "\n".join(lineas)
 
     def __str__(self) -> str:
@@ -2351,8 +2419,11 @@ def monte_carlo_erlang_a(
     warmup: int | None = None,
     t: float | None = None,
     seed: int | None = None,
+    arrivals: object = None,
+    service: object = None,
+    patience: object = None,
 ) -> ErlangASimulationResult:
-    """Simulación de eventos de M/M/c+M con K clases, prioridad no expropiativa, abandono y tiempos de servicio distintos por clase.
+    """Simulación de eventos de M/M/c+M (o G/G/c+G) con K clases, prioridad no expropiativa, abandono y tiempos de servicio distintos por clase.
 
     Es la herramienta para lo que los modelos exactos no alcanzan: **muchos agentes**, **más de dos clases con μ distintos** o colas muy largas. No tiene sesgo
     de modelo (simula el mismo sistema que ``erlang_a_classes``), solo error estadístico, que se mide con réplicas independientes: cada estimación trae el
@@ -2361,6 +2432,12 @@ def monte_carlo_erlang_a(
 
     El sistema empieza vacío; ``warmup`` descarta las primeras llegadas de cada réplica (por defecto, el 10 %). El costo es lineal en
     ``n_customers · n_replications`` (≈ 1 s por millón de llegadas) y casi no depende de *c*.
+
+    Con ``arrivals``, ``service`` y ``patience`` se sale del mundo exponencial (llegadas de renovación, servicio y paciencia generales) y se mide **cuánto se
+    equivoca Erlang A**: la media siempre es 1/λ, 1/μ y 1/θ y solo cambia la forma, dada por la familia y su CV² (varianza / media²). Cada uno acepta
+    ``None`` o ``'exponential'`` (CV² = 1, lo de siempre y con los mismos resultados), ``'deterministic'`` (CV² = 0), ``('gamma', cv2)`` (``cv2`` = 1/k es Erlang-k),
+    ``('lognormal', cv2)`` o ``('hyperexponential', cv2)`` (``cv2`` ≥ 1, dos fases con medias balanceadas), una sola especificación para todas las clases o una
+    lista con una por clase.
 
     Parameters
     ----------
@@ -2382,6 +2459,10 @@ def monte_carlo_erlang_a(
         Si se indica, estima también el nivel de servicio: fracción de las llegadas de cada clase que se atiende esperando como máximo *t*.
     seed : int, optional
         Semilla (entero ≥ 0) para reproducir el resultado.
+    arrivals, service, patience : str, tuple or sequence, optional
+        Distribución de los tiempos entre llegadas de cada clase (proceso de renovación, media 1/λ), del servicio (media 1/μ) y de la paciencia (media 1/θ):
+        ``'exponential'`` (por defecto), ``'deterministic'``, ``('gamma', cv2)``, ``('lognormal', cv2)`` o ``('hyperexponential', cv2)``; una para todas las clases
+        o una lista con una por clase (``None`` = exponencial). El CV² admite hasta 10 000.
 
     Returns
     -------
@@ -2392,9 +2473,9 @@ def monte_carlo_erlang_a(
     ------
     ValueError
         Si algún argumento numérico no es finito o está fuera de su dominio (por ejemplo, no positivo), si ``lam``, ``mu`` o ``theta`` no tienen una
-        tasa por clase, si hay más de 6 clases, si ``n_replications`` < 2, si ``warmup`` no es un entero menor que ``n_customers``, si ``seed`` es negativa o si el total de llegadas supera 50 000 000.
+        tasa por clase, si hay más de 6 clases, si ``n_replications`` < 2, si ``warmup`` no es un entero menor que ``n_customers``, si ``seed`` es negativa o si el total de llegadas supera 50 000 000. También si una distribución es desconocida, le falta (o le sobra) el CV², este queda fuera de su rango o la lista no tiene una por clase.
     TypeError
-        Si un argumento no es numérico, ``seed`` no es un entero o una secuencia contiene valores que no lo son.
+        Si un argumento no es numérico, ``seed`` no es un entero, una secuencia contiene valores que no lo son o una distribución no es un nombre, una tupla (nombre, CV²) o una lista de ellas.
 
     Examples
     --------
@@ -2430,8 +2511,11 @@ def monte_carlo_erlang_a(
             raise TypeError(_t("advanced.error.monte_carlo_erlang_a.seed_tipo", valor=seed))
         if seed < 0:
             raise ValueError(_t("advanced.error.monte_carlo_erlang_a.seed_negativa", valor=seed))
+    llegada_d = _distribuciones(arrivals, "arrivals", k_clases)
+    servicio_d = _distribuciones(service, "service", k_clases)
+    paciencia_d = _distribuciones(patience, "patience", k_clases)
     flujos = [np.random.default_rng(s) for s in np.random.SeedSequence(seed).spawn(n_rep)]
-    reps = [_replica_contacto(lams, mus, ths, c, n, g, calent, espera_t) for g in flujos]
+    reps = [_replica_contacto(lams, mus, ths, c, n, g, calent, espera_t, llegada_d, servicio_d, paciencia_d) for g in flujos]
     medidas = n - calent
     cuantil = t_cuantil_975(n_rep - 1)
 
@@ -2449,7 +2533,8 @@ def monte_carlo_erlang_a(
             fila.update({"service_level": nivel, "service_level_halfwidth": nivel_hw})
         clases.append(fila)
     pw, pw_hw = ic(np.array([r["esperan"][0] for r in reps]) / medidas)
-    return ErlangASimulationResult(servers=c, n_customers=n, n_replications=n_rep, warmup=calent, p_wait=pw, p_wait_halfwidth=pw_hw, classes=clases, t=espera_t)
+    return ErlangASimulationResult(servers=c, n_customers=n, n_replications=n_rep, warmup=calent, p_wait=pw, p_wait_halfwidth=pw_hw, classes=clases, t=espera_t,
+                                   arrivals=llegada_d, service=servicio_d, patience=paciencia_d)
 
 
 def _por_clase(valor: float | Sequence[float], nombre: str, k_clases: int) -> list[float]:
@@ -2462,6 +2547,51 @@ def _por_clase(valor: float | Sequence[float], nombre: str, k_clases: int) -> li
     if len(lista) != k_clases:
         raise ValueError(_t("advanced.error.monte_carlo_erlang_a.una_por_clase", nombre=nombre, n=k_clases, n_dado=len(lista)))
     return lista
+
+
+def _una_distribucion(valor: object, nombre: str) -> tuple[str, float]:
+    """Una especificación: ``'exponential'``, ``'deterministic'`` o ``(familia, cv2)`` con familia gamma, lognormal o hyperexponential (CV² = varianza / media²)."""
+    if isinstance(valor, str):
+        familia, cv2 = valor, None
+    elif isinstance(valor, tuple) and len(valor) == 2 and isinstance(valor[0], str):
+        familia, cv2 = valor
+    else:
+        raise TypeError(_t("advanced.error.monte_carlo_erlang_a.dist_tipo", nombre=nombre, valor=valor))
+    if familia not in DISTRIBUCIONES:
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.dist_desconocida", nombre=nombre, dist=familia, opciones=", ".join(DISTRIBUCIONES)))
+    if familia in ("exponential", "deterministic"):
+        fijo = 1.0 if familia == "exponential" else 0.0
+        if cv2 is not None and (isinstance(cv2, (str, bool)) or cv2 != fijo):
+            raise ValueError(_t("advanced.error.monte_carlo_erlang_a.dist_cv2_innecesario", nombre=nombre, dist=familia, fijo=fijo))
+        return (familia, fijo)
+    if cv2 is None:
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.dist_cv2_requerido", nombre=nombre, dist=familia))
+    cv2 = as_positive(cv2, nombre)
+    if cv2 > MAX_CV2 or (familia == "hyperexponential" and cv2 < 1.0):
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.dist_cv2_rango", nombre=nombre, dist=familia, max=MAX_CV2))
+    return (familia, cv2)
+
+
+def _distribuciones(valor: object, nombre: str, k_clases: int) -> list[tuple[str, float]]:
+    """Distribución por clase: ``None`` (exponencial), una especificación para todas o una secuencia con una por clase (``None`` = exponencial)."""
+    if valor is None:
+        return [_EXPONENCIAL] * k_clases
+    if isinstance(valor, str) or (isinstance(valor, tuple) and len(valor) == 2 and isinstance(valor[0], str) and not isinstance(valor[1], (str, tuple, list))):
+        return [_una_distribucion(valor, nombre)] * k_clases
+    if isinstance(valor, (bytes, bool, int, float, np.number, dict, set, frozenset)) or not hasattr(valor, "__len__"):
+        raise TypeError(_t("advanced.error.monte_carlo_erlang_a.dist_tipo", nombre=nombre, valor=valor))
+    elementos = list(valor)  # type: ignore[call-overload]
+    if len(elementos) != k_clases:
+        raise ValueError(_t("advanced.error.monte_carlo_erlang_a.dist_longitud", nombre=nombre, n=k_clases, n_dado=len(elementos)))
+    return [_EXPONENCIAL if e is None else _una_distribucion(e, nombre) for e in elementos]
+
+
+def _texto_distribuciones(especs: Sequence[tuple[str, float]]) -> str:
+    """``lognormal(CV²=2)`` (o la lista por clase si difieren)."""
+    def uno(e: tuple[str, float]) -> str:
+        return e[0] if e[0] in ("exponential", "deterministic") else _t("advanced.etiqueta.summary.distribucion_cv2", familia=e[0], cv2=e[1])
+    textos = [uno(e) for e in especs]
+    return textos[0] if len(set(textos)) == 1 else "[" + ", ".join(textos) + "]"
 
 
 # ---------------------------------------------------------------------------
@@ -2556,6 +2686,9 @@ def erlang_a_classes_servers(
     n_customers: int = 100_000,
     n_replications: int = 8,
     seed: int | None = 12345,
+    arrivals: object = None,
+    service: object = None,
+    patience: object = None,
 ) -> ErlangAStaffingResult:
     """Mínimo número de servidores de M/M/c+M con K clases que cumple objetivos por clase (todos a la vez).
 
@@ -2589,6 +2722,9 @@ def erlang_a_classes_servers(
         Cota superior de servidores a considerar (por defecto 10 000).
     n_customers, n_replications, seed
         Tamaño, réplicas y semilla de la simulación (por defecto 100 000 llegadas × 8 réplicas, semilla fija para que el resultado sea reproducible).
+    arrivals, service, patience : str, tuple or sequence, optional
+        Distribuciones no exponenciales de las llegadas, el servicio y la paciencia, como en ``monte_carlo_erlang_a``. Con cualquiera de ellas la dotación se
+        calcula siempre por simulación (``method='exact'`` no es posible).
 
     Returns
     -------
@@ -2617,6 +2753,12 @@ def erlang_a_classes_servers(
     c_max = as_int_positive(c_max, "c_max", max=MAX_SERVIDORES)
     if method not in ("auto", "exact", "simulation"):
         raise ValueError(_t("advanced.error.erlang_a_classes_servers.metodo_invalido"))
+    llegada_d = _distribuciones(arrivals, "arrivals", k_clases)
+    servicio_d = _distribuciones(service, "service", k_clases)
+    paciencia_d = _distribuciones(patience, "patience", k_clases)
+    no_exponencial = any(e != _EXPONENCIAL for d in (llegada_d, servicio_d, paciencia_d) for e in d)
+    if no_exponencial and method == "exact":
+        raise ValueError(_t("advanced.error.erlang_a_classes_servers.exacto_no_exponencial"))
     max_ab = _objetivos_por_clase(max_abandon, "max_abandon", k_clases)
     min_sl = _objetivos_por_clase(min_service_level, "min_service_level", k_clases)
     pw_max = None
@@ -2658,7 +2800,8 @@ def erlang_a_classes_servers(
         return {"ok": ok, "ok_clase": ok_c, "ok_pw": ok_pw, "pab": pab, "sl": sl, "pw": r.p_wait, "result": r}
 
     def evaluar_simulacion(c: int) -> dict:
-        r = monte_carlo_erlang_a(lams, mus, ths, c, n_customers=n_customers, n_replications=n_replications, t=t if hay_nivel else None, seed=seed)
+        r = monte_carlo_erlang_a(lams, mus, ths, c, n_customers=n_customers, n_replications=n_replications, t=t if hay_nivel else None, seed=seed,
+                                 arrivals=llegada_d, service=servicio_d, patience=paciencia_d)
         pab = [x["p_abandon"] for x in r.classes]
         sl = [x["service_level"] for x in r.classes] if hay_nivel else None
         sf = 1.0 if conservative else 0.0
@@ -2697,7 +2840,7 @@ def erlang_a_classes_servers(
     distintos = len(set(mus)) > 1
     exacto_aplicable = (k_clases == 2 and (not distintos or c_lo <= 25)) or (k_clases == 3 and not distintos and c_lo <= 40)
     usado = "simulation"
-    if method != "simulation" and (method == "exact" or exacto_aplicable):
+    if method != "simulation" and not no_exponencial and (method == "exact" or exacto_aplicable):
         try:
             c_sol, ev, traza = buscar(evaluar_exacto)
             usado = "exact"

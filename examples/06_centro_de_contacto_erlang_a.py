@@ -60,3 +60,11 @@ chico = wl.erlang_a_classes_servers([0.5, 1.5], mu=[0.4, servicio], theta=[0.1, 
 grande = wl.erlang_a_classes_servers([5.5, 16.5], mu=[0.4, servicio], theta=[0.1, abandono], **objetivos,
                                      n_customers=50_000, n_replications=6, seed=2026)
 print(f"\nDotación mínima: {chico.servers} agentes con la carga base ({chico.method}), {grande.servers} con diez veces más llamadas ({grande.method})")
+
+# ¿Cuánto se equivoca Erlang A? Mismo centro (9 llamadas/min, 1 min por llamada, paciencia media de 5 min, 10 agentes) con otras formas de los tiempos.
+print("\nAbandono con 10 agentes (la media de cada tiempo no cambia, solo su forma):")
+print(f"  Erlang A (todo exponencial)          : {wl.erlang_a(9.0, 1.0, 0.2, 10).params['P(abandono)']:.2%}")
+for nombre, forma in {"servicio determinista": dict(service="deterministic"), "servicio muy variable (CV² = 4)": dict(service=("lognormal", 4.0)),
+                      "paciencia determinista": dict(patience="deterministic"), "llegadas en ráfagas (CV² = 4)": dict(arrivals=("hyperexponential", 4.0))}.items():
+    forma_r = wl.monte_carlo_erlang_a([9.0], mu=1.0, theta=0.2, c=10, n_customers=60_000, n_replications=6, seed=1, **forma).classes[0]
+    print(f"  {nombre:37s}: {forma_r['p_abandon']:.2%} ± {forma_r['p_abandon_halfwidth']:.2%}")

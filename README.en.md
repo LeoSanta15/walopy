@@ -408,6 +408,25 @@ print(r.to_frame())                       # one row per class with the estimates
 
 With the same parameters, the exact results of `erlang_a_classes` fall inside these intervals (the suite checks it with 2 and 3 classes, with common and different μ). `seed` makes the result reproducible; `warmup` (10 % by default) discards the first arrivals of each replication, because the system starts empty; and `t` adds the service level. To halve an interval, four times more arrivals are needed.
 
+#### How wrong is Erlang A? Non-exponential arrivals, service and patience
+
+The exact models assume exponential times. With `arrivals`, `service` and `patience` the simulation accepts other shapes **with the same mean** (1/λ, 1/μ and 1/θ): `'exponential'` (the default), `'deterministic'`, `('gamma', cv2)` (`cv2` = 1/k is Erlang-k), `('lognormal', cv2)` and `('hyperexponential', cv2)` (`cv2` ≥ 1), where `cv2` is the squared coefficient of variation (variance / mean²). Each argument takes one specification for all classes or a list with one per class; arrivals become a renewal process per class. The exponential case gives exactly the same as before.
+
+```python
+# 9 calls/min, 1 min per call, mean patience of 5 min, 10 agents: Erlang A says 4.4 % abandonment
+model = wl.erlang_a(lam=9.0, mu=1.0, theta=0.2, c=10)
+print(model.params["P(abandono)"])
+shapes = {"deterministic service": dict(service="deterministic"),                 # ≈ 3.2 %
+          "very variable service (CV² = 4)": dict(service=("lognormal", 4.0)),    # ≈ 5.4 %
+          "deterministic patience (5 min)": dict(patience="deterministic"),       # < 0.1 %: almost nobody abandons
+          "bursty arrivals (CV² = 4)": dict(arrivals=("hyperexponential", 4.0))}  # ≈ 8.6 %
+for name, shape in shapes.items():
+    r = wl.monte_carlo_erlang_a([9.0], mu=1.0, theta=0.2, c=10, n_customers=60_000, n_replications=6, seed=1, **shape)
+    print(name, r.classes[0]["p_abandon"], r.classes[0]["p_abandon_halfwidth"])
+```
+
+The lesson: abandonment is rather insensitive to the shape of the service (±30 %), but very sensitive to the shape of the **patience** and of the **arrivals** (from almost 0 to almost double). If you have data, measure the CV² of each time (`cv2_lognormal`, `cv2_gamma`, `fit_from_data`) and simulate before trusting Erlang A. `erlang_a_classes_servers` accepts the same arguments (with them it always simulates): a deterministic service needs fewer agents than the exponential one and a very variable one, more (18, 19 and 20 agents for two classes with λ = 4 and 12 and a 3 % maximum abandonment).
+
 ---
 
 ### `erlang_a_classes_servers(...)` — minimum staffing with K classes
