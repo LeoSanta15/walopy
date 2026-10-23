@@ -5,7 +5,7 @@ import collections
 import heapq
 import math
 import warnings
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -2462,6 +2462,256 @@ def _por_clase(valor: float | Sequence[float], nombre: str, k_clases: int) -> li
     if len(lista) != k_clases:
         raise ValueError(_t("advanced.error.monte_carlo_erlang_a.una_por_clase", nombre=nombre, n=k_clases, n_dado=len(lista)))
     return lista
+
+
+# ---------------------------------------------------------------------------
+# Dimensionamiento de M/M/c+M con K clases: mínimo de servidores que cumple objetivos por clase
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ErlangAStaffingResult:
+    """Resultado de ``erlang_a_classes_servers``: la dotación mínima y cómo se comprobó.
+
+    Attributes
+    ----------
+    servers : int
+        Mínimo número de servidores que cumple todos los objetivos.
+    method : str
+        ``'exact'`` (``erlang_a_classes``) o ``'simulation'`` (``monte_carlo_erlang_a``).
+    result : ErlangAClassesResult or ErlangASimulationResult
+        Los indicadores con ``servers`` servidores.
+    lower_bound : int
+        Cota inferior rigurosa de la dotación: los servidores ocupados en promedio, Σ λ_k(1 − abandono máximo_k)/μ_k, no superan a *c*.
+    classes : list[dict]
+        Por clase: ``class_id``, ``max_abandon``, ``p_abandon``, ``min_service_level``, ``service_level`` y ``ok`` (``None`` donde no se pidió el objetivo).
+        Con ``method='simulation'`` los valores son estimaciones puntuales (su intervalo está en ``result``).
+    p_wait_target, p_wait : float or None
+        Objetivo y valor de P(esperar), si se pidió.
+    evaluations : list[tuple[int, bool]]
+        Los tamaños probados y si cumplían, en orden: sirve para ver cuánto costó la búsqueda.
+    """
+
+    servers: int
+    method: str
+    result: object
+    lower_bound: int
+    classes: list[dict]
+    p_wait_target: float | None
+    p_wait: float | None
+    evaluations: list[tuple[int, bool]]
+
+    def to_frame(self) -> pd.DataFrame:
+        """Una fila por clase con el objetivo, el valor logrado y si se cumple."""
+        filas = []
+        for cl in self.classes:
+            filas.append({
+                _t("advanced.cabecera.to_frame.id_clase"): cl["class_id"],
+                _t("advanced.cabecera.to_frame.objetivo_abandono"): cl["max_abandon"], _t("advanced.cabecera.to_frame.p_abandono"): cl["p_abandon"],
+                _t("advanced.cabecera.to_frame.objetivo_nivel"): cl["min_service_level"], _t("advanced.cabecera.to_frame.nivel_servicio"): cl["service_level"],
+                _t("advanced.cabecera.to_frame.cumple"): cl["ok"],
+            })
+        return pd.DataFrame(filas)
+
+    def summary(self) -> str:
+        lineas = [_t("advanced.etiqueta.summary.dotacion_clases", c=self.servers, metodo=self.method, cota=self.lower_bound, n=len(self.evaluations))]
+        if self.p_wait_target is not None and self.p_wait is not None:
+            lineas.append(_t("advanced.etiqueta.summary.dotacion_p_espera", objetivo=self.p_wait_target, valor=self.p_wait))
+        lineas.append(self.to_frame().to_string(index=False))
+        return "\n".join(lineas)
+
+    def __str__(self) -> str:
+        return self.summary()
+
+
+def _objetivos_por_clase(valor: float | Sequence[float | None] | None, nombre: str, k_clases: int) -> list[float | None]:
+    """Objetivo por clase: ``None`` (sin objetivo), un número (el mismo para todas) o una secuencia con uno por clase (``None`` donde no hay)."""
+    if valor is None:
+        return [None] * k_clases
+    if isinstance(valor, (int, float, np.number)) and not isinstance(valor, bool):
+        vals: list[float | None] = [as_fraction(valor, nombre)] * k_clases
+    else:
+        if isinstance(valor, (str, bytes, bool)) or not hasattr(valor, "__len__"):
+            raise TypeError(_t("advanced.error.erlang_a_classes_servers.objetivo_tipo", nombre=nombre, tipo=type(valor).__name__))
+        if len(valor) != k_clases:
+            raise ValueError(_t("advanced.error.erlang_a_classes_servers.objetivo_longitud", nombre=nombre, n=k_clases, n_dado=len(valor)))
+        vals = [None if x is None else as_fraction(x, nombre) for x in valor]
+    for x in vals:
+        if x is not None and not 0.0 < x < 1.0:
+            raise ValueError(_t("advanced.error.erlang_a_servers.objetivo_entre_0_1", nombre=nombre))
+    return vals
+
+
+def erlang_a_classes_servers(
+    lam: Sequence[float],
+    mu: float | Sequence[float],
+    theta: Sequence[float],
+    *,
+    max_abandon: float | Sequence[float | None] | None = None,
+    max_wait_prob: float | None = None,
+    min_service_level: float | Sequence[float | None] | None = None,
+    t: float | None = None,
+    method: str = "auto",
+    conservative: bool = False,
+    c_max: int = 10_000,
+    n_customers: int = 100_000,
+    n_replications: int = 8,
+    seed: int | None = 12345,
+) -> ErlangAStaffingResult:
+    """Mínimo número de servidores de M/M/c+M con K clases que cumple objetivos por clase (todos a la vez).
+
+    Es lo que ``erlang_a_servers`` hace para una clase, pero con varias clases, prioridad y tiempos de servicio por clase: la pregunta típica de un
+    centro de contacto («¿cuántos agentes para que los VIP abandonen menos de 1 % y el 90 % de los estándar se atienda en 20 s?»). Los indicadores mejoran
+    al añadir servidores, así que se busca por pasos crecientes desde una cota inferior rigurosa y bisección.
+
+    ``method='exact'`` evalúa con ``erlang_a_classes`` (exacto, pero solo donde ese modelo llega: ver su docstring). ``method='simulation'`` evalúa con
+    ``monte_carlo_erlang_a`` con la misma semilla en todos los tamaños (números aleatorios comunes, lo que hace casi monótona la respuesta en *c*), para
+    cualquier *c*, K y μ; entonces el mínimo tiene error estadístico: con ``conservative=True`` se exige que el extremo adverso del intervalo del 95 %
+    cumpla el objetivo (dotación más segura). ``method='auto'`` (por defecto) usa el exacto donde es aplicable (hasta 3 clases con μ común, o 2 clases con
+    c ≲ 25 si los μ difieren) y, si no, o si el exacto supera su cota de cálculo, la simulación.
+
+    Parameters
+    ----------
+    lam, mu, theta
+        Igual que en ``erlang_a_classes`` (de 2 a 6 clases, de mayor a menor prioridad; ``mu`` número común o uno por clase).
+    max_abandon : float or sequence, optional
+        Máxima probabilidad de abandono, en (0, 1): un número para todas las clases o una secuencia con uno por clase (``None`` donde no hay objetivo).
+    max_wait_prob : float, optional
+        Máxima probabilidad de que quien llega (de cualquier clase) tenga que esperar, en (0, 1).
+    min_service_level : float or sequence, optional
+        Mínimo nivel de servicio (fracción atendida esperando ≤ *t*), en (0, 1), en el mismo formato que ``max_abandon``. Requiere ``t``.
+    t : float, optional
+        Tiempo de espera del nivel de servicio (≥ 0, el mismo para todas las clases).
+    method : str
+        ``'auto'`` (por defecto), ``'exact'`` o ``'simulation'``.
+    conservative : bool
+        Solo con simulación: exige el extremo adverso del intervalo del 95 % en lugar de la estimación puntual.
+    c_max : int
+        Cota superior de servidores a considerar (por defecto 10 000).
+    n_customers, n_replications, seed
+        Tamaño, réplicas y semilla de la simulación (por defecto 100 000 llegadas × 8 réplicas, semilla fija para que el resultado sea reproducible).
+
+    Returns
+    -------
+    ErlangAStaffingResult
+        La dotación mínima, el método usado, los indicadores con esa dotación y la búsqueda realizada.
+
+    Raises
+    ------
+    ValueError
+        Si no se indica ningún objetivo, si un objetivo está fuera de (0, 1) o no tiene una por clase, si ``min_service_level`` se da sin ``t``, si ``method`` no es válido o si ni con ``c_max`` servidores se cumplen. También los de ``erlang_a_classes`` y ``monte_carlo_erlang_a``.
+    TypeError
+        Si un argumento no es numérico o una secuencia contiene valores que no lo son.
+
+    Examples
+    --------
+    >>> r = erlang_a_classes_servers([0.5, 1.5], [0.4, 0.25], [0.1, 1/3], max_abandon=[0.01, 0.05], method="exact")
+    >>> r.servers, r.method
+    (10, 'exact')
+    """
+    lams = as_float_list(lam, "lam", min_len=1)
+    k_clases = len(lams)
+    if k_clases > MAX_CLASES:
+        raise ValueError(_t("advanced.error.erlang_a_clases.demasiadas_clases", max=MAX_CLASES, n=k_clases))
+    mus = _por_clase(mu, "mu", k_clases)
+    ths = _por_clase(theta, "theta", k_clases)
+    c_max = as_int_positive(c_max, "c_max", max=MAX_SERVIDORES)
+    if method not in ("auto", "exact", "simulation"):
+        raise ValueError(_t("advanced.error.erlang_a_classes_servers.metodo_invalido"))
+    max_ab = _objetivos_por_clase(max_abandon, "max_abandon", k_clases)
+    min_sl = _objetivos_por_clase(min_service_level, "min_service_level", k_clases)
+    pw_max = None
+    if max_wait_prob is not None:
+        nombre_pw = "max_wait_prob"
+        pw_max = as_fraction(max_wait_prob, nombre_pw)
+        if not 0.0 < pw_max < 1.0:
+            raise ValueError(_t("advanced.error.erlang_a_servers.objetivo_entre_0_1", nombre=nombre_pw))
+    hay_nivel = any(x is not None for x in min_sl)
+    if all(x is None for x in max_ab) and not hay_nivel and pw_max is None:
+        raise ValueError(_t("advanced.error.erlang_a_servers.sin_objetivo"))
+    if hay_nivel:
+        if t is None:
+            raise ValueError(_t("advanced.error.erlang_a_servers.nivel_servicio_requiere_t"))
+        t = as_nonneg(t, "t")
+    # Cota inferior: servidores ocupados en promedio Σ λ_k(1 − P(abandono)_k)/μ_k ≤ c, con P(abandono)_k ≤ min(max_abandon_k, 1 − min_service_level_k).
+    tope_ab = [min(1.0 if a is None else a, 1.0 if s is None else 1.0 - s) for a, s in zip(max_ab, min_sl)]
+    c_lo = max(1, math.ceil(sum(lamk * (1.0 - ak) / muk for lamk, ak, muk in zip(lams, tope_ab, mus)) - 1e-9))
+
+    def cumple(pab: list[float], pab_hw: list[float], sl: list[float] | None, sl_hw: list[float] | None, pw: float, pw_hw: float) -> tuple[bool, list[bool | None], bool | None]:
+        ok_clase: list[bool | None] = []
+        for k in range(k_clases):
+            partes = []
+            ab_k, sl_k = max_ab[k], min_sl[k]
+            if ab_k is not None:
+                partes.append(pab[k] + pab_hw[k] <= ab_k)
+            if sl_k is not None and sl is not None and sl_hw is not None:
+                partes.append(sl[k] - sl_hw[k] >= sl_k)
+            ok_clase.append(all(partes) if partes else None)
+        ok_pw = None if pw_max is None else pw + pw_hw <= pw_max
+        todo = all(x is not False for x in ok_clase) and ok_pw is not False
+        return todo, ok_clase, ok_pw
+
+    def evaluar_exacto(c: int) -> dict:
+        r = erlang_a_classes(lams, mus, ths, c)
+        sl = list(erlang_a_classes_service_level(lams, mus, ths, c, t=t)) if hay_nivel and t is not None else None
+        pab = [x["p_abandon"] for x in r.classes]
+        ok, ok_c, ok_pw = cumple(pab, [0.0] * k_clases, sl, [0.0] * k_clases if sl else None, r.p_wait, 0.0)
+        return {"ok": ok, "ok_clase": ok_c, "ok_pw": ok_pw, "pab": pab, "sl": sl, "pw": r.p_wait, "result": r}
+
+    def evaluar_simulacion(c: int) -> dict:
+        r = monte_carlo_erlang_a(lams, mus, ths, c, n_customers=n_customers, n_replications=n_replications, t=t if hay_nivel else None, seed=seed)
+        pab = [x["p_abandon"] for x in r.classes]
+        sl = [x["service_level"] for x in r.classes] if hay_nivel else None
+        sf = 1.0 if conservative else 0.0
+        ok, ok_c, ok_pw = cumple(pab, [sf * x["p_abandon_halfwidth"] for x in r.classes], sl,
+                                  [sf * x["service_level_halfwidth"] for x in r.classes] if hay_nivel else None, r.p_wait, sf * r.p_wait_halfwidth)
+        return {"ok": ok, "ok_clase": ok_c, "ok_pw": ok_pw, "pab": pab, "sl": sl, "pw": r.p_wait, "result": r}
+
+    def buscar(evaluar: Callable[[int], dict]) -> tuple[int, dict, list[tuple[int, bool]]]:
+        cache: dict[int, dict] = {}
+        traza: list[tuple[int, bool]] = []
+
+        def prueba(c: int) -> bool:
+            if c not in cache:
+                cache[c] = evaluar(c)
+                traza.append((c, cache[c]["ok"]))
+            return bool(cache[c]["ok"])
+
+        if prueba(c_lo):
+            return c_lo, cache[c_lo], traza
+        bajo, paso = c_lo, 1
+        while True:
+            alto = min(bajo + paso, c_max)
+            if prueba(alto):
+                break
+            if alto >= c_max:
+                raise ValueError(_t("advanced.error.erlang_a_servers.inalcanzable", c_max=c_max))
+            bajo, paso = alto, 2 * paso
+        while alto - bajo > 1:
+            medio = (bajo + alto) // 2
+            if prueba(medio):
+                alto = medio
+            else:
+                bajo = medio
+        return alto, cache[alto], traza
+
+    distintos = len(set(mus)) > 1
+    exacto_aplicable = (k_clases == 2 and (not distintos or c_lo <= 25)) or (k_clases == 3 and not distintos and c_lo <= 40)
+    usado = "simulation"
+    if method != "simulation" and (method == "exact" or exacto_aplicable):
+        try:
+            c_sol, ev, traza = buscar(evaluar_exacto)
+            usado = "exact"
+        except ValueError:
+            if method == "exact":
+                raise
+    if usado == "simulation":
+        c_sol, ev, traza = buscar(evaluar_simulacion)
+    clases = [{
+        "class_id": k, "max_abandon": max_ab[k], "p_abandon": ev["pab"][k], "min_service_level": min_sl[k],
+        "service_level": None if ev["sl"] is None else ev["sl"][k], "ok": ev["ok_clase"][k],
+    } for k in range(k_clases)]
+    return ErlangAStaffingResult(servers=c_sol, method=usado, result=ev["result"], lower_bound=c_lo, classes=clases,
+                                 p_wait_target=pw_max, p_wait=ev["pw"] if pw_max is not None else None, evaluations=traza)
 
 
 # ---------------------------------------------------------------------------

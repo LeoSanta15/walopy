@@ -53,3 +53,10 @@ vip_s, est_s = sim.classes
 print(f"\n80 agentes (simulación, IC 95 %): abandono VIP {vip_s['p_abandon']:.2%} ± {vip_s['p_abandon_halfwidth']:.2%}, "
       f"estándar {est_s['p_abandon']:.2%} ± {est_s['p_abandon_halfwidth']:.2%}")
 print(f"  atendidas en ≤ 20 s: VIP {vip_s['service_level']:.1%}, estándar {est_s['service_level']:.1%}")
+
+# ¿Cuántos agentes hacen falta? Mínimo que cumple, a la vez, los objetivos de cada clase (VIP: abandono ≤ 1 %; estándar: abandono ≤ 5 % y 80 % en ≤ 20 s).
+objetivos = dict(max_abandon=[0.01, 0.05], min_service_level=[None, 0.8], t=espera_meta)
+chico = wl.erlang_a_classes_servers([0.5, 1.5], mu=[0.4, servicio], theta=[0.1, abandono], **objetivos)
+grande = wl.erlang_a_classes_servers([5.5, 16.5], mu=[0.4, servicio], theta=[0.1, abandono], **objetivos,
+                                     n_customers=50_000, n_replications=6, seed=2026)
+print(f"\nDotación mínima: {chico.servers} agentes con la carga base ({chico.method}), {grande.servers} con diez veces más llamadas ({grande.method})")

@@ -11,6 +11,7 @@ from .advanced import (
     ErlangAClassesResult,
     ErlangAPriorityResult,
     ErlangASimulationResult,
+    ErlangAStaffingResult,
     LineBalanceResult,
     PriorityQueueResult,
     SimulationResult,
@@ -19,6 +20,7 @@ from .advanced import (
     break_even_sales,
     erlang_a,
     erlang_a_classes,
+    erlang_a_classes_servers,
     erlang_a_classes_service_level,
     erlang_a_priority,
     erlang_a_priority_service_level,
@@ -182,7 +184,7 @@ from .solver import (
     solve_servers,
 )
 
-__version__ = "0.4.14"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
+__version__ = "0.4.15"  # fuente única de la versión; pyproject.toml la lee con [tool.setuptools.dynamic]
 
 __all__ = [
     # idioma de los textos
@@ -239,10 +241,12 @@ __all__ = [
     "ErlangAClassesResult",
     "ErlangAPriorityResult",
     "ErlangASimulationResult",
+    "ErlangAStaffingResult",
     "BreakEvenMultiResult",
     "PriorityQueueResult",
     "erlang_a",
     "erlang_a_classes",
+    "erlang_a_classes_servers",
     "erlang_a_classes_service_level",
     "erlang_a_priority",
     "erlang_a_priority_service_level",

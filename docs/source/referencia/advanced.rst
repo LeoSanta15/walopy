@@ -26,6 +26,8 @@ Funciones
 
 .. autofunction:: walopy.erlang_a_classes_service_level
 
+.. autofunction:: walopy.erlang_a_classes_servers
+
 .. autofunction:: walopy.mm1_priority
 
 .. autofunction:: walopy.monte_carlo_gg1
@@ -71,5 +73,8 @@ Clases de resultado
    :members:
 
 .. autoclass:: walopy.ErlangASimulationResult
+   :members:
+
+.. autoclass:: walopy.ErlangAStaffingResult
    :members:
 
