@@ -130,6 +130,17 @@ def test_el_catalogo_es_contiene_todas_las_claves_de_la_base_con_su_texto():
 
 # Textos añadidos después de v0.3.0 (no están en la línea base congelada): una clave nueva debe declararse aquí a propósito.
 AÑADIDAS_TRAS_V030 = {
+    # 0.5.0: distribuciones no exponenciales en la simulación de Erlang A
+    "advanced.error.monte_carlo_erlang_a.dist_tipo",
+    "advanced.error.monte_carlo_erlang_a.dist_desconocida",
+    "advanced.error.monte_carlo_erlang_a.dist_cv2_innecesario",
+    "advanced.error.monte_carlo_erlang_a.dist_cv2_requerido",
+    "advanced.error.monte_carlo_erlang_a.dist_cv2_rango",
+    "advanced.error.monte_carlo_erlang_a.dist_longitud",
+    "advanced.etiqueta.summary.simulacion_distribuciones",
+    "advanced.etiqueta.summary.distribucion_cv2",
+    "advanced.etiqueta.summary.simulacion_erlang_a_general",
+    "advanced.error.erlang_a_classes_servers.exacto_no_exponencial",
     # 0.4.15: dotación con K clases
     "advanced.error.erlang_a_classes_servers.objetivo_tipo",
     "advanced.error.erlang_a_classes_servers.objetivo_longitud",

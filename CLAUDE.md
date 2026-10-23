@@ -8,13 +8,13 @@ matplotlib y plotly se importan de forma perezosa dentro de las funciones de gr�
 
 Python ≥ 3.9 · layout `src/` · versión actual: ver `src/walopy/__init__.py` (`__version__`).
 
-## Estado verificado (2026-10-23, v0.4.15)
+## Estado verificado (2026-10-23, v0.5.0)
 Cifras medidas con `make check`; si cambian, actualiza esta sección con la salida real (no de memoria).
 
 | Medida | Valor |
 |---|---|
-| Tests (`make test`) | 3 032 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
-| Cobertura | global 98,0 %; el módulo menor (`solver.py`) 91,9 % |
+| Tests (`make test`) | 3 154 pasan y 12 se saltan (renderizado en navegador: `make dibujo`) (incluye los doctests de `src/`, los bloques de código de `README.md` y `README.en.md` y los ejemplos); el CI los ejecuta en 3.9 a 3.13 y en 3.9 con dependencias mínimas |
+| Cobertura | global 98,1 %; el módulo menor (`solver.py`) 91,9 % |
 | Lint / tipos | `ruff` y `mypy` sin errores (19 archivos fuente) |
 | Build | `python -m build` + `twine check` correctos; el wheel incluye `py.typed` |
 | Docs | `sphinx -W` sin avisos en español y en inglés, 14 páginas de referencia |
@@ -22,7 +22,7 @@ Cifras medidas con `make check`; si cambian, actualiza esta sección con la sali
 
 ## Mapa del código (`src/walopy/`)
 - `queuing.py`     — M/M/1, M/M/c, M/D/1, M/G/1, G/G/1 (Kingman), ley de Little, helpers `cv2_*`
-- `advanced.py`    — M/M/1/K, M/M/c/K, Erlang-B, Erlang-A (abandono; 1, 2 y K clases; μ por clase con 2; simulación para casos grandes; dotación mínima con K clases), colas con prioridad, Monte Carlo G/G/1, takt, balance de línea, break-even, PMF/CDF
+- `advanced.py`    — M/M/1/K, M/M/c/K, Erlang-B, Erlang-A (abandono; 1, 2 y K clases; μ por clase con 2; simulación para casos grandes y con distribuciones no exponenciales; dotación mínima con K clases), colas con prioridad, Monte Carlo G/G/1, takt, balance de línea, break-even, PMF/CDF
 - `network.py`     — redes de Jackson
 - `fitting.py`     — ajuste de parámetros de cola desde datos (`fit_from_data`)
 - `solver.py`      — `solve_lam`, `solve_mu`, `solve_servers`, `optimize_servers`, `sensitivity`, `batch_model`, `compare`

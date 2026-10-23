@@ -8,6 +8,27 @@ Sin cambios todavía.
 
 ---
 
+## [0.5.0] — 2026-10-23
+
+Versión que sale del mundo exponencial: la simulación de centros de contacto admite llegadas, servicio y paciencia con otras distribuciones, para medir cuánto se equivoca Erlang A. Solo añade capacidades: sin indicarlas todo es igual que en 0.4.15, bit a bit con la misma semilla.
+
+### Añadido
+- **`monte_carlo_erlang_a(..., arrivals, service, patience)`**: la forma de los tiempos entre llegadas de cada clase (proceso de renovación), del servicio y de la paciencia, siempre con media 1/λ, 1/μ y 1/θ. Cada uno acepta `'exponential'` (por defecto), `'deterministic'`,
+  `('gamma', cv2)` (`cv2` = 1/k es Erlang-k), `('lognormal', cv2)` y `('hyperexponential', cv2)` (dos fases con medias balanceadas, `cv2` ≥ 1), donde `cv2` es varianza / media² (hasta 10 000). Una especificación vale para todas las clases o se da una lista con una por clase.
+  El resultado (`ErlangASimulationResult`) guarda las distribuciones (`arrivals`, `service`, `patience`) y su `summary()` pasa a titularse G/G/c+G y las muestra.
+- **`erlang_a_classes_servers(..., arrivals, service, patience)`**: la dotación mínima con esas distribuciones. Con cualquiera de ellas siempre simula (`method='exact'` da un error claro). Con dos clases de λ = 4 y 12 y abandono máximo del 3 %: 19 agentes con todo exponencial, 18 con servicio determinista, 20 con servicio hiperexponencial (CV² = 6) y 17 con paciencia determinista.
+- Ejemplo: `examples/06_centro_de_contacto_erlang_a.py` compara Erlang A con otras formas (9 llamadas/min, 10 agentes): abandono 4,4 % exponencial, 3,2 % con servicio determinista, 5,4 % con servicio de CV² = 4, 0,04 % con paciencia determinista y 8,5 % con llegadas en ráfagas (CV² = 4).
+
+### Qué enseña
+El abandono es poco sensible a la forma del servicio (±30 % entre determinista y CV² = 4), pero muy sensible a la de la paciencia (con la misma media, la paciencia determinista casi elimina el abandono) y a la de las llegadas (casi el doble con ráfagas). Antes de fiarse de Erlang A conviene medir el CV² de cada tiempo y simular.
+
+### Pruebas
+- `tests/test_monte_carlo_distribuciones.py`: los momentos de cada familia; el caso exponencial idéntico a lo anterior bit a bit; las familias con CV² = 1 contra `erlang_a`; **M/G/1** (Pollaczek-Khinchine, `mg1`) para el servicio general; **G/M/1** (la raíz σ = A\*(μ(1 − σ))) para las llegadas
+  generales; la **insensibilidad de Erlang B** (con paciencia casi nula el bloqueo no depende de la forma del servicio); una simulación de eventos escrita aparte (abandonos como eventos, generador de `random`) con distribuciones mixtas en dos clases; la ampliación del horizonte de las llegadas; la validación y la dotación.
+  Nueve mutantes nuevos (`MU-72` a `MU-80`).
+
+---
+
 ## [0.4.15] — 2026-10-23
 
 Versión de dimensionamiento con K clases: la pregunta «¿cuántos agentes?» para los modelos de 0.4.11 a 0.4.14. Solo añade capacidades.
